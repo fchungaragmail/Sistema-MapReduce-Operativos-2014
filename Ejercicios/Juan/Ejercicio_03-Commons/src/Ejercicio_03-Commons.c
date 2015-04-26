@@ -23,6 +23,8 @@ void list(char*, t_list*);
 bool isGreater(t_persona*,t_persona*);
 void saveToFile(t_list*, FILE*);
 bool isMajor(t_persona*);
+t_log* logFile;
+
 
 int main(void) {
 	FILE* personasIN;
@@ -32,15 +34,17 @@ int main(void) {
 	t_list* personasList = list_create();
 
 
-	personasIN = fopen("/home/utnso/workspace/Practica/Ejercicio_03-Commons/Personas.txt","r");
-    personasOUT = fopen("/home/utnso/workspace/Practica/Ejercicio_03-Commons/PersonasNuevo.txt","w");
-	if (personasIN == NULL)
+	personasIN = fopen("/home/utnso/workspace/tp-2015-1c-the-byteless/Ejercicios/Juan/Ejercicio_03-Commons/Personas.txt","r");
+    personasOUT = fopen("/home/utnso/workspace/tp-2015-1c-the-byteless/Ejercicios/Juan/Ejercicio_03-Commons/PersonasNuevo.txt","w");
+	logFile = log_create("/home/utnso/workspace/tp-2015-1c-the-byteless/Ejercicios/Juan/Ejercicio_03-Commons/log.txt",
+						"Ejercicio 3",true,LOG_LEVEL_INFO);
+    if (personasIN == NULL)
     {
         printf("No se pudo abrir el archivo");
     	exit(EXIT_FAILURE);
     }
-    line = malloc(LINE_SIZE);
 
+	line = malloc(LINE_SIZE);
 
 
 	while (fgets(line,LINE_SIZE,personasIN)!=NULL)
@@ -49,6 +53,7 @@ int main(void) {
 	}
 
 	list_sort(personasList, (isGreater));
+
 	personasList = list_filter(personasList, (isMajor));
 
 	saveToFile(personasList, personasOUT);
@@ -60,6 +65,7 @@ int main(void) {
 
 void list(char* line,t_list* lista)
 {
+	int credito;
 	t_persona* persona = persona = malloc(sizeof(t_persona));
 	char** array;
 
@@ -69,6 +75,13 @@ void list(char* line,t_list* lista)
 	sscanf(array[2],"%d",&(persona->edad));
 	sscanf(array[3],"%d",&(persona->Tel));
 	sscanf(array[4],"%d",&(persona->DNI));
+	sscanf(array[5],"%d",&credito);
+
+	if (credito < 100)
+	{
+		log_info(logFile,string_substring_until(line,(strlen(line)-1)));
+	}
+
 	free(array);
 
 	list_add(lista,persona);
@@ -97,7 +110,6 @@ bool isGreater(t_persona* persona1,t_persona* persona2)
 
 	}
 }
-
 
 void saveToFile(t_list* personasList,FILE* personasOUT)
 {

@@ -9,7 +9,7 @@
 #define TIPOS_H_
 
 typedef struct {
-	char* region[20];
+	char region[20];
 	int edad;
 	int DNI;
 	char NomAp[30];
