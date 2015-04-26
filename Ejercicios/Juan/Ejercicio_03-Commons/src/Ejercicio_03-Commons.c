@@ -29,7 +29,6 @@ t_log* logFile;
 int main(void) {
 	FILE* personasIN;
 	FILE* personasOUT;
-	int item;
 	char* line;
 	t_list* personasList = list_create();
 
@@ -58,8 +57,11 @@ int main(void) {
 
 	saveToFile(personasList, personasOUT);
 
+	free(line);
 	fclose(personasIN);
 	fclose(personasOUT);
+	log_destroy(logFile);
+	list_destroy(personasList);
 	return EXIT_SUCCESS;
 }
 
