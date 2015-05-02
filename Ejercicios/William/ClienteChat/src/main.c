@@ -45,28 +45,27 @@ typedef struct _sockaddr_in Sockaddr_in;
 int socketFd;
 t_list* listaConexiones;
 pthread_t threadRecibirMensajes;
-pthread_t threadConsola;
+pthread_t threadConsolaChat;
 
 int main() {
 
 	IniciarCliente();
-	pthread_create(&threadConsola, NULL, consolaChat, NULL);
+	pthread_create(&threadConsolaChat, NULL, consolaChat, NULL);
 	pthread_create(&threadRecibirMensajes, NULL, recibirMensajes, NULL);
 
-	pthread_join(threadConsola,NULL);
+	pthread_join(threadConsolaChat, NULL);
 	CerrarCliente();
 	printf("FINALIZACION CON EXITO.\n");
 	return 0;
 
 }
 
-
-void* recibirMensajes(void* ptr){
+void* recibirMensajes(void* ptr) {
 
 	char buffer[BUFFER_SIZE];
-	while(1){
+	while (1) {
 
-		recv(socketFd,buffer,BUFFER_SIZE,0);
+		recv(socketFd, buffer, BUFFER_SIZE, 0);
 		printf(buffer);
 		printf("\n");
 
@@ -74,15 +73,14 @@ void* recibirMensajes(void* ptr){
 
 }
 
-
 void* consolaChat(void* ptr) {
 
 	char buffer[BUFFER_SIZE];
-	while(1){
-		scanf("%s",buffer );
-		send(socketFd,buffer,BUFFER_SIZE,0);
+	while (1) {
+		scanf("%s", buffer);
+		send(socketFd, buffer, BUFFER_SIZE, 0);
 
-		if(strncmp("EXIT",buffer,5) == 0){
+		if (strncmp("EXIT", buffer, 5) == 0) {
 			break;
 		}
 	}
@@ -90,26 +88,25 @@ void* consolaChat(void* ptr) {
 
 void IniciarCliente() {
 
+	struct sockaddr_in their_addr; // información de la dirección de destino
 
-    struct sockaddr_in their_addr; // información de la dirección de destino
+	if ((socketFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+		perror("socket");
+		exit(1);
+	}
 
-    if ((socketFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-        perror("socket");
-        exit(1);
-    }
-
-    their_addr.sin_family = AF_INET;    // Ordenación de bytes de la máquina
-    their_addr.sin_port = htons(9999);  // short, Ordenación de bytes de la red
+	their_addr.sin_family = AF_INET;    // Ordenación de bytes de la máquina
+	their_addr.sin_port = htons(PUERTO); // short, Ordenación de bytes de la red
 	inet_aton(LOCALHOST, &(their_addr.sin_addr));
-    memset(&(their_addr.sin_zero),'\o', 8);  // poner a cero el resto de la estructura
+	memset(&(their_addr.sin_zero), '\o', 8); // poner a cero el resto de la estructura
 
-    if (connect(socketFd, (struct sockaddr *)&their_addr,
-                                          sizeof(struct sockaddr)) == -1) {
-        error_show("ERROR AL CONECTARSE");
-        CerrarCliente();
-        exit(1);
-    }
-    printf("CONECTADO, BIENVENIDO AL CHAT!\n");
+	if (connect(socketFd, (Sockaddr_in*) &their_addr, sizeof(struct sockaddr))
+			== -1) {
+		error_show("ERROR AL CONECTARSE");
+		CerrarCliente();
+		exit(1);
+	}
+	printf("CONECTADO, BIENVENIDO AL CHAT!\n");
 
 }
 

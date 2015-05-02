@@ -17,11 +17,13 @@
  *
  *
  */
+
 void* escucharConexiones(void* ptr);
 void* consolaChat(void* ptr);
 void* clienteHandler(void* ptr);
 void IniciarServidor();
 void CerrarServidor();
+
 /*
  *
  * ESTRUCTURAS
@@ -51,16 +53,16 @@ typedef struct _conexion Conexion;
 
 int socketFd;
 t_list* listaConexiones;
-pthread_t threadEscuchar;
-pthread_t threadConsola;
+pthread_t threadEscucharConexiones;
+pthread_t threadConsolaChat;
 
 int main() {
 
 	IniciarServidor();
-	pthread_create(&threadEscuchar, NULL, escucharConexiones, NULL);
-	pthread_create(&threadConsola, NULL, consolaChat, NULL);
+	pthread_create(&threadEscucharConexiones, NULL, escucharConexiones, NULL);
+	pthread_create(&threadConsolaChat, NULL, consolaChat, NULL);
 
-	pthread_join(threadConsola, NULL);
+	pthread_join(threadConsolaChat, NULL);
 	CerrarServidor();
 	printf("FINALIZACION CON EXITO.\n");
 	return 0;
@@ -121,9 +123,9 @@ void IniciarServidor() {
 	inet_aton(LOCALHOST, &(my_addr.sin_addr));
 	memset(&(my_addr.sin_zero), '\0', 8);
 
-	if (bind(socketFd, (Sockaddr_in*) &my_addr, sizeof(Sockaddr_in))
-			== -1) {
+	if (bind(socketFd, (Sockaddr_in*) &my_addr, sizeof(Sockaddr_in)) == -1) {
 		error_show("ERROR EN EL BINDEO!!\n");
+		CerrarServidor();
 		exit(-1);
 	}
 
@@ -134,6 +136,7 @@ void IniciarServidor() {
 
 void CerrarServidor() {
 
+	list_clean(listaConexiones);
 	if (close(socketFd) == -1) {
 		error_show("ERROR CERRANDO EL SOCKET!\n");
 	}
