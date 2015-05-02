@@ -100,7 +100,7 @@ void IniciarCliente() {
 	inet_aton(LOCALHOST, &(their_addr.sin_addr));
 	memset(&(their_addr.sin_zero), '\o', 8); // poner a cero el resto de la estructura
 
-	if (connect(socketFd, (Sockaddr_in*) &their_addr, sizeof(struct sockaddr))
+	if (connect(socketFd, (Sockaddr_in*) &their_addr, sizeof(Sockaddr_in))
 			== -1) {
 		error_show("ERROR AL CONECTARSE");
 		CerrarCliente();
