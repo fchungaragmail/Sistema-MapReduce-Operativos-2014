@@ -16,12 +16,16 @@
 
 #include "Ejercicio6.h"
 
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 sem_t queueCount;
+sem_t queueJob;
 
 int main() {
 	pthread_t h1, h2, h3, h4;
 	t_queue * jobQueue = queue_create(); //La cola de impresion
-	sem_init(&queueCount, 1, 10);
+	sem_init(&queueCount, 0, 10);
+	sem_init(&queueJob, 0, 0);
+	pthread_mutex_init(&mutex, NULL);
 
 	pthread_create(&h1, NULL, (void*) trabajar, jobQueue);
 	pthread_create(&h2, NULL, (void*) trabajar, jobQueue);
@@ -47,8 +51,12 @@ void trabajar(void* args) {
 void procesar_cola_impresion(void* args) {
 	t_queue * jobQueue = (t_queue*) args;
 	t_print_job* job;
-	sem_post(&queueCount);
-	while ((job = queue_pop(jobQueue)) != NULL) {
+	while (true){
+		sem_wait(&queueJob);
+		pthread_mutex_lock(&mutex);
+		job = queue_pop(jobQueue);
+		pthread_mutex_unlock(&mutex);
+		sem_post(&queueCount);
 		printf("Imprimiendo trabajo de PC %d , datos a imprimir: %s\n", job->pc,
 				job->data);
 	}
@@ -59,8 +67,12 @@ void mandar_a_imprimir(t_queue* jobQueue) {
 	t_print_job * job = malloc(sizeof(t_print_job));
 	job->data = crear_data();
 	job->pc = getpid();
+	printf("PC: %d Enviando a la cola de impresion %s\n", job->pc, job->data);
 	sem_wait(&queueCount);
+	pthread_mutex_lock(&mutex);
 	queue_push(jobQueue, job);
+	pthread_mutex_unlock(&mutex);
+	sem_post(&queueJob);
 }
 
 /**
