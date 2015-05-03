@@ -10,9 +10,17 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include "estructuras.h"
+#include "consola.h"
+
 
 int main(void) {
-	puts(""); /* prints  */
+	pthread_t tConsola;
+
+	pthread_create(&tConsola, NULL, execConsola, NULL);
+
+	pthread_join(tConsola,NULL);
 	return EXIT_SUCCESS;
 }
+
