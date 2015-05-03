@@ -12,6 +12,6 @@
 #include <stdlib.h>
 
 int main(void) {
-	printf("Espero que salga bien este commiteo");
+	printf("Espero que salga bien este commiteo\n");
 	return EXIT_SUCCESS;
 }
