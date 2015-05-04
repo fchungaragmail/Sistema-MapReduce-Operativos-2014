@@ -15,7 +15,7 @@ void esperarComando();
 void procesarEntrada(char[],bool*);
 void mostrarAyuda();
 void cerrarConsola();
-t_dictionary *diccionarioComandos; //En este diccionario se guardan
+t_dictionary* diccionarioComandos; //En este diccionario se guardan
 							//todos los pares comando -> int
 							//en initConsola se pueden ver todos
 
@@ -40,8 +40,7 @@ void esperarComando()
 	}
 }
 
-
-void procesarEntrada(char entrada[],bool *continuar)
+void procesarEntrada(char entrada[],bool* continuar)
 {
 	char** comando = string_n_split(entrada,1," ");
 
