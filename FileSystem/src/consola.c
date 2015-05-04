@@ -56,12 +56,32 @@ void procesarEntrada(char entrada[],bool *continuar)
 	}
 	case 2:
 	{
-		//Mover archivo
+		//Mover/renombrar archivo/directorio
 		break;
 	}
 	case 3:
 	{
-		//Borrar archivo
+		//Borrar archivo/directorio
+		break;
+	}
+	case 4:
+	{
+		//Crear directorio
+		break;
+	}
+	case 5:
+	{
+		//Importar archivo
+		break;
+	}
+	case 6:
+	{
+		//Exportar archivo
+		break;
+	}
+	case 7:
+	{
+		//Mostrar md5
 		break;
 	}
 	case 90:
@@ -72,7 +92,8 @@ void procesarEntrada(char entrada[],bool *continuar)
 	}
 	default:
 	{
-		printf("Comando desconocido.\n");
+		printf("Comando desconocido.\n"
+				"Ingrese 'help' para ver los comandos disponibles.\n");
 		break;
 	}
 	}
@@ -83,19 +104,37 @@ void initConsola()
 	//Aca vemos todos los comandos y sus integer
 	//para el case de "procesarComandos()
 	diccionarioComandos = dictionary_create();
-	dictionary_put(diccionarioComandos,"ayuda",1);
-	dictionary_put(diccionarioComandos,"salir",90);
+	dictionary_put(diccionarioComandos,"help",1);
+	dictionary_put(diccionarioComandos,"exit",90);
 	dictionary_put(diccionarioComandos,"mv",2);
 	dictionary_put(diccionarioComandos,"rm",3);
+	dictionary_put(diccionarioComandos,"mkdir",4);
+	dictionary_put(diccionarioComandos,"import",5);
+	dictionary_put(diccionarioComandos,"export",6);
+	dictionary_put(diccionarioComandos,"md5",7);
+	dictionary_put(diccionarioComandos,"showb",8);
+	dictionary_put(diccionarioComandos,"rmb",9);
+	dictionary_put(diccionarioComandos,"cpb",10);
+	dictionary_put(diccionarioComandos,"addn",11);
+	dictionary_put(diccionarioComandos,"deln",12);
 }
 
 void mostrarAyuda()
 {
-	printf("Comandos disponibles:\n"
-			"ayuda	Muestra el menu de ayuda\n"
-			"salir	Sale de la consola\n"
-			"mv		Mover/renombrar arcivo. Simil UNIX"
-			"rm		Borrar archivo. Simil UNIX");
+	printf("\nComandos disponibles:\n"
+			"help	Muestra el menu de ayuda\n"
+			"exit	Sale de la consola\n"
+			"mv 	Mover/renombrar arcivo/direcorio. Simil UNIX\n"
+			"rm 	Borrar archivo/directorio. Simil UNIX\n"
+			"mkdir	Crear directorio. Simil UNIX\n"
+			"import	Importa un archivo al MDFS\n"
+			"export	Exporta un archivo desde el MDFS\n"
+			"md5	Mostrar md5 de un archivo\n"
+			"showb	Muestra los bloques que componen un archivo\n"
+			"rmb	Borra un bloque\n"
+			"cpb	Copia un bloque\n"
+			"addn	Aniadir nodo\n"
+			"deln	Quitar nodo\n");
 }
 
 void cerrarConsola()
