@@ -14,6 +14,7 @@
 #include "estructuras.h"
 #include "consola.h"
 #include <commons/config.h>
+#include <commons/log.h>
 #include "recursosCompartidos.h"
 
 void initFileSystem();
@@ -31,8 +32,9 @@ int main(void) {
 
 void initFileSystem()
 {
-	t_config* archivoConfig = config_create("./FileSistem.config");
-	//PUERTO_LISTEN = config_get_int_value(archivoConfig, "PUERTO_LISTEN");
-	//LISTA_NODOS = config_get_array_value(archivoConfig, "LISTA_NODOS");
+	t_config* archivoConfig = config_create("./FileSystem.config");
+	PUERTO_LISTEN = config_get_int_value(archivoConfig, "PUERTO_LISTEN");
+	LISTA_NODOS = config_get_array_value(archivoConfig, "LISTA_NODOS");
 	listaArchivos = list_create();
+	log = log_create("./FileSystem.log","FileSystem", true, LOG_LEVEL_TRACE);
 }

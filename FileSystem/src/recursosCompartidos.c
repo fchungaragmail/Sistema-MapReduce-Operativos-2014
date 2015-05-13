@@ -10,3 +10,4 @@
 t_list* listaArchivos;
 int PUERTO_LISTEN;
 char** LISTA_NODOS;
+FILE* log;
