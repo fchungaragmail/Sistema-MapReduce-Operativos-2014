@@ -6,9 +6,6 @@
  */
 
 #include "consola.h"
-#include <string.h>
-#include <commons/collections/dictionary.h>
-#include <commons/string.h>
 
 void initConsola();
 void esperarComando();

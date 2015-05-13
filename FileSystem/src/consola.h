@@ -8,6 +8,12 @@
 #ifndef CONSOLA_H_
 #define CONSOLA_H_
 
+#include <string.h>
+#include <commons/collections/dictionary.h>
+#include <commons/string.h>
+#include "recursosCompartidos.h"
+
+
 //Comienza la ejecucion de la consola
 void execConsola();
 

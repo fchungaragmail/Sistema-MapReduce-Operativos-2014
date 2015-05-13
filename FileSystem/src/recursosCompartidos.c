@@ -8,6 +8,6 @@
 #include "recursosCompartidos.h"
 
 t_list* listaArchivos;
-int PUERTO_LISTEN;
+int PUERTO_LISTEN = -1;
 char** LISTA_NODOS;
 FILE* log;
