@@ -53,67 +53,67 @@ void procesarEntrada(char entrada[],bool* continuar)
 	case 2:
 	{
 		//Mover/renombrar archivo/directorio
-		procesarComando(comando,printf);
+		procesarComando(comando,mover);
 		break;
 	}
 	case 3:
 	{
 		//Borrar archivo/directorio
-		procesarComando(comando,printf);
+		procesarComando(comando,borrar);
 		break;
 	}
 	case 4:
 	{
 		//Crear directorio
-		procesarComando(comando,printf);
+		procesarComando(comando,crearDir);
 		break;
 	}
 	case 5:
 	{
 		//Importar archivo
-		procesarComando(comando,printf);
+		procesarComando(comando,importar);
 		break;
 	}
 	case 6:
 	{
 		//Exportar archivo
-		procesarComando(comando,printf);
+		procesarComando(comando,exportar);
 		break;
 	}
 	case 7:
 	{
 		//Mostrar md5 de un archivo
-		procesarComando(comando,printf);
+		procesarComando(comando,md5);
 		break;
 	}
 	case 8:
 	{
 		//Muestra los bloques que componen un archivo
-		procesarComando(comando,printf);
+		procesarComando(comando,bloques);
 		break;
 	}
 	case 9:
 	{
 		//Borra un bloque
-		procesarComando(comando,printf);
+		procesarComando(comando,borrarBloque);
 		break;
 	}
 	case 10:
 	{
 		//Copia un bloque
-		procesarComando(comando,printf);
+		procesarComando(comando,copiarBloque);
 		break;
 	}
 	case 11:
 	{
-		//Aniadir nodo
-		procesarComando(comando,printf);
+		//Agregar nodo
+		procesarComando(comando,agregarNodo);
 		break;
 	}
 	case 12:
 	{
 		//Quitar nodo
-		procesarComando(comando,printf);
+		procesarComando(comando,quitarNodo);
 		break;
 	}
 	case 90:
@@ -165,7 +165,7 @@ void mostrarAyuda()
 			"showb	Muestra los bloques que componen un archivo\n"
 			"rmb	Borra un bloque\n"
 			"cpb	Copia un bloque\n"
-			"addn	Aniadir nodo\n"
+			"addn	Agregar nodo\n"
 			"deln	Quitar nodo\n");
 }
 

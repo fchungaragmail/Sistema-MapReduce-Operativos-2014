@@ -1,0 +1,14 @@
+[INFO] 00:40:39:344 FileSystem/(9023:9025): Procesando comando: mv, con los argumentos: asdasd
+[INFO] 00:41:47:627 FileSystem/(9055:9060): Procesando comando: mv, con los argumentos: (null)
+[INFO] 00:42:33:277 FileSystem/(9101:9109): Procesando comando: mv, con los argumentos: asda
+[INFO] 00:43:19:69 FileSystem/(9170:9172): Procesando comando: mv, con los argumentos: (null)
+[INFO] 00:43:34:434 FileSystem/(9216:9221): Procesando comando: mv, con los argumentos: (null)
+[INFO] 00:43:36:271 FileSystem/(9216:9221): Procesando comando: mv, con los argumentos: (null)
+[INFO] 00:43:37:340 FileSystem/(9216:9221): Procesando comando: mv, con los argumentos: (null)
+[INFO] 00:43:38:142 FileSystem/(9216:9221): Procesando comando: mv, con los argumentos: (null)
+[INFO] 00:43:38:801 FileSystem/(9216:9221): Procesando comando: mv, con los argumentos: (null)
+[INFO] 00:50:59:932 FileSystem/(9579:9582): Procesando comando: mv, con los argumentos: (null)
+[INFO] 00:51:04:121 FileSystem/(9579:9582): Procesando comando: addn, con los argumentos: (null)
+[INFO] 00:51:25:405 FileSystem/(9579:9582): Procesando comando: rm, con los argumentos: (null)
+[INFO] 00:51:28:392 FileSystem/(9579:9582): Procesando comando: import, con los argumentos: (null)
+[INFO] 00:51:29:749 FileSystem/(9579:9582): Procesando comando: md5, con los argumentos: (null)
