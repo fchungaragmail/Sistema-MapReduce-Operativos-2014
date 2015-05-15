@@ -53,27 +53,31 @@ void procesarEntrada(char entrada[],bool* continuar)
 	case 2:
 	{
 		//Mover/renombrar archivo/directorio
-
+		procesarComando(comando,printf);
 		break;
 	}
 	case 3:
 	{
 		//Borrar archivo/directorio
+		procesarComando(comando,printf);
 		break;
 	}
 	case 4:
 	{
 		//Crear directorio
+		procesarComando(comando,printf);
 		break;
 	}
 	case 5:
 	{
 		//Importar archivo
+		procesarComando(comando,printf);
 		break;
 	}
 	case 6:
 	{
 		//Exportar archivo
+		procesarComando(comando,printf);
 		break;
 	}
 	case 7:
