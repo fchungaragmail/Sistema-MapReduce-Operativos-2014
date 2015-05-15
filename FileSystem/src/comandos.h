@@ -8,10 +8,11 @@
 #ifndef COMANDOS_H_
 #define COMANDOS_H_
 
-
+#include <pthread.h>
+#include <commons/string.h>
 #include "recursosCompartidos.h"
 
-void procesarComando();
+void procesarComando(char** comando, void(*doComando)(void*));
 
 
 

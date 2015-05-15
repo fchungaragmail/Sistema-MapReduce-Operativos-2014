@@ -32,14 +32,14 @@ void esperarComando()
 	continuar = true;
 	while(continuar)
 	{
-	scanf("%s", entrada);
+	scanf(" %[^\n]",entrada);
 	procesarEntrada(entrada,&continuar);
 	}
 }
 
 void procesarEntrada(char entrada[],bool* continuar)
 {
-	char** comando = string_n_split(entrada,1," ");
+	char** comando = string_n_split(entrada,2," ");
 
 	*continuar = true;
 	int eleccion = dictionary_get(diccionarioComandos,comando[0]);
@@ -51,13 +51,65 @@ void procesarEntrada(char entrada[],bool* continuar)
 		break;
 	}
 	case 2:
+	{
+		//Mover/renombrar archivo/directorio
+
+		break;
+	}
 	case 3:
+	{
+		//Borrar archivo/directorio
+		break;
+	}
 	case 4:
+	{
+		//Crear directorio
+		break;
+	}
 	case 5:
+	{
+		//Importar archivo
+		break;
+	}
 	case 6:
+	{
+		//Exportar archivo
+		break;
+	}
 	case 7:
 	{
-		//Procesar comando
+		//Mostrar md5 de un archivo
+		procesarComando(comando,printf);
+		break;
+	}
+	case 8:
+	{
+		//Muestra los bloques que componen un archivo
+		procesarComando(comando,printf);
+		break;
+	}
+	case 9:
+	{
+		//Borra un bloque
+		procesarComando(comando,printf);
+		break;
+	}
+	case 10:
+	{
+		//Copia un bloque
+		procesarComando(comando,printf);
+		break;
+	}
+	case 11:
+	{
+		//Aniadir nodo
+		procesarComando(comando,printf);
+		break;
+	}
+	case 12:
+	{
+		//Quitar nodo
+		procesarComando(comando,printf);
 		break;
 	}
 	case 90:
