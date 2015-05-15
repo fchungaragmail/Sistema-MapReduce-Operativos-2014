@@ -11,10 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include "estructuras.h"
 #include "consola.h"
-#include <commons/config.h>
-#include <commons/log.h>
 #include "recursosCompartidos.h"
 
 void initFileSystem();

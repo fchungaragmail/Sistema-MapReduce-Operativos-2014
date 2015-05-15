@@ -11,6 +11,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <commons/collections/list.h>
+#include <commons/config.h>
+#include <commons/log.h>
+#include "estructuras.h"
 
 
 extern t_list* listaArchivos;

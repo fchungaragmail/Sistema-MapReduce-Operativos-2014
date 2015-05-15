@@ -12,6 +12,7 @@
 #include <commons/collections/dictionary.h>
 #include <commons/string.h>
 #include "recursosCompartidos.h"
+#include "comandos.h"
 
 
 //Comienza la ejecucion de la consola

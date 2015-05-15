@@ -51,33 +51,13 @@ void procesarEntrada(char entrada[],bool* continuar)
 		break;
 	}
 	case 2:
-	{
-		//Mover/renombrar archivo/directorio
-		break;
-	}
 	case 3:
-	{
-		//Borrar archivo/directorio
-		break;
-	}
 	case 4:
-	{
-		//Crear directorio
-		break;
-	}
 	case 5:
-	{
-		//Importar archivo
-		break;
-	}
 	case 6:
-	{
-		//Exportar archivo
-		break;
-	}
 	case 7:
 	{
-		//Mostrar md5
+		//Procesar comando
 		break;
 	}
 	case 90:
