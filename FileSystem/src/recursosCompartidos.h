@@ -18,7 +18,8 @@
 
 extern t_list* listaArchivos;
 extern int PUERTO_LISTEN;
-extern char** LISTA_NODOS;
+extern char IP_LISTEN[16];
+extern int LISTA_NODOS;
 extern FILE* log;
 
 
