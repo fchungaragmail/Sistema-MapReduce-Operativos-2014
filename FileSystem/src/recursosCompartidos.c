@@ -9,5 +9,5 @@
 
 t_list* listaArchivos;
 int PUERTO_LISTEN = -1;
-char** LISTA_NODOS;
+int LISTA_NODOS;
 FILE* log;
