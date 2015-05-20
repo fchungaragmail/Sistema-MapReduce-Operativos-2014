@@ -1,0 +1,100 @@
+/*
+ * ReadWriteFunctions.c
+ *
+ *  Created on: 20/5/2015
+ *      Author: utnso
+ */
+
+
+//Programa Escritura.c
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct alumno {
+
+	char nombre[20];
+	int edad;
+
+} t_alumno;
+
+int readFile(struct t,int longitud) {
+
+	//Defino la variable alumno
+	t_alumno* alumno;
+
+	//aloco memoria
+	alumno = malloc(sizeof(t));
+	char* serial = malloc(longitud);
+
+	//Hago la copia de memoria a mi struct alumno
+	strcpy(&alumno->nombre, "Juan");
+	(*alumno).edad = 21;
+
+	//Serializo proque el padding me complica la vida
+	memcpy(serial, &alumno->edad, 4);
+	memcpy(serial+4, &alumno->nombre, 20);
+
+	//Printeo el struct
+	printf("%s\n", (*alumno).nombre);
+	printf("%d\n", (*alumno).edad);
+
+	//Escribo en el archivo
+	FILE *file = fopen("/home/utnso/a1.txt", "wb");
+	fwrite(serial, 24, 1, file);
+
+	//Cierro el archivo
+	fclose(file);
+
+	//Hago los free para no ser cabeza con el manejo de la memoria
+	free(alumno);
+	free(serial);
+
+	//return, porque si
+	return 0;
+}
+
+---------------------
+
+//Programa Lectura.c
+
+
+typedef struct alumno {
+
+	char nombre[20];
+	int edad;
+
+} t_alumno;
+
+int main(void) {
+
+	//Defino la variable alumno
+	t_alumno* alumno;
+
+	//aloco memoria
+	alumno = malloc(sizeof(t_alumno));
+	char * deserial = malloc(24);
+
+	//Leo del archivo
+	FILE *file = fopen("/home/utnso/a1.txt", "rb");
+	fread(deserial, 24, 1, file);
+
+	//Des-serializo porque el que creo el archivo serializa todo
+	memcpy(&alumno->edad, deserial, 4);
+	memcpy(&alumno->nombre, deserial+4, 20);
+
+	//Printeo los datos del struct
+	printf("%s\n", alumno->nombre);
+	printf("%d\n", alumno->edad);
+
+	//Cierro el archivo
+	fclose(file);
+
+	//Hago los free porque valgrind me trata mal sino :'(
+	free(alumno);
+	free(deserial);
+
+	//Retorno porque el main tiene int
+	return 0;
+}

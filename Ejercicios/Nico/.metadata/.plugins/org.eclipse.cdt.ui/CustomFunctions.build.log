@@ -1,0 +1,35 @@
+15:19:28 **** Incremental Build of configuration Debug for project CustomFunctions ****
+make all 
+Building file: ../src/ScriptFunctions.c
+Invoking: Cross GCC Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/ScriptFunctions.d" -MT"src/ScriptFunctions.d" -o "src/ScriptFunctions.o" "../src/ScriptFunctions.c"
+../src/ScriptFunctions.c: In function ‘procesarScript’:
+../src/ScriptFunctions.c:79:9: warning: implicit declaration of function ‘inputString’ [-Wimplicit-function-declaration]
+         bloqueProcesado = (char *)inputString(fp,1);//1 valor por default
+         ^
+../src/ScriptFunctions.c:77:15: warning: variable ‘bloqueProcesado’ set but not used [-Wunused-but-set-variable]
+         char *bloqueProcesado;
+               ^
+../src/ScriptFunctions.c:66:10: warning: unused variable ‘count’ [-Wunused-variable]
+      int count;
+          ^
+../src/ScriptFunctions.c:87:5: warning: return makes pointer from integer without a cast [enabled by default]
+     return -1;
+     ^
+../src/ScriptFunctions.c:43:9: warning: unused variable ‘infd’ [-Wunused-variable]
+     int infd[2];
+         ^
+../src/ScriptFunctions.c:42:9: warning: unused variable ‘outfd’ [-Wunused-variable]
+     int outfd[2];
+         ^
+../src/ScriptFunctions.c: At top level:
+../src/ScriptFunctions.c:91:7: error: conflicting types for ‘inputString’
+ void *inputString(FILE* fp, size_t size){
+       ^
+../src/ScriptFunctions.c:79:35: note: previous implicit declaration of ‘inputString’ was here
+         bloqueProcesado = (char *)inputString(fp,1);//1 valor por default
+                                   ^
+make: *** [src/ScriptFunctions.o] Error 1
+
+15:19:29 Build Finished (took 443ms)
+
