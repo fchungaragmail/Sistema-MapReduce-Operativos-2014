@@ -34,7 +34,7 @@ int pipes[NUM_PIPES][2];
 #define CHILD_READ_FD   ( pipes[PARENT_WRITE_PIPE][READ_FD]  )
 #define CHILD_WRITE_FD  ( pipes[PARENT_READ_PIPE][WRITE_FD]  )
 
-
+char *inputString(FILE* fp, size_t size);
 
 FILE* procesarScript(char* direccionScript, char *bloqueAProcesar, FILE *archivoTemporal)
 {
@@ -59,11 +59,14 @@ FILE* procesarScript(char* direccionScript, char *bloqueAProcesar, FILE *archivo
         close(PARENT_READ_FD);
         close(PARENT_WRITE_FD);
 
-         execv(argv[0], argv);
+        system(direccionScript);
+         //execv(argv[0], argv);
+
+        //ADJUNTO LINK DE COMO CORRER UN SCRIPT PASANDOLE PARAMETROS !!!
+        //http://stackoverflow.com/questions/6477057/running-shell-script-from-c
+
         //luego el script como ya esta redireccionado le devolveria al padre el resultado
     } else {
-
-    	int count;
 
         /* close fds not required by parent */
         close(CHILD_READ_FD);
@@ -76,10 +79,10 @@ FILE* procesarScript(char* direccionScript, char *bloqueAProcesar, FILE *archivo
         // Read from child’s stdout
         char *bloqueProcesado;
         FILE* fp = fdopen(PARENT_READ_FD, "r");//PARENT_READ_FD es un fd
-        bloqueProcesado = (char *)inputString(fp,1);//1 valor por default
+        bloqueProcesado = inputString(fp,1);//1 valor por default
 
-        //size_t lenBlckProcesado = strlen(bloqueProcesado);
-        //fwrite(bloqueProcesado,sizeof(char),lenBlckProcesado,archivoTemporal);
+        size_t lenBlckProcesado = strlen(bloqueProcesado);
+        fwrite(bloqueProcesado,sizeof(char),lenBlckProcesado,archivoTemporal);
         return archivoTemporal;
         //hay que hacer free de _bloqueProcesado cuando se deje de usar !!
     }
@@ -88,7 +91,7 @@ FILE* procesarScript(char* direccionScript, char *bloqueAProcesar, FILE *archivo
 }
 
 
-void *inputString(FILE* fp, size_t size){
+char *inputString(FILE* fp, size_t size){
 //The size is extended by the input with the value of the provisional
     char *str;
     int ch;
