@@ -23,6 +23,8 @@
 
 int pipes[NUM_PIPES][2];
 
+void *inputString(FILE* fp, size_t size);
+
 /* always in a pipe[], pipe[0] is for read and
    pipe[1] is for write */
 #define READ_FD  0
