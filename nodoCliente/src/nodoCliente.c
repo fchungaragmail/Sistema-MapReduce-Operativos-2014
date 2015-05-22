@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <pthread.h>
 
 
 #define PORT 8000
