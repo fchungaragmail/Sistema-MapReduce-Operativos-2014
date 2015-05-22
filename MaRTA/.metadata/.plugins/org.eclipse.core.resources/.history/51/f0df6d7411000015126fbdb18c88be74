@@ -1,0 +1,17 @@
+/*
+ ============================================================================
+ Name        : MaRTA.c
+ Author      : Nicolas Buzzano
+ Version     :
+ Copyright   : Your copyright notice
+ Description : Hello World in C, Ansi-style
+ ============================================================================
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+	puts("MaRTA !!!"); /* prints MaRTA !!! */
+	return EXIT_SUCCESS;
+}
