@@ -10,14 +10,20 @@
 
 int escuchaNodos;
 int escuchaMaRTA, MaRTA;
+t_list* conexiones;
+fd_set nodos;
 
 int initConexiones();
 void escucharNodos(int cantNodos);
 void escucharMaRTA();
+void cerrarConexiones();
+void freeConexion(Conexion_t* conexion);
 
 
 int initConexiones()
 {
+	conexiones = list_create();
+	FD_ZERO(&nodos);
 	escuchaNodos = socket(AF_INET, SOCK_STREAM, 0);
 	escuchaMaRTA = socket(AF_INET, SOCK_STREAM, 0);
 	if ((escuchaNodos == -1) && (escuchaMaRTA == -1)){
@@ -68,12 +74,13 @@ void escucharNodos(int cantNodos)
 	while ((i < cantNodos) || (cantNodos == -1))
 	{
 		Sockaddr_in their_addr;
-		Conexion* conexionNueva = malloc(sizeof(Conexion));
+		Conexion_t* conexionNueva = malloc(sizeof(Conexion_t));
 
-		nuevoSocketfd = accept(escuchaNodos, (Sockaddr_in*) &their_addr, &sin_size);
+		nuevoSocketfd = accept(escuchaNodos, &their_addr, &sin_size);
 
 		conexionNueva->sockaddr_in = their_addr;
 		conexionNueva->sockfd = nuevoSocketfd;
+		list_add(conexiones, conexionNueva);
 		log_info(log, "Conectado con el nodo %s \n", inet_ntoa(their_addr.sin_addr));
 		i++;
 	}
@@ -85,11 +92,23 @@ void escucharMaRTA()
 	int sin_size = sizeof(Sockaddr_in);
 
 	Sockaddr_in their_addr;
-	Conexion* conexionNueva = malloc(sizeof(Conexion));
+	Conexion_t* conexionNueva = malloc(sizeof(Conexion_t));
 
 	MaRTA = accept(escuchaMaRTA, (Sockaddr_in*) &their_addr, &sin_size);
 
 	conexionNueva->sockaddr_in = their_addr;
 	conexionNueva->sockfd = MaRTA;
 	log_info(log, "Conectado con MaRTA (%s) \n", inet_ntoa(their_addr.sin_addr));
+}
+
+
+void cerrarConexiones()
+{
+	list_iterate(conexiones, freeConexion);
+}
+
+void freeConexion(Conexion_t* conexion)
+{
+	close(conexion->sockfd);
+	free(conexion);
 }

@@ -26,19 +26,18 @@ int main(void) {
 	initFileSystem();
 
 	pthread_create(&tConsola, NULL, execConsola, NULL);
-
 	//Hasta que no tenga los nodos suficientes no sigue
 	pthread_create(&tEscucharConexioesInicial, NULL, escucharNodos, LISTA_NODOS);
 	pthread_join(tEscucharConexioesInicial, NULL);
 
+
 	pthread_create(&tConectarMaRTA, NULL, escucharMaRTA, NULL);
 	pthread_create(&tEscucharConexioes, NULL, escucharNodos, -1);
 
+
 	pthread_join(tConsola,NULL);
 
-
-	exitFileSystem();
-	return EXIT_SUCCESS;
+	return 0;
 }
 
 void initFileSystem()
@@ -69,4 +68,6 @@ void exitFileSystem()
 {
 	list_destroy(listaArchivos);
 	log_destroy(log);
+	cerrarConexiones();
+	exit(0);
 }

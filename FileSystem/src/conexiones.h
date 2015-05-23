@@ -12,8 +12,17 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define NODOS_MAX 20
+
+int initConexiones();
+void escucharNodos(int cantNodos); //Si le mandas -1 sigue buscando
+void escucharMaRTA();
+void cerrarConexiones();
+
 
 struct _sockaddr_in {
 	short int sin_family;  // familia de direcciones, AF_INET
@@ -27,10 +36,10 @@ struct _conexion {
 	int sockfd;
 	Sockaddr_in sockaddr_in;
 };
-typedef struct _conexion Conexion;
+typedef struct _conexion Conexion_t;
 
-int initConexiones();
-void escucharNodos(int cantNodos); //Si le mandas -1 sigue buscando
-void escucharMaRTA();
+
+
+
 
 #endif /* CONEXIONES_H_ */

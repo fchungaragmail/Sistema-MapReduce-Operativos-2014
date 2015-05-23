@@ -1,38 +1,12 @@
-[INFO] 00:37:54:392 FileSystem/(6731:6731): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:37:54:393 FileSystem/(6731:6731): Escuchando conexiones.
-[INFO] 00:37:57:893 FileSystem/(6731:6733): Conectado con el nodo 127.0.0.1 
+[INFO] 01:43:20:186 FileSystem/(9539:9539): Los socket para escuchar nuevas conexiones se crearon correctamente.
+[INFO] 01:43:20:187 FileSystem/(9539:9539): Escuchando conexiones.
+[INFO] 17:33:00:997 FileSystem/(3835:3835): Los socket para escuchar nuevas conexiones se crearon correctamente.
+[INFO] 17:33:00:998 FileSystem/(3835:3835): Escuchando conexiones.
+[INFO] 17:33:27:725 FileSystem/(3878:3878): Los socket para escuchar nuevas conexiones se crearon correctamente.
+[INFO] 17:33:28:745 FileSystem/(3878:3878): Escuchando conexiones.
+[INFO] 17:33:39:760 FileSystem/(3878:3889): Conectado con el nodo 127.0.0.1 
 
-[INFO] 00:37:57:893 FileSystem/(6731:6733): Cantidad minima de nodos (1) alcanzada.
+[INFO] 17:33:39:761 FileSystem/(3878:3889): Cantidad minima de nodos (1) alcanzada.
 
-[INFO] 00:39:06:212 FileSystem/(6781:6781): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:39:16:140 FileSystem/(6781:6781): Escuchando conexiones.
-[INFO] 00:40:41:736 FileSystem/(6892:6892): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:40:41:736 FileSystem/(6892:6892): Escuchando conexiones.
-[INFO] 00:41:31:221 FileSystem/(6892:6909): Conectado con el nodo 127.0.0.1 
-
-[INFO] 00:41:31:221 FileSystem/(6892:6909): Cantidad minima de nodos (1) alcanzada.
-
-[INFO] 00:42:30:226 FileSystem/(6892:6913): Conectado con el nodo 127.0.0.1 
-
-[INFO] 00:42:30:226 FileSystem/(6892:6913): Cantidad minima de nodos (1) alcanzada.
-
-[INFO] 00:45:13:379 FileSystem/(7120:7120): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:45:13:380 FileSystem/(7120:7120): Escuchando conexiones.
-[INFO] 00:45:17:998 FileSystem/(7120:7121): Conectado con el nodo 127.0.0.1 
-
-[INFO] 00:45:17:998 FileSystem/(7120:7121): Cantidad minima de nodos (1) alcanzada.
-
-[INFO] 00:45:17:0 FileSystem/(7120:7128): Conectado con MaRTA!
-
-[INFO] 00:45:35:652 FileSystem/(7148:7148): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:45:35:653 FileSystem/(7148:7148): Escuchando conexiones.
-[INFO] 00:46:16:357 FileSystem/(7171:7171): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:46:16:358 FileSystem/(7171:7171): Escuchando conexiones.
-[INFO] 00:46:16:358 FileSystem/(7171:7176): Cantidad minima de nodos (0) alcanzada.
-
-[INFO] 00:46:16:358 FileSystem/(7171:7178): Conectado con el nodo 127.0.0.1 
-
-[INFO] 00:46:16:358 FileSystem/(7171:7178): Cantidad minima de nodos (0) alcanzada.
-
-[INFO] 00:46:16:359 FileSystem/(7171:7177): Conectado con MaRTA!
+[INFO] 17:33:39:763 FileSystem/(3878:3924): Conectado con MaRTA (0.0.0.0) 
 

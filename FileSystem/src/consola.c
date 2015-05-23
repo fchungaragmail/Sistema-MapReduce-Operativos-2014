@@ -173,4 +173,5 @@ void cerrarConsola()
 {
 	printf("Saliendo de la consola...\n");
 	dictionary_destroy(diccionarioComandos);
+	exitFileSystem();
 }
