@@ -90,6 +90,7 @@ void escucharNodos(int cantNodos)
 		conexionNueva->sockaddr_in = their_addr;
 		conexionNueva->sockfd = nuevoSocketfd;
 		list_add(conexiones, conexionNueva);
+		FD_SET(nuevoSocketfd, &nodos);
 		log_info(log, "Conectado con el nodo %s \n", inet_ntoa(their_addr.sin_addr));
 		i++;
 	}
