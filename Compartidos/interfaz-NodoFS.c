@@ -13,11 +13,11 @@ mensaje_t* recibir(int socket);
 mensaje_t* recibir(int socket){
 	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
 
-	recv(socket, mensaje->comandoSize, sizeof(int),0);
+	recv(socket, &(mensaje->comandoSize), sizeof(int),0);
 	mensaje->comando = malloc(mensaje->comandoSize);
 	recv(socket, mensaje->comando, mensaje->comandoSize,0);
 
-	recv(socket, mensaje->dataSize, sizeof(long),0);
+	recv(socket, &(mensaje->dataSize), sizeof(long),0);
 	mensaje->data = malloc(mensaje->dataSize);
 	recv(socket, mensaje->data, mensaje->dataSize,0);
 
@@ -26,8 +26,8 @@ mensaje_t* recibir(int socket){
 
 void enviar(int socket, mensaje_t* mensaje)
 {
-	send(socket, mensaje->comandoSize, sizeof(int), 0);
+	send(socket, &(mensaje->comandoSize), sizeof(int), 0);
 	send(socket, mensaje->comando, mensaje->comandoSize, 0);
-	send(socket, mensaje->dataSize, sizeof(long), 0);
+	send(socket, &(mensaje->dataSize), sizeof(long), 0);
 	send(socket, mensaje->data, mensaje->dataSize, 0);
 }
