@@ -13,15 +13,13 @@
 #include <commons/error.h>
 #include <commons/collections/list.h>
 
-#include "MaRTA.c"
-#include "ConexionCenter.h"
 // CONSTANTES
 
 #define LOCALHOST "127.0.0.1"
 #define PUERTO_FS 9999
 #define PUERTO_JOB 8888
 #define MAX_JOBS 20
-#define BUFFER_SIZE 10
+#define BUFFER_SIZE_HEAD 10
 
 // ESTRUCTURAS
 
@@ -48,8 +46,8 @@ int socketFd_FS;
 pthread_t threadEscucharConexiones;
 
 void initConexiones();
-void *listenFS();
-void *listenJobs();
+void listenFS();
+void listenJobs();
 void closeServidores();
 int createSocket(int puerto,int socketFd);
 
@@ -63,7 +61,7 @@ void initConexiones()
 	printf("INICIO DEL SERVIDOR CON EXITO\n");
 }
 
-void *listenFS()//ya esta en un hilo de MaRTA
+void listenFS()//ya esta en un hilo de MaRTA
 {
 	listen(socketFd_FS,1);//solo hay una instancia de FS
 
@@ -81,13 +79,33 @@ void *listenFS()//ya esta en un hilo de MaRTA
 	conexionNueva->thread = hiloCliente;
 	list_add(listaConexiones, (void*) conexionNueva);
 
-	char buffer[BUFFER_SIZE];
+	char buffer_head[BUFFER_SIZE_HEAD];
 
-	recv(conexionNueva.sockfd,buffer, BUFFER_SIZE, 0);
-	return buffer;
+	while (1) {
+			recv(conexionNueva.sockfd, buffer_head, BUFFER_SIZE_HEAD, 0);
+			procesarMensaje(buffer);
+	}
 }
 
-void *listenJobs() //ya esta en un hilo de MaRTA
+void procesarMensaje(char* mensaje) {
+
+	int n;
+	char buffer[BUFFER_SIZE_HEAD];
+	strcpy(buffer, mensaje);
+	int count = list_size(listaConexiones);
+
+	for (n = 0; n < count; ++n) {
+
+
+		Conexion* conexion = (Conexion*) list_get(listaConexiones, n);
+		send(conexion->sockfd, buffer, BUFFER_SIZE, 0);
+		printf(buffer);
+		printf("\n");
+	}
+
+}
+
+void listenJobs() //ya esta en un hilo de MaRTA
 {
 	listen(socketFd_Job, MAX_JOBS);
 
@@ -105,27 +123,11 @@ void *listenJobs() //ya esta en un hilo de MaRTA
 		conexionNueva->sockaddr_in = their_addr;
 		conexionNueva->sockfd = nuevoSocketfd;
 		conexionNueva->thread = hiloCliente;
-		pthread_create(&hiloCliente, NULL, jobHandler,(void*) conexionNueva);
-		// lo 1ero q me pasa es la direccion de su arch. a procesar
+		pthread_create(&hiloCliente, NULL, clienteHandler,
+				(void*) conexionNueva); // lo 1ero q me pasa es la direccion de su arch. a procesar
 		list_add(listaConexiones, (void*) conexionNueva);
 
-		//ACA PUEDE QUE TENGA Q IR EL "SELECT" Y PUEDO DEVOLVER A MARTA DIRECTAMENTE
-
 	}
-}
-
-void* jobHandler(void* conexionCliente) {
-	Conexion conexion = *((Conexion*) conexionCliente);
-	char buffer[BUFFER_SIZE];
-
-	while (1) {
-		recv(conexion.sockfd, buffer, BUFFER_SIZE, 0);
-		//CADA RESPUES QUE LLEGA AL recv LE DEBERIA LLEGAR A MaRTA !!
-		BroadCast(buffer);
-
-		jobMessage(buffer);//funcion en .c de MaRTA
-	}
-
 }
 
 void closeServidores()

@@ -11,8 +11,8 @@
 t_list* listaConexiones;
 
 void initConexiones();
-void *listenFS();
-void *listenJobs();
+void listenFS();
+void listenJobs();
 void closeServidores();
 
 #endif /* CONEXIONCENTER_H_ */

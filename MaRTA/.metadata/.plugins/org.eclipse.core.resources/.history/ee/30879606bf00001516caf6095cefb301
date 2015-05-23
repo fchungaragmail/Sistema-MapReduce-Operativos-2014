@@ -24,10 +24,6 @@ typedef enum
 
 #define 	HEAD_LENGHT 5
 
-void listenToFS();
-void listenToJobs();
-void jobMessage(char *jobMessage);
-//PLANIFICADOR
 processFSMessage(char* message);
 processJobMessage(char* message);
 
@@ -81,7 +77,7 @@ void listenToJobs()
 processFSMessage(char* message)
 {
 	char *messageType = malloc(sizeof(HEAD_LENGHT));
-	for (int i=0;i<HEAD_LENGHT;i++)
+	for (int i=0,i<HEAD_LENGHT,i++)
 	{
 		strcpy(messageType[i],message[i]);
 	}
@@ -101,9 +97,4 @@ processFSMessage(char* message)
 			break;
 	}
 
-}
-
-void jobMessage(char *jobMessage)
-{
-	//mensaje de cada job
 }

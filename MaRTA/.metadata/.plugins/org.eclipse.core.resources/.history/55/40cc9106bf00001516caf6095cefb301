@@ -13,7 +13,6 @@
 #include <commons/error.h>
 #include <commons/collections/list.h>
 
-#include "MaRTA.c"
 #include "ConexionCenter.h"
 // CONSTANTES
 
@@ -109,8 +108,6 @@ void *listenJobs() //ya esta en un hilo de MaRTA
 		// lo 1ero q me pasa es la direccion de su arch. a procesar
 		list_add(listaConexiones, (void*) conexionNueva);
 
-		//ACA PUEDE QUE TENGA Q IR EL "SELECT" Y PUEDO DEVOLVER A MARTA DIRECTAMENTE
-
 	}
 }
 
@@ -123,7 +120,6 @@ void* jobHandler(void* conexionCliente) {
 		//CADA RESPUES QUE LLEGA AL recv LE DEBERIA LLEGAR A MaRTA !!
 		BroadCast(buffer);
 
-		jobMessage(buffer);//funcion en .c de MaRTA
 	}
 
 }

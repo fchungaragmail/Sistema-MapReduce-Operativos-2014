@@ -14,23 +14,6 @@
 #include "FilesStatusCenter.h"
 #include "ConexionCenter.h"
 
-typedef enum
-{
-	TYPE_1 = "tipo1",
-	TYPE_2 = "tipo2",
-	TYPE_N = "tipoN"
-
-}FS_TypesMessages;
-
-#define 	HEAD_LENGHT 5
-
-void listenToFS();
-void listenToJobs();
-void jobMessage(char *jobMessage);
-//PLANIFICADOR
-processFSMessage(char* message);
-processJobMessage(char* message);
-
 int main(void) {
 
 	puts("MaRTA al ataque !!!");
@@ -59,11 +42,7 @@ void listenToFS()
 {
 	while(1)
 		{
-			void *fsMessage;
-		 	void *fsMessage = listenFS();
-
-		 	//procesar data ...
-		 	processFSMessage(fsMessage);
+			listenFS();
 		}
 }
 
@@ -73,37 +52,4 @@ void listenToJobs()
 		{
 			listenJobs();
 		}
-}
-
-////////////////
-//Planificador
-
-processFSMessage(char* message)
-{
-	char *messageType = malloc(sizeof(HEAD_LENGHT));
-	for (int i=0;i<HEAD_LENGHT;i++)
-	{
-		strcpy(messageType[i],message[i]);
-	}
-
-	switch (messageType) {
-		case TYPE_1:
-			//hacer tal cosa
-			break;
-		case TYPE_2:
-			//hacer tal cosa
-			break;
-		case TYPE_N:
-			//hacer tal cosa
-			break;
-		default:
-			printf("ERROR !! FS Message no identificado !!");
-			break;
-	}
-
-}
-
-void jobMessage(char *jobMessage)
-{
-	//mensaje de cada job
 }
