@@ -25,14 +25,14 @@ int main(void) {
 
 	initFileSystem();
 
+	pthread_create(&tConsola, NULL, execConsola, NULL);
+
 	//Hasta que no tenga los nodos suficientes no sigue
-	pthread_create(&tEscucharConexioesInicial, NULL, escucharConexiones, LISTA_NODOS);
+	pthread_create(&tEscucharConexioesInicial, NULL, escucharNodos, LISTA_NODOS);
 	pthread_join(tEscucharConexioesInicial, NULL);
 
-
-	pthread_create(&tConectarMaRTA, NULL, conectarMaRTA, NULL);
-	pthread_create(&tEscucharConexioes, NULL, escucharConexiones, -1);
-	pthread_create(&tConsola, NULL, execConsola, NULL);
+	pthread_create(&tConectarMaRTA, NULL, escucharMaRTA, NULL);
+	pthread_create(&tEscucharConexioes, NULL, escucharNodos, -1);
 
 	pthread_join(tConsola,NULL);
 
@@ -51,11 +51,9 @@ void initFileSystem()
 	PUERTO_LISTEN = config_get_int_value(archivoConfig, "PUERTO_LISTEN");
 	char* tmp = config_get_string_value(archivoConfig, "IP_LISTEN");
 	strcpy(IP_LISTEN,tmp);
+	free(tmp);
 
 	PUERTO_MARTA = config_get_int_value(archivoConfig, "PUERTO_MARTA");
-	tmp = config_get_string_value(archivoConfig, "IP_MARTA");
-	strcpy(IP_MARTA,tmp);
-	free(tmp);
 
 	LISTA_NODOS = config_get_int_value(archivoConfig, "LISTA_NODOS");
 

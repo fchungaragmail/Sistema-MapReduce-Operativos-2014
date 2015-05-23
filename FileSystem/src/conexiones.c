@@ -8,36 +8,44 @@
 
 #include "conexiones.h"
 
-int nuevasConexiones;
-int MaRTA;
+int escuchaNodos;
+int escuchaMaRTA, MaRTA;
 
 int initConexiones();
-void escucharConexiones(int cantNodos);
-void conectarMaRTA();
+void escucharNodos(int cantNodos);
+void escucharMaRTA();
 
 
 int initConexiones()
 {
-	nuevasConexiones = socket(AF_INET, SOCK_STREAM, 0);
-	if (nuevasConexiones == -1) {
-		log_error(log,"No se pudo crear el socket para escuchar "
+	escuchaNodos = socket(AF_INET, SOCK_STREAM, 0);
+	escuchaMaRTA = socket(AF_INET, SOCK_STREAM, 0);
+	if ((escuchaNodos == -1) && (escuchaMaRTA == -1)){
+		log_error(log,"No se pudieron crear los socket para escuchar "
 				"nuevas conexiones.");
 	} else
 	{
-		log_info(log, "El socket para escuchar nuevas conexiones se "
-				"creo correctamente");
+		log_info(log, "Los socket para escuchar nuevas conexiones se "
+				"crearon correctamente.");
 	}
 
-	Sockaddr_in my_addr;
-	my_addr.sin_family = AF_INET;
-	my_addr.sin_port = htons(PUERTO_LISTEN);
-	inet_aton("127.0.0.1", &(my_addr.sin_addr));
-	memset(&(my_addr.sin_zero), '\0', 8);
+	Sockaddr_in miDireccNodos;
+	miDireccNodos.sin_family = AF_INET;
+	miDireccNodos.sin_port = htons(PUERTO_LISTEN);
+	inet_aton(IP_LISTEN, &(miDireccNodos.sin_addr));
+	memset(&(miDireccNodos.sin_zero), '\0', 8);
+	bind(escuchaNodos, (Sockaddr_in*) &miDireccNodos, sizeof(Sockaddr_in));
 
-	bind(nuevasConexiones, (Sockaddr_in*) &my_addr, sizeof(Sockaddr_in));
+	Sockaddr_in miDireccMaRTA;
+	miDireccMaRTA.sin_family = AF_INET;
+	miDireccMaRTA.sin_port = htons(PUERTO_MARTA);
+	inet_aton(IP_LISTEN, &(miDireccMaRTA.sin_addr));
+	memset(&(miDireccMaRTA.sin_zero), '\0', 8);
+	bind(escuchaMaRTA, (Sockaddr_in*) &miDireccMaRTA, sizeof(Sockaddr_in));
 
 
-	if (listen(nuevasConexiones, NODOS_MAX) == -1)
+	if ((listen(escuchaNodos, NODOS_MAX) == -1) &&
+		(listen(escuchaMaRTA, 1) 		 == -1))
 	{
 		log_error(log,"No se pueden escuchar conexiones."
 				"El FileSystem se cerrara");
@@ -49,7 +57,7 @@ int initConexiones()
 }
 
 
-void escucharConexiones(int cantNodos)
+void escucharNodos(int cantNodos)
 {
 	int nuevoSocketfd;
 	int sin_size = sizeof(Sockaddr_in);
@@ -62,7 +70,7 @@ void escucharConexiones(int cantNodos)
 		Sockaddr_in their_addr;
 		Conexion* conexionNueva = malloc(sizeof(Conexion));
 
-		nuevoSocketfd = accept(nuevasConexiones, (Sockaddr_in*) &their_addr, &sin_size);
+		nuevoSocketfd = accept(escuchaNodos, (Sockaddr_in*) &their_addr, &sin_size);
 
 		conexionNueva->sockaddr_in = their_addr;
 		conexionNueva->sockfd = nuevoSocketfd;
@@ -72,23 +80,16 @@ void escucharConexiones(int cantNodos)
 	log_info(log, "Cantidad minima de nodos (%d) alcanzada.\n", LISTA_NODOS);
 }
 
-void conectarMaRTA()
+void escucharMaRTA()
 {
-	struct sockaddr_in their_addr; // información de la dirección de destino
+	int sin_size = sizeof(Sockaddr_in);
 
-	MaRTA = socket(AF_INET, SOCK_STREAM, 0);
+	Sockaddr_in their_addr;
+	Conexion* conexionNueva = malloc(sizeof(Conexion));
 
-	their_addr.sin_family = AF_INET;    // Ordenación de bytes de la máquina
-	their_addr.sin_port = htons(PUERTO_MARTA); // short, Ordenación de bytes de la red
-	inet_aton(IP_MARTA, &(their_addr.sin_addr));
-	memset(&(their_addr.sin_zero), '\o', 8); // poner a cero el resto de la estructura
+	MaRTA = accept(escuchaMaRTA, (Sockaddr_in*) &their_addr, &sin_size);
 
-	if (connect(MaRTA, (Sockaddr_in*) &their_addr, sizeof(Sockaddr_in))
-			== -1)
-	{
-		log_error(log, "Error al conectarse a MaRTA!\n");
-	} else
-	{
-		log_info(log, "Conectado con MaRTA!\n");
-	}
+	conexionNueva->sockaddr_in = their_addr;
+	conexionNueva->sockfd = MaRTA;
+	log_info(log, "Conectado con MaRTA (%s) \n", inet_ntoa(their_addr.sin_addr));
 }
