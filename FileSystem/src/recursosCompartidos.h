@@ -20,6 +20,8 @@ extern t_list* listaArchivos;
 extern int PUERTO_LISTEN;
 extern char IP_LISTEN[16];
 extern int LISTA_NODOS;
+extern int PUERTO_MARTA;
+extern char IP_MARTA[16];
 extern FILE* log;
 
 

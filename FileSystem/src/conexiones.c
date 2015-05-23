@@ -9,9 +9,11 @@
 #include "conexiones.h"
 
 int nuevasConexiones;
+int MaRTA;
 
 int initConexiones();
 void escucharConexiones(int cantNodos);
+void conectarMaRTA();
 
 
 int initConexiones()
@@ -66,5 +68,27 @@ void escucharConexiones(int cantNodos)
 		conexionNueva->sockfd = nuevoSocketfd;
 		log_info(log, "Conectado con el nodo %s \n", inet_ntoa(their_addr.sin_addr));
 		i++;
+	}
+	log_info(log, "Cantidad minima de nodos (%d) alcanzada.\n", LISTA_NODOS);
+}
+
+void conectarMaRTA()
+{
+	struct sockaddr_in their_addr; // información de la dirección de destino
+
+	MaRTA = socket(AF_INET, SOCK_STREAM, 0);
+
+	their_addr.sin_family = AF_INET;    // Ordenación de bytes de la máquina
+	their_addr.sin_port = htons(PUERTO_MARTA); // short, Ordenación de bytes de la red
+	inet_aton(IP_MARTA, &(their_addr.sin_addr));
+	memset(&(their_addr.sin_zero), '\o', 8); // poner a cero el resto de la estructura
+
+	if (connect(MaRTA, (Sockaddr_in*) &their_addr, sizeof(Sockaddr_in))
+			== -1)
+	{
+		log_error(log, "Error al conectarse a MaRTA!\n");
+	} else
+	{
+		log_info(log, "Conectado con MaRTA!\n");
 	}
 }
