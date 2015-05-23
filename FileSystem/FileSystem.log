@@ -1,33 +1,38 @@
-[INFO] 23:41:40:25 FileSystem/(4660:4660): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 23:41:51:127 FileSystem/(4691:4691): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 23:42:58:148 FileSystem/(4753:4753): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 23:42:58:148 FileSystem/(4753:4753): Escuchando conexiones.
-[INFO] 23:46:00:436 FileSystem/(4839:4839): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 23:46:00:436 FileSystem/(4839:4839): Escuchando conexiones.
-[INFO] 23:49:15:170 FileSystem/(5009:5009): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 23:49:15:171 FileSystem/(5009:5009): Escuchando conexiones.
-[INFO] 23:50:05:352 FileSystem/(5063:5063): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 23:50:05:352 FileSystem/(5063:5063): Escuchando conexiones.
-[INFO] 23:51:39:196 FileSystem/(5124:5124): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 23:51:39:196 FileSystem/(5124:5124): Escuchando conexiones.
-[INFO] 23:55:55:831 FileSystem/(5493:5493): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 23:55:55:832 FileSystem/(5493:5493): Escuchando conexiones.
-[INFO] 00:02:24:115 FileSystem/(5693:5693): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:02:24:115 FileSystem/(5693:5693): Escuchando conexiones.
-[INFO] 00:06:40:928 FileSystem/(5805:5805): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:06:40:928 FileSystem/(5805:5805): Escuchando conexiones.
-[INFO] 00:07:01:734 FileSystem/(5856:5856): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:07:01:735 FileSystem/(5856:5856): Escuchando conexiones.
-[INFO] 00:09:45:653 FileSystem/(6045:6045): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:10:47:441 FileSystem/(6118:6118): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:11:41:536 FileSystem/(6209:6209): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:14:09:592 FileSystem/(6429:6429): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:14:09:592 FileSystem/(6429:6429): Escuchando conexiones.
-[INFO] 00:14:47:694 FileSystem/(6463:6463): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:15:12:999 FileSystem/(6463:6463): Escuchando conexiones.
-[INFO] 00:15:50:551 FileSystem/(6543:6543): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:15:50:551 FileSystem/(6543:6543): Escuchando conexiones.
-[INFO] 00:19:27:327 FileSystem/(6790:6790): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:19:27:327 FileSystem/(6790:6790): Escuchando conexiones.
-[INFO] 00:23:37:286 FileSystem/(7018:7018): El socket para escuchar nuevas conexiones se creo correctamente
-[INFO] 00:23:37:286 FileSystem/(7018:7018): Escuchando conexiones.
+[INFO] 00:37:54:392 FileSystem/(6731:6731): El socket para escuchar nuevas conexiones se creo correctamente
+[INFO] 00:37:54:393 FileSystem/(6731:6731): Escuchando conexiones.
+[INFO] 00:37:57:893 FileSystem/(6731:6733): Conectado con el nodo 127.0.0.1 
+
+[INFO] 00:37:57:893 FileSystem/(6731:6733): Cantidad minima de nodos (1) alcanzada.
+
+[INFO] 00:39:06:212 FileSystem/(6781:6781): El socket para escuchar nuevas conexiones se creo correctamente
+[INFO] 00:39:16:140 FileSystem/(6781:6781): Escuchando conexiones.
+[INFO] 00:40:41:736 FileSystem/(6892:6892): El socket para escuchar nuevas conexiones se creo correctamente
+[INFO] 00:40:41:736 FileSystem/(6892:6892): Escuchando conexiones.
+[INFO] 00:41:31:221 FileSystem/(6892:6909): Conectado con el nodo 127.0.0.1 
+
+[INFO] 00:41:31:221 FileSystem/(6892:6909): Cantidad minima de nodos (1) alcanzada.
+
+[INFO] 00:42:30:226 FileSystem/(6892:6913): Conectado con el nodo 127.0.0.1 
+
+[INFO] 00:42:30:226 FileSystem/(6892:6913): Cantidad minima de nodos (1) alcanzada.
+
+[INFO] 00:45:13:379 FileSystem/(7120:7120): El socket para escuchar nuevas conexiones se creo correctamente
+[INFO] 00:45:13:380 FileSystem/(7120:7120): Escuchando conexiones.
+[INFO] 00:45:17:998 FileSystem/(7120:7121): Conectado con el nodo 127.0.0.1 
+
+[INFO] 00:45:17:998 FileSystem/(7120:7121): Cantidad minima de nodos (1) alcanzada.
+
+[INFO] 00:45:17:0 FileSystem/(7120:7128): Conectado con MaRTA!
+
+[INFO] 00:45:35:652 FileSystem/(7148:7148): El socket para escuchar nuevas conexiones se creo correctamente
+[INFO] 00:45:35:653 FileSystem/(7148:7148): Escuchando conexiones.
+[INFO] 00:46:16:357 FileSystem/(7171:7171): El socket para escuchar nuevas conexiones se creo correctamente
+[INFO] 00:46:16:358 FileSystem/(7171:7171): Escuchando conexiones.
+[INFO] 00:46:16:358 FileSystem/(7171:7176): Cantidad minima de nodos (0) alcanzada.
+
+[INFO] 00:46:16:358 FileSystem/(7171:7178): Conectado con el nodo 127.0.0.1 
+
+[INFO] 00:46:16:358 FileSystem/(7171:7178): Cantidad minima de nodos (0) alcanzada.
+
+[INFO] 00:46:16:359 FileSystem/(7171:7177): Conectado con MaRTA!
+
