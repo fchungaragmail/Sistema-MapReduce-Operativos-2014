@@ -10,3 +10,14 @@
 
 [INFO] 17:33:39:763 FileSystem/(3878:3924): Conectado con MaRTA (0.0.0.0) 
 
+[INFO] 17:38:50:105 FileSystem/(4078:4078): Los socket para escuchar nuevas conexiones se crearon correctamente.
+[INFO] 17:38:50:108 FileSystem/(4078:4078): Escuchando conexiones.
+[INFO] 17:42:27:797 FileSystem/(4227:4227): Los socket para escuchar nuevas conexiones se crearon correctamente.
+[INFO] 17:42:27:797 FileSystem/(4227:4227): Escuchando conexiones.
+[INFO] 17:42:27:797 FileSystem/(4227:4227): Escuchando conexiones.
+[INFO] 17:42:47:701 FileSystem/(4227:4229): Conectado con el nodo 127.0.0.1 
+
+[INFO] 17:42:47:701 FileSystem/(4227:4229): Cantidad minima de nodos (1) alcanzada.
+
+[INFO] 17:42:59:306 FileSystem/(4227:4291): Conectado con MaRTA (127.0.0.1) 
+

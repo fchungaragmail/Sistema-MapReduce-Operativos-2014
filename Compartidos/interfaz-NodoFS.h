@@ -22,4 +22,19 @@
 //:   Devolverá   el   contenido   del   archivo   de   Espacio   Temporal
 //solicitado.
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
+
+typedef struct mensaje
+{
+	int comandoSize;
+	char* comando;
+	long dataSize;
+	char* data;
+} mensaje_t;
+
+mensaje_t* recibir(int socket);
+
 #endif /* COMPARTIDOS_INTERFAZ_NODOFS_H_ */
