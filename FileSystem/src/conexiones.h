@@ -15,6 +15,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "interfaz-NodoFS.h"
 
 #define NODOS_MAX 20
 
@@ -22,6 +23,8 @@ int initConexiones();
 void escucharNodos(int cantNodos); //Si le mandas -1 sigue buscando
 void escucharMaRTA();
 void cerrarConexiones();
+
+void probarConexiones();
 
 
 struct _sockaddr_in {

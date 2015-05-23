@@ -19,6 +19,8 @@ void escucharMaRTA();
 void cerrarConexiones();
 void freeConexion(Conexion_t* conexion);
 
+void probarConexiones();
+
 
 int initConexiones()
 {
@@ -85,13 +87,20 @@ void escucharNodos(int cantNodos)
 		Sockaddr_in their_addr;
 		Conexion_t* conexionNueva = malloc(sizeof(Conexion_t));
 
+		probarConexiones(); //PRUEBA
+
 		nuevoSocketfd = accept(escuchaNodos, &their_addr, &sin_size);
 
 		conexionNueva->sockaddr_in = their_addr;
 		conexionNueva->sockfd = nuevoSocketfd;
 		list_add(conexiones, conexionNueva);
 		FD_SET(nuevoSocketfd, &nodos);
+
+		mensaje_t* mensajeRecibido;
+		mensajeRecibido = recibir(nuevoSocketfd); //PRUEBA
+
 		log_info(log, "Conectado con el nodo %s \n", inet_ntoa(their_addr.sin_addr));
+
 		i++;
 	}
 	log_info(log, "Cantidad minima de nodos (%d) alcanzada.\n", LISTA_NODOS);
@@ -122,3 +131,33 @@ void freeConexion(Conexion_t* conexion)
 	close(conexion->sockfd);
 	free(conexion);
 }
+
+
+void probarConexiones()
+{
+	int socketPrueba;
+	struct sockaddr_in their_addr;
+
+	socketPrueba = socket(AF_INET, SOCK_STREAM, 0);
+
+	their_addr.sin_family = AF_INET;
+	their_addr.sin_port = htons(PUERTO_LISTEN);
+	inet_aton(IP_LISTEN, &(their_addr.sin_addr));
+	memset(&(their_addr.sin_zero), '\o', 8);
+
+	connect(socketPrueba, &their_addr, sizeof(Sockaddr_in));
+
+	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
+	char comando[] = "este es el comando que voy a mandar";
+	mensaje->comando = malloc(strlen(comando));
+	strcpy(mensaje->comando,comando);
+	mensaje->comandoSize = strlen(mensaje->comando);
+
+	char data[] = "Aca irian los datos";
+	mensaje->data = malloc(strlen(data));
+	strcpy(mensaje->data,data);
+	mensaje->dataSize = strlen(mensaje->data);
+
+	enviar(socketPrueba, mensaje);
+}
+
