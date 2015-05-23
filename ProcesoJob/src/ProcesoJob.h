@@ -17,5 +17,4 @@ void Terminar(int);
 
 void* martaHandler(void*);
 
-
 #endif /* SRC_PROCESOJOB_H_ */
