@@ -31,8 +31,8 @@ typedef struct mensaje
 {
 	int comandoSize;
 	char* comando;
-	long dataSize;
-	char* data;
+	long dataSize; 	//Pongo long xq en un int no entraria el valor
+	char* data;		//correspondiente a 20mb
 } mensaje_t;
 
 mensaje_t* recibir(int socket);
