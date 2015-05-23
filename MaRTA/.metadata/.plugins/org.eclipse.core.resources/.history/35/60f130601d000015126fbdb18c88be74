@@ -1,0 +1,83 @@
+/*
+ * FileStatusCenter.c
+ *
+ *  Created on: 21/5/2015
+ *      Author: utnso
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <commons/collections/dictionary.h>
+
+#define KFilePath "FilePath"
+#define KFileCombinerMode "FileCombinerMode"
+#define KFileParts "FileParts"
+
+typedef enum {	UNINITIALIZED = 0, 	//sin estado
+				IN_MAPPING = 1, 	//se esta mappeando, se espera respuesta del job
+				MAPPED = 2, 		//archivo ya mappeado
+				IN_REDUCING = 3,
+				REDUCED = 4,
+				TEMPORAL_ERROR = 5,//fallo la operacion de map o reduce
+				TOTAL_ERROR = 6  	// fallo la operacion y el FS no tiene otros bloques disponibles para procesar
+} status;
+
+struct PartialFileData
+{
+   char 	 *partialName;
+   char		 *nodo_IP;
+   char		 *temporaryFileName; //el archivo temporal donde se va a guardar el rdo de la rutina, MaRTA asigna este nombre
+   status 	 fileStatus;
+
+} partialFileData;
+
+
+t_dictionary *filesToProcess;
+
+
+
+void initFilesStatusCenter();
+void addNewFilePath(char *fileToProcess_Path,_Bool soportaCombiner);
+
+void initFilesStatusCenter()
+{
+	filesToProcess = dictionary_create();
+}
+
+void addNewJobFilePath(char *fileToProcess_Path,_Bool soportaCombiner)
+{
+	t_dictionary *fileToProcessStatusData = dictionary_create();
+	dictionary_put(fileToProcessStatusData, fileToProcess_Path, KFilePath);
+	dictionary_put(fileToProcessStatusData, soportaCombiner, KFileCombinerMode);
+
+
+	dictionary_put(filesToProcess,fileToProcess_Path,fileToProcessStatusData);
+	//MaRTA y FilesStatusCenter deben compartir un array con los path de los archivos
+}
+
+void removeJobFilePath(char *fileToRemove_Path)
+{
+	dictionary_remove(filesToProcess,fileToRemove_Path);
+}
+
+/////////////////
+
+// aca va la respuesta del FS
+// tiene la info de los bloques y nodos donde esta el archivo a procesar
+
+void addNodoDataForFile(char *filePath,char *fileInfo)//fileInfo es un ptr a array
+{
+	t_dictionary *fileToProcessStatusData = dictionary_get(filesToProcess,filePath);
+
+	char *partialName = fileInfo[0]; //nombre del archivo parcial en el Nodo
+	char *nodo_IP = fileInfo[1];	//IP del Nodo
+
+	struct partialFileData data;
+	dat
+
+	int
+
+}
+
+

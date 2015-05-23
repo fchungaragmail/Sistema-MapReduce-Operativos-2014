@@ -1,0 +1,15 @@
+/*
+ * FileStatusCenter.h
+ *
+ *  Created on: 21/5/2015
+ *      Author: utnso
+ */
+
+#include <stdbool.h>
+#ifndef FILESTATUSCENTER_H_
+#define FILESTATUSCENTER_H_
+
+void initFilesStatusCenter();
+void addNewJobFilePath(char *fileToProcess_Path,_Bool soportaCombiner);
+
+#endif /* FILESTATUSCENTER_H_ */

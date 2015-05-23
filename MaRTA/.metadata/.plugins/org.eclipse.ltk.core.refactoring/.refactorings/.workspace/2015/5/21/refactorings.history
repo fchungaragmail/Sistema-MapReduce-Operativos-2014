@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Delete resource &apos;MaRTA/src/FileStatusCenter&apos;" deleteContents="false" description="Delete resource &apos;MaRTA/src/FileStatusCenter&apos;" element1="/MaRTA/src/FileStatusCenter" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1432251684428"/>
+</session>

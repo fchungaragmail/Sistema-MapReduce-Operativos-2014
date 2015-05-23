@@ -1,0 +1,61 @@
+/*
+ * ConexionCenter.c
+ *
+ *  Created on: 22/5/2015
+ *      Author: utnso
+ */
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <pthread.h>
+#include <commons/txt.h>
+#include <commons/error.h>
+#include <commons/collections/list.h>
+
+
+// * ESTRUCTURAS
+
+struct _sockaddr_in {
+	short int sin_family;  // familia de direcciones, AF_INET
+	unsigned short int sin_port;    // Número de puerto
+	struct in_addr sin_addr;    // Dirección de Internet
+	unsigned char sin_zero[8]; // Relleno para preservar el tamaño original de struct sockaddr
+};
+typedef struct _sockaddr_in Sockaddr_in;
+
+struct _conexion {
+	int sockfd;
+	pthread_t thread;
+	Sockaddr_in sockaddr_in;
+};
+typedef struct _conexion Conexion;
+
+//VARIABLES GLOBALES
+
+int socketFd;
+t_list* listaConexiones;
+pthread_t threadEscucharConexiones;
+
+void initConexiones();
+void listesFS();
+void listenJobs();
+void closeServidores();
+
+void initConexiones()
+{
+}
+void listesFS()
+{
+
+
+}
+void listenJobs
+{
+
+}
+
+void closeServidores()
+{
+
+}

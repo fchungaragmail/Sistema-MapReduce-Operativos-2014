@@ -1,0 +1,11 @@
+/*
+ * FileStatusCenter.c
+ *
+ *  Created on: 21/5/2015
+ *      Author: utnso
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <commons/collections/dictionary.h>

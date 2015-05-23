@@ -1,0 +1,96 @@
+16:57:50 **** Incremental Build of configuration Debug for project MaRTA ****
+make all 
+Building file: ../src/ConexionCenter.c
+Invoking: Cross GCC Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/ConexionCenter.d" -MT"src/ConexionCenter.d" -o "src/ConexionCenter.o" "../src/ConexionCenter.c"
+../src/ConexionCenter.c: In function ‘listenFS’:
+../src/ConexionCenter.c:73:2: warning: implicit declaration of function ‘malloc’ [-Wimplicit-function-declaration]
+  Conexion* conexionNueva = malloc(sizeof(Conexion));
+  ^
+../src/ConexionCenter.c:73:28: warning: incompatible implicit declaration of built-in function ‘malloc’ [enabled by default]
+  Conexion* conexionNueva = malloc(sizeof(Conexion));
+                            ^
+../src/ConexionCenter.c:76:2: warning: passing argument 2 of ‘accept’ from incompatible pointer type [enabled by default]
+  nuevoSocketfd = accept(socketFd_FS, (Sockaddr_in*) &their_addr, &sin_size);
+  ^
+In file included from ../src/ConexionCenter.c:8:0:
+/usr/include/i386-linux-gnu/sys/socket.h:243:12: note: expected ‘struct sockaddr * __restrict__’ but argument is of type ‘struct Sockaddr_in *’
+ extern int accept (int __fd, __SOCKADDR_ARG __addr,
+            ^
+../src/ConexionCenter.c:76:2: warning: pointer targets in passing argument 3 of ‘accept’ differ in signedness [-Wpointer-sign]
+  nuevoSocketfd = accept(socketFd_FS, (Sockaddr_in*) &their_addr, &sin_size);
+  ^
+In file included from ../src/ConexionCenter.c:8:0:
+/usr/include/i386-linux-gnu/sys/socket.h:243:12: note: expected ‘socklen_t * __restrict__’ but argument is of type ‘int *’
+ extern int accept (int __fd, __SOCKADDR_ARG __addr,
+            ^
+../src/ConexionCenter.c:85:20: error: request for member ‘sockfd’ in something not a structure or union
+  recv(conexionNueva.sockfd,buffer, BUFFER_SIZE, 0);
+                    ^
+../src/ConexionCenter.c:86:2: warning: function returns address of local variable [-Wreturn-local-addr]
+  return buffer;
+  ^
+../src/ConexionCenter.c: In function ‘listenJobs’:
+../src/ConexionCenter.c:99:29: warning: incompatible implicit declaration of built-in function ‘malloc’ [enabled by default]
+   Conexion* conexionNueva = malloc(sizeof(Conexion));
+                             ^
+../src/ConexionCenter.c:102:3: warning: passing argument 2 of ‘accept’ from incompatible pointer type [enabled by default]
+   nuevoSocketfd = accept(socketFd_Job, (Sockaddr_in*) &their_addr, &sin_size);
+   ^
+In file included from ../src/ConexionCenter.c:8:0:
+/usr/include/i386-linux-gnu/sys/socket.h:243:12: note: expected ‘struct sockaddr * __restrict__’ but argument is of type ‘struct Sockaddr_in *’
+ extern int accept (int __fd, __SOCKADDR_ARG __addr,
+            ^
+../src/ConexionCenter.c:102:3: warning: pointer targets in passing argument 3 of ‘accept’ differ in signedness [-Wpointer-sign]
+   nuevoSocketfd = accept(socketFd_Job, (Sockaddr_in*) &their_addr, &sin_size);
+   ^
+In file included from ../src/ConexionCenter.c:8:0:
+/usr/include/i386-linux-gnu/sys/socket.h:243:12: note: expected ‘socklen_t * __restrict__’ but argument is of type ‘int *’
+ extern int accept (int __fd, __SOCKADDR_ARG __addr,
+            ^
+../src/ConexionCenter.c:107:38: error: ‘jobHandler’ undeclared (first use in this function)
+   pthread_create(&hiloCliente, NULL, jobHandler,(void*) conexionNueva);
+                                      ^
+../src/ConexionCenter.c:107:38: note: each undeclared identifier is reported only once for each function it appears in
+../src/ConexionCenter.c: In function ‘jobHandler’:
+../src/ConexionCenter.c:121:3: warning: implicit declaration of function ‘BroadCast’ [-Wimplicit-function-declaration]
+   BroadCast(buffer);
+   ^
+../src/ConexionCenter.c: In function ‘closeServidores’:
+../src/ConexionCenter.c:130:2: warning: implicit declaration of function ‘close’ [-Wimplicit-function-declaration]
+  if (close(socketFd_Job) == -1) {
+  ^
+../src/ConexionCenter.c: At top level:
+../src/ConexionCenter.c:138:12: error: static declaration of ‘createSocket’ follows non-static declaration
+ static int createSocket(int puerto,int socketFd)
+            ^
+../src/ConexionCenter.c:53:5: note: previous declaration of ‘createSocket’ was here
+ int createSocket(int puerto,int socketFd);
+     ^
+../src/ConexionCenter.c: In function ‘createSocket’:
+../src/ConexionCenter.c:143:5: warning: implicit declaration of function ‘exit’ [-Wimplicit-function-declaration]
+     exit(-1);
+     ^
+../src/ConexionCenter.c:143:5: warning: incompatible implicit declaration of built-in function ‘exit’ [enabled by default]
+../src/ConexionCenter.c:150:4: warning: implicit declaration of function ‘memset’ [-Wimplicit-function-declaration]
+    memset(&(my_addr.sin_zero), '\0', 8);
+    ^
+../src/ConexionCenter.c:150:4: warning: incompatible implicit declaration of built-in function ‘memset’ [enabled by default]
+../src/ConexionCenter.c:152:4: warning: passing argument 2 of ‘bind’ from incompatible pointer type [enabled by default]
+    if (bind(socketFd, (Sockaddr_in*) &my_addr, sizeof(Sockaddr_in)) == -1) {
+    ^
+In file included from ../src/ConexionCenter.c:8:0:
+/usr/include/i386-linux-gnu/sys/socket.h:123:12: note: expected ‘const struct sockaddr *’ but argument is of type ‘struct Sockaddr_in *’
+ extern int bind (int __fd, __CONST_SOCKADDR_ARG __addr, socklen_t __len)
+            ^
+../src/ConexionCenter.c:155:5: warning: incompatible implicit declaration of built-in function ‘exit’ [enabled by default]
+     exit(-1);
+     ^
+../src/ConexionCenter.c: At top level:
+../src/ConexionCenter.c:138:12: warning: ‘createSocket’ defined but not used [-Wunused-function]
+ static int createSocket(int puerto,int socketFd)
+            ^
+make: *** [src/ConexionCenter.o] Error 1
+
+16:57:50 Build Finished (took 195ms)
+
