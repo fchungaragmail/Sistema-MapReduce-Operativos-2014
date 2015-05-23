@@ -23,3 +23,11 @@ mensaje_t* recibir(int socket){
 
 	return mensaje;
 }
+
+void enviar(int socket, mensaje_t* mensaje)
+{
+	send(socket, mensaje->comandoSize, sizeof(int), 0);
+	send(socket, mensaje->comando, mensaje->comandoSize, 0);
+	send(socket, mensaje->dataSize, sizeof(long), 0);
+	send(socket, mensaje->data, mensaje->dataSize, 0);
+}
