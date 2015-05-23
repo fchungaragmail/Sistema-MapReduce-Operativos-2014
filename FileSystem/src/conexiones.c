@@ -50,10 +50,19 @@ int initConexiones()
 	bind(escuchaMaRTA, (Sockaddr_in*) &miDireccMaRTA, sizeof(Sockaddr_in));
 
 
-	if ((listen(escuchaNodos, NODOS_MAX) == -1) &&
-		(listen(escuchaMaRTA, 1) 		 == -1))
+	if (listen(escuchaNodos, NODOS_MAX) == -1)
 	{
-		log_error(log,"No se pueden escuchar conexiones."
+		log_error(log,"No se pueden escuchar conexiones para Nodos."
+				"El FileSystem se cerrara");
+		return(-1);
+	} else
+	{
+		log_info(log, "Escuchando conexiones.");
+	}
+
+	if (listen(escuchaMaRTA, 1) 		 == -1)
+	{
+		log_error(log,"No se pueden escuchar conexiones para MaRTA."
 				"El FileSystem se cerrara");
 		return(-1);
 	} else
