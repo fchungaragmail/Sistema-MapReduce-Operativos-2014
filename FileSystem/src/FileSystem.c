@@ -20,15 +20,18 @@ void exitFileSystem();
 
 
 int main(void) {
-	pthread_t tConsola, tEscucharConexioes;
+	pthread_t tConsola, tEscucharConexioesInicial, tEscucharConexioes;
 
 	initFileSystem();
 
 	//Hasta que no tenga los nodos suficientes no sigue
-	pthread_create(&tEscucharConexioes, NULL, escucharConexiones, NULL);
-	pthread_join(tEscucharConexioes, NULL);
+	pthread_create(&tEscucharConexioesInicial, NULL, escucharConexiones, LISTA_NODOS);
+	pthread_join(tEscucharConexioesInicial, NULL);
+	log_info(log, "Cantidad minima de nodos (%d) completada.\n", LISTA_NODOS);
 
+	pthread_create(&tEscucharConexioes, NULL, escucharConexiones, -1);
 	pthread_create(&tConsola, NULL, execConsola, NULL);
+
 	pthread_join(tConsola,NULL);
 
 	exitFileSystem();

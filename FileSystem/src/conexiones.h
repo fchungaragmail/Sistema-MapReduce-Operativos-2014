@@ -30,6 +30,7 @@ struct _conexion {
 typedef struct _conexion Conexion;
 
 int initConexiones();
-void escucharConexiones();
+
+void escucharConexiones(int cantNodos); //Si le mandas -1 sigue buscando
 
 #endif /* CONEXIONES_H_ */

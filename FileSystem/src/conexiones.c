@@ -11,7 +11,7 @@
 int nuevasConexiones;
 
 int initConexiones();
-void escucharConexiones();
+void escucharConexiones(int cantNodos);
 
 
 int initConexiones()
@@ -47,14 +47,16 @@ int initConexiones()
 }
 
 
-void escucharConexiones()
+void escucharConexiones(int cantNodos)
 {
 	int nuevoSocketfd;
 	int sin_size = sizeof(Sockaddr_in);
 
-	while (1)
-	{
+	if (cantNodos == -1) cantNodos = 1;
+	int i = 0;
 
+	while ((i < cantNodos) || (cantNodos == -1))
+	{
 		Sockaddr_in their_addr;
 		Conexion* conexionNueva = malloc(sizeof(Conexion));
 
@@ -62,6 +64,7 @@ void escucharConexiones()
 
 		conexionNueva->sockaddr_in = their_addr;
 		conexionNueva->sockfd = nuevoSocketfd;
-		log_info(log, "Conectado con el nodo %s", their_addr.sin_addr);
+		log_info(log, "Conectado con el nodo %s \n", inet_ntoa(their_addr.sin_addr));
+		i++;
 	}
 }
