@@ -1,0 +1,63 @@
+/*
+ ============================================================================
+ Name        : Serialization.c
+ Author      : 
+ Version     :
+ Copyright   : Your copyright notice
+ Description : Hello World in C, Ansi-style
+ ============================================================================
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "SerializationFW.h"
+#include "PackedSerialization.h"
+
+#define MaxDataSize 200
+#define MaxDataSize2 200
+struct SerializedPacket {
+    int senderId;
+    int sequenceNumber;
+    char data[MaxDataSize];
+} __attribute__((packed));
+
+struct No_SerializedPacket {
+    int senderId;
+    int sequenceNumber;
+    char data[MaxDataSize2];
+};
+
+int main(void) {
+
+	struct No_SerializedPacket *n_s;
+	int senderId = 22;
+	int sequenceNumber = 55;
+
+	 struct SerializedPacket *s;
+	    s->senderId = htonl(senderId);
+	    s->sequenceNumber = htonl(sequenceNumber);
+	    memcpy(s->data, this->data, MaxDataSize);
+	    return s;
+
+
+
+	/* prints !!!Hello World!!! */
+	/*
+	Buffer *buf;
+	buf = new_buffer();
+	int a =22;
+	int b =33;
+
+	serialize_int(a,buf);
+	serialize_int(b,buf);
+
+
+
+	puts("!!!Hello World!!!");
+	a=a+5;
+	//printf("la data serializada es %d",(void*)buf->data);
+
+	 */
+	return EXIT_SUCCESS;
+}

@@ -1,0 +1,30 @@
+21:50:06 **** Incremental Build of configuration Debug for project Serialization ****
+make all 
+Building file: ../src/Serialization.c
+Invoking: Cross GCC Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/Serialization.d" -MT"src/Serialization.d" -o "src/Serialization.o" "../src/Serialization.c"
+../src/Serialization.c: In function ‘main’:
+../src/Serialization.c:83:2: warning: implicit declaration of function ‘strcpy’ [-Wimplicit-function-declaration]
+  strcpy(n_s->data,"saraza");
+  ^
+../src/Serialization.c:83:2: warning: incompatible implicit declaration of built-in function ‘strcpy’ [enabled by default]
+../src/Serialization.c:90:2: warning: implicit declaration of function ‘strlen’ [-Wimplicit-function-declaration]
+  s->string = malloc(strlen(n_s->string)+1);
+  ^
+../src/Serialization.c:90:21: warning: incompatible implicit declaration of built-in function ‘strlen’ [enabled by default]
+  s->string = malloc(strlen(n_s->string)+1);
+                     ^
+../src/Serialization.c:94:2: warning: implicit declaration of function ‘memcpy’ [-Wimplicit-function-declaration]
+  memcpy(s->data, n_s->data, MaxDataSize);
+  ^
+../src/Serialization.c:94:2: warning: incompatible implicit declaration of built-in function ‘memcpy’ [enabled by default]
+Finished building: ../src/Serialization.c
+ 
+Building target: Serialization
+Invoking: Cross GCC Linker
+gcc  -o "Serialization"  ./src/PackedSerialization.o ./src/Serialization.o ./src/SerializationFW.o   
+Finished building target: Serialization
+ 
+
+21:50:08 Build Finished (took 1s.413ms)
+

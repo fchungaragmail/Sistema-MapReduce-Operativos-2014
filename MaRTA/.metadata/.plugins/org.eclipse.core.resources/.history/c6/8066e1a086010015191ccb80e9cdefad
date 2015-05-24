@@ -1,0 +1,28 @@
+/*
+ ============================================================================
+ Name        : Serialization.c
+ Author      : 
+ Version     :
+ Copyright   : Your copyright notice
+ Description : Hello World in C, Ansi-style
+ ============================================================================
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "SerializationFW.h"
+
+int main(void) {
+	puts("!!!Hello World!!!"); /* prints !!!Hello World!!! */
+
+	Buffer *buf;
+	int a =22;
+	serialize_int(a,&buf);
+
+	a=a+5;
+	//printf("la data serializada es %d",(void*)buf->data);
+
+
+	return EXIT_SUCCESS;
+}

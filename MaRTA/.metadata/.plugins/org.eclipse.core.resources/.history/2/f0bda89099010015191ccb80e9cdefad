@@ -1,0 +1,82 @@
+/*
+ ============================================================================
+ Name        : Serialization.c
+ Author      : 
+ Version     :
+ Copyright   : Your copyright notice
+ Description : Hello World in C, Ansi-style
+ ============================================================================
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <arpa/inet.h>
+
+#include "SerializationFW.h"
+#include "PackedSerialization.h"
+
+#define MaxDataSize 200
+
+struct SerializedPacket {
+    int senderId;
+    int sequenceNumber;
+    char data[MaxDataSize];
+} __attribute__((packed));
+
+struct No_SerializedPacket {
+    int senderId;
+    int sequenceNumber;
+    char data[MaxDataSize];
+};
+
+int main(void) {
+
+	struct No_SerializedPacket *n_s;
+	n_s=malloc(sizeof(struct No_SerializedPacket));
+	n_s->data = malloc(sizeof(char)*MaxDataSize);
+	n_s->senderId = 22;
+	n_s->sequenceNumber = 55;
+	strcpy(n_s->data,"saraza");
+
+
+	//serializacion
+	struct SerializedPacket *s;
+	s = malloc(sizeof(struct SerializedPacket));
+	s->data = malloc(sizeof(char)*MaxDataSize);
+
+	s->senderId = htonl(n_s->senderId);
+	s->sequenceNumber = htonl(n_s->sequenceNumber);
+	memcpy(s->data, n_s->data, MaxDataSize);
+
+	//deserializacion
+
+	struct No_SerializedPacket *n_s2;
+	n_s2=malloc(sizeof(struct No_SerializedPacket));
+	n_s2->senderId = ntohl(s->senderId);
+	n_s2->sequenceNumber = ntohl(s->sequenceNumber);
+	memcpy(n_s2->data, s->data, MaxDataSize);
+
+	printf("senderId deserializado %d ",n_s2->senderId);
+	printf("sequenceNumber deserializado %d ",n_s2->sequenceNumber);
+	//mirar con el debuger el n_s2->data aparece !!!
+
+
+	/* prints !!!Hello World!!! */
+	/*
+	Buffer *buf;
+	buf = new_buffer();
+	int a =22;
+	int b =33;
+
+	serialize_int(a,buf);
+	serialize_int(b,buf);
+
+
+
+	puts("!!!Hello World!!!");
+	a=a+5;
+	//printf("la data serializada es %d",(void*)buf->data);
+
+	 */
+	return EXIT_SUCCESS;
+}
