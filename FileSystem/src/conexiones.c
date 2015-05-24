@@ -87,7 +87,7 @@ void escucharNodos(int cantNodos)
 		Sockaddr_in their_addr;
 		Conexion_t* conexionNueva = malloc(sizeof(Conexion_t));
 
-		probarConexiones(); //PRUEBA
+		//probarConexiones(); //PRUEBA
 
 		nuevoSocketfd = accept(escuchaNodos, &their_addr, &sin_size);
 
@@ -96,8 +96,8 @@ void escucharNodos(int cantNodos)
 		list_add(conexiones, conexionNueva);
 		FD_SET(nuevoSocketfd, &nodos);
 
-		mensaje_t* mensajeRecibido;
-		mensajeRecibido = recibir(nuevoSocketfd); //PRUEBA
+		//mensaje_t* mensajeRecibido;
+		//mensajeRecibido = recibirNodoFS(nuevoSocketfd); //PRUEBA
 
 		log_info(log, "Conectado con el nodo %s \n", inet_ntoa(their_addr.sin_addr));
 
@@ -158,6 +158,6 @@ void probarConexiones()
 	strcpy(mensaje->data,data);
 	mensaje->dataSize = strlen(mensaje->data);
 
-	enviar(socketPrueba, mensaje);
+	enviarNodoFS(socketPrueba, mensaje);
 }
 

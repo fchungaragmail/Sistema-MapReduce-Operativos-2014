@@ -29,12 +29,13 @@
 
 typedef struct mensaje
 {
-	int comandoSize;
+	int16_t comandoSize;
 	char* comando;
-	long dataSize; 	//Pongo long xq en un int no entraria el valor
-	char* data;		//correspondiente a 20mb
+	int32_t dataSize; 	//Pongo int32_t asi entra el valor correspondiente a 20mb
+	char* data;
 } mensaje_t;
 
-mensaje_t* recibir(int socket);
+mensaje_t* recibirNodoFS(int socket);
+void enviarNodoFS(int socket, mensaje_t* mensaje);
 
 #endif /* COMPARTIDOS_INTERFAZ_NODOFS_H_ */
