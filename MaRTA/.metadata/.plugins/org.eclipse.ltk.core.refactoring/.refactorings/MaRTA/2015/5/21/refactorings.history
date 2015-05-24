@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">&#x0A;<refactoring comment="Rename resource &apos;MaRTA/src/FileStatusCenter.c&apos; to &apos;FilesStatusCenter.c&apos;" description="Rename resource &apos;FileStatusCenter.c&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/FileStatusCenter.c" name="FilesStatusCenter.c" stamp="1432251979336" updateReferences="true"/>&#x0A;<refactoring comment="Rename resource &apos;MaRTA/src/FileStatusCenter.h&apos; to &apos;FilesStatusCenter.h&apos;" description="Rename resource &apos;FileStatusCenter.h&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/FileStatusCenter.h" name="FilesStatusCenter.h" stamp="1432251989295" updateReferences="true"/>
-</session>
