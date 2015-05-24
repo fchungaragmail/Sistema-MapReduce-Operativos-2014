@@ -8,6 +8,9 @@
 #ifndef UTILITIES_H_
 #define UTILITIES_H_
 
+/*
+// ESTRUCTURAS
+*/
 struct _message {
 	int sockfd;
 	int head;
@@ -15,7 +18,13 @@ struct _message {
 };
 typedef struct _message Message;
 
-#define 	HEAD_LENGHT 5
+typedef struct mensaje
+{
+	int comandoSize;
+	char* comando;
+	long dataSize; 	//Pongo long xq en un int no entraria el valor
+	char* data;		//correspondiente a 20mb
+} mensaje_t;
 
 typedef enum
 {
@@ -25,5 +34,11 @@ typedef enum
 	K_JobMessage = 2
 
 }TypesMessages;
+
+/*
+// 	CONSTANTES
+*/
+
+#define 	HEAD_LENGHT 5
 
 #endif /* UTILITIES_H_ */
