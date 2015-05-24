@@ -10,12 +10,16 @@
 
 int escuchaNodos;
 int escuchaMaRTA, MaRTA;
+int desbloquearSelect[2];
 t_list* conexiones;
 fd_set nodos;
+pthread_mutex_t mNodos;
+int nodosCount;
 
 int initConexiones();
-void escucharNodos(int cantNodos);
+void escucharNodos(int nodosMax);
 void escucharMaRTA();
+void leerEntradas();
 void cerrarConexiones();
 void freeConexion(Conexion_t* conexion);
 
@@ -26,6 +30,8 @@ int initConexiones()
 {
 	conexiones = list_create();
 	FD_ZERO(&nodos);
+	pthread_mutex_init(&mNodos, NULL);
+	nodosCount = 0;
 	escuchaNodos = socket(AF_INET, SOCK_STREAM, 0);
 	escuchaMaRTA = socket(AF_INET, SOCK_STREAM, 0);
 	if ((escuchaNodos == -1) && (escuchaMaRTA == -1)){
@@ -36,6 +42,10 @@ int initConexiones()
 		log_info(log, "Los socket para escuchar nuevas conexiones se "
 				"crearon correctamente.");
 	}
+
+	pipe2(desbloquearSelect, O_NONBLOCK);
+	FD_SET(desbloquearSelect[0], &nodos);
+	nodosCount++;
 
 	Sockaddr_in miDireccNodos;
 	miDireccNodos.sin_family = AF_INET;
@@ -74,30 +84,30 @@ int initConexiones()
 }
 
 
-void escucharNodos(int cantNodos)
+void escucharNodos(int nodosMax)
 {
 	int nuevoSocketfd;
 	int sin_size = sizeof(Sockaddr_in);
-
-	if (cantNodos == -1) cantNodos = 1;
 	int i = 0;
 
-	while ((i < cantNodos) || (cantNodos == -1))
+	while ((i < nodosMax) || (nodosMax == -1))
 	{
 		Sockaddr_in their_addr;
 		Conexion_t* conexionNueva = malloc(sizeof(Conexion_t));
 
-		//probarConexiones(); //PRUEBA
+		if (nodosMax == 1) probarConexiones(); //PRUEBA
 
 		nuevoSocketfd = accept(escuchaNodos, &their_addr, &sin_size);
 
 		conexionNueva->sockaddr_in = their_addr;
 		conexionNueva->sockfd = nuevoSocketfd;
 		list_add(conexiones, conexionNueva);
+		pthread_mutex_lock(&mNodos);
 		FD_SET(nuevoSocketfd, &nodos);
+		nodosCount++;
+		pthread_mutex_unlock(&mNodos);
+		write(desbloquearSelect[1], "", 1);
 
-		//mensaje_t* mensajeRecibido;
-		//mensajeRecibido = recibirNodoFS(nuevoSocketfd); //PRUEBA
 
 		log_info(log, "Conectado con el nodo %s \n", inet_ntoa(their_addr.sin_addr));
 
@@ -124,12 +134,48 @@ void escucharMaRTA()
 void cerrarConexiones()
 {
 	list_iterate(conexiones, freeConexion);
+	list_destroy(conexiones);
+	close(desbloquearSelect[0]);
+	close(desbloquearSelect[1]);
 }
 
 void freeConexion(Conexion_t* conexion)
 {
 	close(conexion->sockfd);
 	free(conexion);
+}
+
+
+void leerEntradas()
+{
+	while (1)
+	{
+		fd_set nodosSelect;
+		int nodosCountSelect;
+		pthread_mutex_lock(&mNodos);
+		nodosSelect = nodos;
+		nodosCountSelect = nodosCount;
+		pthread_mutex_unlock(&mNodos);
+		select(1024, &nodosSelect, NULL, NULL, NULL);
+
+		if (FD_ISSET(desbloquearSelect[0], &nodosSelect))
+		{
+			char* dummy = malloc(1);
+			read(desbloquearSelect[0], dummy, 1);
+			free(dummy);
+		}
+
+
+		for (int i=0; i<conexiones->elements_count ;i++)
+		{
+			Conexion_t* conexion = list_get(conexiones,i);
+			if (!FD_ISSET(conexion->sockfd,&nodosSelect)) continue;
+
+			mensaje_t* mensajeRecibido;
+			mensajeRecibido = recibirNodoFS(conexion->sockfd);
+			log_info(log, "%s", mensajeRecibido->comando);
+		}
+	}
 }
 
 
