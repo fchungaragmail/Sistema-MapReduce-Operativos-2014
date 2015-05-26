@@ -5,8 +5,8 @@
  *      Author: utnso
  */
 
-#ifndef COMPARTIDOS_INTERFAZ_NODOFS_H_
-#define COMPARTIDOS_INTERFAZ_NODOFS_H_
+#ifndef COMPARTIDOS_PROTOCOLO_H_
+#define COMPARTIDOS_PROTOCOLO_H_
 
 //El FileSystem u otro proceso Nodo podrán solicitar las siguientes operaciones:
 
@@ -35,7 +35,7 @@ typedef struct mensaje
 	char* data;
 } mensaje_t;
 
-mensaje_t* recibirNodoFS(int socket);
-void enviarNodoFS(int socket, mensaje_t* mensaje);
+mensaje_t* recibir(int socket);
+void enviar(int socket, mensaje_t* mensaje);
 
-#endif /* COMPARTIDOS_INTERFAZ_NODOFS_H_ */
+#endif /* COMPARTIDOS_PROTOCOLO_H_ */

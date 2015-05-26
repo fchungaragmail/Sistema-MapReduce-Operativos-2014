@@ -5,13 +5,13 @@
  *      Author: utnso
  */
 
-#include "interfaz-NodoFS.h"
+#include <protocolo.h>
 
 
-mensaje_t* recibirNodoFS(int socket);
-void enviarNodoFS(int socket, mensaje_t* mensaje);
+mensaje_t* recibir(int socket);
+void enviar(int socket, mensaje_t* mensaje);
 
-mensaje_t* recibirNodoFS(int socket){
+mensaje_t* recibir(int socket){
 	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
 
 	recv(socket, &(mensaje->comandoSize), sizeof(int16_t),0);
@@ -25,7 +25,7 @@ mensaje_t* recibirNodoFS(int socket){
 	return mensaje;
 }
 
-void enviarNodoFS(int socket, mensaje_t* mensaje)
+void enviar(int socket, mensaje_t* mensaje)
 {
 	send(socket, &(mensaje->comandoSize), sizeof(int16_t), 0);
 	send(socket, mensaje->comando, mensaje->comandoSize, 0);
