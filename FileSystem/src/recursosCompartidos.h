@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include <commons/collections/list.h>
 #include <commons/config.h>
 #include <commons/log.h>

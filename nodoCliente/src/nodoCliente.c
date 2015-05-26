@@ -12,31 +12,50 @@
 #include <pthread.h>
 
 
-#define PORT 8000
+#define PORT 9000
+#define MESSAGE_LENGTH 256
+
 
 int main() {
 
+	int socketFD;
+	struct sockaddr_in my_addr;
+	char buffer[MESSAGE_LENGTH];
 
-	int socketCli;
-	struct sockaddr_in dir;
-	socklen_t dirsize;
-	char bufferRecive[200];
 
-	dir.sin_family = AF_INET;
-	dir.sin_port = htons(PORT);
-	dir.sin_addr.s_addr = inet_addr("127.0.0.1");
+//Obtengo FD del socket
+	socketFD = socket(AF_INET, SOCK_STREAM, 0);
+	if (socketFD == -1) {
+		printf("Fallo en crear el socket\n");
+	} else {
+		printf("Socket creado correctamente\n");
+	}
 
-	dirsize = sizeof(struct sockaddr);
 
-	socketCli = socket(AF_INET, SOCK_STREAM, 0);
+	my_addr.sin_family = AF_INET;
+	my_addr.sin_port = htons(PORT);
+	my_addr.sin_addr.s_addr = INADDR_ANY;
+	bzero(&(my_addr.sin_zero), 8);
 
-	connect(socketCli, &dir, &dirsize);
 
-	recv(socketCli, bufferRecive, 140, 0);
+//Solicito conexión
+	if (connect(socketFD, (struct sockaddr*) &my_addr, sizeof(my_addr)) == -1) {
+		printf("Fallo en establecer conexión\n");
+	} else {
+		printf("Conexión establecida...\n");
+	}
+
+
+//Espero por recibir mensaje
+	recv(socketFD, buffer, MESSAGE_LENGTH, 0);
+
+	printf("%s", buffer);
+
+	close(socketFD);
+
 
 
 
 
 	return 0;
 }
-

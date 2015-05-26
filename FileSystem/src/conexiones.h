@@ -15,13 +15,15 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include "interfaz-NodoFS.h"
 
 #define NODOS_MAX 20
 
 int initConexiones();
-void escucharNodos(int cantNodos); //Si le mandas -1 sigue buscando
+void escucharNodos(int nodosMax); //Si le mandas -1 sigue buscando
 void escucharMaRTA();
+void leerEntradas();
 void cerrarConexiones();
 
 void probarConexiones();

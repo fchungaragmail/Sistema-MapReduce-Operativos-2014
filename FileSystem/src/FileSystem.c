@@ -10,7 +10,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
 #include "consola.h"
 #include "conexiones.h"
 #include "recursosCompartidos.h"
@@ -20,20 +19,20 @@ void exitFileSystem();
 
 
 int main(void) {
-	pthread_t tConsola, tEscucharConexioesInicial, tEscucharConexioes,
-			  tConectarMaRTA;
+	pthread_t tConsola, tEscucharConexionesInicial, tEscucharConexioes,
+			  tConectarMaRTA, tLeerEntradas;
 
 	initFileSystem();
 
 	pthread_create(&tConsola, NULL, execConsola, NULL);
-	//Hasta que no tenga los nodos suficientes no sigue
-	pthread_create(&tEscucharConexioesInicial, NULL, escucharNodos, LISTA_NODOS);
-	pthread_join(tEscucharConexioesInicial, NULL);
 
+	//Hasta que no tenga los nodos suficientes no sigue
+	pthread_create(&tEscucharConexionesInicial, NULL, escucharNodos, LISTA_NODOS);
+	pthread_join(tEscucharConexionesInicial, NULL);
+	pthread_create(&tLeerEntradas, NULL, leerEntradas, NULL);
 
 	pthread_create(&tConectarMaRTA, NULL, escucharMaRTA, NULL);
 	pthread_create(&tEscucharConexioes, NULL, escucharNodos, -1);
-
 
 	pthread_join(tConsola,NULL);
 

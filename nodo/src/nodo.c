@@ -10,89 +10,86 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <stdlib.h>
 
-#define PORT 7500
-#define MSJ_LENGTH 256
 
-void* conectionHandler(void*);
+#define PORT 8000
+#define BACKLOG 5
+#define MESSAGE_LENGTH 256
+
 
 int main() {
 
-	int conectionListener;
-	int comunicationSocket;
-	int *auxSocket;
-	socklen_t length;
-	struct sockaddr_in sock_in, sock_out;
+	int sockListener;
+	int sockAccept;
+	socklen_t size;
+	struct sockaddr_in my_sock;
+	struct sockaddr_in client_sock;
+	pthread_t listener_thread;  //este hilo se va a encargar de escuchar
+	pthread_t comunication_thread; //este hilo acepta y se comunica
+	char buffer[MESSAGE_LENGTH];
 
+//Establezo datos de estructura de my_sock
+	my_sock.sin_family = AF_INET;
+	inet_aton("127.0.0.1", &my_sock.sin_addr);
+	my_sock.sin_port = htons(PORT);
+	bzero(&(my_sock.sin_zero), 8);
 
-	sock_in.sin_family = AF_INET;
-	sock_in.sin_port = htons(PORT);
-	sock_in.sin_addr.s_addr = htonl(INADDR_ANY);
-
-	conectionListener = socket(AF_INET, SOCK_STREAM, 0);
-
-	if (conectionListener == -1) {
-		printf("Fallo en creación de socket \n");
+//Creo socket que va a escuchar en la IP establecida anteriormente, en este caso en cualquiera
+	sockListener = socket(AF_INET, SOCK_STREAM, 0);
+	if (sockListener == -1) {
+		printf("Fallo al crear el socket\n");
 		return -1;
 	} else {
-		printf("Socket creado con exito...\n");
+		printf("Socket creado con exito\n");
 	}
 
-
-	if (bind(conectionListener, (struct sockaddr*) &sock_in, sizeof(struct sockaddr)) < 0) {
-		printf("No se pudo hacer Bind...\n");
+//Enlazo el socket al puerto para que escuche por ese puerto en la IP que haya quedado definida
+	if (bind(sockListener, (struct sockaddr*) &my_sock, sizeof(my_sock)) < 0) {
+		printf("Fallo al hacer el bind\n");
+		close(sockListener);
 		return -1;
 	} else {
-		printf("Bind exitoso...\n");
+		printf("Bind hecho exitosamente\n");
 	}
 
-
-	//escucho conecciones entrantes, hasta 2 a la vez, verifico que sea menor o igual a 2 la cant de conecciones
-	if (listen(conectionListener, 2) == -1) {
-		printf("Sobrecarga del servidor \n");
+//Pongo a escuchar al socket, hasta un maximo de 10 msj
+	if (listen(sockListener, 2) == -1) {
+		printf("Sobrecarga de servidor\n");
+		close(sockListener);
 		return -1;
 	} else {
-		printf("Escuchando conecciones\n");
+		printf("Escuchando conexiones...\n");
 	}
 
-	length = sizeof(struct sockaddr);
 
-	//acepto conecciones
-	comunicationSocket = accept(conectionListener, (struct sockaddr*) &sock_out, &length);
-	if (comunicationSocket != 1) {
-		printf("No se puede aceptar conección\n");
+	size = sizeof(struct sockaddr_in);
+
+//Acepto conexiones
+	sockAccept = accept(sockListener, (struct sockaddr*) &client_sock, &size);
+	if (sockAccept != 1) {
+		printf("No se pudo aceptar conexión\n");
+		close(sockListener);
+		close(sockAccept);
+		return -1;
 	}
 
-	while (comunicationSocket) {
+//Obtengo la IP del cliente que se conectó
+	printf("Se obtuvo una conexión desde: %s\n", inet_ntoa(client_sock.sin_addr));
 
-		printf("Conección aceptada\n");
+//Envio mensaje al cliente
+	strcpy(buffer, "Bienvenido al servidor que sirve\n");
+	send(sockAccept, &buffer, MESSAGE_LENGTH, 0);
 
-		pthread_t conectionThread;
-		auxSocket = malloc(sizeof(comunicationSocket));
-		*auxSocket = comunicationSocket;
+	close(sockAccept);
 
-		pthread_create(&conectionThread, NULL, conectionHandler, (void*) &auxSocket );
 
-		pthread_join(conectionThread, NULL);
 
-	}
+
+
+
+
+
 
 	return 0;
-
-}
-
-
-void* conectionHandler(void* sockAux) {
-
-	int sock = * (int*) sockAux;
-	char* message;
-
-	message = "Hello client, I'm your server";
-
-	write(sock, message, sizeof(message));
-
-	close(sock);
-
 }
 
