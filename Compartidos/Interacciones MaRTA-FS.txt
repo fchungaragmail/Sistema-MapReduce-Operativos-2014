@@ -1,0 +1,8 @@
+Agregar todas las interacciones entre los procesos
+
+Luego de conectarse con MaRTA, el FS espera el siguiente mensaje:
+-Comando: "soy MaRTA"
+-Data: Vacio
+
+Si no se envia esto, el FS no puede identificar a MaRta, ya que los nodos
+tambien se conectan por el mismo puerto

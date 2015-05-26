@@ -1,0 +1,5 @@
+Agregar todas las interacciones entre los procesos
+
+Luego de conectarse con un nodo, el FS espera el siguiente mensaje:
+-Comando: "soy NombreDelNodo"
+-Data: Vacio
