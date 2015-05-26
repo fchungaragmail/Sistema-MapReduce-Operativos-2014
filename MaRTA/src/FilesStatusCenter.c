@@ -7,23 +7,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <commons/collections/dictionary.h>
+#include "Utilities.h"
 
 #define KFilePath "FilePath"
 #define KFileCombinerMode "FileCombinerMode"
 #define KFilePartsData "FileParts"
 #define KPartsCount "PartsCount"
-
-typedef enum {
-				UNINITIALIZED = 0, 	//sin estado
-				IN_MAPPING = 1, 	//se esta mappeando, se espera respuesta del job
-				MAPPED = 2, 		//archivo ya mappeado
-				IN_REDUCING = 3,
-				REDUCED = 4,
-				TEMPORAL_ERROR = 5,//fallo la operacion de map o reduce
-				TOTAL_ERROR = 6  	// fallo la operacion y el FS no tiene otros bloques disponibles para procesar
-} status;
 
 typedef struct partialFileData
 {
@@ -35,98 +27,107 @@ typedef struct partialFileData
 } t_partialFileData;
 
 t_dictionary *filesToProcess;
+t_dictionary *filesStates;
 
+int fs_socket; //socket del FS
+
+// Inicializar
 void initFilesStatusCenter();
-void addNewFilePath(char *fileToProcess_Path,_Bool soportaCombiner);
-void removeJobFilePath(char *fileToRemove_Path);
-//////////////////
-void addNodoDataForFile(char *filePath,t_dictionary *fileInfo);
-void updateNodoLocationForPartialFile(char *filePath,char *partialFile, char *nodo_IP_update);
+// Agregar nuevas conexiones
+void addFSConnection(int fs_socket);
+void addNewConnection(int socket);
+// Varias
+void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);
+void addFileFullData(int sckt, char* path, t_dictionary *fullData);
+void changeFileBlockState(char* path,int nroBloque,status nuevoEstado);
 
 void initFilesStatusCenter()
 {
 	filesToProcess = dictionary_create();
+	filesStates = dictionary_create();
+	fs_socket=-1;
 }
 
-void addNewJobFilePath(char *fileToProcess_Path,_Bool *soportaCombiner)
+void addFSConnection(int fs_sckt)
 {
-	t_dictionary *fileToProcessStatusData = dictionary_create();
-	dictionary_put(fileToProcessStatusData, KFilePath, fileToProcess_Path);
-	dictionary_put(fileToProcessStatusData, KFileCombinerMode,soportaCombiner);
-
-	dictionary_put(filesToProcess,fileToProcess_Path,fileToProcessStatusData);
-	//MaRTA y FilesStatusCenter deben compartir un array con los path de los archivos
+		fs_socket = fs_sckt;
 }
-
-void removeJobFilePath(char *fileToRemove_Path)
+void addNewConnection(int jobSocket)
 {
-	dictionary_remove(filesToProcess,fileToRemove_Path);
+	char* skct_key = intToCharPtr(jobSocket);//VER COMO FUNCA ESTA FC
+	t_dictionary *file_StatusData = dictionary_create();
+	dictionary_put(filesToProcess, skct_key, file_StatusData);
+	free(skct_key);
 }
 
-/////////////////
+void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket)
+{
+	char* dic_key = intToCharPtr(jobSocket);//VER COMO FUNCA ESTA FC
+	t_dictionary *file_StatusData = dictionary_get(filesToProcess,dic_key);
 
-// aca va la respuesta del FS
-// tiene la info de los bloques y nodos donde esta el archivo a procesar
+	dictionary_put(file_StatusData,KFileCombinerMode,soportaCombiner);
+	dictionary_put(file_StatusData,KFilePath,file_Path);
+	free(file_Path);
+	free(soportaCombiner);
+}
 
-void addNodoDataForFile(char *filePath,t_dictionary *fileInfo)//fileInfo es un dic con 2 claves
-																//1er clave es el nro de elementos
-{																//2da clave el array con los elementos
+void addFileFullData(int sckt, char* path, t_dictionary *fullData)
+{	// aca va la respuesta del FS
+	// tiene la info de los bloques y nodos donde esta el archivo a procesar
 
-	t_dictionary *fileToProcessStatusData = dictionary_get(filesToProcess,filePath);
+	char *key = intToCharPtr(sckt);//VER COMO FUNCA ESTA FC
+	t_dictionary *file_StatusData = dictionary_get(filesToProcess,key);
 
-	int elementsCount = dictionary_get(fileInfo,"KElementsCount");
-	void *array = dictionary_get(fileInfo,"KElementsArray");//cada 2 posiciones tengo nodoIP y nombreParcial
+	int size = dictionary_get(fullData,"KCantidadDeBloques");
+	dictionary_put(file_StatusData,"KCantidadDeBloques",size);
 
-	dictionary_put(fileToProcessStatusData,KPartsCount,elementsCount);
+	t_dictionary *fileData = dictionary_get(fullData,"KFileData");
+	dictionary_put(file_StatusData,"KFileData",fileData);
 
-	t_partialFileData partsInfo[elementsCount]; //array lleno de partialFileData, N es length->filePath
-/*
-	int i=0;
-	while(elementsCount>i){
+	//Construyo un "fileState"
+	int intSize = charPtrToInt(size);
+	t_dictionary *blocksStatesArray[intSize];
+	int i;
+	for(i=0;i<intSize;intSize++){
 
-		t_dictionary *partialFileData = *(t_dictionary *)array[i];
-		void *nodo_IP = dictionary_get(partialFileData,"KNodo_IP");
-		char *partialName = dictionary_get(partialFileData,"KPartialName"); //nombre del archivo parcial en el Nodo
-
-		t_partialFileData *data;
-		data = malloc(sizeof(t_partialFileData));
-		strcpy(&data->nodo_IP,*nodo_IP);
-		strcpy(&data->partialName,*partialName);
-		strcpy(&data->temporaryFileName,"-1");
-		(*data).fileStatus=UNINITIALIZED;
-
-		partsInfo[i]=data;
-		i++;
+		t_dictionary *blockState = dictionary_create();
+		dictionary_put(blockState,"State",UNINITIALIZED);
+		dictionary_put(blockState,"NodoNumber",UNINITIALIZED);
+		dictionary_put(blockState,"BlockNumber",UNINITIALIZED);
+		blocksStatesArray[i]=blockState;
+		free(blockState);
 	}
-*/
-	dictionary_put(fileToProcessStatusData,KFilePartsData,partsInfo);
 
+	//Agrego "filesState" a "filesStates"
+	t_dictionary *fileState = dictionary_create();
+	dictionary_put(fileState,"array",blocksStatesArray);
+	dictionary_put(fileState,"size",size);
+	dictionary_put(filesStates,path,fileState);
 
+	free(path);
+	free(fullData);
+	free(fileState);
+	free(key);
+	free(size);
+	free(fileData);
+	free(blocksStatesArray);
 }
 
-void updateNodoLocationForPartialFile(char *filePath,char *partialFile, char *nodo_IP_update)
-//en el caso de que la rutina falle y le pida al FS otra ubicacion de ese arch. parcial
-{
-/*
-	t_dictionary *fileToProcessStatusData = dictionary_get(filesToProcess,filePath);
-	int elementsCount = dictionary_get(fileToProcessStatusData,KPartsCount);
+void changeFileBlockState(char *path,int nroBloque,status nuevoEstado)
+{	//ESTO LO HAGO EN MI ESTRUCTURA "filesStates"
+	//VER SI ES nroBloque o (nroBloque-1)!!!!!
 
-	t_partialFileData partsInfo[elementsCount];
-	partsInfo = dictionary_get(fileToProcessStatusData,KFilePartsData);
+	t_dictionary *fileState = dictionary_get(filesStates,path);
+	int size = dictionary_get(fileState,"size");
+	t_dictionary *array[size];
+	array = dictionary_get(fileState,"array");
 
-	int i=0;
-	while(i<elementsCount)//busco el partial element por su PartialName y le cambio el Nodo_IP
-	{
-		t_partialFileData *data;
-		data = malloc(sizeof(t_partialFileData));
-		data = partsInfo[i];
+	t_dictionary *blockState = dictionary_create();
+	blockState = array[nroBloque];
+	dictionary_put(blockState,"State",nuevoEstado);
 
-		if(!strcmp((*data).partialName,partialFile)){
-			strcpy(&data->nodo_IP,*nodo_IP_update);
-			return;
-		}
-		i++;
-
-	}
-*/
+	free(path);
+	free(blockState);
+	free(fileState);
+	free(array);
 }

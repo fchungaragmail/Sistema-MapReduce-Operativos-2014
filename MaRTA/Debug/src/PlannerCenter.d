@@ -1,3 +1,6 @@
-src/PlannerCenter.d: ../src/PlannerCenter.c ../src/Utilities.h
+src/PlannerCenter.d: ../src/PlannerCenter.c ../src/FilesStatusCenter.h \
+ ../src/Utilities.h
+
+../src/FilesStatusCenter.h:
 
 ../src/Utilities.h:

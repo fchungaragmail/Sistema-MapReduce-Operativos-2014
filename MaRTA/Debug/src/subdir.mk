@@ -7,19 +7,22 @@ C_SRCS += \
 ../src/ConexionCenter.c \
 ../src/FilesStatusCenter.c \
 ../src/MaRTA.c \
-../src/PlannerCenter.c 
+../src/PlannerCenter.c \
+../src/Utilities.c 
 
 OBJS += \
 ./src/ConexionCenter.o \
 ./src/FilesStatusCenter.o \
 ./src/MaRTA.o \
-./src/PlannerCenter.o 
+./src/PlannerCenter.o \
+./src/Utilities.o 
 
 C_DEPS += \
 ./src/ConexionCenter.d \
 ./src/FilesStatusCenter.d \
 ./src/MaRTA.d \
-./src/PlannerCenter.d 
+./src/PlannerCenter.d \
+./src/Utilities.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

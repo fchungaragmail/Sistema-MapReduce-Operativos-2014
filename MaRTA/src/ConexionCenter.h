@@ -14,6 +14,7 @@
 t_list* listaConexiones;
 
 void initConexiones();
+int connectToFS();
 void closeServidores();
 Message* listenConnections();
 

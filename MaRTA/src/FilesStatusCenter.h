@@ -9,14 +9,19 @@
 #ifndef FILESTATUSCENTER_H_
 #define FILESTATUSCENTER_H_
 
+#include "Utilities.h"
 #include <commons/collections/dictionary.h>
 
+// Inicializar
 void initFilesStatusCenter();
-////////////////// Para usar con Job
-void addNewJobFilePath(char *fileToProcess_Path,_Bool soportaCombiner);
-void removeJobFilePath(char *fileToRemove_Path);
-////////////////// Para usar con FS
-void addNodoDataForFile(char *filePath,t_dictionary *fileInfo);
-void updateNodoLocationForPartialFile(char *filePath,char *partialFile, char *nodo_IP_update);
+
+// Agregar nuevas conexiones
+void addFSConnection(int fs_socket);
+void addNewConnection(int socket);
+
+// Varias
+void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);
+void addFileFullData(int sckt, char* path, t_dictionary *fullData);
+void changeFileBlockState(char* path,int nroBloque,status nuevoEstado);
 
 #endif /* FILESTATUSCENTER_H_ */

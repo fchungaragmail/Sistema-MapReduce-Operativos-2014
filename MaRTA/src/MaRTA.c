@@ -15,7 +15,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
+#include <commons/collections/dictionary.h>
 #include "FilesStatusCenter.h"
 #include "ConexionCenter.h"
 #include "PlannerCenter.h"
@@ -31,7 +31,7 @@ void* listenConecctions(void* arg);
 //JUAN
 void* probarConexiones(void* arg);
 void enviar(int socket, mensaje_t* mensaje);
-mensaje_t* recibir(int socket);
+
 //JUAN
 struct _sockaddr_in {
 	short int sin_family;  // familia de direcciones, AF_INET
@@ -45,28 +45,34 @@ int main(void) {
 
 	puts("MaRTA al ataque !!!");
 
+	//init MaRTA
 	pthread_t connectionThread;
+	//pthread_t connectToFSThread;
 	recvMessage=malloc(sizeof(Message));
 
 	sem_init(&escucharConexiones, 0, 1);
 	sem_init(&leerConexiones, 0, 0);
 
-	pthread_create(&connectionThread, NULL, listenConecctions,NULL);
 	initFilesStatusCenter();
 
-	sleep(4);
+	pthread_create(&connectionThread, NULL, listenConecctions,NULL);
+	//pthread_create(&connectToFSThread, NULL,connectToFileSystem,NULL);
+
+
+	sleep(2);
 	printf("salio del sleep\n");
 	pthread_t hiloPrueba;
+	pthread_create(&hiloPrueba, NULL, probarConexiones,"hilo_1");
+	/*
 	int t=0;
-	while (t<5){
+	while (t<4){
+		sleep(0.5);
 		if(t==1){pthread_create(&hiloPrueba, NULL, probarConexiones,"hilo_1");};
 		if(t==2){pthread_create(&hiloPrueba, NULL, probarConexiones,"hilo_2");};
 		if(t==3){pthread_create(&hiloPrueba, NULL, probarConexiones,"hilo_3");};
-		if(t==4){pthread_create(&hiloPrueba, NULL, probarConexiones,"hilo_4");};
-		if(t==5){pthread_create(&hiloPrueba, NULL, probarConexiones,"hilo_5");};
 		t++;
 	}
-
+*/
 	while(1)
 	{
 		printf("MaRTA : esta esperando en el while principal\n");
@@ -108,28 +114,38 @@ void* listenConecctions(void *arg)
 	pthread_exit(NULL);
 }
 
+void* connectToFileSystem(void *arg)
+{
+	int fileSystemSocket = connectToFS();
+	addFSConnection(fileSystemSocket);
+	pthread_exit(NULL);
+}
 
 // JUAN
 #define IP_LISTEN "127.0.0.1"
-#define PUERTO 6704
 
 void* probarConexiones(void* arg)
 {
 	char *str= (char*) arg;
 
-	//printf ("entro a PROBAR CONEXIONES !\n");
+	printf ("MaRTA-hilo : entro a PROBAR CONEXIONES !\n");
 	int socketPrueba;
 	struct sockaddr_in their_addr;
 
 	socketPrueba = socket(AF_INET, SOCK_STREAM, 0);
 
 	their_addr.sin_family = AF_INET;
-	their_addr.sin_port = htons(PUERTO);
+	their_addr.sin_port = htons(K_PUERTO_LOCAL);
 	inet_aton(IP_LISTEN, &(their_addr.sin_addr));
 	memset(&(their_addr.sin_zero), '\o', 8);
 
-	connect(socketPrueba, &their_addr, sizeof(Sockaddr_in));
-	//printf("probarConexiones : conectado \n");
+	if(connect(socketPrueba, &their_addr, sizeof(Sockaddr_in))<0)
+	{
+		printf("MaRTA-hilo : CONECCTION FAILED\n");
+		pthread_exit(NULL);
+	}
+	printf("MaRTA-hilo : CONNECTION SUCCESS \n");
+
 	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
 	char comando[] = "este es el comando que voy a mandar";
 	mensaje->comando = malloc(strlen(comando));
@@ -142,8 +158,8 @@ void* probarConexiones(void* arg)
 	mensaje->dataSize = strlen(mensaje->data);
 
 	int f=0;
-	while(f<10){
-		//printf("probarConexiones - %s - va a mandar el msj \n",str);
+	while(f<20){
+		printf("probarConexiones - %s - va a mandar el msj \n",str);
 		enviar(socketPrueba, mensaje);
 		f++;
 	}
@@ -153,23 +169,9 @@ void* probarConexiones(void* arg)
 
 void enviar(int socket, mensaje_t* mensaje)
 {
-	send(socket, &(mensaje->comandoSize), sizeof(int), 0);
-	send(socket, mensaje->comando, mensaje->comandoSize, 0);
-	send(socket, &(mensaje->dataSize), sizeof(long), 0);
-	send(socket, mensaje->data, mensaje->dataSize, 0);
+	if(send(socket, &(mensaje->comandoSize), sizeof(int), 0)<0){printf("ERROR EN EL SEND");};
+	if(send(socket, mensaje->comando, mensaje->comandoSize, 0)<0){printf("ERROR EN EL SEND");};
+	if(send(socket, &(mensaje->dataSize), sizeof(long), 0)<0){printf("ERROR EN EL SEND");};
+	if(send(socket, mensaje->data, mensaje->dataSize, 0)<0){printf("ERROR EN EL SEND");};
 }
 
-mensaje_t* recibir(int socket){
-
-	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
-
-	recv(socket, &(mensaje->comandoSize), sizeof(int),0);
-	mensaje->comando = malloc(mensaje->comandoSize);
-	recv(socket, mensaje->comando, mensaje->comandoSize,0);
-
-	recv(socket, &(mensaje->dataSize), sizeof(long),0);
-	mensaje->data = malloc(mensaje->dataSize);
-	recv(socket, mensaje->data, mensaje->dataSize,0);
-
-	return mensaje;
-}
