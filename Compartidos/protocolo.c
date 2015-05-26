@@ -16,11 +16,13 @@ mensaje_t* recibir(int socket){
 
 	recv(socket, &(mensaje->comandoSize), sizeof(int16_t),0);
 	mensaje->comando = malloc(mensaje->comandoSize);
-	recv(socket, mensaje->comando, mensaje->comandoSize,0);
+	if (mensaje->comandoSize != 0)
+		recv(socket, mensaje->comando, mensaje->comandoSize,0);
 
 	recv(socket, &(mensaje->dataSize), sizeof(int32_t),0);
 	mensaje->data = malloc(mensaje->dataSize);
-	recv(socket, mensaje->data, mensaje->dataSize,0);
+	if (mensaje->dataSize != 0)
+		recv(socket, mensaje->data, mensaje->dataSize,0);
 
 	return mensaje;
 }
