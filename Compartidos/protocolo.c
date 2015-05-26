@@ -8,13 +8,16 @@
 #include <protocolo.h>
 
 
-mensaje_t* recibir(int socket);
+int recibir(int socket, mensaje_t* mensaje);
 void enviar(int socket, mensaje_t* mensaje);
 
-mensaje_t* recibir(int socket){
-	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
+int recibir(int socket, mensaje_t* mensaje){
 
-	recv(socket, &(mensaje->comandoSize), sizeof(int16_t),0);
+	int primerRecv = 0;
+
+	primerRecv = recv(socket, &(mensaje->comandoSize), sizeof(int16_t),0);
+	if (primerRecv == 0) return DESCONECTADO;
+
 	mensaje->comando = malloc(mensaje->comandoSize);
 	if (mensaje->comandoSize != 0)
 		recv(socket, mensaje->comando, mensaje->comandoSize,0);
@@ -24,7 +27,7 @@ mensaje_t* recibir(int socket){
 	if (mensaje->dataSize != 0)
 		recv(socket, mensaje->data, mensaje->dataSize,0);
 
-	return mensaje;
+	return CONECTADO;
 }
 
 void enviar(int socket, mensaje_t* mensaje)

@@ -35,7 +35,12 @@ typedef struct mensaje
 	char* data;
 } mensaje_t;
 
-mensaje_t* recibir(int socket);
+
+#define CONECTADO 0
+#define DESCONECTADO -1
+
+//Es necesario que el malloc para mensaje ya este hecho
+int recibir(int socket, mensaje_t* mensaje);
 void enviar(int socket, mensaje_t* mensaje);
 
 #endif /* COMPARTIDOS_PROTOCOLO_H_ */
