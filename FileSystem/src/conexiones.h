@@ -39,7 +39,7 @@ typedef struct _sockaddr_in Sockaddr_in;
 
 struct _conexion {
 	int sockfd;
-	Sockaddr_in sockaddr_in;
+	char nombre[20];
 };
 typedef struct _conexion Conexion_t;
 

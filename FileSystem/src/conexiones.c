@@ -21,6 +21,7 @@ void escucharNodos(int nodosMax);
 void escucharMaRTA();
 void leerEntradas();
 void cerrarConexiones();
+bool desconectado (Conexion_t* conexion);
 void freeConexion(Conexion_t* conexion);
 
 void probarConexiones();
@@ -99,7 +100,7 @@ void escucharNodos(int nodosMax)
 
 		nuevoSocketfd = accept(escuchaNodos, &their_addr, &sin_size);
 
-		conexionNueva->sockaddr_in = their_addr;
+		strcpy(conexionNueva->nombre, "NombreGenerico");
 		conexionNueva->sockfd = nuevoSocketfd;
 		list_add(conexiones, conexionNueva);
 		pthread_mutex_lock(&mNodos);
@@ -125,7 +126,6 @@ void escucharMaRTA()
 
 	MaRTA = accept(escuchaMaRTA, (Sockaddr_in*) &their_addr, &sin_size);
 
-	conexionNueva->sockaddr_in = their_addr;
 	conexionNueva->sockfd = MaRTA;
 	log_info(log, "Conectado con MaRTA (%s) \n", inet_ntoa(their_addr.sin_addr));
 }
@@ -170,7 +170,11 @@ void leerEntradas()
 		for (int i=0; i<conexiones->elements_count ;i++)
 		{
 			Conexion_t* conexion = list_get(conexiones,i);
-			if (!FD_ISSET(conexion->sockfd,&nodosSelect)) continue;
+			if (!FD_ISSET(conexion->sockfd,&nodosSelect))
+				continue;
+
+			if (desconectado(conexion))
+				continue;
 
 			mensaje_t* mensajeRecibido;
 			mensajeRecibido = recibir(conexion->sockfd);
@@ -178,6 +182,24 @@ void leerEntradas()
 
 		}
 	}
+}
+
+bool desconectado (Conexion_t* conexion)
+{
+
+	int error = 0;
+	socklen_t len = sizeof (error);
+	int retval = getsockopt(conexion->sockfd, SOL_SOCKET, SO_ERROR, &error, &len );
+
+	if (retval == 0)
+	{
+		log_info(log, "Desconectado del nodo %s\n", conexion->nombre);
+		pthread_mutex_lock(&mNodos);
+		FD_CLR(conexion->sockfd, &nodos);
+		pthread_mutex_unlock(&mNodos);
+		close(conexion->sockfd);
+		return true;
+	} else return false;
 }
 
 
