@@ -156,8 +156,9 @@ void leerEntradas()
 		nodosSelect = nodos;
 		nodosCountSelect = nodosCount;
 		pthread_mutex_unlock(&mNodos);
-		select(1024, &nodosSelect, NULL, NULL, NULL);
+		select(FD_SETSIZE, &nodosSelect, NULL, NULL, NULL);
 
+		//Chequeo si salio del select por una nueva conexion
 		if (FD_ISSET(desbloquearSelect[0], &nodosSelect))
 		{
 			char* dummy = malloc(1);
@@ -165,15 +166,16 @@ void leerEntradas()
 			free(dummy);
 		}
 
-
+		//Chequeo los fd de las conexiones
 		for (int i=0; i<conexiones->elements_count ;i++)
 		{
 			Conexion_t* conexion = list_get(conexiones,i);
 			if (!FD_ISSET(conexion->sockfd,&nodosSelect)) continue;
 
 			mensaje_t* mensajeRecibido;
-			mensajeRecibido = recibirNodoFS(conexion->sockfd);
+			mensajeRecibido = recibir(conexion->sockfd);
 			log_info(log, "%s", mensajeRecibido->comando);
+
 		}
 	}
 }
@@ -194,16 +196,14 @@ void probarConexiones()
 	connect(socketPrueba, &their_addr, sizeof(Sockaddr_in));
 
 	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
-	char comando[] = "este es el comando que voy a mandar";
+	char comando[] = "soy -Nodo1";
 	mensaje->comando = malloc(strlen(comando));
 	strcpy(mensaje->comando,comando);
 	mensaje->comandoSize = strlen(mensaje->comando);
 
-	char data[] = "Aca irian los datos";
-	mensaje->data = malloc(strlen(data));
-	strcpy(mensaje->data,data);
-	mensaje->dataSize = strlen(mensaje->data);
+	memcpy(mensaje->data, NULL, 0);
+	mensaje->dataSize = 0;
 
-	enviarNodoFS(socketPrueba, mensaje);
+	enviar(socketPrueba, mensaje);
 }
 

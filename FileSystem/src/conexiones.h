@@ -16,7 +16,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "interfaz-NodoFS.h"
+#include <protocolo.h>
 
 #define NODOS_MAX 20
 
