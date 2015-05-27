@@ -30,13 +30,15 @@ void processMessage(Message *recvMessage)
 			//addFileFullData(int sckt, char* path, t_dictionary *fullData);
 			//FS responde con la info de los bloques y nodos donde esta el archivo a procesar
 			//** A cont. debo PLANIFICAR!!! y empezar a decirle que arch. mapp/reduce al Job
+			//Al enviar un pedido tambien uso "incrementarOperacionesEnProcesoEnNodo(int nroNodo);"
 			printf("***************\n");
 			break;
 		case K_Job_ChangeBlockState:
 			printf("PlannerCenter : planificar Job_ChangeBlockState\n");
 			//changeFileBlockState(int sckt,int nroNodo,int nroBloque,status nuevoEstado);
+			//addTemporaryFilePathToNodoData(int nroNodo,char* filePath);
 			//Job responde con la respuesta de la operacion que se le mando a hacer
-			//y entonces cambio el estado del bloque
+			//y entonces cambio el estado del bloque y agrego el pathTemporal a nodosData
 			//sigo con el envio siguiente
 
 			//*Al concluir la rutina de Reduce le solicitará al FileSystem que copie
@@ -47,9 +49,12 @@ void processMessage(Message *recvMessage)
 		case K_Job_OperationFailure:
 			printf("PlannerCenter : planificar Job_OperationFailure\n");
 			//operacion enviada a Job fallo
+			//DEBO DAR DE BAJA LA DIRECCION QUE FALLO
 			//debo RE-PLANIFICAR !!
 			//CHECKEAR SI YA FALLARON TODAS LAS COPIAS DISPONIBLES
 			//NO sigo con el envio siguiente y vuelvo a mandarlo, pero a otro NODO
+			//Cuando no quedan mas copias, se saca el archivo de la lista "filesOrdersToProcess"
+			//y se mete el fileState+path en la lista "filesOrdersFailed"
 			printf("***************\n");
 			break;
 		default:
@@ -61,9 +66,10 @@ void processMessage(Message *recvMessage)
 }
 
 // Idea de planificaion : se hara map y reduce de los bloques en orden ascendente.
-// Se procesara todo un archivo y luego se pasara al siguiente.
-// Cuando me llega el OK de un map, entonces ahi encolo el pedido de Reduce
-// Se hara una lista en la cual, se encolaran los pedidos.
+// Se procesara todo todos los archivos en paralelo o los mas que se puedan, sino lo habria un Job activo.
+// Hago map de todos los bloques de un archivo y ahi lanzo el reduce.
+
 // Habra un MAXIMO de envios por la red, hasta que no responda un envio, nose hara otro(Productor-Consumidor)
 // Si vuelve con error, entonces se rePlanifica y se vuelve a mandar el mismo pero a otro NODO.
-// Si no hay otro NODO disponible entonces, se informa que el proceso del archivo quedo incompleto.
+// Si NO hay otro NODO disponible entonces, se informa que el proceso del archivo quedo incompleto--> se envia a la lista de incompletos.
+// Si la operacion enviada falla porque se cayo el Nodo o simplemente fallo entonces se RE-PLANIFICA, si se cae el Job NO hay nada mas que hacer.
