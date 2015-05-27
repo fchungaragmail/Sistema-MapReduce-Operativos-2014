@@ -17,7 +17,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <protocolo.h>
-#include "comandos.h"
 
 #define NODOS_MAX 20
 
@@ -37,7 +36,7 @@ struct _sockaddr_in {
 };
 typedef struct _sockaddr_in Sockaddr_in;
 
-typedef struct _conexion {
+struct _conexion {
 	int sockfd;
 	char nombre[20];
 	int estado;
