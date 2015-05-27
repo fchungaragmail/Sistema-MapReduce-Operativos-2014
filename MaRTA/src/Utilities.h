@@ -24,13 +24,14 @@ struct _message {
 };
 typedef struct _message Message;
 
-typedef struct mensaje
+struct mensaje
 {
 	int comandoSize;
 	char* comando;
 	long dataSize; 	//Pongo long xq en un int no entraria el valor
 	char* data;		//correspondiente a 20mb
-} mensaje_t;
+}__attribute__((packed));
+typedef struct mensaje mensaje_t;
 
 typedef enum
 {
@@ -53,13 +54,13 @@ typedef enum {
 				REDUCED = 4,
 				TEMPORAL_ERROR = 5,//fallo la operacion de map o reduce
 				TOTAL_ERROR = 6  	// fallo la operacion y el FS no tiene otros bloques disponibles para procesar
-} status;
+} blockState;
 
 struct _blockData{
 	int nroDeNodo;
 	int nroDeBloque;
 	char *archTemporal;
-	status estado;
+	blockState estado;
 };
 typedef struct _blockData BlockData;
 
@@ -67,9 +68,8 @@ typedef struct _blockData BlockData;
 // 	CONSTANTES
 */
 
-#define 	HEAD_LENGHT 5
-
-#define K_PUERTO_LOCAL 6782
+//Varias
+#define K_PUERTO_LOCAL 6796
 #define K_FS_IP -1 //DEFINIR
 #define K_FS_PUERTO -1 //DEFINIR
 

@@ -6,3 +6,17 @@ Luego de conectarse con MaRTA, el FS espera el siguiente mensaje:
 
 Si no se envia esto, el FS no puede identificar a MaRta, ya que los nodos
 tambien se conectan por el mismo puerto
+
+
+-->Pedir tabla con todos los datos de los nodos en los que esta tal archivo 
+-Comando: "DataFile"
+-Data: sizeRutaDelArchivo-rutaDelArchivo -->por ejemplo: "/user/juan/datos/temperatura2012.txt/"
+
+--> FS responde con tabla de archivo pedida
+-Comando: "DataFileResponse"
+-Data:sizeRutaDelArchivo-rutaDelArchivo-sizeCantidadDeBloques-cantidadDeBloques-sizeEstructura-estructura 
+
+//Por "estructura "me refiero a la que se ve en la pag 13 del tp (contando la caratula).
+ A mi me vendria genial que me llegue una matriz (de arrays) donde siempre tendra 3 columnas (copia 1,2,3) y
+ luego las filas son la cantidad de bloques que es el parametro "cantidadDeBloques", asi yo podria recorrerlo,
+ donde cada elemento de esta matriz es un t_dictionary con los elementos "numeroDeNodo" y "nroDeBloque"

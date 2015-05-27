@@ -151,6 +151,7 @@ Message* listenConnections()
 						perror("recv");
 					}
 					close(i); // bye!
+					//ENVIAR AL PLANIFICADOR QUE SE CERRO EL SOCKET
 					FD_CLR(i, &master); // eliminar del conjunto maestro
 				} else {
 					// tenemos datos de algún cliente
@@ -159,8 +160,10 @@ Message* listenConnections()
 					msj = malloc(sizeof(mensaje_t));
 					msj = recibir(i);
 
-					printf("se recibio comandoSize %d \n",msj->comandoSize);
-					printf("se recibio comandoData %s \n",msj->comando);
+					//printf("se recibio comandoSize %d \n",msj->comandoSize);
+					//printf("se recibio comandoData %s \n",msj->comando);
+					//printf("se recibio comandoSize %d \n",msj->dataSize);
+					//printf("se recibio comandoSize %s \n",msj->data);
 
 					Message* message;
 					message=malloc(sizeof(Message));
