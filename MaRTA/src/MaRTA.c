@@ -23,7 +23,7 @@
 
 sem_t escucharConexiones;
 sem_t leerConexiones;
-
+sem_t semPrueba;
 struct Message *recvMessage;
 
 void* listenConecctions(void* arg);
@@ -31,6 +31,7 @@ void* listenConecctions(void* arg);
 //JUAN
 void* probarConexiones(void* arg);
 void enviar(int socket, mensaje_t* mensaje);
+void destrabarSemPrueba();
 
 //JUAN
 struct _sockaddr_in {
@@ -52,6 +53,7 @@ int main(void) {
 
 	sem_init(&escucharConexiones, 0, 1);
 	sem_init(&leerConexiones, 0, 0);
+	sem_init(&semPrueba, 0, 1);
 
 	initFilesStatusCenter();
 
@@ -82,7 +84,7 @@ int main(void) {
 		//el planif lo devuelve y MaRTA lo envia
 		//MODELO PRODUCTOR CONSUMIDOR !!
 		processMessage(recvMessage);
-
+		sem_post(&semPrueba);
 		sem_post(&escucharConexiones);
 	}
 	closeServidores();
@@ -160,16 +162,24 @@ void* probarConexiones(void* arg)
 	int f=0;
 	while(f<20){
 		printf("probarConexiones - %s - va a mandar el msj \n",str);
+		sem_wait(&semPrueba);
 		enviar(socketPrueba, mensaje);
 		f++;
 	}
 
 	pthread_exit(NULL);
 }
-
+void destrabarSemPrueba()
+{
+	sem_post(&semPrueba);
+}
 void enviar(int socket, mensaje_t* mensaje)
 {
-	if(send(socket, &(mensaje->comandoSize), sizeof(int), 0)<0){printf("ERROR EN EL SEND");};
+	//int i,j;
+	//memcpy(&i,&(mensaje->comandoSize),sizeof(mensaje->comandoSize));
+	//memcpy(&j,&(mensaje->dataSize),sizeof(mensaje->comandoSize));
+
+	if(send(socket,&(mensaje->comandoSize), sizeof(int), 0)<0){printf("ERROR EN EL SEND");};
 	if(send(socket, mensaje->comando, mensaje->comandoSize, 0)<0){printf("ERROR EN EL SEND");};
 	if(send(socket, &(mensaje->dataSize), sizeof(long), 0)<0){printf("ERROR EN EL SEND");};
 	if(send(socket, mensaje->data, mensaje->dataSize, 0)<0){printf("ERROR EN EL SEND");};
