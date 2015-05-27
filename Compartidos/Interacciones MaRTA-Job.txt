@@ -1,0 +1,36 @@
+Interacciones MaRTA-Job
+************************
+
+-->Job le pasa a MaRTA su archivo a procesar (pueden ser muchos, en este caso seran varios envios)
+*comando: "archivoAProcesar"
+*data: sizeRutaDeArchivo-rutaDeArchivo-sizeSoportaCombiner-soportaCombiner 
+// La rutaDeArchivo puede ser por ejemplo: "/user/juan/datos/temperatura2012.txt/" 
+// SoportaCombiner sera un true/false que te da la libreria stdbool.h
+************************************************************************************************************************************************************************************************
+-->MaRTA le dice al Job que haga una rutina de mapping
+*comando: "mapFile"
+*data:sizeDireccionNodo-direccionNodo-sizeNroDeBloque-nroDeBloque-sizeRutaArchivoTemporal-rutaArchivoTemporal
+// La ruta del archivo temporal siempre sera el nombreDelArchivo y se le concatenara los hh:mm:ss:mmmm devuelto por la funcion temporal.h que nos da la catedra
+// se pondra un guion como separador, de esta manera se podra distinguir entre la ruta del archivo y el hh:mm:ss:mmmm agregado, de esta manera se va a poder 
+// obtener la ruta del archivo si hiciera falta--> por ejemplo "/user/juan/datos/temperatura2012.txt/-23:43:45:2345"
+************************************************************************************************************************************************************************************************
+-->Job responde a Marta con el resultado de la operacion de map
+*comando : "mapFileResponse"
+*data:sizeRutaArchivoTemporal-rutaArchivoTemporal-sizeRespuesta-Respuesta 
+// la "Respuesta" sera un Bool que te da la libreria stdbool.h
+************************************************************************************************************************************************************************************************
+-->MaRTA le indica al Job en que archivos aplicar Reduce 
+*comando: "reduceFile"(con Combiner)
+*data: sizeNroDeNodo1-nroDeNodo1-sizeRutaArchivoTemporal1-rutaArchivoTemporal1-sizeNroDeNodo2-nroDeNodo2-sizeRutaArchivoTemporal2-rutaArchivoTemporal2-etc... 
+
+*comando: "reduceFile"(sin Combiner)
+*data: sizeNroDeNodo1-nroDeNodo1-sizeRutaArchivoTemporal1-rutaArchivoTemporal1-sizeNroDeNodo2-nroDeNodo2-sizeRutaArchivoTemporal2-rutaArchivoTemporal2-etc... 
+
+//MaRTA tendra dos formas de ejecutar este comando dependiendo si el Job soporta combiner o no, de cualquiera de las formas que MaRTA lo envie, el Job tendra que saber que 
+//tipo de mensaje debe esperar, ya que el mismo Job sabe si soporta combiner o no.
+************************************************************************************************************************************************************************************************
+-->Job responde a Marta con el resultado de la operacion de reduce
+*comando:"reduceFileResponse"
+*data:
+
+************************************************************************************************************************************************************************************************
