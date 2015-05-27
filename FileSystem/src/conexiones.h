@@ -17,12 +17,12 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <protocolo.h>
+#include "comandos.h"
 
 #define NODOS_MAX 20
 
 int initConexiones();
-void escucharNodos(int nodosMax); //Si le mandas -1 sigue buscando
-void escucharMaRTA();
+void escucharConexiones(int nodosMax); //Si le mandas -1 sigue buscando
 void leerEntradas();
 void cerrarConexiones();
 
@@ -37,9 +37,10 @@ struct _sockaddr_in {
 };
 typedef struct _sockaddr_in Sockaddr_in;
 
-struct _conexion {
+typedef struct _conexion {
 	int sockfd;
 	char nombre[20];
+	int estado;
 };
 typedef struct _conexion Conexion_t;
 

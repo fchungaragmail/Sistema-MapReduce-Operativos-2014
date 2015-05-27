@@ -11,6 +11,8 @@
 #include <pthread.h>
 #include <commons/string.h>
 #include "recursosCompartidos.h"
+#include "conexiones.h"
+
 
 void procesarComando(char** comando, void(*doComando)(void*));
 
@@ -25,6 +27,7 @@ int borrarBloque(char* argumentos);
 int copiarBloque(char* argumentos);
 int agregarNodo(char* argumentos);
 int quitarNodo(char* argumentos);
+int nombre(char* comando, void* conexion);
 
 
 #endif /* COMANDOS_H_ */

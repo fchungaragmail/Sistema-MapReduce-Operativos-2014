@@ -1,5 +1,5 @@
 /*
- * interfaz-NodoFS.h
+ * protocolo.h
  *
  *  Created on: 12/5/2015
  *      Author: utnso

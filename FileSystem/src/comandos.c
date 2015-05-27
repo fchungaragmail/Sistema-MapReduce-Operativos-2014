@@ -19,6 +19,7 @@ int borrarBloque(char* argumentos);
 int copiarBloque(char* argumentos);
 int agregarNodo(char* argumentos);
 int quitarNodo(char* argumentos);
+int nombre(char* comando, void* conexion);
 
 
 
@@ -95,6 +96,19 @@ int agregarNodo(char* argumentos){
 int quitarNodo(char* argumentos){
 	printf("Quitar nodo\n");
 	return 0;
+}
+
+int nombre(char* comando, void* conexion)
+{
+	char** lineasComando = string_n_split(comando,2," ");
+	//strcpy(conexion->nombre, lineasComando[1]);
+	if ((strcmp(lineasComando[1], "MaRTA")) != 0)
+	{
+		return 1;
+	}else
+	{
+		return 0;
+	}
 }
 
 

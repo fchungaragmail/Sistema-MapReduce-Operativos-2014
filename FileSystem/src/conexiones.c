@@ -8,17 +8,16 @@
 
 #include "conexiones.h"
 
-int escuchaNodos;
-int escuchaMaRTA, MaRTA;
+int escuchaConexiones;
+int MaRTA;
 int desbloquearSelect[2];
 t_list* conexiones;
 fd_set nodos;
 pthread_mutex_t mNodos;
-int nodosCount;
+int nodosOnline;
 
 int initConexiones();
-void escucharNodos(int nodosMax);
-void escucharMaRTA();
+void escucharConexiones(int nodosMax);
 void leerEntradas();
 void cerrarConexiones();
 void cerrarConexion(Conexion_t* conexion);
@@ -32,50 +31,31 @@ int initConexiones()
 	conexiones = list_create();
 	FD_ZERO(&nodos);
 	pthread_mutex_init(&mNodos, NULL);
-	nodosCount = 0;
-	escuchaNodos = socket(AF_INET, SOCK_STREAM, 0);
-	escuchaMaRTA = socket(AF_INET, SOCK_STREAM, 0);
-	if ((escuchaNodos == -1) && (escuchaMaRTA == -1)){
-		log_error(log,"No se pudieron crear los socket para escuchar "
+	nodosOnline = 0;
+	escuchaConexiones = socket(AF_INET, SOCK_STREAM, 0);
+	if (escuchaConexiones == -1){
+		log_error(log,"No se pudo crear el socket para escuchar "
 				"nuevas conexiones.");
 	} else
 	{
-		log_info(log, "Los socket para escuchar nuevas conexiones se "
-				"crearon correctamente.");
+		log_info(log, "El socket para escuchar nuevas conexiones se "
+				"creo correctamente.");
 	}
 
 	pipe2(desbloquearSelect, O_NONBLOCK);
 	FD_SET(desbloquearSelect[0], &nodos);
-	nodosCount++;
 
-	Sockaddr_in miDireccNodos;
-	miDireccNodos.sin_family = AF_INET;
-	miDireccNodos.sin_port = htons(PUERTO_LISTEN);
-	inet_aton(IP_LISTEN, &(miDireccNodos.sin_addr));
-	memset(&(miDireccNodos.sin_zero), '\0', 8);
-	bind(escuchaNodos, (Sockaddr_in*) &miDireccNodos, sizeof(Sockaddr_in));
-
-	Sockaddr_in miDireccMaRTA;
-	miDireccMaRTA.sin_family = AF_INET;
-	miDireccMaRTA.sin_port = htons(PUERTO_MARTA);
-	inet_aton(IP_LISTEN, &(miDireccMaRTA.sin_addr));
-	memset(&(miDireccMaRTA.sin_zero), '\0', 8);
-	bind(escuchaMaRTA, (Sockaddr_in*) &miDireccMaRTA, sizeof(Sockaddr_in));
+	Sockaddr_in miDirecc;
+	miDirecc.sin_family = AF_INET;
+	miDirecc.sin_port = htons(PUERTO_LISTEN);
+	inet_aton(IP_LISTEN, &(miDirecc.sin_addr));
+	memset(&(miDirecc.sin_zero), '\0', 8);
+	bind(escuchaConexiones, (Sockaddr_in*) &miDirecc, sizeof(Sockaddr_in));
 
 
-	if (listen(escuchaNodos, NODOS_MAX) == -1)
+	if (listen(escuchaConexiones, NODOS_MAX+1) == -1)
 	{
-		log_error(log,"No se pueden escuchar conexiones para Nodos."
-				"El FileSystem se cerrara");
-		return(-1);
-	} else
-	{
-		log_info(log, "Escuchando conexiones.");
-	}
-
-	if (listen(escuchaMaRTA, 1) 		 == -1)
-	{
-		log_error(log,"No se pueden escuchar conexiones para MaRTA."
+		log_error(log,"No se pueden escuchar conexiones."
 				"El FileSystem se cerrara");
 		return(-1);
 	} else
@@ -85,49 +65,37 @@ int initConexiones()
 }
 
 
-void escucharNodos(int nodosMax)
+void escucharConexiones(int nodosMax)
 {
 	int nuevoSocketfd;
 	int sin_size = sizeof(Sockaddr_in);
-	int i = 0;
 
-	while ((i < nodosMax) || (nodosMax == -1))
+	while ((nodosOnline < nodosMax) || (nodosMax == -1))
 	{
 		Sockaddr_in their_addr;
 		Conexion_t* conexionNueva = malloc(sizeof(Conexion_t));
 
 		if (nodosMax == 1) probarConexiones(); //PRUEBA
 
-		nuevoSocketfd = accept(escuchaNodos, &their_addr, &sin_size);
+		nuevoSocketfd = accept(escuchaConexiones, &their_addr, &sin_size);
 
 		strcpy(conexionNueva->nombre, "NombreGenerico");
 		conexionNueva->sockfd = nuevoSocketfd;
+		conexionNueva->estado = CONECTADO;
 		list_add(conexiones, conexionNueva);
+
+		//Esto debe ir al procesar el comando soy
 		pthread_mutex_lock(&mNodos);
 		FD_SET(nuevoSocketfd, &nodos);
-		nodosCount++;
+		nodosOnline++;
 		pthread_mutex_unlock(&mNodos);
+
 		write(desbloquearSelect[1], "", 1);
 
-
-		log_info(log, "Conectado con el nodo %s \n", inet_ntoa(their_addr.sin_addr));
-
-		i++;
+		log_info(log, "Nueva conexion con %s. \n"
+				"Esperando identificacion.", inet_ntoa(their_addr.sin_addr));
 	}
-	log_info(log, "Cantidad minima de nodos (%d) alcanzada.\n", LISTA_NODOS);
-}
-
-void escucharMaRTA()
-{
-	int sin_size = sizeof(Sockaddr_in);
-
-	Sockaddr_in their_addr;
-	Conexion_t* conexionNueva = malloc(sizeof(Conexion_t));
-
-	MaRTA = accept(escuchaMaRTA, (Sockaddr_in*) &their_addr, &sin_size);
-
-	conexionNueva->sockfd = MaRTA;
-	log_info(log, "Conectado con MaRTA (%s) \n", inet_ntoa(their_addr.sin_addr));
+	log_info(log, "Cantidad minima de nodos (%d) alcanzada.", LISTA_NODOS);
 }
 
 
@@ -151,10 +119,8 @@ void leerEntradas()
 	while (1)
 	{
 		fd_set nodosSelect;
-		int nodosCountSelect;
 		pthread_mutex_lock(&mNodos);
 		nodosSelect = nodos;
-		nodosCountSelect = nodosCount;
 		pthread_mutex_unlock(&mNodos);
 		select(FD_SETSIZE, &nodosSelect, NULL, NULL, NULL);
 
@@ -179,7 +145,9 @@ void leerEntradas()
 			if (estado == CONECTADO)
 			{
 				log_info(log, "%s", mensaje->comando);
-				//ProcesarMensaje
+				//ProcesarInformacion
+				//Por ahora solo procesa el nombre
+				nombre(mensaje->comando, conexion);
 			} else
 			{
 				cerrarConexion(conexion);
@@ -195,7 +163,8 @@ void cerrarConexion(Conexion_t* conexion)
 	FD_CLR(conexion->sockfd, &nodos);
 	pthread_mutex_unlock(&mNodos);
 	close(conexion->sockfd);
-	log_info(log, "Desconectado del nodo %s\n", conexion->nombre);
+	conexion->estado = DESCONECTADO;
+	log_info(log, "Desconectado del nodo %s", conexion->nombre);
 }
 
 
@@ -214,7 +183,7 @@ void probarConexiones()
 	connect(socketPrueba, &their_addr, sizeof(Sockaddr_in));
 
 	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
-	char comando[] = "soy -Nodo1";
+	char comando[] = "nombre -Nodo1";
 	mensaje->comando = malloc(strlen(comando));
 	strcpy(mensaje->comando,comando);
 	mensaje->comandoSize = strlen(mensaje->comando);
