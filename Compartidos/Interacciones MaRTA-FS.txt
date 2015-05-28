@@ -14,7 +14,9 @@ tambien se conectan por el mismo puerto
 
 --> FS responde con tabla de archivo pedida
 -Comando: "DataFileResponse"
--Data:sizeRutaDelArchivo-rutaDelArchivo-sizeCantidadDeBloques-cantidadDeBloques-sizeEstructura-estructura 
+-Data:sizeRutaDelArchivo-rutaDelArchivo--sizeRespuesta-Respuesta-sizeCantidadDeBloques-cantidadDeBloques-sizeEstructura-estructura 
+
+//"Respuesta" sera un bool de stdbool.h y me dira si esta disponible el archivo que pedi o no (si TODAS las copias de un bloque NO estan disponibles, entonces todo el archivo NO esta disponible)
 
 //Por "estructura "me refiero a la que se ve en la pag 13 del tp (contando la caratula).
  A mi me vendria genial que me llegue una matriz (de arrays) donde siempre tendra 3 columnas (copia 1,2,3) y
