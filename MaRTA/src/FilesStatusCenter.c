@@ -14,6 +14,7 @@
 #include <commons/collections/list.h>
 #include <commons/temporal.h>
 #include "Utilities.h"
+#include "FilesStatusCenter.h"
 
 /*
 //CONSTANTES
@@ -32,20 +33,9 @@
 #define K_Nodo_OperacionesEnProceso "operacionesEnProceso"
 #define K_Nodo_ArchivosTemporales "archivosTemporales"
 
-//BlockState --> Keys
-#define K_BlockState_state "BlockState_state"
-#define K_BlockState_nroNodo "BlockState_nroNodo"
-#define K_BlockState_nroBloque "BlockState_nroBloque"
-#define K_BlockState_temporaryPath "BlockState_temporaryPath"
-
-//fileState --> keys
-#define K_FileState_size "FileState_size"
-#define K_FileState_arrayOfBlocksStates "FileState_arrayOfBlocksStates"
-
 t_dictionary *filesToProcess;
 t_dictionary *filesStates;
 t_dictionary *nodosData;
-t_list *filesOrdersToProcess;
 t_list *filesOrdersFailed;
 
 int fs_socket; //socket del FS
@@ -61,12 +51,15 @@ int getFSSocket();
 void addFileFullData(int sckt, char* path, t_dictionary *fullData);
 //nodosData
 void incrementarOperacionesEnProcesoEnNodo(int nroNodo);
+void decrementarOperacionesEnProcesoEnNodo(int nroNodo);
 int getCantidadDeOperacionesEnProcesoEnNodo(int nroNodo);
 void addTemporaryFilePathToNodoData(int nroNodo,char* filePath);
 //filesToProcess
 void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);//crea un fileState
 void darDeBajaCopiaEnBloqueYNodo(char*archivoParcial_Path,int skct,int nroBloque,int nroNodo);
 t_dictionary* obtenerCopiasParaArchivo(int socket,char *path);
+int obtenerNumeroDeCopiasParaArchivo(int socket,char *path);
+int obtenerNumeroDeBloquesParaArchivo(int socket,char *path);
 //filesStates
 void changeFileBlockState(char* path,int nroBloque,blockState nuevoEstado,char* temporaryPath);
 t_dictionary *getFileStateForPath(char *path);
@@ -75,7 +68,6 @@ void initFilesStatusCenter()
 {
 	filesToProcess = dictionary_create();
 	filesStates = dictionary_create();
-	filesOrdersToProcess=list_create();
 	filesOrdersFailed=list_create();
 	nodosData = dictionary_create();
 	fs_socket=-1;
@@ -142,6 +134,7 @@ void addFileFullData(int sckt, char* path, t_dictionary *fullData)
 		dictionary_put(blockState,K_BlockState_state,UNINITIALIZED);
 		dictionary_put(blockState,K_BlockState_nroNodo,UNINITIALIZED);
 		dictionary_put(blockState,K_BlockState_nroBloque,UNINITIALIZED);
+		dictionary_put(blockState,K_BlockState_temporaryPath,K_BlockState_UninitializedPath);
 		blocksStatesArray[i]=blockState;
 		free(blockState);
 	}
@@ -232,6 +225,23 @@ void incrementarOperacionesEnProcesoEnNodo(int nroNodo)
 
 	free(key_nroDeNodo);
 }
+
+void decrementarOperacionesEnProcesoEnNodo(int nroNodo)
+{
+	//se llama cuando envio un pedido de map o reduce al Job
+	char *key_nroDeNodo = intToCharPtr(nroNodo);
+	bool hasKey = dictionary_has_key(nodosData,key_nroDeNodo);
+
+		if(hasKey == true){
+			//busco el dic y le sumo una operacionProcesando
+			t_dictionary *nodoState = dictionary_get(nodosData,key_nroDeNodo);
+			int operacionesEnProceso = dictionary_get(nodoState,K_Nodo_OperacionesEnProceso);
+			operacionesEnProceso = operacionesEnProceso - 1;
+			dictionary_put(nodoState,K_Nodo_OperacionesEnProceso,operacionesEnProceso);
+			free(nodoState);
+		}
+}
+
 void addTemporaryFilePathToNodoData(int nroNodo,char* filePath)
 {//el NodoState tiene que estar si o si creado, pues tiene que haber pasado por
  //"incrementarOperacionesEnProcesoEnNodo"
@@ -298,4 +308,14 @@ t_dictionary* obtenerCopiasParaArchivo(int socket,char *path)
 	//Devuelvo un dic con copia 1,2,3 de filesToProcess
 }
 
+int obtenerNumeroDeCopiasParaArchivo(int socket,char *path)
+{
+	//IMPLEMENTAR
+	return 1;
+}
+int obtenerNumeroDeBloquesParaArchivo(int socket,char *path)
+{
+	//IMPLEMENTAR
+	return 1;
+}
 

@@ -58,9 +58,8 @@ typedef enum {
 				MAPPED = 2, 		//archivo ya mappeado
 				IN_REDUCING = 3,
 				REDUCED = 4,
-				TEMPORAL_ERROR = 5,//fallo la operacion de map o reduce
-				TOTAL_ERROR = 6  	// fallo la operacion y el FS no tiene otros bloques disponibles para procesar
-} blockState;
+				TOTAL_ERROR = 5  	// fallo la operacion y el FS no tiene otros bloques disponibles para procesar
+} statusBlock;
 
 struct _blockData{
 	int nroDeNodo;
@@ -73,6 +72,9 @@ typedef struct _blockData BlockData;
 /*
 // 	CONSTANTES
 */
+
+//BlockState
+#define K_BlockState_UninitializedPath "BlockState_UninitializedPath"
 
 //Varias
 #define K_PUERTO_LOCAL 6796
