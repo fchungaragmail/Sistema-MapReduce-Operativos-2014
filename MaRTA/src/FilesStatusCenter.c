@@ -36,6 +36,7 @@
 #define K_BlockState_state "BlockState_state"
 #define K_BlockState_nroNodo "BlockState_nroNodo"
 #define K_BlockState_nroBloque "BlockState_nroBloque"
+#define K_BlockState_temporaryPath "BlockState_temporaryPath"
 
 //fileState --> keys
 #define K_FileState_size "FileState_size"
@@ -54,15 +55,21 @@ void initFilesStatusCenter();
 // Agregar nuevas conexiones
 void addFSConnection(int fs_socket);
 void addNewConnection(int socket);
+// FS
+int getFSSocket();
 // Varias
-void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);
 void addFileFullData(int sckt, char* path, t_dictionary *fullData);
-void changeFileBlockState(char* path,int nroBloque,blockState nuevoEstado);
-void addTemporaryFilePathToNodoData(int nroNodo,char* filePath);
+//nodosData
 void incrementarOperacionesEnProcesoEnNodo(int nroNodo);
 int getCantidadDeOperacionesEnProcesoEnNodo(int nroNodo);
+void addTemporaryFilePathToNodoData(int nroNodo,char* filePath);
+//filesToProcess
+void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);//crea un fileState
 void darDeBajaCopiaEnBloqueYNodo(char*archivoParcial_Path,int skct,int nroBloque,int nroNodo);
-t_dictionary* obtenerOtroNodoYBloqueParaArchParcial(char *archParcial);
+t_dictionary* obtenerCopiasParaArchivo(int socket,char *path);
+//filesStates
+void changeFileBlockState(char* path,int nroBloque,blockState nuevoEstado,char* temporaryPath);
+t_dictionary *getFileStateForPath(char *path);
 
 void initFilesStatusCenter()
 {
@@ -77,6 +84,11 @@ void initFilesStatusCenter()
 void addFSConnection(int fs_sckt)
 {
 		fs_socket = fs_sckt;
+}
+
+int getFSSocket()
+{
+	return fs_socket;
 }
 void addNewConnection(int jobSocket)
 {
@@ -148,27 +160,30 @@ void addFileFullData(int sckt, char* path, t_dictionary *fullData)
 	free(blocksStatesArray);
 }
 
-void changeFileBlockState(char *path,int nroBloque,blockState nuevoEstado)
+void changeFileBlockState(char *path,int nroBloque,blockState nuevoEstado,char *temporaryPath)
 {	//ESTO LO HAGO EN MI ESTRUCTURA "filesStates"
 	//VER SI ES nroBloque o (nroBloque-1)!!!!!
 
 	t_dictionary *fileState = dictionary_get(filesStates,path);
 	int size = dictionary_get(fileState,K_FileState_size);
 
-	t_dictionary *array[size];
+	t_dictionary *blocksStatesArray[size];
 	int i;
-	for(i=0;i<size;i++){ array[i]=malloc(sizeof(t_dictionary)); }
-	*array = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
+	for(i=0;i<size;i++){ blocksStatesArray[i]=malloc(sizeof(t_dictionary)); }
+	blocksStatesArray = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
 
 	t_dictionary *blockState = dictionary_create();
-	blockState = array[nroBloque];
+	blockState = blocksStatesArray[nroBloque];
 	int estadoBloque = nuevoEstado;
 	dictionary_put(blockState,K_BlockState_state,estadoBloque);
+
+	dictionary_put(blockState,K_BlockState_temporaryPath,temporaryPath);
 
 	free(path);
 	free(blockState);
 	free(fileState);
-	free(array);
+	free(blocksStatesArray);
+	free(temporaryPath);
 }
 
 int getCantidadDeOperacionesEnProcesoEnNodo(int nroNodo)
@@ -270,7 +285,17 @@ void darDeBajaCopiaEnBloqueYNodo(char*archivoParcial_Path,int skct,int nroBloque
 	free(copiasArray);
 }
 
-t_dictionary* obtenerOtroNodoYBloqueParaArchParcial(char *archParcial)
+t_dictionary *getFileStateForPath(char *path)
+{
+	t_dictionary *fileState = malloc(sizeof(t_dictionary));
+	fileState = dictionary_get(filesStates,path);
+	return fileState;
+}
+
+t_dictionary* obtenerCopiasParaArchivo(int socket,char *path)
 {
 	//IMPLEMENTAR
+	//Devuelvo un dic con copia 1,2,3 de filesToProcess
 }
+
+

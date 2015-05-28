@@ -7,6 +7,7 @@
 
 #ifndef UTILITIES_H_
 #define UTILITIES_H_
+
 /*
 //Funciones auxiliares
 */
@@ -19,8 +20,7 @@ int charPtrToInt(char* ptr);
 */
 struct _message {
 	int sockfd;
-	int head;
-	char *messageData;
+	mensaje_t *mensaje;
 };
 typedef struct _message Message;
 
@@ -35,16 +35,22 @@ typedef struct mensaje mensaje_t;
 
 typedef enum
 {
-	K_Error = -1,
+	K_Unidentified = -1,
+
 	K_NewConnection = 0,
-	K_Job_NewFileToProcess = 1,//Job envia path de su archivo y modo combiner
-	K_Job_ChangeBlockState = 3,
-	K_Job_OperationFailure =4,
+	K_Job_NewFileToProcess = 1,
+	K_Job_MapResponse = 2,
+	K_Job_ReduceResponse = 3,
 
-	K_FS_FileFullData = 2, //FS envia tabla con direccion de archivo en los distintos nodos
-	K_FSMessage = 999,
-
+	K_FS_FileFullData = 5, //FS envia tabla con direccion de archivo en los distintos nodos
 }TypesMessages;
+
+typedef enum
+{
+	K_Pedido_Map = 0,
+	K_Pedido_Reduce = 1,
+	K_Pedido_FileData = 2,
+}TypesPedidosRealizado;
 
 typedef enum {
 				UNINITIALIZED = 0, 	//sin estado

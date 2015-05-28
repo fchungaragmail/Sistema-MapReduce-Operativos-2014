@@ -19,13 +19,23 @@ void initFilesStatusCenter();
 void addFSConnection(int fs_socket);
 void addNewConnection(int socket);
 
+// FS
+int getFSSocket();
+
 // Varias
-void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);
 void addFileFullData(int sckt, char* path, t_dictionary *fullData);
-void addTemporaryFilePathToNodoData(int nroNodo,char* filePath);
+
+//nodosData
 void incrementarOperacionesEnProcesoEnNodo(int nroNodo);
-void changeFileBlockState(char* path,int nroBloque,blockState nuevoEstado);
 int getCantidadDeOperacionesEnProcesoEnNodo(int nroNodo);
+void addTemporaryFilePathToNodoData(int nroNodo,char* filePath);
+
+//filesToProcess
+void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);//crea un fileState
 void darDeBajaCopiaEnBloqueYNodo(char*archivoParcial_Path,int skct,int nroBloque,int nroNodo);
-t_dictionary* obtenerOtroNodoYBloqueParaArchParcial(char *archParcial);
+t_dictionary* obtenerCopiasParaArchivo(int socket,char *path);
+
+//filesStates
+void changeFileBlockState(char* path,int nroBloque,blockState nuevoEstado,char* temporaryPath);
+t_dictionary *getFileStateForPath(char *path);
 #endif /* FILESTATUSCENTER_H_ */

@@ -6,6 +6,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -59,17 +60,20 @@ int addrlen;
 int conexionesProcesadas;
 sem_t accesoAMaster;
 
+// Funciones publicas
 void initConexiones();
 void closeServidores();
+int connectToFS();
+Message* listenConnections();
+
+//Funciones privadas
 int createSocket(int puerto,int socketFd);
 void createListener();
 void prepareConnections();
-Message* listenConnections();
 Message* createErrorMessage();
 void setnonblocking();
-int connectToFS();
 
-//JUAN
+//JUAN - Protocolo
 mensaje_t* recibir(int socket);
 
 void initConexiones()
@@ -129,16 +133,20 @@ Message* listenConnections()
 					FD_SET(newfd, &master); // añadir al conjunto maestro
 					if (newfd > fdmax) {fdmax = newfd;} // actualizar el máximo
 					sem_post(&accesoAMaster);
+
 					//setnonblocking();
 
 					printf("selectserver: new connection from %s on "
 						"socket %d\n", inet_ntoa(remoteaddr.sin_addr), newfd);
 
-					Message *newConection;
-					newConection=malloc(sizeof(Message));
-					newConection->head=K_NewConnection;
-					newConection->sockfd=newfd;
-					return newConection;
+					Message *newConnection;
+					newConnection=malloc(sizeof(Message));
+					newConnection->mensaje=malloc(sizeof(mensaje_t));
+					newConnection->mensaje->comandoSize=(strlen("newConnection")+1);
+					newConnection->mensaje->comando=malloc(strlen("newConnection")+1);
+					strcpy(newConnection->mensaje->comando,"newConnection");
+					newConnection->sockfd=newfd;
+					return newConnection;
 				}
 			} else {
 				// gestionar datos de un cliente
@@ -156,35 +164,20 @@ Message* listenConnections()
 				} else {
 					// tenemos datos de algún cliente
 					printf("llegaron datos de algun cliente\n");
-					mensaje_t *msj;
-					msj = malloc(sizeof(mensaje_t));
-					msj = recibir(i);
 
-					//printf("se recibio comandoSize %d \n",msj->comandoSize);
-					//printf("se recibio comandoData %s \n",msj->comando);
-					//printf("se recibio comandoSize %d \n",msj->dataSize);
-					//printf("se recibio comandoSize %s \n",msj->data);
+					Message *recvMesage = malloc(sizeof(Message));
+					recvMesage->mensaje=malloc(sizeof(mensaje_t));
+					recvMesage->mensaje = recibir(i);
+					recvMesage->sockfd=i;
 
-					Message* message;
-					message=malloc(sizeof(Message));
-					message->sockfd=K_FSMessage;
-					//message->messageData = CUERPO;
-					//message->head = HEAD;
-					return message;
+					/*printf("se recibio comandoSize %d \n",recvMesage->mensaje->comandoSize);
+					printf("se recibio el comando %s \n",recvMesage->mensaje->comando);
+					printf("se recibio dataSize %d \n",recvMesage->mensaje->dataSize);
+					printf("se recibio la data %s \n",recvMesage->mensaje->data);*/
 
-					/*for(j = 0; j <= fdmax; j++) {
-						// ¡enviar a todo el mundo!
-						if (FD_ISSET(j, &master)) {
-							// excepto al listener y a nosotros mismos
-							if (j != listener && j != i) {
-								if (send(j, buf, nbytes, 0) == -1) {
-									perror("send");
-								}
-							}
-						}
-					}*/
+					return recvMesage;
 				}
-			} // Esto es ¡TAN FEO!
+			}
 		}
 	}
 	printf("ConexionCenter: fallo listenConnections");	//nunca deberia llegar aca
@@ -257,19 +250,27 @@ void setnonblocking()
 
 Message* createErrorMessage()
 {
-	Message *errorMsg;
-	errorMsg=malloc(sizeof(Message));
-	errorMsg->head=K_Error;
-	return errorMsg;
+	Message *error;
+	error=malloc(sizeof(Message));
+	error->mensaje = malloc(sizeof(mensaje_t));
+	error->mensaje->comando=malloc(strlen("error")+1);
+	error->mensaje->comandoSize=(strlen("error")+1);
+	strcpy(error->mensaje->comando,"error");
+	return error;
 }
 
 void closeServidores()
 {
-/*	list_clean(listaConexiones);
-	if (close(listener) == -1) {
-		error_show("ERROR CERRANDO EL SOCKET DEL JOB!\n");
-	}*/
-
+	int j;
+	for(j = 0; j <= fdmax; j++) {
+	// cerrar todos los sockets
+		if (FD_ISSET(j, &master)) {
+			// excepto al listener
+			if (j != listener) {
+				close(j);
+			}
+		}
+	}
 }
 
 void createListener()

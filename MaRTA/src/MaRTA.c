@@ -24,11 +24,12 @@
 sem_t escucharConexiones;
 sem_t leerConexiones;
 sem_t semPrueba;
-struct Message *recvMessage;
+
+Message *recvMessage;
 
 void* listenConecctions(void* arg);
 
-//JUAN
+//JUAN - protocolo
 void* probarConexiones(void* arg);
 void enviar(int socket, mensaje_t* mensaje);
 void destrabarSemPrueba();
@@ -50,12 +51,14 @@ int main(void) {
 	pthread_t connectionThread;
 	//pthread_t connectToFSThread;
 	recvMessage=malloc(sizeof(Message));
+	recvMessage->mensaje=malloc(sizeof(mensaje_t));
 
 	sem_init(&escucharConexiones, 0, 1);
 	sem_init(&leerConexiones, 0, 0);
 	sem_init(&semPrueba, 0, 1);
 
 	initFilesStatusCenter();
+	initPlannerCenter();
 
 	pthread_create(&connectionThread, NULL, listenConecctions,NULL);
 	//pthread_create(&connectToFSThread, NULL,connectToFileSystem,NULL);
