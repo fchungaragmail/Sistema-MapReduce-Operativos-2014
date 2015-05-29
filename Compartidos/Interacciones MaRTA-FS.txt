@@ -14,7 +14,7 @@ tambien se conectan por el mismo puerto
 
 --> FS responde con tabla de archivo pedida
 -Comando: "DataFileResponse"
--Data:sizeRutaDelArchivo-rutaDelArchivo--sizeRespuesta-Respuesta-sizeCantidadDeBloques-cantidadDeBloques-sizeEstructura-estructura 
+-Data:sizeRutaDelArchivo-rutaDelArchivo--sizeRespuesta-Respuesta-sizeCantidadDeBloques-cantidadDeBloques-sizeNroDeCopias-nroDeCopias-sizeEstructura-estructura 
 
 //"Respuesta" sera un bool de stdbool.h y me dira si esta disponible el archivo que pedi o no (si TODAS las copias de un bloque NO estan disponibles, entonces todo el archivo NO esta disponible)
 
