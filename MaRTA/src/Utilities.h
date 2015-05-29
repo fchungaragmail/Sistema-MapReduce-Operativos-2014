@@ -65,7 +65,7 @@ struct _blockData{
 	int nroDeNodo;
 	int nroDeBloque;
 	char *archTemporal;
-	blockState estado;
+	statusBlock estado;
 };
 typedef struct _blockData BlockData;
 

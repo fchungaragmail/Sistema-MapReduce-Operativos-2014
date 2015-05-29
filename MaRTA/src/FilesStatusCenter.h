@@ -46,11 +46,11 @@ void addTemporaryFilePathToNodoData(int nroNodo,char* filePath);
 //filesToProcess
 void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);//crea un fileState
 void darDeBajaCopiaEnBloqueYNodo(char*archivoParcial_Path,int skct,int nroBloque,int nroNodo);
-t_dictionary* obtenerCopiasParaArchivo(int socket,char *path);
+t_dictionary* obtenerCopiasParaBloqueDeArchivo(int socket,,int bloque,char *path);
 int obtenerNumeroDeCopiasParaArchivo(int socket,char *path);
 int obtenerNumeroDeBloquesParaArchivo(int socket,char *path);
 
 //filesStates
-void changeFileBlockState(char* path,int nroBloque,blockState nuevoEstado,char* temporaryPath);
+void changeFileBlockState(char* path,int nroBloque,statusBlock nuevoEstado,char* temporaryPath);
 t_dictionary *getFileStateForPath(char *path);
 #endif /* FILESTATUSCENTER_H_ */

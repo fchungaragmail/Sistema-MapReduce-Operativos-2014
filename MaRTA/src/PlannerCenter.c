@@ -34,6 +34,7 @@ t_dictionary* procesarFullDataResponse(recvMessage);
 bool redDisponible();
 Message* planificar(Message *recvMessage,TypesMessages type);
 void actualizarPedidoRealizado(int bloque, int nodo, char* path, char *pathTemporal, TypesPedidosRealizado tipo );
+Message* obtenerProximoPedido(Message *recvMessage);
 
 // Funciones publicas
 void initPlannerCenter();
@@ -243,129 +244,14 @@ Message* planificar(Message *recvMessage,TypesMessages type)
 	// !!!!!!!!!!!!!!!!!!!!!!
 
 	char *path = dictionary_get(pedidoRealizado,K_PedidoRealizado_Path);
-	t_dictionary *fileState= malloc(sizeof(t_dictionary));
-	fileState = getFileStateForPath(path);
-
-	int nroDeCopias = obtenerNumeroDeCopiasParaArchivo(recvMessage->sockfd,path);
-	int nroDeBloques = obtenerNumeroDeBloquesParaArchivo(recvMessage->sockfd,path);
-	t_dictionary copias[nroDeCopias];
-
-	int k;
-	for(k=0;k<nroDeCopias;k++){ copias[k] = malloc(sizeof(t_dictionary*)); }
-
-	copias = obtenerCopiasParaArchivo(recvMessage->sockfd,path);
 
 	//con fileState controlar cuantos archivos me quedan por procesar
 
 	if(type==K_FS_FileFullData){
 
-		int size_fileState= dictionary_get(fileState,K_FileState_size);
-		t_dictionary *blockStateArray[size_fileState];
-		int i;
-		for(i=0;i<size_fileState;i++){blockStateArray[i]=malloc(sizeof(t_dictionary));}
-		blockStateArray = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
-
-		for(i=0;i<size_fileState;i++){
-
-			t_dictionary *blockState = malloc(sizeof(t_dictionary));
-			blockState = blockStateArray[i];
-			int statusBlock = dictionary_get(blockState,K_BlockState_state);
-
-			if(statusBlock == MAPPED && i==(size_fileState-1)){
-				//estan todos mappeados , inculuidos el ultimo
-				//Actualizar estados y luego
-				//HACER REDUCE !!!
-
-			};
-
-			if(statusBlock == UNINITIALIZED){ //este bloque no esta procesado
-
-
-				t_dictionary *copiaConMenosCarga = malloc(sizeof(t_dictionary));
-				int j;
-				for(j=0;i<(nroDeCopias-1);j++){//obtengo nodo con menos carga de operaciones
-
-					t_dictionary *copia = malloc(sizeof(t_dictionary));
-					t_dictionary *copiaSiguiente = malloc(sizeof(t_dictionary));
-
-					copia = copias[j];
-					copiaSiguiente = copias[j+1];
-
-					int nroNodoCopia = dictionary_get(copia,"nroDeNodo");
-					int nroNodoCopiaSiguiente = dictionary_get(copia,"nroDeNodo");
-
-
-					if(nroNodoCopia == -1 && nroNodoCopiaSiguiente == -1){
-						//ninguno de los nodos esta disponible
-
-						t_dictionary *dic = malloc(sizeof(t_dictionary));
-						dictionary_put(dic,"nroDeNodo",-1);
-						copiaConMenosCarga = dic;
-
-					}else if(nroNodoCopia != -1 && nroNodoCopiaSiguiente == -1){
-
-						copiaConMenosCarga = nroNodoCopia;
-
-					}else if(nroNodoCopia == -1 && nroNodoCopiaSiguiente != -1){
-
-						copiaConMenosCarga = nroNodoCopiaSiguiente;
-					}else{
-
-						int opsEnNodoCopia = getCantidadDeOperacionesEnProcesoEnNodo(nroNodoCopia);
-						int opsEnNodoCopiaSig = getCantidadDeOperacionesEnProcesoEnNodo(nroNodoCopiaSiguiente);
-
-						if(opsEnNodoCopia < opsEnNodoCopia){
-							copiaConMenosCarga = copia;
-						}else{
-							copiaConMenosCarga = copiaSiguiente;
-						}
-					}
-
-					free(copia);
-					free(copiaSiguiente);
-				}
-				//ya tengo el nodo con menos carga
-
-				int nroDeNodo = dictionary_get(copiaConMenosCarga,"nroDeNodo");
-				if(nroDeNodo == -1){
-
-					//NO HAY COPIAS DISPONIBLES !!!!!
-
-				}
-				//armo pedido de map, segun protocolo es
-				//*comando: "mapFile"
-				//*data:sizeDireccionNodo-direccionNodo-sizeNroDeBloque-nroDeBloque-
-				//-sizeRutaArchivoTemporal-rutaArchivoTemporal
-
-				//"copiaConMenosCarga" tiene el nroDeNodo y nroDeBloque
-				//en "path" tengo el path a concatenar con la hora actual
-				char *temporal = temporal_get_string_time();
-				char *path_with_temporal = malloc(strlen(temporal)+strlen(path)+1);
-				strcpy(path_with_temporal,path);
-				strcat(path_with_temporal,temporal);
-				//YA TENGO EL ARCHIVO PARA ENVIAR
-
-				//ACTUALIZAR PedidoRealizado, NODOState y BLOCKState
-				//actualizarPedidoRealizado(bloque, nodo, path, pathTemporal, IN_MAPPING);
-				//incrementarOperacionesEnProcesoEnNodo(int nroNodo);
-
-				//actualizoBlockState
-				dictionary_put(blockState,K_BlockState_state,IN_MAPPING);
-				//dictionary_put(blockState,K_BlockState_nroNodo,/*copiaConMenosCarga.nodo*/);
-				//dictionary_put(blockState,K_BlockState_nroBloque,/*copiaConMenosCarga.bloque*/);
-				dictionary_put(blockState,K_BlockState_temporaryPath,path_with_temporal);
-
-				Message *sendMessage;
-
-				free(path);
-				free(fileState);
-				free(copiaConMenosCarga);
-				for(k=0;k<nroDeCopias;k++){ free(copias[k]); }
-				for(i=0;i<size_fileState;i++){ free(blockStateArray[i]); }
-
-				return sendMessage;
-			}
-		}
+		Message* sendMessage = malloc(sizeof(Message));
+		sendMessage = obtenerProximoPedido(recvMessage);
+		return sendMessage;
 	}
 
 	if(type==K_Job_MapResponse){
@@ -401,7 +287,10 @@ Message* planificar(Message *recvMessage,TypesMessages type)
 			decrementarOperacionesEnProcesoEnNodo(nroNodo);
 			addTemporaryFilePathToNodoData(nroNodo,temporaryPath);
 
-			//ENVIAR PROXIMO PEDIDO !!!
+			//OBTENER PROXIMO PEDIDO !!!
+			Message* sendMessage = malloc(sizeof(Message));
+			sendMessage = obtenerProximoPedido(recvMessage);
+			return sendMessage;
 		}
 
 		if(requestResponse==false){//REPLANIFICAR
@@ -411,39 +300,168 @@ Message* planificar(Message *recvMessage,TypesMessages type)
 			//PONER -1 EN COPIAS
 			darDeBajaCopiaEnBloqueYNodo(temporaryPath,recvMessage->sockfd,nroBloque,nroNodo);
 			decrementarOperacionesEnProcesoEnNodo(nroNodo);
+
+			//OBTENER PROXIMO PEDIDO !!!
+			Message* sendMessage = malloc(sizeof(Message));
+			sendMessage = obtenerProximoPedido(recvMessage);
+			return sendMessage;
+		}
+	}
+
+	if(type==K_Job_ReduceResponse){
+		//path//fileState//nroDeBloques//nroDeCopias//copias
+		//*data:sizeRutaArchivoTemporal-rutaArchivoTemporal-sizeRespuesta-Respuesta
+		char *temporaryPath = obtenerFilePath(recvMessage,K_Job_ReduceResponse);
+		bool requestResponse = obtenerRequestResponse(recvMessage,K_Job_ReduceResponse);
+
+		int nroNodo =  dictionary_get(pedidoRealizado,K_PedidoRealizado_Nodo);
+		int nroBloque =  dictionary_get(pedidoRealizado,K_PedidoRealizado_Bloque);
+
+		if(requestResponse==true){
+
+			decrementarOperacionesEnProcesoEnNodo(nroNodo);
+			addTemporaryFilePathToNodoData(nroNodo,temporaryPath);
+			printf("archivo %s reducido con exito !!!",path);
+			free(temporaryPath);
+			free(path);
 		}
 
+		if(requestResponse==false){
+			//re planificar
+			// ver que hacer si el reduce falla !!
+			free(temporaryPath);
+			free(path);
+		}
 	}
-	if(type==K_Job_ReduceResponse){
-
-
-		//*data:sizeRutaArchivoTemporal-rutaArchivoTemporal-sizeRespuesta-Respuesta
-					char *temporaryPath = obtenerFilePath(recvMessage,K_Job_ReduceResponse);
-					char *path = dictionary_get(pedidoRealizado,K_PedidoRealizado_Path);
-					bool requestResponse = obtenerRequestResponse(recvMessage,K_Job_ReduceResponse);
-
-					//OBTENER DE MIS "PEDIDOS REALIZADOS" el #bloque y #nodo
-					int nroNodo,nroBloque;
-
-					blockState nuevoEstado;
-					if(requestResponse==true){
-						nuevoEstado=REDUCED;
-						printf("archivo %s reducido con exito !!!",path);
-					}
-					if(requestResponse==false){nuevoEstado=TEMPORAL_ERROR;}//REPLANIFICAR
-
-					changeFileBlockState(path,nroBloque,nuevoEstado,temporaryPath);
-					addTemporaryFilePathToNodoData(nroNodo,temporaryPath);
-
-					planificar();
-
-					free(temporaryPath);
-					free(path);
-
-		printf("archivo %s reducido con exito !!!",path);
-	}
-
 }
+
+Message* obtenerProximoPedido(Message *recvMessage)
+{
+	char *path = dictionary_get(pedidoRealizado,K_PedidoRealizado_Path);
+	t_dictionary *fileState= malloc(sizeof(t_dictionary));
+	fileState = getFileStateForPath(path);
+
+	int nroDeCopias = obtenerNumeroDeCopiasParaArchivo(recvMessage->sockfd,path);
+	int nroDeBloques = obtenerNumeroDeBloquesParaArchivo(recvMessage->sockfd,path);
+	t_dictionary copias[nroDeCopias];
+
+	int k;
+	for(k=0;k<nroDeCopias;k++){ copias[k] = malloc(sizeof(t_dictionary*)); }
+
+	copias = obtenerCopiasParaBloqueDeArchivo(recvMessage->sockfd,path);
+
+
+	int size_fileState= dictionary_get(fileState,K_FileState_size);
+	t_dictionary *blockStateArray[size_fileState];
+	int i;
+	for(i=0;i<size_fileState;i++){blockStateArray[i]=malloc(sizeof(t_dictionary));}
+	blockStateArray = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
+
+	for(i=0;i<size_fileState;i++){
+
+		t_dictionary *blockState = malloc(sizeof(t_dictionary));
+		blockState = blockStateArray[i];
+		int statusBlock = dictionary_get(blockState,K_BlockState_state);
+
+		if(statusBlock == MAPPED && i==(size_fileState-1)){
+			//estan todos mappeados , inculuidos el ultimo
+			//Actualizar estados y luego
+			//HACER REDUCE !!! --> usar fileState para ver las ubicaciones
+			//hacer reduce en el nodo que contenga mas archivos mappeados
+
+
+		};
+
+		if(statusBlock == UNINITIALIZED){ //este bloque no esta procesado
+
+
+			t_dictionary *copiaConMenosCarga = malloc(sizeof(t_dictionary));
+			int j;
+			for(j=0;i<(nroDeCopias-1);j++){//obtengo nodo con menos carga de operaciones
+
+				t_dictionary *copia = malloc(sizeof(t_dictionary));
+				t_dictionary *copiaSiguiente = malloc(sizeof(t_dictionary));
+
+				copia = copias[j];
+				copiaSiguiente = copias[j+1];
+
+				int nroNodoCopia = dictionary_get(copia,"nroDeNodo");
+				int nroNodoCopiaSiguiente = dictionary_get(copia,"nroDeNodo");
+
+
+				if(nroNodoCopia == -1 && nroNodoCopiaSiguiente == -1){
+					//ninguno de los nodos esta disponible
+
+					t_dictionary *dic = malloc(sizeof(t_dictionary));
+					dictionary_put(dic,"nroDeNodo",-1);
+					copiaConMenosCarga = dic;
+
+				}else if(nroNodoCopia != -1 && nroNodoCopiaSiguiente == -1){
+
+					copiaConMenosCarga = nroNodoCopia;
+
+				}else if(nroNodoCopia == -1 && nroNodoCopiaSiguiente != -1){
+
+					copiaConMenosCarga = nroNodoCopiaSiguiente;
+				}else{
+
+					int opsEnNodoCopia = getCantidadDeOperacionesEnProcesoEnNodo(nroNodoCopia);
+					int opsEnNodoCopiaSig = getCantidadDeOperacionesEnProcesoEnNodo(nroNodoCopiaSiguiente);
+
+					if(opsEnNodoCopia < opsEnNodoCopia){
+						copiaConMenosCarga = copia;
+					}else{
+						copiaConMenosCarga = copiaSiguiente;
+					}
+				}
+
+				free(copia);
+				free(copiaSiguiente);
+			}
+			//ya tengo el nodo con menos carga
+
+			int nroDeNodo = dictionary_get(copiaConMenosCarga,"nroDeNodo");
+			if(nroDeNodo == -1){
+
+				//NO HAY COPIAS DISPONIBLES !!!!!
+
+			}
+			//armo pedido de map, segun protocolo es
+			//*comando: "mapFile"
+			//*data:sizeDireccionNodo-direccionNodo-sizeNroDeBloque-nroDeBloque-
+			//-sizeRutaArchivoTemporal-rutaArchivoTemporal
+
+			//"copiaConMenosCarga" tiene el nroDeNodo y nroDeBloque
+			//en "path" tengo el path a concatenar con la hora actual
+			char *temporal = temporal_get_string_time();
+			char *path_with_temporal = malloc(strlen(temporal)+strlen(path)+1);
+			strcpy(path_with_temporal,path);
+			strcat(path_with_temporal,temporal);
+			//YA TENGO EL ARCHIVO PARA ENVIAR
+
+			//ACTUALIZAR PedidoRealizado, NODOState y BLOCKState
+			//actualizarPedidoRealizado(bloque, nodo, path, pathTemporal, IN_MAPPING);
+			//incrementarOperacionesEnProcesoEnNodo(int nroNodo);
+
+			//actualizoBlockState
+			dictionary_put(blockState,K_BlockState_state,IN_MAPPING);
+			//dictionary_put(blockState,K_BlockState_nroNodo,/*copiaConMenosCarga.nodo*/);
+			//dictionary_put(blockState,K_BlockState_nroBloque,/*copiaConMenosCarga.bloque*/);
+			dictionary_put(blockState,K_BlockState_temporaryPath,path_with_temporal);
+
+			Message *sendMessage;
+
+			free(path);
+			free(fileState);
+			free(copiaConMenosCarga);
+			for(k=0;k<nroDeCopias;k++){ free(copias[k]); }
+			for(i=0;i<size_fileState;i++){ free(blockStateArray[i]); }
+
+			return sendMessage;
+		}
+	}
+}
+
 
 void actualizarPedidoRealizado(int bloque, int nodo, char* path, char *pathTemporal, TypesPedidosRealizado tipo )
 {
@@ -455,10 +473,8 @@ void actualizarPedidoRealizado(int bloque, int nodo, char* path, char *pathTempo
 }
 
 // Idea de planificaion : se hara map y reduce de los bloques en orden ascendente.
-// Se procesara todo todos los archivos en paralelo o los mas que se puedan, sino lo habria un Job activo.
 // Hago map de todos los bloques de un archivo y ahi lanzo el reduce.
-
 // Habra un MAXIMO de envios por la red, hasta que no responda un envio, nose hara otro(Productor-Consumidor)
 // Si vuelve con error, entonces se rePlanifica y se vuelve a mandar el mismo pero a otro NODO.
-// Si NO hay otro NODO disponible entonces, se informa que el proceso del archivo quedo incompleto--> se envia a la lista de incompletos.
+// Si NO hay otro NODO disponible entonces, se informa que el proceso del archivo quedo incompleto--> no se que hacer luego.
 // Si la operacion enviada falla porque se cayo el Nodo o simplemente fallo entonces se RE-PLANIFICA, si se cae el Job NO hay nada mas que hacer.
