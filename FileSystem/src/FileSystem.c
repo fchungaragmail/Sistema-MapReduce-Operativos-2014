@@ -29,6 +29,7 @@ int main(void) {
 	//Hasta que no tenga los nodos suficientes no sigue
 	pthread_create(&tEscucharConexionesInicial, NULL, escucharConexiones, LISTA_NODOS);
 	pthread_create(&tLeerEntradas, NULL, leerEntradas, NULL);
+
 	pthread_join(tEscucharConexionesInicial, NULL);
 
 	pthread_create(&tEscucharConexioes, NULL, escucharConexiones, -1);
