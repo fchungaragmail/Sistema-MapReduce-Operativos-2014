@@ -20,11 +20,14 @@ void exitFileSystem();
 
 int main(void) {
 	pthread_t tConsola, tEscucharConexionesInicial, tEscucharConexioes,
-			  tConectarMaRTA, tLeerEntradas;
+			  tConectarMaRTA, tLeerEntradas, tPrueba;
 
 	initFileSystem();
 
 	pthread_create(&tConsola, NULL, execConsola, NULL);
+
+	pthread_create(&tPrueba, NULL, probarConexiones, NULL);
+	pthread_join(tPrueba, NULL);
 
 	//Hasta que no tenga los nodos suficientes no sigue
 	pthread_create(&tEscucharConexionesInicial, NULL, escucharConexiones, LISTA_NODOS);

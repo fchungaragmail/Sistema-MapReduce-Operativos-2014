@@ -11,11 +11,10 @@
 #include <pthread.h>
 #include <commons/string.h>
 #include "recursosCompartidos.h"
-#include "conexiones.h"
+#include "protocolo.h"
 
 
 void procesarComando(char** comando, void(*doComando)(void*));
-
 int mover(char* argumentos);
 int borrar(char* argumentos);
 int crearDir(char* argumentos);
@@ -27,7 +26,8 @@ int borrarBloque(char* argumentos);
 int copiarBloque(char* argumentos);
 int agregarNodo(char* argumentos);
 int quitarNodo(char* argumentos);
-int nombre(char* comando, void* conexion);
+int nomb(char* argumentos, Conexion_t* conexion);
+void procesarComandoRemoto(mensaje_t* mensaje, Conexion_t* conexion);
 
 
 #endif /* COMANDOS_H_ */

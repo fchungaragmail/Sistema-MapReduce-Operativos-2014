@@ -75,7 +75,7 @@ void escucharConexiones(int nodosMax)
 		Sockaddr_in their_addr;
 		Conexion_t* conexionNueva = malloc(sizeof(Conexion_t));
 
-		if (nodosMax == 1) probarConexiones(); //PRUEBA
+		//if (nodosMax == 1) probarConexiones(); //PRUEBA
 
 		nuevoSocketfd = accept(escuchaConexiones, &their_addr, &sin_size);
 
@@ -151,7 +151,7 @@ void leerEntradas()
 				if (estado == CONECTADO)
 				{
 					//En thread -> ProcesarInfo(Mensaje, Conexion);
-					log_info(log,"Recibi %s", mensaje->comando);
+					procesarComandoRemoto(mensaje, conexion);
 				} else
 				{
 					cerrarConexion(conexion);

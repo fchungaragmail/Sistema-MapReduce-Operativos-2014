@@ -9,6 +9,8 @@
 #define CONEXIONES_H_
 
 #include "recursosCompartidos.h"
+#include <protocolo.h>
+#include "comandos.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -16,7 +18,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <protocolo.h>
 #include <sys/ioctl.h>
 
 #define NODOS_MAX 20
@@ -36,15 +37,6 @@ struct _sockaddr_in {
 	unsigned char sin_zero[8]; // Relleno para preservar el tamaño original de struct sockaddr
 };
 typedef struct _sockaddr_in Sockaddr_in;
-
-struct _conexion {
-	int sockfd;
-	char nombre[20];
-	int estado;
-};
-typedef struct _conexion Conexion_t;
-
-
 
 
 

@@ -9,7 +9,7 @@
 
 void initConsola();
 void esperarComando();
-void procesarEntrada(char[],bool*);
+int procesarEntrada(char[],bool*);//Si la pudo procesar devuelve 0
 void mostrarAyuda();
 void cerrarConsola();
 t_dictionary* diccionarioComandos; //En este diccionario se guardan
@@ -33,12 +33,18 @@ void esperarComando()
 	while(continuar)
 	{
 	scanf(" %[^\n]",entrada);
-	procesarEntrada(entrada,&continuar);
+	if (procesarEntrada(entrada,&continuar) != 0)
+	{
+		printf("Comando desconocido.\n"
+				"Ingrese 'help' para ver los comandos disponibles.\n");
+	}
 	}
 }
 
-void procesarEntrada(char entrada[],bool* continuar)
+int procesarEntrada(char entrada[],bool* continuar)
 {
+	int ret = 0;
+
 	char** comando = string_n_split(entrada,2," ");
 
 	*continuar = true;
@@ -124,8 +130,7 @@ void procesarEntrada(char entrada[],bool* continuar)
 	}
 	default:
 	{
-		printf("Comando desconocido.\n"
-				"Ingrese 'help' para ver los comandos disponibles.\n");
+		return 1;
 		break;
 	}
 	}

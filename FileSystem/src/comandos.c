@@ -6,8 +6,11 @@
  */
 
 #include "comandos.h"
+#define MARTA "MaRTA"
+
 
 void procesarComando(char** comando, void(*doComando)(void*));
+void procesarComandoRemoto(mensaje_t* mensaje, Conexion_t* conexion);
 int mover(char* argumentos);
 int borrar(char* argumentos);
 int crearDir(char* argumentos);
@@ -19,7 +22,7 @@ int borrarBloque(char* argumentos);
 int copiarBloque(char* argumentos);
 int agregarNodo(char* argumentos);
 int quitarNodo(char* argumentos);
-int nombre(char* comando, void* conexion);
+int nomb(char* argumentos, Conexion_t* conexion);
 
 
 
@@ -30,6 +33,19 @@ void procesarComando(char** comando, void(*doComando)(void*))
 					"con los argumentos: %s", comando[0], comando[1]);
 	log_info(log, message);
 	pthread_create(&tDoComando, NULL, (*doComando), comando[1]);
+}
+
+
+void procesarComandoRemoto(mensaje_t* mensaje, Conexion_t* conexion)
+{
+	bool dummy;
+	if (procesarEntrada(mensaje->comando,&dummy) != 0)
+	{
+		//Procesarla como remoto
+		//char** comando = string_n_split(mensaje->comando,2," ");
+		nomb(mensaje->comando,conexion);
+	}
+
 }
 
 
@@ -98,17 +114,12 @@ int quitarNodo(char* argumentos){
 	return 0;
 }
 
-int nombre(char* comando, void* conexion)
+int nomb(char* argumentos, Conexion_t* conexion)
 {
-	char** lineasComando = string_n_split(comando,2," ");
-	//strcpy(conexion->nombre, lineasComando[1]);
-	if ((strcmp(lineasComando[1], "MaRTA")) != 0)
-	{
-		return 1;
-	}else
-	{
-		return 0;
-	}
+	char tmp[20] = "";
+	sscanf(argumentos,"nombre -%s", tmp);
+	strcpy(conexion->nombre, tmp);
+	log_info(log, "Identificado el nodo %s", conexion->nombre);
 }
 
 
