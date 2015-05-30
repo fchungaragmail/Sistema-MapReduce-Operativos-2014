@@ -130,10 +130,11 @@ int procesarEntrada(char entrada[],bool* continuar)
 	}
 	default:
 	{
-		return 1;
+		ret = 1;
 		break;
 	}
 	}
+	return ret;
 }
 
 void initConsola()
