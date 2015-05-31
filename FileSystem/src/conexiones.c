@@ -75,7 +75,7 @@ void escucharConexiones(int nodosMax)
 		Sockaddr_in their_addr;
 		Conexion_t* conexionNueva = malloc(sizeof(Conexion_t));
 
-		if (nodosMax == 1) probarConexiones(); //PRUEBA
+		//if (nodosMax == 1) probarConexiones(); //PRUEBA
 
 		nuevoSocketfd = accept(escuchaConexiones, &their_addr, &sin_size);
 
@@ -135,23 +135,29 @@ void leerEntradas()
 		//Chequeo los fd de las conexiones
 		for (int i=0; i<conexiones->elements_count ;i++)
 		{
-			int estado;
-			Conexion_t* conexion = list_get(conexiones,i);
-			if (!FD_ISSET(conexion->sockfd,&nodosSelect))
-				continue;
+			int count = 1;
+			while (count != 0)
+			{
+				int estado;
+				Conexion_t* conexion = list_get(conexiones,i);
+				if (!FD_ISSET(conexion->sockfd,&nodosSelect))
+				{
+					count = 0;
+					continue;
+				}
 
-			mensaje_t* mensaje = malloc(sizeof(mensaje_t));
-			estado = recibir(conexion->sockfd, mensaje);
-			if (estado == CONECTADO)
-			{
-				log_info(log, "%s", mensaje->comando);
-				//ProcesarInformacion
-				//Por ahora solo procesa el nombre
-				nombre(mensaje->comando, conexion);
-			} else
-			{
-				cerrarConexion(conexion);
-				continue;
+				mensaje_t* mensaje = malloc(sizeof(mensaje_t));
+				estado = recibir(conexion->sockfd, mensaje);
+				if (estado == CONECTADO)
+				{
+					//En thread -> ProcesarInfo(Mensaje, Conexion);
+					procesarComandoRemoto(mensaje, conexion);
+				} else
+				{
+					cerrarConexion(conexion);
+					continue;
+				}
+				ioctl(conexion->sockfd, FIONREAD, &count);
 			}
 		}
 	}

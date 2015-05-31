@@ -23,6 +23,14 @@ extern char IP_LISTEN[16];
 extern int LISTA_NODOS;
 extern int PUERTO_MARTA;
 extern FILE* log;
+extern t_list* conexiones;
+
+struct _conexion {
+	int sockfd;
+	char nombre[20];
+	int estado;
+};
+typedef struct _conexion Conexion_t;
 
 
 #endif /* RECURSOSCOMPARTIDOS_H_ */
