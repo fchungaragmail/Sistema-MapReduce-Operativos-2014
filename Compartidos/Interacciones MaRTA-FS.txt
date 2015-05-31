@@ -11,7 +11,7 @@ tambien se conectan por el mismo puerto
 
 -->Pedir tabla con todos los datos de los nodos en los que esta tal archivo 
 -Comando: "DataFile"
--Data: sizeRutaDelArchivo-rutaDelArchivo -->por ejemplo: "/user/juan/datos/temperatura2012.txt/"
+-Data: rutaDelArchivo -->por ejemplo: "/user/juan/datos/temperatura2012.txt/"
 
 *********************************************************************************************************************
 
