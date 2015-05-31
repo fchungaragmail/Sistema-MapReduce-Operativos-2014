@@ -7,14 +7,19 @@ Luego de conectarse con MaRTA, el FS espera el siguiente mensaje:
 Si no se envia esto, el FS no puede identificar a MaRta, ya que los nodos
 tambien se conectan por el mismo puerto
 
+*********************************************************************************************************************
 
 -->Pedir tabla con todos los datos de los nodos en los que esta tal archivo 
 -Comando: "DataFile"
 -Data: sizeRutaDelArchivo-rutaDelArchivo -->por ejemplo: "/user/juan/datos/temperatura2012.txt/"
 
+*********************************************************************************************************************
+
 --> FS responde con tabla de archivo pedida
 -Comando: "DataFileResponse"
--Data:sizeRutaDelArchivo-rutaDelArchivo--sizeRespuesta-Respuesta-sizeCantidadDeBloques-cantidadDeBloques-sizeNroDeCopias-nroDeCopias-sizeEstructura-estructura 
+-Data:sizeRutaDelArchivo-rutaDelArchivo--sizeRespuesta-Respuesta-sizeCantidadDeBloques-cantidadDeBloques-sizeNroDeCopias-nroDeCopias-sizeEstructura-estructura
+
+// --> Si el FS no tiene disponible el archivo que me devuelva en "sizeRespuesta" el valor 0 y en respuesta tambien el valor 0 , luego en los demas bloques nada obviamente.
 
 //"Respuesta" sera un bool de stdbool.h y me dira si esta disponible el archivo que pedi o no (si TODAS las copias de un bloque NO estan disponibles, entonces todo el archivo NO esta disponible)
 
@@ -22,3 +27,5 @@ tambien se conectan por el mismo puerto
  A mi me vendria genial que me llegue una matriz (de arrays) donde siempre tendra 3 columnas (copia 1,2,3) y
  luego las filas son la cantidad de bloques que es el parametro "cantidadDeBloques", asi yo podria recorrerlo,
  donde cada elemento de esta matriz es un t_dictionary con los elementos "numeroDeNodo" y "nroDeBloque"
+
+*********************************************************************************************************************
