@@ -19,8 +19,6 @@ tambien se conectan por el mismo puerto
 -Comando: "DataFileResponse"
 -Data:sizeRutaDelArchivo-rutaDelArchivo--sizeRespuesta-Respuesta-sizeCantidadDeBloques-cantidadDeBloques-sizeNroDeCopias-nroDeCopias-sizeEstructura-estructura
 
-// --> Si el FS no tiene disponible el archivo que me devuelva en "sizeRespuesta" el valor 0 y en respuesta tambien el valor 0 , luego en los demas bloques nada obviamente.
-
 //"Respuesta" sera un bool de stdbool.h y me dira si esta disponible el archivo que pedi o no (si TODAS las copias de un bloque NO estan disponibles, entonces todo el archivo NO esta disponible)
 
 //Por "estructura "me refiero a la que se ve en la pag 13 del tp (contando la caratula).
