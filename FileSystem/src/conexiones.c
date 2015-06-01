@@ -88,9 +88,8 @@ void escucharConexiones(int nodosMax)
 		pthread_mutex_lock(&mNodos);
 		FD_SET(nuevoSocketfd, &nodos);
 		nodosOnline++;
-		pthread_mutex_unlock(&mNodos);
-
 		write(desbloquearSelect[1], "", 1);
+		pthread_mutex_unlock(&mNodos);
 
 		log_info(log, "Nueva conexion con %s. \n"
 				"Esperando identificacion.", inet_ntoa(their_addr.sin_addr));
