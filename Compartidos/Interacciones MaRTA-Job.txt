@@ -1,11 +1,14 @@
 Interacciones MaRTA-Job
 ************************
 
+ACLARACION!!! : TODOS los valores "size..." osea los que vamos a usar para informar la longitud del mensaje siguiente , deben ser de tipo int8_t,int16_t,int32_t
+
+***********************************************
 -->Job le pasa a MaRTA su archivo a procesar (pueden ser muchos, en este caso seran varios envios)
 *comando: "archivoAProcesar"
-*data: sizeRutaDeArchivo-rutaDeArchivo-sizeSoportaCombiner-soportaCombiner 
+*data: sizeRutaDeArchivo-rutaDeArchivo-soportaCombiner 
 // La rutaDeArchivo puede ser por ejemplo: "/user/juan/datos/temperatura2012.txt/" 
-// SoportaCombiner sera un true/false que te da la libreria stdbool.h
+// soportaCombiner debe ser un int_8 siendo 0 si es false o 1 si es true
 ************************************************************************************************************************************************************************************************
 -->MaRTA le dice al Job que haga una rutina de mapping
 *comando: "mapFile"
@@ -16,8 +19,8 @@ Interacciones MaRTA-Job
 ************************************************************************************************************************************************************************************************
 -->Job responde a Marta con el resultado de la operacion de map
 *comando : "mapFileResponse"
-*data:sizeRutaArchivoTemporal-rutaArchivoTemporal-sizeRespuesta-Respuesta 
-// la "Respuesta" sera un Bool que te da la libreria stdbool.h
+*data:sizeRutaArchivoTemporal-rutaArchivoTemporal-Respuesta 
+// la "Respuesta" debe ser un int_8 siendo 0 si es false o 1 si es true
 ************************************************************************************************************************************************************************************************
 -->MaRTA le indica al Job en que archivos aplicar Reduce // Para que sea mas legible usos los sinonimos:  "RutaArchivoTemporal" == "RAT" ; "NroDeNodo(Remoto/Local)" == " #Nodo(Remoto/Local)" ;
 
@@ -43,9 +46,9 @@ Interacciones MaRTA-Job
 ************************************************************************************************************************************************************************************************
 -->Job responde a Marta con el resultado de la operacion de reduce
 *comando:"reduceFileResponse"
-*data:sizeNombreArchTemp-nombreArchTemp-sizeRespuesta-respuesta
+*data:sizeNombreArchTemp-nombreArchTemp-Respuesta
 
 // Debe devolver el "NombreArchTemp" asi MaRTA sabe a que pedido de reduce corresponde, ya que seguramente envio varios.
-// la "Respuesta" sera un Bool que te da la libreria stdbool.h
+// la "Respuesta"  debe ser un int_8 siendo 0 si es false o 1 si es true
 
 ************************************************************************************************************************************************************************************************
