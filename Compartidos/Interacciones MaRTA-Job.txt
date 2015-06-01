@@ -1,7 +1,7 @@
 Interacciones MaRTA-Job
 ************************
 
-ACLARACION!!! : TODOS los valores "size..." osea los que vamos a usar para informar la longitud del mensaje siguiente , deben ser de tipo int8_t,int16_t,int32_t
+ACLARACION!!! : TODOS los valores "size..." osea los que vamos a usar para informar la longitud del mensaje siguiente , deben ser de tipo "int16_t" o "int32_t" segun se considere necesario 
 
 ***********************************************
 -->Job le pasa a MaRTA su archivo a procesar (pueden ser muchos, en este caso seran varios envios)
@@ -12,7 +12,8 @@ ACLARACION!!! : TODOS los valores "size..." osea los que vamos a usar para infor
 ************************************************************************************************************************************************************************************************
 -->MaRTA le dice al Job que haga una rutina de mapping
 *comando: "mapFile"
-*data:sizeDireccionNodo-direccionNodo-sizeNroDeBloque-nroDeBloque-sizeRutaArchivoTemporal-rutaArchivoTemporal
+*data:sizeDireccionNodo-direccionNodo-nroDeBloque-sizeRutaArchivoTemporal-rutaArchivoTemporal
+//"nroDeBloque" sera un int16_t
 // La ruta del archivo temporal siempre sera el nombreDelArchivo y se le concatenara los hh:mm:ss:mmmm devuelto por la funcion temporal.h que nos da la catedra
 // se pondra un guion como separador, de esta manera se podra distinguir entre la ruta del archivo y el hh:mm:ss:mmmm agregado, de esta manera se va a poder 
 // obtener la ruta del archivo si hiciera falta--> por ejemplo "/user/juan/datos/temperatura2012.txt/-23:43:45:2345"
@@ -25,21 +26,23 @@ ACLARACION!!! : TODOS los valores "size..." osea los que vamos a usar para infor
 -->MaRTA le indica al Job en que archivos aplicar Reduce // Para que sea mas legible usos los sinonimos:  "RutaArchivoTemporal" == "RAT" ; "NroDeNodo(Remoto/Local)" == " #Nodo(Remoto/Local)" ;
 
 *comando: "reduceFile"(sin Combiner)
-*data: size#NodoLocal-#NodoLocal-sizeNombreArchTempLocal-NombreArchTempLocal-sizeCantDeArchEnNodoLocalAProcesar-CantDeArchEnNodoLocalAProcesar-sizeRAT1-RAT1-sizeRAT2-RAT2-...etc...-
-                ...-size#NodoRemoto1-#NodoRemoto1-sizeCantDeArchEnNodoRemotoAProcesar-CantDeArchEnNodoRemotoAProcesar-sizeRAT1-RTA1-sizeRAT2-RAT2-sizeRAT3-RAT3-etc... 
+*data: size#NodoLocal-#NodoLocal-sizeNombreArchTempLocal-NombreArchTempLocal-CantDeArchEnNodoLocalAProcesar-sizeRAT1-RAT1-sizeRAT2-RAT2-...etc...-
+                ...-size#NodoRemoto1-#NodoRemoto1-CantDeArchEnNodoRemotoAProcesar-sizeRAT1-RTA1-sizeRAT2-RAT2-sizeRAT3-RAT3-etc... 
 		...-size#NodoRemoto2-#NodoRemoto2-....
 
+//"CantDeArchEnNodoLocalAProcesar" y "CantDeArchEnNodoRemotoAProcesar" seran un int16_t
 //nroDeNodoLocal sera el nodo donde se guardaran el resultado final de aplicar las rutinas de reduce
 
 *******************************************
 
 *comando: "reduceFile"(con Combiner)
-*data: size#NodoLocal-#NodoLocal-sizeNombreArchTemp-nombreArchTemp-sizeCantDeArchEnNodoLocalAProcesar-CantDeArchEnNodoLocalAProcesar-sizeRAT1-RAT1-sizeRAT2-RAT2-...etc...-
-                ...-size#NodoRemoto1-#NodoRemoto1-sizeNombreArchTemp-nombreArchTemp-sizeCantDeArchEnNodoRemotoAProcesar-CantDeArchEnNodoRemotoAProcesar-sizeRAT1-RTA1-sizeRAT2-RAT2-etc... 
+*data: size#NodoLocal-#NodoLocal-sizeNombreArchTemp-nombreArchTemp-CantDeArchEnNodoLocalAProcesar-sizeRAT1-RAT1-sizeRAT2-RAT2-...etc...-
+                ...-size#NodoRemoto1-#NodoRemoto1-sizeNombreArchTemp-nombreArchTemp-CantDeArchEnNodoRemotoAProcesar-sizeRAT1-RTA1-sizeRAT2-RAT2-etc... 
 		...-size#NodoRemoto2-#NodoRemoto2-....
 // NombreArchTemp es el nombre del archivo donde el Nodo guardara el resultado de su rutina de Reduce, luego los resultados que tiene cada nodo de su rutina de reduce deberan ser
 // reducidos de vuelta o concatenados (no lei bien esta parta la verdad) en #NodoLocal
 
+//"CantDeArchEnNodoLocalAProcesar" y "CantDeArchEnNodoRemotoAProcesar" seran un int16_t
 
 //MaRTA tendra dos formas de ejecutar este comando dependiendo si el Job soporta combiner o no, de cualquiera de las formas que MaRTA lo envie, el Job tendra que saber que 
 //tipo de estructura del mensaje debe esperar, ya que el mismo Job sabe si soporta combiner o no.
