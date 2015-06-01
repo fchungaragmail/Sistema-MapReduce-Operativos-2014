@@ -14,12 +14,15 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include <semaphore.h>
+#include <sys/ioctl.h>
 
 #include <commons/txt.h>
 #include <commons/error.h>
 #include <commons/collections/list.h>
 
 #include "ConexionCenter.h"
+
+#include "VariablesGlobales.h"
 
 // CONSTANTES
 
@@ -110,11 +113,13 @@ Message* listenConnections()
 {
 	printf(" SELECT  !!!\n");
 	read_fds = master; // cópialo
+	sem_post(&semPrueba);
+	printf("destrabo enviarMensaje\n");
 	if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) {
 		perror("select");
 		exit(1);
 	}
-	printf("SI PASA POR ACA EL SELECT SIGUIO !!!\n");
+	printf("SELECT recibio algo !!!\n");
 	printf("CONEXION NUMERO : %d \n",conexionesProcesadas);
 	conexionesProcesadas++;
 	int i, j;
@@ -141,7 +146,9 @@ Message* listenConnections()
 
 					Message *newConnection;
 					newConnection=malloc(sizeof(Message));
-					newConnection->mensaje=malloc(sizeof(mensaje_t));
+					newConnection->mensaje=malloc(sizeof(*newConnection->mensaje));
+
+
 					newConnection->mensaje->comandoSize=(strlen("newConnection")+1);
 					newConnection->mensaje->comando=malloc(strlen("newConnection")+1);
 					strcpy(newConnection->mensaje->comando,"newConnection");
@@ -166,14 +173,33 @@ Message* listenConnections()
 					printf("llegaron datos de algun cliente\n");
 
 					Message *recvMesage = malloc(sizeof(Message));
-					recvMesage->mensaje=malloc(sizeof(mensaje_t));
+					recvMesage->mensaje=malloc(sizeof(*recvMesage->mensaje));
+
 					recvMesage->mensaje = recibir(i);
+
+					int count=1;
+					int s=1;
+					while(count>0){
+						ioctl(socket, FIONREAD, &count);
+						if(count >0){
+							recvMesage->mensaje = recibir(i);
+							printf("todabia quedan msjes en el buffer\n");
+							printf("releo %d veces\n",s);
+							s=s+1;
+						}
+					}
 					recvMesage->sockfd=i;
 
 					/*printf("se recibio comandoSize %d \n",recvMesage->mensaje->comandoSize);
 					printf("se recibio el comando %s \n",recvMesage->mensaje->comando);
 					printf("se recibio dataSize %d \n",recvMesage->mensaje->dataSize);
 					printf("se recibio la data %s \n",recvMesage->mensaje->data);*/
+
+					/*mensaje_t *m = recibir(i);
+					printf("se recibio comandoSize %d \n",m->comandoSize);
+					printf("se recibio el comando %s \n",m->comando);
+					printf("se recibio dataSize %d \n",m->dataSize);
+					printf("se recibio la data %s \n",m->data);*/
 
 					return recvMesage;
 				}
@@ -188,11 +214,11 @@ mensaje_t* recibir(int socket){
 
 	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
 
-	recv(socket, &(mensaje->comandoSize), sizeof(int),0);
+	recv(socket, &(mensaje->comandoSize), sizeof(int16_t),0);
 	mensaje->comando = malloc(mensaje->comandoSize);
 	recv(socket, mensaje->comando, mensaje->comandoSize,0);
 
-	recv(socket, &(mensaje->dataSize), sizeof(long),0);
+	recv(socket, &(mensaje->dataSize), sizeof(int32_t),0);
 	mensaje->data = malloc(mensaje->dataSize);
 	recv(socket, mensaje->data, mensaje->dataSize,0);
 

@@ -20,10 +20,24 @@
 #include "ConexionCenter.h"
 #include "PlannerCenter.h"
 #include "Utilities.h"
+#include "VariablesGlobales.h"
 
-sem_t escucharConexiones;
+t_dictionary *filesToProcess;
+t_dictionary *filesStates;
+t_dictionary *nodosData;
+
+sem_t semFilesToProcess;
+sem_t semFilesToProcessPerJob;
+sem_t semFilesStates;
+sem_t semNodosData;
+sem_t semNodoState;
+
 sem_t leerConexiones;
 sem_t semPrueba;
+
+// MaRTA debe controlar el trafico en la red!!
+int MaxPedidosEnRed = 5;
+int pedidosEnRed;
 
 Message *recvMessage;
 
@@ -48,14 +62,20 @@ int main(void) {
 	puts("MaRTA al ataque !!!");
 
 	//init MaRTA
+	filesToProcess = dictionary_create();
+	filesStates = dictionary_create();
+	nodosData = dictionary_create();
+	sem_init(&semNodosData, 0, 1);
+	sem_init(&semFilesStates, 0, 1);
+	sem_init(&semFilesToProcess, 0, 1);
+	sem_init(&semFilesToProcessPerJob, 0, 1);
+	sem_init(&semNodoState, 0, 1);
+
 	pthread_t connectionThread;
 	//pthread_t connectToFSThread;
-	recvMessage=malloc(sizeof(Message));
-	recvMessage->mensaje=malloc(sizeof(mensaje_t));
 
-	sem_init(&escucharConexiones, 0, 1);
 	sem_init(&leerConexiones, 0, 0);
-	sem_init(&semPrueba, 0, 1);
+	sem_init(&semPrueba, 0, 0);
 
 	initFilesStatusCenter();
 	initPlannerCenter();
@@ -66,35 +86,26 @@ int main(void) {
 
 	sleep(2);
 	printf("salio del sleep\n");
-	pthread_t hiloPrueba;
-	pthread_create(&hiloPrueba, NULL, probarConexiones,"hilo_1");
-	/*
-	int t=0;
-	while (t<4){
-		sleep(0.5);
-		if(t==1){pthread_create(&hiloPrueba, NULL, probarConexiones,"hilo_1");};
-		if(t==2){pthread_create(&hiloPrueba, NULL, probarConexiones,"hilo_2");};
-		if(t==3){pthread_create(&hiloPrueba, NULL, probarConexiones,"hilo_3");};
-		t++;
-	}
-*/
+	//pthread_t hiloPrueba;
+	//pthread_create(&hiloPrueba, NULL, probarConexiones,"hilo_1");
+	probarConexiones("hilo_1");
+	return EXIT_SUCCESS;
 	while(1)
 	{
 		printf("MaRTA : esta esperando en el while principal\n");
 		sem_wait(&leerConexiones);
 		printf("MaRTA : esta en el while principal\n");
+		printf("MaRTA : procesar mensaje\n");
 
-		//el planif lo devuelve y MaRTA lo envia
 		//MODELO PRODUCTOR CONSUMIDOR !!
-		processMessage(recvMessage);
-		sem_post(&semPrueba);
-		sem_post(&escucharConexiones);
+
+		//si es un archivo nuevo, crear un nuevo hilo y un nuevo sem y pasar por param la direccion de memoria de este
+		//"recvMessage" sera una var global a la cual tendran acceso los hilos
+
+		//si corresponde a un hilo ya existente
+		//MaRTA debe destrabar el semaforo correspondiente al hilo , para que este agarre la var global
 	}
 	closeServidores();
-
-	//destroy semaphores
-	sem_destroy(&leerConexiones);
-	sem_destroy(&escucharConexiones);
 
 	return EXIT_SUCCESS;
 }
@@ -102,17 +113,13 @@ int main(void) {
 void* listenConecctions(void *arg)
 {
 	initConexiones();
-
+	printf("MaRTA-hilo : entro a listenConecctions\n");
 	while(1)
 		{
-			printf("MaRTA-hilo : esta esperando en el while del hilo listenConecctions\n");
-			sem_wait(&escucharConexiones);
-			printf("MaRTA-hilo : entro en el while del hilo listenConecctions\n");
-
 			recvMessage = listenConnections();
-
 			//MODELO PRODUCTOR CONSUMIDOR !! --> ESCRIBIR EN UNA VAR GLOBAL Y DESTRABAR UN SEM
 			printf("MaRTA-hilo : recibido msje en el while del hilo listenConecctions\n");
+			printf("MaRTA-hilo : destrabo procesarMensage\n");
 			sem_post(&leerConexiones);
 		}
 
@@ -151,40 +158,40 @@ void* probarConexiones(void* arg)
 	}
 	printf("MaRTA-hilo : CONNECTION SUCCESS \n");
 
+	int f=0;
+	while(f<20){
+
+	sem_wait(&semPrueba);
+	printf("MaRTA-hilo : destrabado enviar mensajes\n");
+
 	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
 	char comando[] = "este es el comando que voy a mandar";
-	mensaje->comando = malloc(strlen(comando));
+	mensaje->comando = malloc(strlen(comando)+1);
 	strcpy(mensaje->comando,comando);
 	mensaje->comandoSize = strlen(mensaje->comando);
 
 	char data[] = "Aca irian los datos";
-	mensaje->data = malloc(strlen(data));
+	mensaje->data = malloc(strlen(data)+1);
 	strcpy(mensaje->data,data);
 	mensaje->dataSize = strlen(mensaje->data);
 
-	int f=0;
-	while(f<20){
-		printf("probarConexiones - %s - va a mandar el msj \n",str);
-		sem_wait(&semPrueba);
-		enviar(socketPrueba, mensaje);
-		f++;
+
+
+	printf("probarConexiones - %s - va a mandar el msj nro %d \n",str,f);
+	enviar(socketPrueba, mensaje);
+	f++;
+	free(mensaje);
 	}
 
 	pthread_exit(NULL);
 }
-void destrabarSemPrueba()
-{
-	sem_post(&semPrueba);
-}
+
 void enviar(int socket, mensaje_t* mensaje)
 {
-	//int i,j;
-	//memcpy(&i,&(mensaje->comandoSize),sizeof(mensaje->comandoSize));
-	//memcpy(&j,&(mensaje->dataSize),sizeof(mensaje->comandoSize));
-
-	if(send(socket,&(mensaje->comandoSize), sizeof(int), 0)<0){printf("ERROR EN EL SEND");};
+	if(send(socket,&(mensaje->comandoSize), sizeof(int16_t), 0)<0){printf("ERROR EN EL SEND");};
 	if(send(socket, mensaje->comando, mensaje->comandoSize, 0)<0){printf("ERROR EN EL SEND");};
-	if(send(socket, &(mensaje->dataSize), sizeof(long), 0)<0){printf("ERROR EN EL SEND");};
+	if(send(socket, &(mensaje->dataSize), sizeof(int32_t), 0)<0){printf("ERROR EN EL SEND");};
 	if(send(socket, mensaje->data, mensaje->dataSize, 0)<0){printf("ERROR EN EL SEND");};
+	printf("se envia mensaje \n");
 }
 

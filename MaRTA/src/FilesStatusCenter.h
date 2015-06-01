@@ -10,6 +10,7 @@
 #define FILESTATUSCENTER_H_
 
 #include "Utilities.h"
+#include <commons/collections/list.h>
 #include <commons/collections/dictionary.h>
 
 //BlockState --> Keys
@@ -21,6 +22,11 @@
 //fileState --> keys
 #define K_FileState_size "FileState_size"
 #define K_FileState_arrayOfBlocksStates "FileState_arrayOfBlocksStates"
+
+//fullData --> keys (data pedida al FS)
+#define K_fullData_CantidadDeBloques "fullData_CantidadDeBloques"
+#define K_fullData_CantidadDeCopias "fullData_CantidadDeCopias"
+#define K_fullData_Data "fullData_Data"
 
 //*******************************************************
 
@@ -45,12 +51,21 @@ void addTemporaryFilePathToNodoData(int nroNodo,char* filePath);
 
 //filesToProcess
 void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);//crea un fileState
-void darDeBajaCopiaEnBloqueYNodo(char*archivoParcial_Path,int skct,int nroBloque,int nroNodo);
-t_dictionary* obtenerCopiasParaBloqueDeArchivo(int socket,,int bloque,char *path);
+void darDeBajaCopiaEnBloqueYNodo(char*path,int skct,int nroBloque,int nroNodo);
+t_dictionary* obtenerCopiasParaBloqueDeArchivo(int socket,int bloque,char *path);
 int obtenerNumeroDeCopiasParaArchivo(int socket,char *path);
 int obtenerNumeroDeBloquesParaArchivo(int socket,char *path);
+void destruirFile_StatusData(int sckt, char *path);
+bool* soportaCombiner(int sckt, char *path);
 
 //filesStates
 void changeFileBlockState(char* path,int nroBloque,statusBlock nuevoEstado,char* temporaryPath);
 t_dictionary *getFileStateForPath(char *path);
+void destruirFileState(char* path);
+t_list* obtenerPathsTemporalesParaNodo(char *path,int nodoEnBlockState);
+int obtenerCantidadDePathsTemporalesEnNodo(char *path,int nodoEnBlockState);
+t_list* obtenerNodosEnBlockStateArray(char *path);
+int obtenerCantidadDeNodosDiferentesEnBlockState(char *path);
+int obtenerNodoConMayorCantidadDeArchivosTemporales(char *path);
+
 #endif /* FILESTATUSCENTER_H_ */
