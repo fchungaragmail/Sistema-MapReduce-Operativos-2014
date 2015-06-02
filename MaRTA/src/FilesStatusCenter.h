@@ -28,6 +28,10 @@
 #define K_fullData_CantidadDeCopias "fullData_CantidadDeCopias"
 #define K_fullData_Data "fullData_Data"
 
+//Copia de FullData --> keys (tabla que envia el FS)
+#define K_Copia_IPNodo "Copia_IPNodo"
+#define K_Copia_NroDeBloque "Copia_NroDeBloque"
+
 //*******************************************************
 
 // Inicializar
@@ -44,14 +48,14 @@ int getFSSocket();
 void addFileFullData(int sckt, char* path, t_dictionary *fullData);
 
 //nodosData
-void incrementarOperacionesEnProcesoEnNodo(int nroNodo);
-void decrementarOperacionesEnProcesoEnNodo(int nroNodo);
-int getCantidadDeOperacionesEnProcesoEnNodo(int nroNodo);
-void addTemporaryFilePathToNodoData(int nroNodo,char* filePath);
+void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
+void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
+int getCantidadDeOperacionesEnProcesoEnNodo(char *IPnroNodo);
+void addTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath);
 
 //filesToProcess
 void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);//crea un fileState
-void darDeBajaCopiaEnBloqueYNodo(char*path,int skct,int nroBloque,int nroNodo);
+void darDeBajaCopiaEnBloqueYNodo(char*path,int skct,int nroBloque,char *IP_Nodo);
 t_dictionary* obtenerCopiasParaBloqueDeArchivo(int socket,int bloque,char *path);
 int obtenerNumeroDeCopiasParaArchivo(int socket,char *path);
 int obtenerNumeroDeBloquesParaArchivo(int socket,char *path);
@@ -62,10 +66,10 @@ bool* soportaCombiner(int sckt, char *path);
 void changeFileBlockState(char* path,int nroBloque,statusBlock nuevoEstado,char* temporaryPath);
 t_dictionary *getFileStateForPath(char *path);
 void destruirFileState(char* path);
-t_list* obtenerPathsTemporalesParaNodo(char *path,int nodoEnBlockState);
-int obtenerCantidadDePathsTemporalesEnNodo(char *path,int nodoEnBlockState);
+t_list* obtenerPathsTemporalesParaNodo(char *path,char *IPnodoEnBlockState);
+int obtenerCantidadDePathsTemporalesEnNodo(char *path,char *IPnodoEnBlockState);
 t_list* obtenerNodosEnBlockStateArray(char *path);
 int obtenerCantidadDeNodosDiferentesEnBlockState(char *path);
-int obtenerNodoConMayorCantidadDeArchivosTemporales(char *path);
+char* obtenerNodoConMayorCantidadDeArchivosTemporales(char *path);
 
 #endif /* FILESTATUSCENTER_H_ */

@@ -27,7 +27,7 @@ Ejemplo "DataFile /user/juan/datos/temperatura2012.txt/"
 
 //"Respuesta"  debe ser un int_8 siendo 0 si es false o 1 si es true y me dira si esta disponible el archivo que pedi o no (si TODAS las copias de un bloque NO estan disponibles, entonces todo el archivo NO esta disponible)
 //"cantidadDeBloques" sera un int16_t
-//"nroDeCopias" sera un int8_t
+//"nroDeCopias" sera un int16_t
 
 //Por "estructura "me refiero a la que se ve en la pag 13 del tp (contando la caratula).
  A mi me vendria genial que me llegue una matriz (de arrays) donde siempre tendra 3 columnas (copia 1,2,3) y
