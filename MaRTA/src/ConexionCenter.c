@@ -177,7 +177,12 @@ Message* listenConnections()
 
 					recvMesage->mensaje = recibir(i);
 					recvMesage->sockfd=i;
-
+					
+					printf("se recibio comandoSize %d \n",recvMesage->mensaje->comandoSize);
+					printf("se recibio el comando %s \n",recvMesage->mensaje->comando);
+					printf("se recibio dataSize %d \n",recvMesage->mensaje->dataSize);
+					printf("se recibio la data %s \n",recvMesage->mensaje->data);
+					
 					int count=1;
 					int s=1;
 					while(count>0){
