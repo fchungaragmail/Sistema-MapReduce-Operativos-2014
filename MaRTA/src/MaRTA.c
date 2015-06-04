@@ -85,10 +85,12 @@ int main(void) {
 
 	sleep(2);// --> le doy tiempo al SERVIDOR que llegue al select
 	printf("salio del sleep\n");
-	pthread_t hiloPrueba;// hilo CLIENTE , este manda los mensajes de prueba al servidor.
-	pthread_create(&hiloPrueba, NULL, probarConexiones,"hilo_1");
-	probarConexiones("hilo_1");
+	probarConexiones("hilo_1");// --> CLIENTE , este manda los mensajes de prueba al servidor.
 	return EXIT_SUCCESS;
+//*********************************************************	
+	//pthread_t hiloPrueba;
+	//pthread_create(&hiloPrueba, NULL, probarConexiones,"hilo_1");
+	
 	while(1)
 	{
 		printf("MaRTA : esta esperando en el while principal\n");
