@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
@@ -26,7 +27,52 @@ int main(void) {
 
 	puts("!!!Hello World!!!"); /* prints !!!Hello World!!! */
 
-	t_dictionary *fileState = dictionary_create();
+	//serializo
+	char *request = "saraza";
+	int8_t tipo=2;
+	int8_t largo = 3;
+	char* data = malloc(sizeof(int8_t)+sizeof(int8_t)+strlen(request)+/*1*/sizeof(int8_t));
+	//NO AGREGAR "+1" xq sino incluyo el '/0' y si quiero pedir strlen(data) me lo va a cortar cuando
+	//encuentre el '/0' y no va a tomar lo siguiente
+
+	//en vez de char* data =... podria haber sido void* data =...
+	bool *boolValue = malloc(sizeof(bool));
+	*boolValue = true;
+	int8_t bool8 = *boolValue;
+
+	int size = 0, offset = 0;
+	offset += size;
+	memcpy(data + offset,&tipo, size = sizeof(int8_t));
+	offset += size;
+	memcpy(data + offset,&largo,size = sizeof(int8_t));
+	offset += size;
+	memcpy(data + offset,request,size = strlen(request) + 0);/*no agregar +1 !!!*/
+	offset += size;
+	memcpy(data + offset,&bool8,size = sizeof(int8_t));
+
+	printf("Quedó %s\n:",(char *)data);
+	printf("El largo de data* es %d\n:",strlen(data));
+	//deserializo
+	int8_t a,b;
+	offset = 0; size = 0;
+	memcpy(&a,data,size = sizeof(int8_t));
+	offset = offset + size;
+	memcpy(&b,data+offset,size = sizeof(int8_t));
+	offset = offset + size;
+	char *str = malloc(strlen("saraza")+1);
+	memcpy(str,data+offset,size = (strlen("saraza")+0));
+	str[strlen("saraza")+1] = '\0'; //agrego el '\0' a mano !!!
+	offset = offset + size;
+	int8_t boolRecibido;
+	memcpy(&boolRecibido,data+offset,size=sizeof(int8_t));
+	//int boolInt=boolRecibido;
+	printf("el valor de a es : %d\n",a);
+	printf("el valor de b es : %d\n",b);
+	printf("el valor de str es : %s\n",str);
+	printf("el valor de boolRecibido es : %d\n",boolRecibido);
+	if(boolRecibido == 1) { printf("boolRecibido es true"); }
+	if(boolRecibido == 0) { printf("boolRecibido es false"); }
+	/*t_dictionary *fileState = dictionary_create();
 	t_dictionary *blocksStatesArray[3];
 	int i;
 	for(i=0;i<3;i++){
@@ -51,9 +97,7 @@ int main(void) {
 	  printf("el valor es %s\n",str2);
 	  printf("el valor2 es %d\n",valor2);
 	  printf("el valor es %d\n",valor);
-	}
-
-
+	}*/
 
 	/*int sckt = 2;
 	char *key = intToCharPtr(sckt);

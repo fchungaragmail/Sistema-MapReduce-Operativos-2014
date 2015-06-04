@@ -59,13 +59,6 @@ typedef enum {
 				TOTAL_ERROR = 5  	// fallo la operacion y el FS no tiene otros bloques disponibles para procesar
 } statusBlock;
 
-struct _blockData{
-	int nroDeNodo;
-	int nroDeBloque;
-	char *archTemporal;
-	statusBlock estado;
-};
-typedef struct _blockData BlockData;
 
 /*
 // 	CONSTANTES
@@ -73,6 +66,10 @@ typedef struct _blockData BlockData;
 
 //BlockState
 #define K_BlockState_UninitializedPath "BlockState_UninitializedPath"
+#define K_BlockState_UninitializedNodo "BlockState_UninitializedNodo"
+
+//Copia de FullData(tabla que envia el FS)
+#define K_Copia_DarDeBajaIPNodo "Copia_DarDeBajaIPNodo"
 
 //Varias
 #define K_PUERTO_LOCAL 6815

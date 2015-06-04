@@ -52,13 +52,13 @@ int getFSSocket();
 // Varias
 void addFileFullData(int sckt, char* path, t_dictionary *fullData);
 //nodosData
-void incrementarOperacionesEnProcesoEnNodo(int nroNodo);
-void decrementarOperacionesEnProcesoEnNodo(int nroNodo);
-int getCantidadDeOperacionesEnProcesoEnNodo(int nroNodo);
-void addTemporaryFilePathToNodoData(int nroNodo,char* filePath);
+void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
+void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
+int getCantidadDeOperacionesEnProcesoEnNodo(char *IPnroNodo);
+void addTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath);
 //filesToProcess
 void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);//crea un fileState
-void darDeBajaCopiaEnBloqueYNodo(char*path,int skct,int nroBloque,int nroNodo);
+void darDeBajaCopiaEnBloqueYNodo(char*path,int skct,int nroBloque,char *IP_nroNodo);
 t_dictionary* obtenerCopiasParaBloqueDeArchivo(int socket,int bloque, char *path);
 int obtenerNumeroDeCopiasParaArchivo(int socket,char *path);
 int obtenerNumeroDeBloquesParaArchivo(int socket,char *path);
@@ -68,13 +68,13 @@ bool* soportaCombiner(int sckt, char *path);
 void changeFileBlockState(char* path,int nroBloque,statusBlock nuevoEstado,char* temporaryPath);
 t_dictionary *getFileStateForPath(char *path);
 void destruirFileState(char* path);
-t_list* obtenerPathsTemporalesParaNodo(char *path,int nodoEnBlockState);
-int obtenerCantidadDePathsTemporalesEnNodo(char *path,int nodoEnBlockState);
+t_list* obtenerPathsTemporalesParaNodo(char *path,char *IPnodoEnBlockState);
+int obtenerCantidadDePathsTemporalesEnNodo(char *path,char *IPnodoEnBlockState);
 t_list* obtenerNodosEnBlockStateArray(char *path);
 int obtenerCantidadDeNodosDiferentesEnBlockState(char *path);
-int obtenerNodoConMayorCantidadDeArchivosTemporales(char *path);
+char* obtenerNodoConMayorCantidadDeArchivosTemporales(char *path);
 bool* isPathInList(t_list *lista,char *path);
-bool* isNodoInList(t_list *lista,int nroDeNodo);
+bool* isNodoInList(t_list *lista,char *IPnroDeNodo);
 
 void initFilesStatusCenter()
 {
@@ -153,7 +153,7 @@ void addFileFullData(int sckt, char* path, t_dictionary *fullData)
 
 		t_dictionary *blockState = dictionary_create();
 		dictionary_put(blockState,K_BlockState_state,UNINITIALIZED);
-		dictionary_put(blockState,K_BlockState_nroNodo,UNINITIALIZED);
+		dictionary_put(blockState,K_BlockState_nroNodo,K_BlockState_UninitializedNodo);
 		dictionary_put(blockState,K_BlockState_nroBloque,UNINITIALIZED);
 		dictionary_put(blockState,K_BlockState_temporaryPath,K_BlockState_UninitializedPath);
 		blocksStatesArray[i]=blockState;
@@ -192,44 +192,39 @@ void changeFileBlockState(char *path,int nroBloque,statusBlock nuevoEstado,char 
 
 }
 
-int getCantidadDeOperacionesEnProcesoEnNodo(int nroNodo)
+int getCantidadDeOperacionesEnProcesoEnNodo(char *IPnroNodo)
 {
-	char *key_nroDeNodo = intToCharPtr(nroNodo);
-
 	sem_wait(&semNodosData);
-	bool hasKey = dictionary_has_key(nodosData,key_nroDeNodo);
+	bool hasKey = dictionary_has_key(nodosData,IPnroNodo);
 	sem_post(&semNodosData);
 
 	if(hasKey == true){
 		//el nodo existe
 		sem_wait(&semNodosData);
-		t_dictionary *nodoState = dictionary_get(nodosData,key_nroDeNodo);
+		t_dictionary *nodoState = dictionary_get(nodosData,IPnroNodo);
 		sem_post(&semNodosData);
 
 		sem_wait(&semNodoState);
 		int operacionesEnProceso = dictionary_get(nodoState,K_Nodo_OperacionesEnProceso);
 		sem_post(&semNodoState);
 
-		free(key_nroDeNodo);
 		return operacionesEnProceso;
 	}
-	free(key_nroDeNodo);
 	//else --> al nodo no se le asigno nada aun, entonces no tiene operacionesEnProceso
 	return 0;
 }
 
-void incrementarOperacionesEnProcesoEnNodo(int nroNodo)
+void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo)
 {//se llama cuando envio un pedido de map o reduce al Job
-	char *key_nroDeNodo = intToCharPtr(nroNodo);
 
 	sem_wait(&semNodosData);
-	bool hasKey = dictionary_has_key(nodosData,key_nroDeNodo);
+	bool hasKey = dictionary_has_key(nodosData,IPnroNodo);
 	sem_post(&semNodosData);
 
 		if(hasKey == true){
 			//busco el dic y le sumo una operacionProcesando
 			sem_post(&semNodosData);
-			t_dictionary *nodoState = dictionary_get(nodosData,key_nroDeNodo);
+			t_dictionary *nodoState = dictionary_get(nodosData,IPnroNodo);
 			sem_post(&semNodosData);
 
 			sem_wait(&semNodoState);
@@ -252,24 +247,23 @@ void incrementarOperacionesEnProcesoEnNodo(int nroNodo)
 
 			//agrego a nodosData
 			sem_wait(&semNodosData);
-			dictionary_put(nodosData,key_nroDeNodo,nodoState);
+			dictionary_put(nodosData,IPnroNodo,nodoState);
 			sem_post(&semNodosData);
 		}
-	free(key_nroDeNodo);
+
 }
 
-void decrementarOperacionesEnProcesoEnNodo(int nroNodo)
+void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo)
 {
 	//se llama cuando envio un pedido de map o reduce al Job
-	char *key_nroDeNodo = intToCharPtr(nroNodo);
 	sem_wait(&semNodosData);
-	bool hasKey = dictionary_has_key(nodosData,key_nroDeNodo);
+	bool hasKey = dictionary_has_key(nodosData,IPnroNodo);
 	sem_wait(&semNodosData);
 
 	if(hasKey == true){
 		//busco el dic y le sumo una operacionProcesando
 		sem_wait(&semNodosData);
-		t_dictionary *nodoState = dictionary_get(nodosData,key_nroDeNodo);
+		t_dictionary *nodoState = dictionary_get(nodosData,IPnroNodo);
 		sem_post(&semNodosData);
 
 		sem_wait(&semNodoState);
@@ -278,16 +272,15 @@ void decrementarOperacionesEnProcesoEnNodo(int nroNodo)
 		dictionary_put(nodoState,K_Nodo_OperacionesEnProceso,operacionesEnProceso);
 		sem_post(&semNodoState);
 	}
-	free(key_nroDeNodo);
+
 }
 
-void addTemporaryFilePathToNodoData(int nroNodo,char* filePath)
+void addTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath)
 {//el NodoState tiene que estar si o si creado, pues tiene que haber pasado por
  //"incrementarOperacionesEnProcesoEnNodo"
 
-	char *key_nroDeNodo = intToCharPtr(nroNodo);
 	sem_wait(&semNodosData);
-	t_dictionary *nodoState = dictionary_get(nodosData,key_nroDeNodo);
+	t_dictionary *nodoState = dictionary_get(nodosData,IPnroNodo);
 	sem_post(&semNodosData);
 
 	sem_wait(&semNodoState);
@@ -295,10 +288,9 @@ void addTemporaryFilePathToNodoData(int nroNodo,char* filePath)
 	list_add(listaTemporales,filePath);
 	sem_post(&semNodoState);
 
-	free(key_nroDeNodo);
 }
 
-void darDeBajaCopiaEnBloqueYNodo(char*path,int skct,int nroBloque,int nroNodo )
+void darDeBajaCopiaEnBloqueYNodo(char*path,int skct,int nroBloque,char *IP_Nodo )
 {	//archivoParcial_Path seria algo como librazo-horaDeEnvio.txt
 	//debo conseguir el char* librazo.txt --> supongamos que es char* _archivo;
 
@@ -320,10 +312,10 @@ void darDeBajaCopiaEnBloqueYNodo(char*path,int skct,int nroBloque,int nroNodo )
 	for(i=0;i<3;i++){
 
 		t_dictionary *copiaDeBloque = (*copiasArray)[nroBloque][i];
-		int numeroNodo = dictionary_get(copiaDeBloque,"nroNodo");
-		if(numeroNodo==nroNodo){
+		char *IPNodo = dictionary_get(copiaDeBloque,K_Copia_IPNodo);
+		if( strcmp(IPNodo,IP_Nodo) == 0 ){
 
-			dictionary_put(copiaDeBloque,"nroNodo",-1);
+			dictionary_put(copiaDeBloque,K_Copia_IPNodo,K_Copia_DarDeBajaIPNodo);
 			break;
 		}
 	}
@@ -441,7 +433,7 @@ bool* soportaCombiner(int sckt, char *path)
 
 }
 
-t_list* obtenerPathsTemporalesParaNodo(char *path,int nodoEnBlockState){
+t_list* obtenerPathsTemporalesParaNodo(char *path,char *IPnodoEnBlockState){
 
 	sem_wait(&semFilesStates);
 	t_dictionary* fileState = dictionary_get(filesStates,path);
@@ -455,8 +447,8 @@ t_list* obtenerPathsTemporalesParaNodo(char *path,int nodoEnBlockState){
 
 	for(i=0;i<size_fileState;i++){
 		t_dictionary *blockState = (*blockStateArray)[i];
-		int nroDeNodo = dictionary_get(blockState,K_BlockState_nroNodo);
-		if(nroDeNodo == nodoEnBlockState){
+		char *IPnroDeNodo = dictionary_get(blockState,K_BlockState_nroNodo);
+		if( strcmp(IPnroDeNodo,IPnodoEnBlockState) == 0 ){
 			char *pathTemp = dictionary_get(blockState,K_BlockState_temporaryPath);
 			list_add(pathsTemporalesEnNodo,pathTemp);
 		}
@@ -472,10 +464,10 @@ int obtenerCantidadDeNodosDiferentesEnBlockState(char *path){
 	return size;
 }
 
-int obtenerCantidadDePathsTemporalesEnNodo(char *path,int nodoEnBlockState){
+int obtenerCantidadDePathsTemporalesEnNodo(char *path,char *IPnodoEnBlockState){
 
 	//
-	t_list *litaPathsTemporalesParaNodo = obtenerPathsTemporalesParaNodo(path,nodoEnBlockState);
+	t_list *litaPathsTemporalesParaNodo = obtenerPathsTemporalesParaNodo(path,IPnodoEnBlockState);
 	int size = list_size(litaPathsTemporalesParaNodo);
 	return size;
 }
@@ -494,35 +486,35 @@ t_list* obtenerNodosEnBlockStateArray(char *path){
 	for(i=0;i<sizeBlocksArray;i++){
 
 		t_dictionary *blockState = (*blockStateArray)[i];
-		int nroDeNodo = dictionary_get(blockState,K_BlockState_nroNodo);
-		bool *estaEnLista = isNodoInList(nodosEnBlockStateArray,nroDeNodo);
-		if(estaEnLista == false){ list_add(nodosEnBlockStateArray,nroDeNodo); }
+		char *IPnroDeNodo = dictionary_get(blockState,K_BlockState_nroNodo);
+		bool *estaEnLista = isNodoInList(nodosEnBlockStateArray,IPnroDeNodo);
+		if(estaEnLista == false){ list_add(nodosEnBlockStateArray,IPnroDeNodo); }
 		free(estaEnLista);
 	}
 	return nodosEnBlockStateArray;
 }
 
-int obtenerNodoConMayorCantidadDeArchivosTemporales(char *path){
+char* obtenerNodoConMayorCantidadDeArchivosTemporales(char *path){
 
 	t_list *nodosEnBlockStateArray = obtenerNodosEnBlockStateArray(path);
 	int size = list_size(nodosEnBlockStateArray);
-	int nodoConMayorCantidadDeArchTemp;
+	char *nodoConMayorCantidadDeArchTemp;
 
 	int i;
 	for(i=0;i<(size-1);i++){
-		int nroDeNodo = list_get(nodosEnBlockStateArray,i);
-		int nroDeNodoSiguiente = list_get(nodosEnBlockStateArray,i+1);
+		char *IPnroDeNodo = list_get(nodosEnBlockStateArray,i);
+		char *IPnroDeNodoSiguiente = list_get(nodosEnBlockStateArray,i+1);
 
-		t_list *pathsTemporalesParaNodo = obtenerPathsTemporalesParaNodo(path,nroDeNodo);
-		t_list *pathsTemporalesParaNodoSig = obtenerPathsTemporalesParaNodo(path,nroDeNodoSiguiente);
+		t_list *pathsTemporalesParaNodo = obtenerPathsTemporalesParaNodo(path,IPnroDeNodo);
+		t_list *pathsTemporalesParaNodoSig = obtenerPathsTemporalesParaNodo(path,IPnroDeNodoSiguiente);
 
 		int cantDePathsTempEnNodo = list_size(pathsTemporalesParaNodo);
 		int cantDePathsTempEnNodoSiguiente = list_size(pathsTemporalesParaNodoSig);
 
 		if(cantDePathsTempEnNodo < cantDePathsTempEnNodoSiguiente){
-			nodoConMayorCantidadDeArchTemp = nroDeNodoSiguiente;
+			nodoConMayorCantidadDeArchTemp = IPnroDeNodoSiguiente;
 		}else{
-			nodoConMayorCantidadDeArchTemp = nroDeNodo;
+			nodoConMayorCantidadDeArchTemp = IPnroDeNodo;
 		}
 	}
 	return nodoConMayorCantidadDeArchTemp;
@@ -541,15 +533,15 @@ bool* isPathInList(t_list *lista,char *path)
 	return response;
 }
 
-bool* isNodoInList(t_list *lista,int nroDeNodo)
+bool* isNodoInList(t_list *lista,char *IPnroDeNodo)
 {
 	int listSize = list_size(lista);
 	int i;
 	bool *response = malloc(sizeof(bool));
 	response = false;
 	for(i=0;i<listSize;i++){
-		int nroDeNodoEnLista= list_get(lista,i);
-		if(nroDeNodo == nroDeNodoEnLista){ return true; }
+		char *IPnroDeNodoEnLista= list_get(lista,i);
+		if( strcmp(IPnroDeNodo,IPnroDeNodoEnLista) == 0 ){ return true; }
 	}
 	return response;
 }
