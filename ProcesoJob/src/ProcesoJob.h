@@ -12,9 +12,11 @@
 
 
 void IniciarConexionMarta();
+void HacerPedidoMarta();
 void IniciarConfiguracion();
 void Terminar(int);
 
-void* martaHandler(void*);
+
+void* pedidosMartaHandler(void*);
 
 #endif /* SRC_PROCESOJOB_H_ */
