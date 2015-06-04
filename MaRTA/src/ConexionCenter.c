@@ -189,15 +189,6 @@ Message* listenConnections()
 							s=s+1;
 						}
 					}
-
-
-					printf("se recibio comandoSize %d \n",recvMesage->mensaje->comandoSize);
-					printf("se recibio el comando %s \n",recvMesage->mensaje->comando);
-					printf("se recibio dataSize %d \n",recvMesage->mensaje->dataSize);
-					printf("se recibio la data %s \n",recvMesage->mensaje->data);
-
-
-
 					return recvMesage;
 				}
 			}
