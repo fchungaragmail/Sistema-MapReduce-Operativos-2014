@@ -169,13 +169,14 @@ Message* listenConnections()
 					//ENVIAR AL PLANIFICADOR QUE SE CERRO EL SOCKET
 					FD_CLR(i, &master); // eliminar del conjunto maestro
 				} else {
+
 					// tenemos datos de algún cliente
 					printf("llegaron datos de algun cliente\n");
 
 					Message *recvMesage = malloc(sizeof(Message));
-					recvMesage->mensaje=malloc(sizeof(*recvMesage->mensaje));
 
 					recvMesage->mensaje = recibir(i);
+					recvMesage->sockfd=i;
 
 					int count=1;
 					int s=1;
@@ -188,18 +189,14 @@ Message* listenConnections()
 							s=s+1;
 						}
 					}
-					recvMesage->sockfd=i;
 
-					/*printf("se recibio comandoSize %d \n",recvMesage->mensaje->comandoSize);
+
+					printf("se recibio comandoSize %d \n",recvMesage->mensaje->comandoSize);
 					printf("se recibio el comando %s \n",recvMesage->mensaje->comando);
 					printf("se recibio dataSize %d \n",recvMesage->mensaje->dataSize);
-					printf("se recibio la data %s \n",recvMesage->mensaje->data);*/
+					printf("se recibio la data %s \n",recvMesage->mensaje->data);
 
-					/*mensaje_t *m = recibir(i);
-					printf("se recibio comandoSize %d \n",m->comandoSize);
-					printf("se recibio el comando %s \n",m->comando);
-					printf("se recibio dataSize %d \n",m->dataSize);
-					printf("se recibio la data %s \n",m->data);*/
+
 
 					return recvMesage;
 				}
