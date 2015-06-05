@@ -14,18 +14,15 @@ void* hiloMapperHandler(void* arg){
 
 	HiloJob* hiloJob = (HiloJob*) arg;
 
-	int terminoProceso = FALSE;
-	int hiloNodoSocketFd = -1;
 
-
-	if ((hiloNodoSocketFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+	if ((hiloJob->socketFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		reportarResultadoHilo(hiloJob,ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION);
 		error_show("Error al crear socket para el nodo\n");
 		return NULL;
 	}
 
 
-	if (connect(hiloNodoSocketFd, hiloJob->direccionNodo, sizeof(Sockaddr_in))
+	if (connect(hiloJob->socketFd, hiloJob->direccionNodo, sizeof(Sockaddr_in))
 			== -1) {
 		reportarResultadoHilo(hiloJob,ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION);
 		error_show("Error al conectarse con el nodo\n");
@@ -35,7 +32,7 @@ void* hiloMapperHandler(void* arg){
 	printf("Conexion exitosa con un nodo");
 
 	mensaje_t* mensajeNodo;
-	recibir(hiloNodoSocketFd,mensajeNodo);
+	recibir(hiloJob->socketFd,mensajeNodo);
 	//TODO define
 
 	reportarResultadoHilo(hiloJob,ESTADO_HILO_FINALIZO_OK);
@@ -43,17 +40,30 @@ void* hiloMapperHandler(void* arg){
 
 void reportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado){
 
+	mensaje_t* mensajeParaMarta = malloc(sizeof(mensaje_t));
+	char* bufferMensaje;
 	switch(estado){
 
 	case ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION:
-		break;
 	case ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO:
+		string_append_with_format(&bufferMensaje,"mapFileResponse %s 0",hiloJob->nombreArchivo);
 		break;
 	case ESTADO_HILO_FINALIZO_OK:
+		string_append_with_format(&bufferMensaje,"mapFileResponse %s 1",hiloJob->nombreArchivo);
 		break;
 
 	}
 
-	close(hiloJob->socketFd);
+	mensajeParaMarta->comandoSize = strlen(bufferMensaje);
+	mensajeParaMarta->comando = string_duplicate(bufferMensaje);
+
+	enviar(socketMartaFd, mensajeParaMarta);
+
+
+	if(hiloJob->socketFd != -1){
+		close(hiloJob->socketFd);
+	}
+	free(bufferMensaje);
+	free(mensajeParaMarta);
 	printf("Se termino el hilo con resultado: %d\n", estado);
 }

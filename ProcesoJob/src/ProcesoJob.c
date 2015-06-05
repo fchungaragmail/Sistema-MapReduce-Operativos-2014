@@ -6,7 +6,7 @@
 #include <commons/config.h>
 #include <commons/string.h>
 
-int socketFd = -1;
+int socketMartaFd = -1;
 t_list* listaHilos;
 pthread_t threadPedidosMartaHandler;
 pthread_t threadProcesarHilos;
@@ -18,7 +18,7 @@ void* pedidosMartaHandler(void* arg) {
 
 	while (TRUE) {
 		mensaje_t* mensajeMarta;
-		recibir(socketFd, mensajeMarta);
+		recibir(socketMartaFd, mensajeMarta);
 
 		char** comandoStr = string_split(mensajeMarta, " ");
 
@@ -37,6 +37,7 @@ void* pedidosMartaHandler(void* arg) {
 			HiloJob* hiloJob = malloc(sizeof(HiloJob));
 			hiloJob->direccionNodo = their_addr;
 			hiloJob->threadhilo = NULL;
+			hiloJob->socketFd = -1;
 			hiloJob->nroBloque = atoi(comandoStr[3]);
 			hiloJob->nombreArchivo = string_duplicate(comandoStr[4]);
 
@@ -67,8 +68,8 @@ void Terminar(int exitStatus) {
 	if (configuracion) {
 		config_destroy(configuracion);
 	}
-	if (socketFd != -1) {
-		close(socketFd);
+	if (socketMartaFd != -1) {
+		close(socketMartaFd);
 	}
 
 	printf("Finalizacion del ProcesoJob con exit_status=%d\n", exitStatus);
@@ -79,7 +80,7 @@ void IniciarConexionMarta() {
 
 	struct sockaddr_in their_addr;
 
-	if ((socketFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+	if ((socketMartaFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		error_show("Error al crear socket para MARTA\n");
 		Terminar(EXIT_ERROR);
 	}
@@ -92,7 +93,7 @@ void IniciarConexionMarta() {
 	inet_aton(puertoMarta, &(their_addr.sin_addr));
 	memset(&(their_addr.sin_zero), '\o', 8);
 
-	if (connect(socketFd, (Sockaddr_in*) &their_addr, sizeof(Sockaddr_in))
+	if (connect(socketMartaFd, (Sockaddr_in*) &their_addr, sizeof(Sockaddr_in))
 			== -1) {
 		error_show("Error al conectarse con MARTA\n");
 		Terminar(EXIT_ERROR);
@@ -122,7 +123,7 @@ void HacerPedidoMarta() {
 		mensaje->comandoSize = strlen(buffer);
 		mensaje->comando = buffer;
 
-		enviar(socketFd, mensaje);
+		enviar(socketMartaFd, mensaje);
 
 		printf("Enviado a MaRTA el comando: %s\n", mensaje->comando);
 		free(buffer);
