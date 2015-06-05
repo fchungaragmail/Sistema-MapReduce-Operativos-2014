@@ -14,36 +14,56 @@ void* hiloMapperHandler(void* arg){
 
 	HiloJob* hiloJob = (HiloJob*) arg;
 
-	int terminoProceso = FALSE;
-	int hiloNodoSocketFd = -1;
 
-	//SOLO PARA TEST
-	hiloJob->estadoHilo = ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION;
-	reportarResultadoHilo(hiloJob);
-	return NULL;
-	////
-	if ((hiloNodoSocketFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+	if ((hiloJob->socketFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+		reportarResultadoHilo(hiloJob,ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION);
 		error_show("Error al crear socket para el nodo\n");
+		return NULL;
 	}
 
 
-	if (connect(hiloNodoSocketFd, hiloJob->direccionNodo, sizeof(Sockaddr_in))
+	if (connect(hiloJob->socketFd, hiloJob->direccionNodo, sizeof(Sockaddr_in))
 			== -1) {
+		reportarResultadoHilo(hiloJob,ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION);
 		error_show("Error al conectarse con el nodo\n");
-		close(hiloNodoSocketFd);
+		return NULL;
 	}
 
 	printf("Conexion exitosa con un nodo");
 
+	mensaje_t* mensajeNodo;
+	recibir(hiloJob->socketFd,mensajeNodo);
+	//TODO define
 
-	while(!terminoProceso){
-		//Procesar ?
-	}
-	close(hiloNodoSocketFd);
+	reportarResultadoHilo(hiloJob,ESTADO_HILO_FINALIZO_OK);
 }
 
-void reportarResultadoHilo(HiloJob* hiloJob){
+void reportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado){
+
+	mensaje_t* mensajeParaMarta = malloc(sizeof(mensaje_t));
+	char* bufferMensaje;
+	switch(estado){
+
+	case ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION:
+	case ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO:
+		string_append_with_format(&bufferMensaje,"mapFileResponse %s 0",hiloJob->nombreArchivo);
+		break;
+	case ESTADO_HILO_FINALIZO_OK:
+		string_append_with_format(&bufferMensaje,"mapFileResponse %s 1",hiloJob->nombreArchivo);
+		break;
+
+	}
+
+	mensajeParaMarta->comandoSize = strlen(bufferMensaje);
+	mensajeParaMarta->comando = string_duplicate(bufferMensaje);
+
+	enviar(socketMartaFd, mensajeParaMarta);
 
 
-	printf("Se termino el hilo con resultado: %d\n", hiloJob->estadoHilo);
+	if(hiloJob->socketFd != -1){
+		close(hiloJob->socketFd);
+	}
+	free(bufferMensaje);
+	free(mensajeParaMarta);
+	printf("Se termino el hilo con resultado: %d\n", estado);
 }

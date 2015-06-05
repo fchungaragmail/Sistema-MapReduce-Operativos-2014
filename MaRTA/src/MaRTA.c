@@ -46,7 +46,6 @@ void* listenConecctions(void* arg);
 //JUAN - protocolo
 void* probarConexiones(void* arg);
 void enviar(int socket, mensaje_t* mensaje);
-void destrabarSemPrueba();
 
 //JUAN
 struct _sockaddr_in {
@@ -80,16 +79,18 @@ int main(void) {
 	initFilesStatusCenter();
 	initPlannerCenter();
 
-	pthread_create(&connectionThread, NULL, listenConecctions,NULL);
+	pthread_create(&connectionThread, NULL, listenConecctions,NULL); //--> SERVIDOR con el select();
 	//pthread_create(&connectToFSThread, NULL,connectToFileSystem,NULL);
 
 
-	sleep(2);
+	sleep(2);// --> le doy tiempo al SERVIDOR que llegue al select
 	printf("salio del sleep\n");
+	probarConexiones("hilo_1");// --> CLIENTE , este manda los mensajes de prueba al servidor.
+	return EXIT_SUCCESS;
+//*********************************************************	
 	//pthread_t hiloPrueba;
 	//pthread_create(&hiloPrueba, NULL, probarConexiones,"hilo_1");
-	probarConexiones("hilo_1");
-	return EXIT_SUCCESS;
+	
 	while(1)
 	{
 		printf("MaRTA : esta esperando en el while principal\n");
