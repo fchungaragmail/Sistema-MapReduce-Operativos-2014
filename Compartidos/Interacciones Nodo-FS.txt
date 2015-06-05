@@ -3,3 +3,18 @@ Agregar todas las interacciones entre los procesos
 Luego de conectarse con un nodo, el FS espera el siguiente mensaje:
 -Comando: "nombre NombreDelNodo"
 -Data: Vacio
+
+Luego el nodo queda a la espera de cualquiera de los sigtes msjs del filesystem u otro nodo:
+	
+	//retornar el contenido de un bloque
+	Comando: getBloque numeroDeBloque
+	Data:vacio
+	
+	//grabar un bloque 
+	Comando: setBloque numeroBloque
+	data: datos
+	
+	//retornar el contenido de un archivo dentro del directorio temporal
+	Comando: getFileContent nombreArchivoTemporal
+	data: vacio
+	

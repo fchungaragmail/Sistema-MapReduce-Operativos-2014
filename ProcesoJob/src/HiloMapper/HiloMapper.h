@@ -10,6 +10,6 @@
 
 pthread_t* CrearHiloMapper(HiloJob*);
 void* hiloMapperHandler(void*);
-void reportarResultadoHilo(HiloJob*);
+void reportarResultadoHilo(HiloJob*, EstadoHilo);
 
 #endif /* SRC_HILOMAPPER_HILOMAPPER_H_ */
