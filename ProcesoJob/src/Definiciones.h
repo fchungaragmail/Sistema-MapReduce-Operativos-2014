@@ -33,7 +33,7 @@ typedef struct {
 } Sockaddr_in ;
 
 typedef struct {
-	Sockaddr_in* direccionNodo;
+	Sockaddr_in direccionNodo;
 	pthread_t* threadhilo;
 	int socketFd;
 	char* nombreArchivo;

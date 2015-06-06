@@ -15,6 +15,7 @@ t_config* configuracion;
 void* pedidosMartaHandler(void* arg) {
 
 	listaHilos = list_create();
+	HacerPedidoMarta();
 
 	while (TRUE) {
 		mensaje_t* mensajeMarta;
@@ -27,7 +28,7 @@ void* pedidosMartaHandler(void* arg) {
 			/// TO DO , usar enums o defines
 			////                    0        1       2     3                    4
 			//// Ej del comando: mapFile  127.0.0.1 9999 12345 /user/juan/datos/temperatura2012.txt/-23:43:45:2345
-			struct sockaddr_in their_addr;
+			Sockaddr_in their_addr;
 
 			their_addr.sin_family = AF_INET;
 			their_addr.sin_port = htons(comandoStr[1]);
@@ -122,6 +123,8 @@ void HacerPedidoMarta() {
 
 		mensaje->comandoSize = strlen(buffer);
 		mensaje->comando = buffer;
+		mensaje->dataSize = 0;
+		mensaje->data = NULL;
 
 		enviar(socketMartaFd, mensaje);
 
@@ -137,6 +140,5 @@ int main(int argc, char* argv[]) {
 
 	IniciarConfiguracion();
 	IniciarConexionMarta();
-	HacerPedidoMarta();
 	Terminar(EXIT_OK);
 }

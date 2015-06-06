@@ -1,5 +1,8 @@
 #include "HiloMapper.h"
 
+//TODO organizar mejor esto!!
+extern socketMartaFd;
+
 pthread_t* CrearHiloMapper(HiloJob* hiloJob){
 
 	pthread_t* hiloMapper;
@@ -22,7 +25,7 @@ void* hiloMapperHandler(void* arg){
 	}
 
 
-	if (connect(hiloJob->socketFd, hiloJob->direccionNodo, sizeof(Sockaddr_in))
+	if (connect(hiloJob->socketFd, (Sockaddr_in*) &hiloJob->direccionNodo, sizeof(Sockaddr_in))
 			== -1) {
 		reportarResultadoHilo(hiloJob,ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION);
 		error_show("Error al conectarse con el nodo\n");
@@ -56,6 +59,8 @@ void reportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado){
 
 	mensajeParaMarta->comandoSize = strlen(bufferMensaje);
 	mensajeParaMarta->comando = string_duplicate(bufferMensaje);
+	mensajeParaMarta->dataSize = 0;
+	mensajeParaMarta->data = NULL;
 
 	enviar(socketMartaFd, mensajeParaMarta);
 
