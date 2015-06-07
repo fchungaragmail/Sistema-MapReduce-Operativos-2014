@@ -117,8 +117,23 @@ int nomb(char* argumentos, Conexion_t* conexion)
 {
 	char** tmp;
 	tmp = string_split(argumentos, " ");
+
+	if (strcmp(conexion->nombre,tmp[1]) == 0)
+	{
+		//El nodo ya existia
+		log_info(log, "El nodo %s ya estaba identificado", conexion->nombre);
+		return 0;
+	}
+
 	strcpy(conexion->nombre, tmp[1]);
 	log_info(log, "Identificado el nodo %s", conexion->nombre);
+	if (strcmp(conexion->nombre, "MaRTA") != 0)
+	{
+		nodosOnline++;
+		if (nodosOnline == LISTA_NODOS)
+			log_info(log, "Cantidad minima de nodos (%d) alcanzada.", LISTA_NODOS);
+	}
+	return 0;
 }
 
 

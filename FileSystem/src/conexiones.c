@@ -17,7 +17,7 @@ pthread_mutex_t mNodos;
 int nodosOnline;
 
 int initConexiones();
-void escucharConexiones(int nodosMax);
+void escucharConexiones();
 void leerEntradas();
 void cerrarConexiones();
 void cerrarConexion(Conexion_t* conexion);
@@ -65,12 +65,12 @@ int initConexiones()
 }
 
 
-void escucharConexiones(int nodosMax)
+void escucharConexiones()
 {
 	int nuevoSocketfd;
 	int sin_size = sizeof(Sockaddr_in);
 
-	while ((nodosOnline < nodosMax) || (nodosMax == -1))
+	while (true)
 	{
 		Sockaddr_in their_addr;
 		Conexion_t* conexionNueva = malloc(sizeof(Conexion_t));
@@ -85,14 +85,12 @@ void escucharConexiones(int nodosMax)
 
 		pthread_mutex_lock(&mNodos);
 		FD_SET(nuevoSocketfd, &nodos);
-		nodosOnline++;
 		write(desbloquearSelect[1], "", 1);
 		pthread_mutex_unlock(&mNodos);
 
 		log_info(log, "Nueva conexion con %s. \n"
 				"Esperando identificacion.", inet_ntoa(their_addr.sin_addr));
 	}
-	log_info(log, "Cantidad minima de nodos (%d) alcanzada.", LISTA_NODOS);
 }
 
 

@@ -24,12 +24,10 @@
 #define NODOS_MAX 20
 
 int initConexiones();
-void escucharConexiones(int nodosMax); //Si le mandas -1 sigue buscando
+void escucharConexiones(); //Si le mandas -1 sigue buscando
 void leerEntradas();
 void cerrarConexiones();
 void probarConexiones();
-
-extern int nodosOnline;
 
 struct _sockaddr_in {
 	short int sin_family;  // familia de direcciones, AF_INET

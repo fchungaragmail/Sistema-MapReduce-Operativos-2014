@@ -24,6 +24,7 @@ extern int LISTA_NODOS;
 extern int PUERTO_MARTA;
 extern FILE* log;
 extern t_list* conexiones;
+extern int nodosOnline;
 
 struct _conexion {
 	int sockfd;
