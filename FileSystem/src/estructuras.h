@@ -11,15 +11,15 @@
 typedef enum {DISPONIBLE, NO_DISPONIBLE} t_estado;
 
 typedef struct {
-	char nodo[5];
-	unsigned int bloque;
-} t_ubicacion;
+	char nodo[20];
+	int16_t bloque;
+} t_ubicacion_bloque;
 
 typedef struct {
-	unsigned long long int tamanio;
-	unsigned short int dirPadre;
+	int64_t tamanio;
+	int16_t dirPadre;
 	t_estado estado;
-	t_ubicacion** bloques;
+	t_list** bloques; //A su vez, cada bloque tiene una lista de t_ubicacion_bloque
 } t_reg_archivo;
 
 typedef struct {
