@@ -1,51 +1,59 @@
 Interacciones MaRTA-Job
 ************************
 
+***********************************************
 -->Job le pasa a MaRTA su archivo a procesar (pueden ser muchos, en este caso seran varios envios)
-*comando: "archivoAProcesar"
-*data: sizeRutaDeArchivo-rutaDeArchivo-sizeSoportaCombiner-soportaCombiner 
+*comando: "archivoAProcesar rutaDeArchivo soportaCombiner"
+*data: NADA
 // La rutaDeArchivo puede ser por ejemplo: "/user/juan/datos/temperatura2012.txt/" 
-// SoportaCombiner sera un true/false que te da la libreria stdbool.h
+// soportaCombiner debe ser 1 en caso de verdadero, o 0
+// Ej del comando: archivoAProcesar /user/juan/datos/temperatura2012.txt/ 1
 ************************************************************************************************************************************************************************************************
 -->MaRTA le dice al Job que haga una rutina de mapping
-*comando: "mapFile"
-*data:sizeDireccionNodo-direccionNodo-sizeNroDeBloque-nroDeBloque-sizeRutaArchivoTemporal-rutaArchivoTemporal
+*comando: "mapFile direccionNodo puertoEscucha nroDeBloque rutaArchivoTemporal"
+*data: NADA
 // La ruta del archivo temporal siempre sera el nombreDelArchivo y se le concatenara los hh:mm:ss:mmmm devuelto por la funcion temporal.h que nos da la catedra
 // se pondra un guion como separador, de esta manera se podra distinguir entre la ruta del archivo y el hh:mm:ss:mmmm agregado, de esta manera se va a poder 
 // obtener la ruta del archivo si hiciera falta--> por ejemplo "/user/juan/datos/temperatura2012.txt/-23:43:45:2345"
+// Ej del comando: mapFile  127.0.0.1 9999 12345 /user/juan/datos/temperatura2012.txt/-23:43:45:2345
 ************************************************************************************************************************************************************************************************
 -->Job responde a Marta con el resultado de la operacion de map
-*comando : "mapFileResponse"
-*data:sizeRutaArchivoTemporal-rutaArchivoTemporal-sizeRespuesta-Respuesta 
-// la "Respuesta" sera un Bool que te da la libreria stdbool.h
+*comando : "mapFileResponse rutaArchivoTemporal Respuesta"
+*data:NADA
+// la "Respuesta" debe ser 0 si es false o 1 si es true
+// Ej del comando: mapFileResponse /user/juan/datos/temperatura2012.txt/-23:43:45:2345 1
 ************************************************************************************************************************************************************************************************
 -->MaRTA le indica al Job en que archivos aplicar Reduce // Para que sea mas legible usos los sinonimos:  "RutaArchivoTemporal" == "RAT" ; "NroDeNodo(Remoto/Local)" == " #Nodo(Remoto/Local)" ;
 
-*comando: "reduceFile"(sin Combiner)
-*data: size#NodoLocal-#NodoLocal-sizeNombreArchTempLocal-NombreArchTempLocal-sizeCantDeArchEnNodoLocalAProcesar-CantDeArchEnNodoLocalAProcesar-sizeRAT1-RAT1-sizeRAT2-RAT2-...etc...-
-                ...-size#NodoRemoto1-#NodoRemoto1-sizeCantDeArchEnNodoRemotoAProcesar-CantDeArchEnNodoRemotoAProcesar-sizeRAT1-RTA1-sizeRAT2-RAT2-sizeRAT3-RAT3-etc... 
-		...-size#NodoRemoto2-#NodoRemoto2-....
-
+*comando: "reduceFileSinCombiner NodoLocal NombreArchTempLocal CantDeArchEnNodoLocalAProcesar RAT1 RAT2-...etc...-
+                ...NodoRemoto1 CantDeArchEnNodoRemotoAProcesar RTA1 RAT2 RAT3 -etc... 
+		...NodoRemoto2-...."
+*data: VACIO
+		
+//"CantDeArchEnNodoLocalAProcesar" y "CantDeArchEnNodoRemotoAProcesar" seran un int16_t
 //nroDeNodoLocal sera el nodo donde se guardaran el resultado final de aplicar las rutinas de reduce
 
 *******************************************
 
-*comando: "reduceFile"(con Combiner)
-*data: size#NodoLocal-#NodoLocal-sizeNombreArchTemp-nombreArchTemp-sizeCantDeArchEnNodoLocalAProcesar-CantDeArchEnNodoLocalAProcesar-sizeRAT1-RAT1-sizeRAT2-RAT2-...etc...-
-                ...-size#NodoRemoto1-#NodoRemoto1-sizeNombreArchTemp-nombreArchTemp-sizeCantDeArchEnNodoRemotoAProcesar-CantDeArchEnNodoRemotoAProcesar-sizeRAT1-RTA1-sizeRAT2-RAT2-etc... 
-		...-size#NodoRemoto2-#NodoRemoto2-....
+*comando: "reduceFileConCombiner NodoLocal nombreArchTemp CantDeArchEnNodoLocalAProcesar RAT1 RAT2 -etc...-
+                ...NodoRemoto1 nombreArchTemp CantDeArchEnNodoRemotoAProcesar RTA1 RAT2 -etc... 
+		...NodoRemoto2 ....
+*data: VACIO
+
 // NombreArchTemp es el nombre del archivo donde el Nodo guardara el resultado de su rutina de Reduce, luego los resultados que tiene cada nodo de su rutina de reduce deberan ser
 // reducidos de vuelta o concatenados (no lei bien esta parta la verdad) en #NodoLocal
 
+//"CantDeArchEnNodoLocalAProcesar" y "CantDeArchEnNodoRemotoAProcesar" seran un int16_t
 
 //MaRTA tendra dos formas de ejecutar este comando dependiendo si el Job soporta combiner o no, de cualquiera de las formas que MaRTA lo envie, el Job tendra que saber que 
 //tipo de estructura del mensaje debe esperar, ya que el mismo Job sabe si soporta combiner o no.
 ************************************************************************************************************************************************************************************************
 -->Job responde a Marta con el resultado de la operacion de reduce
-*comando:"reduceFileResponse"
-*data:sizeNombreArchTemp-nombreArchTemp-sizeRespuesta-respuesta
+*comando:"reduceFileResponse nombreArchTemp Respuesta"
+*data:VACIO
 
 // Debe devolver el "NombreArchTemp" asi MaRTA sabe a que pedido de reduce corresponde, ya que seguramente envio varios.
-// la "Respuesta" sera un Bool que te da la libreria stdbool.h
+// la "Respuesta"  debe ser un 1 o 0
+// Ej de comando: reduceFileResponse /user/juan/datos/temperatura2012.txt/-23:43:45:2345 0
 
 ************************************************************************************************************************************************************************************************

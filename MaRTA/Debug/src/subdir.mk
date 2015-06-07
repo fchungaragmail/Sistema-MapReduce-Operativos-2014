@@ -8,6 +8,8 @@ C_SRCS += \
 ../src/FilesStatusCenter.c \
 ../src/MaRTA.c \
 ../src/PlannerCenter.c \
+../src/Serializador.c \
+../src/Simulador.c \
 ../src/Utilities.c 
 
 OBJS += \
@@ -15,6 +17,8 @@ OBJS += \
 ./src/FilesStatusCenter.o \
 ./src/MaRTA.o \
 ./src/PlannerCenter.o \
+./src/Serializador.o \
+./src/Simulador.o \
 ./src/Utilities.o 
 
 C_DEPS += \
@@ -22,6 +26,8 @@ C_DEPS += \
 ./src/FilesStatusCenter.d \
 ./src/MaRTA.d \
 ./src/PlannerCenter.d \
+./src/Serializador.d \
+./src/Simulador.d \
 ./src/Utilities.d 
 
 

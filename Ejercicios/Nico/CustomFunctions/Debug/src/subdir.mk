@@ -6,16 +6,19 @@
 C_SRCS += \
 ../src/CustomFunctions.c \
 ../src/MapFunctions.c \
+../src/Pruebas.c \
 ../src/ScriptFunctions.c 
 
 OBJS += \
 ./src/CustomFunctions.o \
 ./src/MapFunctions.o \
+./src/Pruebas.o \
 ./src/ScriptFunctions.o 
 
 C_DEPS += \
 ./src/CustomFunctions.d \
 ./src/MapFunctions.d \
+./src/Pruebas.d \
 ./src/ScriptFunctions.d 
 
 

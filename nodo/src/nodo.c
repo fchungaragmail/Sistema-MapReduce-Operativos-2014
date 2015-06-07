@@ -5,91 +5,156 @@
  *      Author: utnso
  */
 
+/*
+ * nodo.c
+ *
+ *  Created on: 17/5/2015
+ *      Author: utnso
+ */
+
 #include <string.h>
 #include <stdio.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <pthread.h>
+#include "execScript.h"
+#include "conection_threads.h"
+#include "sockets_struct.h"
+#include "protocolo.h"
+#include <commons/config.h>
 
 
-#define PORT 8000
-#define BACKLOG 5
-#define MESSAGE_LENGTH 256
+//Global Variables
+int PUERTO_FS;
+char* IP_FS;
+char* ARCHIVO_BIN;
+char* DIR_TEMP;
+char* NODO_NUEVO;
+char* IP_NODO;
+int PUERTO_NODO;
 
 
+//Headers
+void getConfig();
+int initServer();
+//void *fs_conection_handler(void*);
+//void *map_conection_handler(void*);
+//void *reduce_conection_handler(void*);
+//void *nodo_conection_handler(void*);
+
+
+//Main Programm
 int main() {
 
-	int sockListener;
+	int sockFD;
 	int sockAccept;
 	socklen_t size;
-	struct sockaddr_in my_sock;
-	struct sockaddr_in client_sock;
-	pthread_t listener_thread;  //este hilo se va a encargar de escuchar
-	pthread_t comunication_thread; //este hilo acepta y se comunica
-	char buffer[MESSAGE_LENGTH];
+	Sockaddr_in client_sock;
+//	pthread_t nodo_handler;
+//	pthread_t fs_handler;
+//	pthread_t map_handler;
+//	pthread_t reduce_handler;
+	char buffer_send[MESSAGE_LENGTH];
+	char buffer_recv[MESSAGE_LENGTH];
 
-//Establezo datos de estructura de my_sock
-	my_sock.sin_family = AF_INET;
-	inet_aton("127.0.0.1", &my_sock.sin_addr);
-	my_sock.sin_port = htons(PORT);
-	bzero(&(my_sock.sin_zero), 8);
+	memset(buffer_recv, 0, MESSAGE_LENGTH);
 
-//Creo socket que va a escuchar en la IP establecida anteriormente, en este caso en cualquiera
-	sockListener = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockListener == -1) {
-		printf("Fallo al crear el socket\n");
-		return -1;
-	} else {
-		printf("Socket creado con exito\n");
-	}
+	getConfig();
 
-//Enlazo el socket al puerto para que escuche por ese puerto en la IP que haya quedado definida
-	if (bind(sockListener, (struct sockaddr*) &my_sock, sizeof(my_sock)) < 0) {
-		printf("Fallo al hacer el bind\n");
-		close(sockListener);
-		return -1;
-	} else {
-		printf("Bind hecho exitosamente\n");
-	}
-
-//Pongo a escuchar al socket, hasta un maximo de 10 msj
-	if (listen(sockListener, 2) == -1) {
-		printf("Sobrecarga de servidor\n");
-		close(sockListener);
-		return -1;
-	} else {
-		printf("Escuchando conexiones...\n");
-	}
-
+	sockFD = initServer();
 
 	size = sizeof(struct sockaddr_in);
 
-//Acepto conexiones
-	sockAccept = accept(sockListener, (struct sockaddr*) &client_sock, &size);
+	while(1) {
+	sockAccept = accept(sockFD, (struct sockaddr*) &client_sock, &size);
 	if (sockAccept != 1) {
 		printf("No se pudo aceptar conexión\n");
-		close(sockListener);
+		close(sockFD);
 		close(sockAccept);
 		return -1;
 	}
 
-//Obtengo la IP del cliente que se conectó
 	printf("Se obtuvo una conexión desde: %s\n", inet_ntoa(client_sock.sin_addr));
+	strcpy(buffer_send, "Bienvenido al servidor que sirve\n");
+	send(sockAccept, &buffer_send, MESSAGE_LENGTH, 0);
 
-//Envio mensaje al cliente
-	strcpy(buffer, "Bienvenido al servidor que sirve\n");
-	send(sockAccept, &buffer, MESSAGE_LENGTH, 0);
+	recv(sockAccept, &buffer_recv, MESSAGE_PROTOCOL_LENGTH, 0);
 
-	close(sockAccept);
+//	if(strcmp(buffer_recv, "fs") == 0) {
+//		pthread_create(&fs_handler, NULL, fs_conection_handler, NULL);
+//	}
+//
+//	if(strcmp(buffer_recv, "nd") == 0) {
+//		pthread_create(&nodo_handler, NULL, nodo_conection_handler, NULL);
+//	}
+//
+//	if(strcmp(buffer_recv, "mp") == 0){
+//		pthread_create(&map_handler, NULL, map_conection_handler, NULL);
+//	}
+//
+//	if(strcmp(buffer_recv, "rd") == 0) {
+//		pthread_create(&reduce_handler, NULL, reduce_conection_handler, NULL);
+//	}
 
 
-
-
-
-
-
+	} //while
 
 
 	return 0;
 }
 
+
+void getConfig() {
+
+	t_config* archivoConfig = config_create("./nodo/nodo.config");
+
+	PUERTO_FS = config_get_int_value(archivoConfig, "PUERTO_FS");
+	IP_FS = config_get_string_value(archivoConfig, "IP_FS");
+	ARCHIVO_BIN = config_get_string_value(archivoConfig, "ARCHIVO_BIN");
+	DIR_TEMP = config_get_string_value(archivoConfig, "DIR_TEMP");
+	NODO_NUEVO = config_get_string_value(archivoConfig, "NODO_NUEVO");
+	IP_NODO = config_get_string_value(archivoConfig, "IP_NODO");
+	PUERTO_NODO = config_get_int_value(archivoConfig, "PUERTO_NODO");
+
+}
+
+
+int initServer() {
+
+	int sockFD;
+	Sockaddr_in my_sock;
+
+	my_sock.sin_family = AF_INET;
+	my_sock.sin_port = htons(PUERTO_NODO);
+	memset(&my_sock.sin_zero, 0, 8);
+	inet_aton(IP_NODO, &my_sock.sin_addr);
+
+	sockFD = socket(AF_INET, SOCK_STREAM, 0);
+	if(sockFD == -1) {
+		printf("Error al crear socket\n");
+		return -1;
+	} else {
+		printf("Socket creado correctamente...\n");
+	}
+
+	if(bind(sockFD, (struct sockaddr*) &my_sock, sizeof(my_sock)) == -1) {
+		printf("Fallo al hacer el bind...\n");
+		return -1;
+	} else {
+		printf("Bind realizado con exito...\n");
+	}
+
+	if(listen(sockFD, 5) == -1) {
+		printf("Fallo en listen\n");
+	} else {
+		printf("Socket escuchando conexiones...\n");
+	}
+
+	return sockFD;
+}
+
+
+//void *fs_conection_handler(void* ptr){}
+//void *map_conection_handler(void* ptr){}
+//void *reduce_conection_handler(void* ptr){}
+//void *nodo_conection_handler(void* ptr){}

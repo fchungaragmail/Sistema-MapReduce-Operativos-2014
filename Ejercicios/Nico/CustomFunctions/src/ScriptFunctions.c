@@ -36,7 +36,7 @@ void *inputString(FILE* fp, size_t size);
 #define CHILD_READ_FD   ( pipes[PARENT_WRITE_PIPE][READ_FD]  )
 #define CHILD_WRITE_FD  ( pipes[PARENT_READ_PIPE][WRITE_FD]  )
 
-char *inputString(FILE* fp, size_t size);
+//char *inputString(FILE* fp, size_t size);
 
 FILE* procesarScript(char* direccionScript, char *bloqueAProcesar, FILE *archivoTemporal)
 {
@@ -81,7 +81,8 @@ FILE* procesarScript(char* direccionScript, char *bloqueAProcesar, FILE *archivo
         // Read from child’s stdout
         char *bloqueProcesado;
         FILE* fp = fdopen(PARENT_READ_FD, "r");//PARENT_READ_FD es un fd
-        bloqueProcesado = inputString(fp,1);//1 valor por default
+
+        // bloqueProcesado = inputString(fp,1);//1 valor por default-->DESCOMENTAR
 
         size_t lenBlckProcesado = strlen(bloqueProcesado);
         fwrite(bloqueProcesado,sizeof(char),lenBlckProcesado,archivoTemporal);
@@ -92,7 +93,7 @@ FILE* procesarScript(char* direccionScript, char *bloqueAProcesar, FILE *archivo
     return -1;
 }
 
-
+/*
 char *inputString(FILE* fp, size_t size){
 //The size is extended by the input with the value of the provisional
     char *str;
@@ -111,4 +112,4 @@ char *inputString(FILE* fp, size_t size){
 
     return realloc(str, sizeof(char)*len);
 }
-
+*/

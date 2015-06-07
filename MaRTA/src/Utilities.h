@@ -13,25 +13,23 @@
 */
 
 char* intToCharPtr(int x);
-int charPtrToInt(char* ptr);
 
 /*
 // ESTRUCTURAS
 */
-struct _message {
+
+typedef struct mensaje
+{
+	int16_t comandoSize;
+	char* comando;
+	int32_t dataSize; 	//Pongo long xq en un int no entraria el valor
+	char* data;		//correspondiente a 20mb
+}mensaje_t;
+
+typedef struct _message {
 	int sockfd;
 	mensaje_t *mensaje;
-};
-typedef struct _message Message;
-
-struct mensaje
-{
-	int comandoSize;
-	char* comando;
-	long dataSize; 	//Pongo long xq en un int no entraria el valor
-	char* data;		//correspondiente a 20mb
-}__attribute__((packed));
-typedef struct mensaje mensaje_t;
+}Message;
 
 typedef enum
 {
@@ -53,7 +51,7 @@ typedef enum
 }TypesPedidosRealizado;
 
 typedef enum {
-				UNINITIALIZED = 0, 	//sin estado
+				UNINITIALIZED = -1, 	//sin estado
 				IN_MAPPING = 1, 	//se esta mappeando, se espera respuesta del job
 				MAPPED = 2, 		//archivo ya mappeado
 				IN_REDUCING = 3,
@@ -61,13 +59,6 @@ typedef enum {
 				TOTAL_ERROR = 5  	// fallo la operacion y el FS no tiene otros bloques disponibles para procesar
 } statusBlock;
 
-struct _blockData{
-	int nroDeNodo;
-	int nroDeBloque;
-	char *archTemporal;
-	statusBlock estado;
-};
-typedef struct _blockData BlockData;
 
 /*
 // 	CONSTANTES
@@ -75,10 +66,18 @@ typedef struct _blockData BlockData;
 
 //BlockState
 #define K_BlockState_UninitializedPath "BlockState_UninitializedPath"
+#define K_BlockState_UninitializedNodo "BlockState_UninitializedNodo"
+
+//Copia de FullData(tabla que envia el FS)
+#define K_Copia_DarDeBajaIPNodo "Copia_DarDeBajaIPNodo"
 
 //Varias
-#define K_PUERTO_LOCAL 6796
+#define K_PUERTO_LOCAL 6851
 #define K_FS_IP -1 //DEFINIR
 #define K_FS_PUERTO -1 //DEFINIR
+
+//Simulacion
+#define K_Simulacion_ScktJob 	5
+#define K_Simulacion_ScktFS 	3
 
 #endif /* UTILITIES_H_ */

@@ -1,5 +1,9 @@
 Agregar todas las interacciones entre los procesos
+**********************
 
+ACLARACION!!! : TODOS los valores "size..." osea los que vamos a usar para informar la longitud del mensaje siguiente , deben ser de tipo "int16_t" o "int32_t" segun se considere necesario 
+
+**********************
 Luego de conectarse con MaRTA, el FS espera el siguiente mensaje:
 -Comando: "nombre MaRTA"
 -Data: Vacio
@@ -18,14 +22,15 @@ Ejemplo "DataFile /user/juan/datos/temperatura2012.txt/"
 *********************************************************************************************************************
 
 --> FS responde con tabla de archivo pedida
--Comando: "DataFileResponse"
--Data:sizeRutaDelArchivo-rutaDelArchivo--sizeRespuesta-Respuesta-sizeCantidadDeBloques-cantidadDeBloques-sizeNroDeCopias-nroDeCopias-sizeEstructura-estructura
+-Comando: "DataFileResponse rutaDelArchivo Respuesta cantidadDeBloques-nroDeCopias-sizeEstructura-"
+-Data: estructura
 
-//"Respuesta" sera un bool de stdbool.h y me dira si esta disponible el archivo que pedi o no (si TODAS las copias de un bloque NO estan disponibles, entonces todo el archivo NO esta disponible)
+//"Respuesta"  debe ser un int_8 siendo 0 si es false o 1 si es true y me dira si esta disponible el archivo que pedi o no (si TODAS las copias de un bloque NO estan disponibles, entonces todo el archivo NO esta disponible)
+//"cantidadDeBloques" sera un int16_t
+//"nroDeCopias" sera un int16_t
 
-//Por "estructura "me refiero a la que se ve en la pag 13 del tp (contando la caratula).
- A mi me vendria genial que me llegue una matriz (de arrays) donde siempre tendra 3 columnas (copia 1,2,3) y
- luego las filas son la cantidad de bloques que es el parametro "cantidadDeBloques", asi yo podria recorrerlo,
- donde cada elemento de esta matriz es un t_dictionary con los elementos "numeroDeNodo" y "nroDeBloque"
+// --> "estructura" va a ser IPNodoX-nroDeBloqueX-IPNodoY-nroDeBloqueY-IPNodoZ-nroDeBloqueZ...
+//donde entendiendo que el FS va a tener una tabla como la de la pag 13 del tp,
+//primero va a poner toda la fila 0 , luego toda la fila 1 , luego toda la fila 2 etc
 
 *********************************************************************************************************************

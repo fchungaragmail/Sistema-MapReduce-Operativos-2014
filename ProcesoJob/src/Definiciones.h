@@ -10,6 +10,7 @@
 
 #include <netinet/in.h>
 #include <pthread.h>
+#include "Protocolo/protocolo.h" //TODO
 
 #define EXIT_ERROR -1
 #define EXIT_OK 1
@@ -32,9 +33,11 @@ typedef struct {
 } Sockaddr_in ;
 
 typedef struct {
-	Sockaddr_in* direccionNodo;
+	Sockaddr_in direccionNodo;
 	pthread_t* threadhilo;
-	EstadoHilo estadoHilo;
+	int socketFd;
+	char* nombreArchivo;
+	int nroBloque;
 
 } HiloJob ;
 
