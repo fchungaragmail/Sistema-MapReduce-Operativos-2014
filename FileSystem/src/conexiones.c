@@ -126,28 +126,33 @@ void leerEntradas()
 		if (FD_ISSET(desbloquearSelect[0], &nodosSelect))
 		{
 			char* dummy = malloc(1);
-			read(desbloquearSelect[0], dummy, 1);
+			int count = 1;
+			while (count != 0)
+			{
+				read(desbloquearSelect[0], dummy, 1);
+				ioctl(desbloquearSelect[0], FIONREAD, &count);
+			}
 			free(dummy);
 		}
 
 		//Chequeo los fd de las conexiones
 		for (int i=0; i<conexiones->elements_count ;i++)
 		{
-			int estado;
 			Conexion_t* conexion = list_get(conexiones,i);
-			if (!FD_ISSET(conexion->sockfd,&nodosSelect))
+			if (true != FD_ISSET(conexion->sockfd,&nodosSelect))
 			{
 				continue;
 			}
 
-			int count = 1;
+			int estado;
+			int count;
+			ioctl(conexion->sockfd, FIONREAD, &count);
 			while (count != 0)
 			{
 				mensaje_t* mensaje = malloc(sizeof(mensaje_t));
 				estado = recibir(conexion->sockfd, mensaje);
 				if (estado == CONECTADO)
 				{
-					//En thread -> ProcesarInfo(Mensaje, Conexion);
 					procesarComandoRemoto(mensaje, conexion);
 					ioctl(conexion->sockfd, FIONREAD, &count);
 				} else
@@ -168,7 +173,7 @@ void cerrarConexion(Conexion_t* conexion)
 	pthread_mutex_unlock(&mNodos);
 	close(conexion->sockfd);
 	conexion->estado = DESCONECTADO;
-	log_info(log, "Desconectado del nodo %s", conexion->nombre);
+	log_info(log, "Desconectado de %s", conexion->nombre);
 }
 
 
@@ -187,10 +192,10 @@ void probarConexiones()
 	connect(socketPrueba, &their_addr, sizeof(Sockaddr_in));
 
 	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
-	char comando[] = "nombre -Nodo1";
+	char comando[] = "nombre Nodo1";
 	mensaje->comando = malloc(strlen(comando));
 	strcpy(mensaje->comando,comando);
-	mensaje->comandoSize = strlen(mensaje->comando);
+	mensaje->comandoSize = (strlen(mensaje->comando) + 1);
 
 	memcpy(mensaje->data, NULL, 0);
 	mensaje->dataSize = 0;
