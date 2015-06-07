@@ -193,7 +193,7 @@ void probarConexiones()
 
 	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
 	char comando[] = "nombre Nodo1";
-	mensaje->comando = malloc(strlen(comando));
+	mensaje->comando = malloc(strlen(comando)+1);
 	strcpy(mensaje->comando,comando);
 	mensaje->comandoSize = (strlen(mensaje->comando) + 1);
 
