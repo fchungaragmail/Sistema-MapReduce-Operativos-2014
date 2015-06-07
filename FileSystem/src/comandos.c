@@ -24,7 +24,8 @@ int agregarNodo(char* argumentos);
 int quitarNodo(char* argumentos);
 int nomb(char* argumentos, Conexion_t* conexion);
 
-int getDir(char* dir,int16_t padre);
+int16_t getDir(char* dir,int16_t padre);
+int32_t get_file_size(const char * file_name);
 
 void procesarComando(char** comando, void(*doComando)(void*))
 {
@@ -79,6 +80,7 @@ int crearDir(char* argumentos){
 			strcpy(directorio->directorio, dir);
 			directorio->padre = padre;
 			padre = list_add(listaDirs, directorio);
+			log_debug(log, "Directorio agregado: %s padre: %d", dir, directorio->padre);
 		}else
 		{
 			padre = index;
@@ -91,8 +93,6 @@ int crearDir(char* argumentos){
 
 
 int importar(char* argumentos){
-	printf("Importar archivo\n");
-
 	char** tmp;
 	tmp = string_split(argumentos, " ");
 	//tmp[0]: ruta del archivo local
@@ -100,14 +100,36 @@ int importar(char* argumentos){
 
 	if( access( tmp[0], F_OK ) == -1 )
 	{
-	    printf("El archivo %s no existe. \n");
+	    printf("El archivo %s no existe. \n", tmp[0]);
 	    return 1;
 	}
 
-	//Habria que chequear que el archivo no exista ya en el FS
+	int16_t indexPadre = 0;
+	char nombrePadre[256];
+	char nombre[50];
+	int i = 1;
 
+	char** ruta = string_split(tmp[1], "/");
+	strcpy(nombre,ruta[i-1]);
 
+	while (ruta[i] != NULL)
+	{
+		strcpy(nombrePadre,ruta[i-1]);
+		indexPadre = getDir(nombrePadre,indexPadre);
+		if (indexPadre < 0 )
+		{
+			log_error(log, "Directorio no encontrado %s", nombrePadre);
+			return -1;
+		}
+		strcpy(nombre,ruta[i]);
+		i++;
+	}
 
+	t_reg_archivo* archivo = malloc(sizeof(t_reg_archivo));
+	archivo->dirPadre = indexPadre;
+	strcpy(archivo->nombre,nombre);
+	archivo->tamanio = get_file_size(tmp[0]);
+	archivo->estado = DISPONIBLE;
 	return 0;
 }
 
@@ -178,7 +200,7 @@ int nomb(char* argumentos, Conexion_t* conexion)
 	return 0;
 }
 
-int getDir(char* dir,int16_t padre)
+int16_t getDir(char* dir,int16_t padre)
 {
 	int ret = -1;
 	int length = list_size(listaDirs);
@@ -196,4 +218,11 @@ int getDir(char* dir,int16_t padre)
 	return ret;
 }
 
+
+int32_t get_file_size(const char * file_name)
+{
+    struct stat sb;
+    stat (file_name, & sb);
+    return sb.st_size;
+}
 

@@ -11,6 +11,7 @@
 #include <pthread.h>
 #include <commons/string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include "recursosCompartidos.h"
 #include "protocolo.h"
 
