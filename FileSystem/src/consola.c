@@ -18,7 +18,6 @@ t_dictionary* diccionarioComandos; //En este diccionario se guardan
 
 void execConsola()
 {
-	initConsola();
 	char* menuInicial = "Bienvenido al FileSystem\n";
 	system("clear");
 	printf(menuInicial);
@@ -48,7 +47,12 @@ int procesarEntrada(char entrada[],bool* continuar)
 	char** comando = string_n_split(entrada,2," ");
 
 	*continuar = true;
-	int eleccion = dictionary_get(diccionarioComandos,comando[0]);
+	int eleccion = 0;
+	bool encontro = dictionary_has_key(diccionarioComandos,comando[0]);
+	if (encontro)
+	{
+		eleccion = dictionary_get(diccionarioComandos,comando[0]);
+	}
 	switch (eleccion)
 	{
 	case 1:

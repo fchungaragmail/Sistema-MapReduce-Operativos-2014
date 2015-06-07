@@ -16,6 +16,7 @@
 
 
 //Comienza la ejecucion de la consola
+void initConsola();
 void execConsola();
 
 #endif /* CONSOLA_H_ */
