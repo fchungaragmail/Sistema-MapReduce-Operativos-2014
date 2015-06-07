@@ -160,16 +160,11 @@ Message* planificar(Message *recvMessage,TypesMessages type)
 		fsRequest->mensaje = malloc(sizeof(mensaje_t));
 
 		//armo stream a mano
-		char *stream = malloc(strlen("DataFile ") + strlen(path) + 1);
-		char *comando = "DataFile ";
-		int size,offset; size = 0; offset = 0;
-		memcpy(stream,comando,size = strlen(comando));
-		offset = offset + size;
-		memcpy(stream+offset,path,strlen(path)+1);
+		char *stream = string_new();
+		string_append(&stream,"DataFile ");
+		string_append(&stream,path);
 
-		int fileSystemSocket = getFSSocket();
-
-		fsRequest->sockfd = fileSystemSocket;
+		fsRequest->sockfd = getFSSocket();
 		fsRequest->mensaje->comandoSize = strlen(stream);
 		fsRequest->mensaje->comando = stream;
 		fsRequest->mensaje->dataSize = 0;

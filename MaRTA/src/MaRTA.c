@@ -22,6 +22,10 @@
 #include "Utilities.h"
 #include "VariablesGlobales.h"
 
+#include "Simulador.h"
+
+//Variables GLOBALES
+
 t_dictionary *filesToProcess;
 t_dictionary *filesStates;
 t_dictionary *nodosData;
@@ -32,22 +36,20 @@ sem_t semFilesStates;
 sem_t semNodosData;
 sem_t semNodoState;
 
-sem_t leerConexiones;
 sem_t semPrueba;
 
-// MaRTA debe controlar el trafico en la red!!
-int MaxPedidosEnRed = 5;
+int MaxPedidosEnRed = 5; // MaRTA debe controlar el trafico en la red !!
 int pedidosEnRed;
-
 Message *recvMessage;
 
-void* listenConecctions(void* arg);
+void initMaRTA();
+void* connectToFileSystem(void *arg);
 
-//JUAN - protocolo
+//*******************************************
+//PRUEBAS de conexiones CLI-SERV
 void* probarConexiones(void* arg);
 void enviar(int socket, mensaje_t* mensaje);
 
-//JUAN
 struct _sockaddr_in {
 	short int sin_family;  // familia de direcciones, AF_INET
 	unsigned short int sin_port;    // Número de puerto
@@ -55,10 +57,49 @@ struct _sockaddr_in {
 	unsigned char sin_zero[8]; // Relleno para preservar el tamaño original de struct sockaddr
 };
 typedef struct _sockaddr_in Sockaddr_in;
+//*******************************************
 
 int main(void) {
 
 	puts("MaRTA al ataque !!!");
+
+	initMaRTA();
+
+	//PRUEBAS de conexiones CLI-SERV
+	sem_init(&semPrueba, 0, 0);
+	pthread_t hiloCliente;
+	pthread_create(&hiloCliente, NULL, probarConexiones,"hiloCliente_1");
+
+	
+	while(1)
+	{
+
+		recvMessage = listenConnections(); //--> SERVIDOR con el select();
+
+		printf("MaRTA : procesar mensaje\n");
+		printf("************************\n");
+		//processMessage(recvMessage);
+
+		//***********************************
+		//si es un archivo nuevo, crear un nuevo hilo y un nuevo sem y pasar por param la direccion de memoria de este
+		//"recvMessage" sera una var global a la cual tendran acceso los hilos
+
+		//si corresponde a un hilo ya existente
+		//MaRTA debe destrabar el semaforo correspondiente al hilo , para que este agarre la var global
+		//***********************************
+	}
+	closeServidores();
+	return EXIT_SUCCESS;
+}
+
+void* connectToFileSystem(void *arg)
+{
+	int fileSystemSocket = connectToFS();
+	addFSConnection(fileSystemSocket);
+	pthread_exit(NULL);
+}
+
+void initMaRTA(){
 
 	//init MaRTA
 	filesToProcess = dictionary_create();
@@ -70,76 +111,24 @@ int main(void) {
 	sem_init(&semFilesToProcessPerJob, 0, 1);
 	sem_init(&semNodoState, 0, 1);
 
-	pthread_t connectionThread;
-	//pthread_t connectToFSThread;
-
-	sem_init(&leerConexiones, 0, 0);
-	sem_init(&semPrueba, 0, 0);
-
 	initFilesStatusCenter();
 	initPlannerCenter();
-
-	pthread_create(&connectionThread, NULL, listenConecctions,NULL); //--> SERVIDOR con el select();
-	//pthread_create(&connectToFSThread, NULL,connectToFileSystem,NULL);
-
-
-	sleep(2);// --> le doy tiempo al SERVIDOR que llegue al select
-	printf("salio del sleep\n");
-	probarConexiones("hilo_1");// --> CLIENTE , este manda los mensajes de prueba al servidor.
-	return EXIT_SUCCESS;
-//*********************************************************	
-	//pthread_t hiloPrueba;
-	//pthread_create(&hiloPrueba, NULL, probarConexiones,"hilo_1");
-	
-	while(1)
-	{
-		printf("MaRTA : esta esperando en el while principal\n");
-		sem_wait(&leerConexiones);
-		printf("MaRTA : esta en el while principal\n");
-		printf("MaRTA : procesar mensaje\n");
-
-		//MODELO PRODUCTOR CONSUMIDOR !!
-
-		//si es un archivo nuevo, crear un nuevo hilo y un nuevo sem y pasar por param la direccion de memoria de este
-		//"recvMessage" sera una var global a la cual tendran acceso los hilos
-
-		//si corresponde a un hilo ya existente
-		//MaRTA debe destrabar el semaforo correspondiente al hilo , para que este agarre la var global
-	}
-	closeServidores();
-
-	return EXIT_SUCCESS;
-}
-
-void* listenConecctions(void *arg)
-{
 	initConexiones();
-	printf("MaRTA-hilo : entro a listenConecctions\n");
-	while(1)
-		{
-			recvMessage = listenConnections();
-			//MODELO PRODUCTOR CONSUMIDOR !! --> ESCRIBIR EN UNA VAR GLOBAL Y DESTRABAR UN SEM
-			printf("MaRTA-hilo : recibido msje en el while del hilo listenConecctions\n");
-			printf("MaRTA-hilo : destrabo procesarMensage\n");
-			sem_post(&leerConexiones);
-		}
 
-	pthread_exit(NULL);
+	//CONEXION A FILE SYSTEM !!!
+	//pthread_t connectToFSThread;
+	//pthread_create(&connectToFSThread, NULL,connectToFileSystem,NULL);
 }
+//**************************************************
+// PRUEBAS de conexiones CLI-SERV
 
-void* connectToFileSystem(void *arg)
-{
-	int fileSystemSocket = connectToFS();
-	addFSConnection(fileSystemSocket);
-	pthread_exit(NULL);
-}
-
-// JUAN
 #define IP_LISTEN "127.0.0.1"
 
 void* probarConexiones(void* arg)
 {
 	char *str= (char*) arg;
+
+	sleep(2);
 
 	printf ("MaRTA-hilo : entro a PROBAR CONEXIONES !\n");
 	int socketPrueba;
@@ -162,20 +151,24 @@ void* probarConexiones(void* arg)
 	int f=0;
 	while(f<20){
 
+	printf("MaRTA-hilo : esperando en sem - nroDeVez %d\n",f);
 	sem_wait(&semPrueba);
-	printf("MaRTA-hilo : destrabado enviar mensajes\n");
+	printf("MaRTA-hilo : destrabado sem - nroDeVez %d\n",f);
+
+	printf("MaRTA-hilo : esperando en sleep - nroDeVez %d\n",f);
+	sleep(3);
+	printf("MaRTA-hilo : destrabado sleep - nroDeVez %d\n",f);
 
 	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
 	char comando[] = "este es el comando que voy a mandar";
 	mensaje->comando = malloc(strlen(comando)+1);
 	strcpy(mensaje->comando,comando);
-	mensaje->comandoSize = strlen(mensaje->comando);
+	mensaje->comandoSize = (strlen(mensaje->comando)+1);
 
-	char data[] = "Aca irian los datos";
-	mensaje->data = malloc(strlen(data)+1);
-	strcpy(mensaje->data,data);
-	mensaje->dataSize = strlen(mensaje->data);
-
+	//char data[] = "Aca irian los datos";
+	//mensaje->data = malloc(strlen(data)+1);
+	//strcpy(mensaje->data,data);
+	mensaje->dataSize = f;
 
 
 	printf("probarConexiones - %s - va a mandar el msj nro %d \n",str,f);
@@ -192,7 +185,6 @@ void enviar(int socket, mensaje_t* mensaje)
 	if(send(socket,&(mensaje->comandoSize), sizeof(int16_t), 0)<0){printf("ERROR EN EL SEND");};
 	if(send(socket, mensaje->comando, mensaje->comandoSize, 0)<0){printf("ERROR EN EL SEND");};
 	if(send(socket, &(mensaje->dataSize), sizeof(int32_t), 0)<0){printf("ERROR EN EL SEND");};
-	if(send(socket, mensaje->data, mensaje->dataSize, 0)<0){printf("ERROR EN EL SEND");};
-	printf("se envia mensaje \n");
-}
+	//if(send(socket, mensaje->data, mensaje->dataSize, 0)<0){printf("ERROR EN EL SEND");};
 
+}

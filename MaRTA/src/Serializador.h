@@ -25,9 +25,9 @@ bool* deserializeRequestResponse(Message *recvMessage,TypesMessages type);
 char* deserializeComando(Message *recvMessage);
 t_dictionary* deserializarFullDataResponse(Message *recvMessage);
 
-void* createStream();
-void addIntToStream(void *stream, int value,IntTypes type);
-void addBoolToStream(void *stream, bool value);
-void addStringToStream(void *stream,char *value);
+char* createStream();
+void addIntToStream(char *stream, int value,IntTypes type);
+void addBoolToStream(char *stream, bool value);
+void addStringToStream(char *stream,char *value);
 
 #endif /* SERIALIZADOR_H_ */

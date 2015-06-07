@@ -9,6 +9,7 @@
 #include "Serializador.h"
 #include <stdbool.h>
 #include "FilesStatusCenter.h"
+#include <commons/string.h>
 
 char *deserializeFilePath(Message *recvMessage,TypesMessages type);
 bool* deserializeSoportaCombiner(Message *recvMessage);
@@ -16,10 +17,10 @@ bool* deserializeRequestResponse(Message *recvMessage,TypesMessages type);
 char* deserializeComando(Message *recvMessage);
 t_dictionary* deserializarFullDataResponse(Message *recvMessage);
 
-void* createStream();
-void addIntToStream(void *stream, int value,IntTypes type);
-void addBoolToStream(void *stream, bool value);
-void addStringToStream(void *stream,char *value);
+char* createStream();
+void addIntToStream(char *stream, int value,IntTypes type);
+void addBoolToStream(char *stream, bool value);
+void addStringToStream(char *stream,char *value);
 
 char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 {
@@ -28,43 +29,37 @@ char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 	size = 0; offset = 0;
 
 	if(type == K_Job_NewFileToProcess){
-		//Segun protocolo recvMessage->mensaje->data sera
-		//*data: sizeRutaDeArchivo-rutaDeArchivo-soportaCombiner
+		//Segun protocolo recvMessage->mensaje->comando sera
+		//*comando: "archivoAProcesar rutaDeArchivo soportaCombiner"
+		//*data: NADA
 		//necesito obtener "rutaDeArchivo"
-		void *data = recvMessage->mensaje->data;
-		int16_t sizeRutaDeArchivo;
-		memcpy(&sizeRutaDeArchivo,data,size = sizeof(int16_t));
-		offset = offset + size;
-		filePath = malloc(sizeRutaDeArchivo + 1);
-		memcpy(filePath,data+offset,size = (sizeRutaDeArchivo + 1));
-		return filePath;
+
+		char *comandStr = recvMessage->mensaje->comando;
+		char **comandoArray = string_split(comandStr," ");
+		return comandoArray[1];
 	}
 
 	if(type == K_FS_FileFullData){
 		//Tengo que ver como me pasa Juan el FullData
 		//La estructura hasta el momento es:
-		//-Data:sizeRutaDelArchivo-rutaDelArchivo-sizeCantidadDeBloques-cantidadDeBloques-sizeEstructura-estructura
+		//-Comando: "DataFileResponse rutaDelArchivo"
 		//Debo obtener "rutaDelArchivo"
-		void *data = recvMessage->mensaje->data;
-		int16_t sizeRutaDeArchivo;
-		memcpy(&sizeRutaDeArchivo,data,size = sizeof(int16_t));
-		offset = offset + size;
-		filePath = malloc(sizeRutaDeArchivo + 1);
-		memcpy(filePath,data+offset,size = (sizeRutaDeArchivo + 1));
-		return filePath;
+
+		char *comandoStr = recvMessage->mensaje->comando;
+		char **comandoArray = string_split(comandoStr," ");
+		return comandoArray[1];
 	}
 
 	if(type == K_Job_MapResponse || type == K_Job_ReduceResponse){
 		//Segun protocolo recvMessage->mensaje->data sera
-		//*data:sizeRutaArchivoTemporal-rutaArchivoTemporal-Respuesta
+		//*comando(map) : "mapFileResponse rutaArchivoTemporal Respuesta"
+		//*comando(reduce) : "reduceFileResponse rutaArchivoTemporal Respuesta"
+		//*data:NADA
 		//necesito obtener "rutaArchivoTemporal"
-		void *data = recvMessage->mensaje->data;
-		int16_t sizeRutaDeArchivo;
-		memcpy(&sizeRutaDeArchivo,data,size = sizeof(int16_t));
-		offset = offset + size;
-		filePath = malloc(sizeRutaDeArchivo + 1);
-		memcpy(filePath,data+offset,size = (sizeRutaDeArchivo + 1));
-		return filePath;
+
+		char *comandoStr = recvMessage->mensaje->comando;
+		char **comandoArray = string_split(comandoStr," ");
+		return comandoArray[1];
 	}
 
 	return filePath;
@@ -72,20 +67,18 @@ char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 
 bool* deserializeSoportaCombiner(Message *recvMessage)
 {
-		//Segun protocolo recvMessage->mensaje->data sera
-		//*data: sizeRutaDeArchivo-rutaDeArchivo-soportaCombiner
-		//necesito obtener "soportaCombiner"
-	void *data = recvMessage->mensaje->data;
-	int sizeRutaDeArchivo;
-	memcpy(&sizeRutaDeArchivo,data,sizeRutaDeArchivo = sizeof(int16_t));
-	int offset,size; offset = 0; size = 0;
-	offset = sizeof(int16_t) + sizeRutaDeArchivo;
-	int8_t _soportaCombiner;
-	memcpy(&_soportaCombiner,data,sizeof(int8_t));
+	//Segun protocolo recvMessage->mensaje->data sera
+	//*comando: "archivoAProcesar rutaDeArchivo soportaCombiner"
+	//*data: NADA
+	//necesito obtener "soportaCombiner"
+
+	char *comandoStr = recvMessage->mensaje->comando;
+	char **comandoArray = string_split(comandoStr," ");
+	char *soportaCombinerStr = comandoArray[2];
 
 	bool* soportaCombiner = malloc(sizeof(bool));
-	if(_soportaCombiner == 1){ *soportaCombiner = true; }
-	if(_soportaCombiner == 0){ *soportaCombiner = false; }
+	if(strcmp(soportaCombinerStr,"1") == 0){ *soportaCombiner = true; }
+	if(strcmp(soportaCombinerStr,"1") != 0){ *soportaCombiner = false; }
 
 	return soportaCombiner;
 
@@ -97,15 +90,17 @@ bool* deserializeRequestResponse(Message *recvMessage,TypesMessages type)
 
 		if(type==K_Job_MapResponse || type==K_Job_ReduceResponse){
 			//segun protocolo el data sera
-			//*data:sizeRutaArchivoTemporal-rutaArchivoTemporal-Respuesta
+			//*comando(map) : "mapFileResponse rutaArchivoTemporal Respuesta"
+			//*comando(reduce) : "reduceFileResponse rutaArchivoTemporal Respuesta"
+			//*data:NADA
 			//debo obtener "Respuesta"
 			requestResponse = deserializeSoportaCombiner(recvMessage);
 			return requestResponse;
 		}
 
 		if(type == K_FS_FileFullData){
-			//segun protocolo --> Comando: "DataFileResponse"
-			//Si existe el archivo --> Data:sizeRutaDelArchivo-rutaDelArchivo-Respuesta-.......
+			//segun protocolo --> Comando: "DataFileResponse rutaDelArchivo Respuesta"
+			//Si existe el archivo --> Data:.......
 			//debo obtener "Respuesta"
 			requestResponse = deserializeSoportaCombiner(recvMessage);
 			return requestResponse;
@@ -114,34 +109,29 @@ bool* deserializeRequestResponse(Message *recvMessage,TypesMessages type)
 
 char* deserializeComando(Message *recvMessage)
 {
-	int16_t size = recvMessage->mensaje->comandoSize;
-	char *comando = malloc(size+1);
-	void *head_comando = recvMessage->mensaje->comando;
-	memcpy(comando,head_comando,size);
-	return comando;
+	//Segun protocolo el "comando" siempre es lo 1ero del stream
+	char *comandoStr = recvMessage->mensaje->comando;
+	char **comandoArray = string_split(comandoStr," ");
+	char *soportaCombinerStr = comandoArray[2];
+
+	return comandoArray[0];
 }
 
 t_dictionary* deserializarFullDataResponse(Message *recvMessage)
 {
 	// segun protocolo
-	//-Data:sizeRutaDelArchivo-rutaDelArchivo-Respuesta-cantidadDeBloques-nroDeCopias-sizeEstructura-estructura
+	//-Comando: "DataFileResponse rutaDelArchivo Respuesta"
+	//-Data: cantidadDeBloques-nroDeCopias-sizeEstructura-estructura
+	//estructura va a ser IPNodoX-nroDeBloqueX-IPNodoY-nroDeBloqueY-IPNodoZ-nroDeBloqueZ...
 
 	t_dictionary *fullDataDic = dictionary_create();
-	void *data = recvMessage->mensaje->data;
 
-	int16_t sizeRutaDelArchivo;
-	memcpy(&sizeRutaDelArchivo,data,sizeof(int16_t));
-
-	int offset = sizeof(int16_t) + sizeRutaDelArchivo;
-	int size;
-
-	int16_t cantidadDeBloques;
-	int16_t nroDeCopias;
-
-	memcpy(&cantidadDeBloques,data+offset,size = sizeof(int16_t));
-	offset = offset + size;
-	memcpy(&nroDeCopias,data+offset,size = sizeof(int16_t));
-	offset = offset + size;
+	char *_data = recvMessage->mensaje->data;
+	char **data = string_split(_data," ");
+	char *strCantDeBloques = data[0];
+	char *strNroDeCopias = data[1];
+	int16_t cantidadDeBloques = strtol(strCantDeBloques, (char **)NULL, 10);
+	int16_t nroDeCopias = strtol(strNroDeCopias, (char **)NULL, 10);
 
 	dictionary_put(fullDataDic,K_fullData_CantidadDeBloques,cantidadDeBloques);
 	dictionary_put(fullDataDic,K_fullData_CantidadDeCopias,nroDeCopias);
@@ -150,81 +140,26 @@ t_dictionary* deserializarFullDataResponse(Message *recvMessage)
 
 	return fullDataDic;
 }
-void* createStream()
+char* createStream()
 {
-	void *stream = malloc(sizeof(char));
+	char *stream = string_new();
 	return stream;
 }
 
-void addIntToStream(void *stream, int value,IntTypes type)
+void addIntToStream(char *stream, int value,IntTypes type)
 {
-	void *intStream;
-
-	if(type == K_int16_t){
-		intStream = malloc(sizeof(int16_t));
-		int16_t streamInt = value;
-		intStream = &streamInt;
-	}
-	if(type == K_int32_t){
-		intStream = malloc(sizeof(int32_t));
-		int32_t streamInt = value;
-		intStream = &streamInt;
-	}
-
-	int offset = strlen(stream);
-	stream = realloc(stream,strlen(stream)+sizeof(*intStream));
-	memcpy(stream + offset ,intStream,sizeof(*intStream));
-
+	char *intValue = intToCharPtr(value);
+	string_append(&stream," ");
+	string_append(&stream,intValue);
 }
 
-void addBoolToStream(void *stream, bool value)
+void addBoolToStream(char *stream, bool value)
 {
-	int8_t bool8 = value;
-
-	int offset = strlen(stream);
-	stream = realloc(stream,strlen(stream)+sizeof(int8_t));
-	memcpy(stream + offset ,bool8,sizeof(int8_t));
-
+	if(value == true){ string_append(&stream," 1");};
+	if(value == false){ string_append(&stream," 0");};
 }
 
-void addStringToStream(void *stream, char *str)
+void addStringToStream(char *stream, char *str)
 {
-	//se agrega al stream un --> ...-stringSize-string-...
-	addIntToStream(stream,strlen(str),K_int16_t);
-
-	int offset = strlen(stream);
-	stream = realloc(stream,strlen(stream)+sizeof(str));
-	memcpy(stream + offset ,str,sizeof(str));
-
+	string_append(&stream,str);
 }
-
-/*
- //serializo
-char *request = "saraza";
-int tipo=2;
-int largo = 3;
-char* data = malloc(sizeof(int)+sizeof(int)+strlen(request)+1);
-int size = 0, offset = 0;
-offset += size;
-memcpy(data + offset,&tipo, size = sizeof(int));
-offset += size;
-memcpy(data + offset,&largo,size = sizeof(int));
-offset += size;
-memcpy(data + offset,request,size = strlen(request) + 1);
-printf("Quedó %s\n:",(char *)data);
-
-//deserializo
-int a,b;
-offset = 0; size = 0;
-memcpy(&a,data,size = sizeof(int));
-offset = offset + size;
-memcpy(&b,data+offset,size = sizeof(int));
-offset = offset + size;
-char *str = malloc(strlen("saraza")+1);
-memcpy(str,data+offset,size = (strlen("saraza")+1));
-offset = offset + size;
-
-printf("el valor de a es : %d\n",a);
-printf("el valor de b es : %d\n",b);
-printf("el valor de str es : %s\n",str);
-*/

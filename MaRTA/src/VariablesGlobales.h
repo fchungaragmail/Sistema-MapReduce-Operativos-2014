@@ -25,8 +25,7 @@ extern int MaxPedidosEnRed;
 extern int pedidosEnRed;
 
 //***************************************
-
-extern sem_t leerConexiones;
+//PRUEBAS de conexiones CLI-SERV
 extern sem_t semPrueba;
 
 #endif /* VARIABLESGLOBALES_H_ */

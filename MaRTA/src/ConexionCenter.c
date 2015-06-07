@@ -85,7 +85,7 @@ void initConexiones()
 
 	createListener();
 	prepareConnections();
-	conexionesProcesadas=0;
+	conexionesProcesadas=-1;
 
 	printf("INICIO DEL SERVIDOR-MaRTA CON EXITO\n\n");
 }
@@ -114,7 +114,7 @@ Message* listenConnections()
 	printf(" SELECT  !!!\n");
 	read_fds = master; // cópialo
 	sem_post(&semPrueba);
-	printf("destrabo enviarMensaje\n");
+	printf("destrabo sem\n");
 	if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) {
 		perror("select");
 		exit(1);
@@ -171,27 +171,29 @@ Message* listenConnections()
 				} else {
 
 					// tenemos datos de algún cliente
-					printf("llegaron datos de algun cliente\n");
+					printf("llegaron datos de algun cliente - nroDeMsje %d\n",conexionesProcesadas);
 
 					Message *recvMesage = malloc(sizeof(Message));
-
-					recvMesage->mensaje = recibir(i);
+					//recvMesage->mensaje = recibir(i);
 					recvMesage->sockfd=i;
-					
+
+					/*printf("se recibio nroDeMensaje %d \n",recvMesage->mensaje->dataSize);
 					printf("se recibio comandoSize %d \n",recvMesage->mensaje->comandoSize);
-					printf("se recibio el comando %s \n",recvMesage->mensaje->comando);
-					printf("se recibio dataSize %d \n",recvMesage->mensaje->dataSize);
-					printf("se recibio la data %s \n",recvMesage->mensaje->data);
-					
-					int count=1;
-					int s=1;
+					printf("se recibio el comando %s \n",recvMesage->mensaje->comando);*/
+					//printf("se recibio la data %s \n",recvMesage->mensaje->data);
+
+					int count;
+					ioctl(socket, FIONREAD, &count);
 					while(count>0){
 						ioctl(socket, FIONREAD, &count);
 						if(count >0){
 							recvMesage->mensaje = recibir(i);
-							printf("todabia quedan msjes en el buffer\n");
-							printf("releo %d veces\n",s);
-							s=s+1;
+
+							printf("todabia quedan msjes en el buffer y los mensajes son :\n");
+							/*printf("se recibio nroDeMensaje %d \n",recvMesage->mensaje->dataSize);
+							printf("se recibio comandoSize %d \n",recvMesage->mensaje->comandoSize);
+							printf("se recibio el comando %s \n",recvMesage->mensaje->comando);*/
+							//printf("se recibio la data %s \n",recvMesage->mensaje->data);
 						}
 					}
 					return recvMesage;
@@ -208,12 +210,12 @@ mensaje_t* recibir(int socket){
 	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
 
 	recv(socket, &(mensaje->comandoSize), sizeof(int16_t),0);
-	mensaje->comando = malloc(mensaje->comandoSize);
+	mensaje->comando = malloc((mensaje->comandoSize));
 	recv(socket, mensaje->comando, mensaje->comandoSize,0);
 
 	recv(socket, &(mensaje->dataSize), sizeof(int32_t),0);
-	mensaje->data = malloc(mensaje->dataSize);
-	recv(socket, mensaje->data, mensaje->dataSize,0);
+	//mensaje->data = malloc((mensaje->dataSize));
+	//recv(socket, mensaje->data, mensaje->dataSize,0);
 
 	return mensaje;
 }

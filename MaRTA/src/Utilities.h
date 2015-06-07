@@ -72,7 +72,7 @@ typedef enum {
 #define K_Copia_DarDeBajaIPNodo "Copia_DarDeBajaIPNodo"
 
 //Varias
-#define K_PUERTO_LOCAL 6818
+#define K_PUERTO_LOCAL 6851
 #define K_FS_IP -1 //DEFINIR
 #define K_FS_PUERTO -1 //DEFINIR
 
