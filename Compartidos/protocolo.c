@@ -13,15 +13,16 @@ void enviar(int socket, mensaje_t* mensaje);
 
 int recibir(int socket, mensaje_t* mensaje){
 
-	int primerRecv = 0;
+	int estado = 0;
 
-	primerRecv = recv(socket, &(mensaje->comandoSize), sizeof(int16_t),0);
-	if (primerRecv == 0) return DESCONECTADO;
+	estado = recv(socket, &(mensaje->comandoSize), sizeof(int16_t),0);
+	if (estado == 0) return DESCONECTADO;
 
 	mensaje->comando = malloc(mensaje->comandoSize);
 	if (mensaje->comandoSize != 0)
 		recv(socket, mensaje->comando, mensaje->comandoSize,0);
 
+	mensaje->dataSize = 0;
 	recv(socket, &(mensaje->dataSize), sizeof(int32_t),0);
 	mensaje->data = malloc(mensaje->dataSize);
 	if (mensaje->dataSize != 0)
