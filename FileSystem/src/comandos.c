@@ -24,7 +24,7 @@ int agregarNodo(char* argumentos);
 int quitarNodo(char* argumentos);
 int nomb(char* argumentos, Conexion_t* conexion);
 
-
+int getDir(char* dir,int16_t padre);
 
 void procesarComando(char** comando, void(*doComando)(void*))
 {
@@ -62,12 +62,52 @@ int borrar(char* argumentos){
 
 int crearDir(char* argumentos){
 	printf("Crear Directorio\n");
+
+	char** dirs = string_split(argumentos,"/");
+
+	char* dir;
+	int16_t padre = 0;
+	int i = 0;
+	dir = dirs[i];
+
+	while (dir != NULL)
+	{
+		int index = getDir(dir,padre);
+		if (index<0)
+		{
+			t_reg_directorio* directorio= malloc(sizeof(t_reg_directorio));
+			strcpy(directorio->directorio, dir);
+			directorio->padre = padre;
+			padre = list_add(listaDirs, directorio);
+		}else
+		{
+			padre = index;
+		}
+		i++;
+		dir = dirs[i];
+	}
 	return 0;
 }
 
 
 int importar(char* argumentos){
 	printf("Importar archivo\n");
+
+	char** tmp;
+	tmp = string_split(argumentos, " ");
+	//tmp[0]: ruta del archivo local
+	//tmp[1]: ruta del archivo en MDFS
+
+	if( access( tmp[0], F_OK ) == -1 )
+	{
+	    printf("El archivo %s no existe. \n");
+	    return 1;
+	}
+
+	//Habria que chequear que el archivo no exista ya en el FS
+
+
+
 	return 0;
 }
 
@@ -133,8 +173,27 @@ int nomb(char* argumentos, Conexion_t* conexion)
 		if (nodosOnline == LISTA_NODOS)
 			log_info(log, "Cantidad minima de nodos (%d) alcanzada.", LISTA_NODOS);
 	}
+
+	free(tmp);
 	return 0;
 }
 
+int getDir(char* dir,int16_t padre)
+{
+	int ret = -1;
+	int length = list_size(listaDirs);
+	for (int i=0;i<length;i++)
+	{
+		t_reg_directorio* dirListado = list_get(listaDirs,i);
+
+		if ((strcmp(dirListado->directorio,dir) == 0) &&
+				(dirListado->padre == padre) ){
+			ret = i;
+			break;
+		}
+
+	}
+	return ret;
+}
 
 

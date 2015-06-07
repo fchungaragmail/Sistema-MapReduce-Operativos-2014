@@ -16,6 +16,7 @@ typedef struct {
 } t_ubicacion_bloque;
 
 typedef struct {
+	char nombre[50];
 	int64_t tamanio;
 	int16_t dirPadre;
 	t_estado estado;

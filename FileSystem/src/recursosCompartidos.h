@@ -18,6 +18,7 @@
 
 
 extern t_list* listaArchivos;
+extern t_list* listaDirs;
 extern int PUERTO_LISTEN;
 extern char IP_LISTEN[16];
 extern int LISTA_NODOS;

@@ -10,6 +10,7 @@
 
 #include <pthread.h>
 #include <commons/string.h>
+#include <unistd.h>
 #include "recursosCompartidos.h"
 #include "protocolo.h"
 

@@ -56,6 +56,12 @@ void initFileSystem()
 
 	listaArchivos = list_create();
 
+	listaDirs = list_create();
+	t_reg_directorio* raiz = malloc(sizeof(t_reg_directorio));
+	strcpy(raiz->directorio, "");
+	raiz->padre = -1;
+	list_add(listaDirs, raiz);
+
 	initConsola();
 	initConexiones();
 }

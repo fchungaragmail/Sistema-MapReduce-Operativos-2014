@@ -8,6 +8,7 @@
 #include "recursosCompartidos.h"
 
 t_list* listaArchivos;
+t_list* listaDirs;
 int PUERTO_LISTEN = -1;
 char IP_LISTEN[16] = "127.0.0.1";
 int PUERTO_MARTA = -1;
