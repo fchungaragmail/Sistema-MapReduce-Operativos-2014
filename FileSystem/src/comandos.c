@@ -45,7 +45,6 @@ void procesarComandoRemoto(mensaje_t* mensaje, Conexion_t* conexion)
 		//char** comando = string_n_split(mensaje->comando,2," ");
 		nomb(mensaje->comando,conexion);
 	}
-
 }
 
 
@@ -116,9 +115,9 @@ int quitarNodo(char* argumentos){
 
 int nomb(char* argumentos, Conexion_t* conexion)
 {
-	char tmp[20] = "";
-	sscanf(argumentos,"nombre -%s", tmp);
-	strcpy(conexion->nombre, tmp);
+	char** tmp;
+	tmp = string_split(argumentos, " ");
+	strcpy(conexion->nombre, tmp[1]);
 	log_info(log, "Identificado el nodo %s", conexion->nombre);
 }
 
