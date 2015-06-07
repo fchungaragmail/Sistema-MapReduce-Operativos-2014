@@ -22,8 +22,8 @@ Ejemplo "DataFile /user/juan/datos/temperatura2012.txt/"
 *********************************************************************************************************************
 
 --> FS responde con tabla de archivo pedida
--Comando: "DataFileResponse rutaDelArchivo Respuesta"
--Data: cantidadDeBloques-nroDeCopias-sizeEstructura-estructura
+-Comando: "DataFileResponse rutaDelArchivo Respuesta cantidadDeBloques-nroDeCopias-sizeEstructura-"
+-Data: estructura
 
 //"Respuesta"  debe ser un int_8 siendo 0 si es false o 1 si es true y me dira si esta disponible el archivo que pedi o no (si TODAS las copias de un bloque NO estan disponibles, entonces todo el archivo NO esta disponible)
 //"cantidadDeBloques" sera un int16_t
