@@ -76,4 +76,8 @@ typedef enum {
 #define K_FS_IP -1 //DEFINIR
 #define K_FS_PUERTO -1 //DEFINIR
 
+//Simulacion
+#define K_Simulacion_ScktJob 	5
+#define K_Simulacion_ScktFS 	3
+
 #endif /* UTILITIES_H_ */

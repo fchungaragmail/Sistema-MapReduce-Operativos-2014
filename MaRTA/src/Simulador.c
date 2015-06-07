@@ -7,45 +7,114 @@
 
 
 #include "Simulador.h"
+#include "Utilities.h"
+#include <commons/string.h>
 
+int nroDeLlamado = -1;
+
+//FS
 Message* simulacion_FS_DataFullResponse();
 
+//Job
+Message *simulacion_Job_newFileToProcess();
+Message *simulacion_Job_mapResponse();
+Message *simulacion_Job_reduceResponse();
+
+//Ambos
+Message *simulacion_NewConnection(int sckt);
+Message *simular();
+
+Message *simular()
+{
+	nroDeLlamado = nroDeLlamado + 1;
+	if(nroDeLlamado == 0){ return simulacion_NewConnection(K_Simulacion_ScktJob); }
+	if(nroDeLlamado == 1){ return simulacion_FS_DataFullResponse(); }
+	if(nroDeLlamado < 4 ){ return simulacion_Job_mapResponse(); }
+	return simulacion_Job_reduceResponse();
+}
 Message* simulacion_FS_DataFullResponse()
 {
 	//--> FS responde con tabla de archivo pedida
-	//-Comando: "DataFileResponse rutaDelArchivo Respuesta"
-	//-Data: cantidadDeBloques-nroDeCopias-sizeEstructura-estructura
+	//-Comando: "DataFileResponse rutaDelArchivo Respuesta cantidadDeBloques-nroDeCopias-sizeEstructura-"
+	//-Data: estructura
 	//estructura va a ser IPNodo-nroDeBloque-IPNodo-nroDeBloque-IPNodo-nroDeBloque...
 
 	Message *fsResponse = malloc(sizeof(Message));
 
 	//armo Comando
-	int16_t comandoSize = (strlen("DataFileResponse /user/juan/datos/temperatura2012.txt/ 1"))+1;
-	strcpy(fsResponse->mensaje->comando,"DataFileResponse /user/juan/datos/temperatura2012.txt/ 1");
+	char *comando = string_new();
+	string_append(&comando,"DataFileResponse /user/juan/datos/temperatura2012.txt/ 1 4 3 X");// X == sizeEstrctura
+	fsResponse->mensaje->comandoSize = strlen(comando);
+	fsResponse->mensaje->comando = comando;
 
-	//armo Data --> matriz de 4x4
-	int i,j; t_dictionary *matriz[4][4];
+	//armo Data
+	char *data1 = "195.456.2.5 01 196.422.1.1 77 192.456.8.9 55 ";
+	char *data2 = "192.163.2.5 22 192.456.8.9 54 192.163.2.5 36 ";
+	char *data3 = "195.456.2.5 99 192.163.2.5 85 192.163.2.5 77 ";
+	char *data4 = "192.456.8.9 88 192.153.7.5 82 198.167.5.9 22";
 
-	char *IP1 = "192.163.2.5";
-	char *IP2 = "192.456.8.9";
-	char *IP3 = "195.456.2.5";
-	char *IP4 = "196.422.1.1";
+	char *data = string_new();
+	string_append(&data,data1);
+	string_append(&data,data2);
+	string_append(&data,data3);
+	string_append(&data,data4);
 
-	for(i=0;i<4;i++){
+	fsResponse->mensaje->dataSize = strlen(data);
+	fsResponse->mensaje->data = data;
 
-		char *ip;
-		if(i==0){ ip=IP1; };
-		if(i==1){ ip=IP2; };
-		if(i==2){ ip=IP3; };
-		if(i==3){ ip=IP4; };
+	fsResponse->sockfd = K_Simulacion_ScktFS;
 
-		for(j=0;j<4;j++){
+	return fsResponse;
+}
 
-				t_dictionary *dic = malloc(sizeof(t_dictionary));
+Message *simulacion_Job_newFileToProcess()
+{
+		//-->Job le pasa a MaRTA su archivo a procesar (pueden ser muchos, en este caso seran varios envios)
+		//*comando: "archivoAProcesar rutaDeArchivo soportaCombiner"
+		//*data: NADA
 
-			}
+		Message *jobMsj = malloc(sizeof(Message));
+		char *comando = string_new();
+		string_append(&comando,"archivoAProcesar /user/juan/datos/temperatura2012.txt/ 0");
+		jobMsj->mensaje->comandoSize = strlen(comando);
+		jobMsj->mensaje->comando = comando;
+		jobMsj->mensaje->dataSize = 0;
+		jobMsj->mensaje->data = "";
+		jobMsj->sockfd = K_Simulacion_ScktJob;
+		return jobMsj;
+}
 
-	}
+Message *simulacion_Job_mapResponse()
+{
+	//-->Job responde a Marta con el resultado de la operacion de map
+	//*comando : "mapFileResponse rutaArchivoTemporal Respuesta"
+	//*data:NADA
 
+	Message *jobMsj = malloc(sizeof(Message));
+	char *comando = string_new();
+	string_append(&comando,"mapFileResponse /user/juan/datos/temperatura2012.txt/-23:43:45:2345 1");
+	jobMsj->mensaje->comandoSize = strlen(comando);
+	jobMsj->mensaje->comando = comando;
+	jobMsj->mensaje->dataSize = 0;
+	jobMsj->mensaje->data = "";
+	jobMsj->sockfd = K_Simulacion_ScktJob;
+	return jobMsj;
+}
 
+Message *simulacion_Job_reduceResponse()
+{
+	return simulacion_Job_mapResponse();
+}
+
+Message *simulacion_NewConnection(int sckt){
+
+	Message *newConnection;
+	newConnection=malloc(sizeof(Message));
+	newConnection->mensaje=malloc(sizeof(*newConnection->mensaje));
+
+	newConnection->mensaje->comandoSize=(strlen("newConnection")+1);
+	newConnection->mensaje->comando=malloc(strlen("newConnection")+1);
+	strcpy(newConnection->mensaje->comando,"newConnection");
+	newConnection->sockfd=sckt;
+	return newConnection;
 }

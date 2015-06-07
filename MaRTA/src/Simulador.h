@@ -18,7 +18,11 @@
 Message* simulacion_FS_DataFullResponse();
 
 //Simulador Job
+Message *simulacion_Job_newFileToProcess();
+Message *simulacion_Job_mapResponse();
+Message *simulacion_Job_reduceResponse();
 
-
-
+//Ambos
+Message *simulacion_NewConnection(int sckt);
+Message *simular();
 #endif /* SIMULADOR_H_ */

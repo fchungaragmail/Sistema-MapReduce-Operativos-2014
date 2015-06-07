@@ -41,8 +41,9 @@ char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 
 	if(type == K_FS_FileFullData){
 		//Tengo que ver como me pasa Juan el FullData
-		//La estructura hasta el momento es:
-		//-Comando: "DataFileResponse rutaDelArchivo"
+		//-Comando: "DataFileResponse rutaDelArchivo Respuesta cantidadDeBloques-nroDeCopias-sizeEstructura"
+		//-Data: estructura
+		//estructura va a ser IPNodoX-nroDeBloqueX-IPNodoY-nroDeBloqueY-IPNodoZ-nroDeBloqueZ...
 		//Debo obtener "rutaDelArchivo"
 
 		char *comandoStr = recvMessage->mensaje->comando;
@@ -99,8 +100,10 @@ bool* deserializeRequestResponse(Message *recvMessage,TypesMessages type)
 		}
 
 		if(type == K_FS_FileFullData){
-			//segun protocolo --> Comando: "DataFileResponse rutaDelArchivo Respuesta"
-			//Si existe el archivo --> Data:.......
+			//segun protocolo
+			//-Comando: "DataFileResponse rutaDelArchivo Respuesta cantidadDeBloques-nroDeCopias-sizeEstructura"
+			//-Data: estructura
+			//estructura va a ser IPNodoX-nroDeBloqueX-IPNodoY-nroDeBloqueY-IPNodoZ-nroDeBloqueZ...
 			//debo obtener "Respuesta"
 			requestResponse = deserializeSoportaCombiner(recvMessage);
 			return requestResponse;
@@ -120,23 +123,40 @@ char* deserializeComando(Message *recvMessage)
 t_dictionary* deserializarFullDataResponse(Message *recvMessage)
 {
 	// segun protocolo
-	//-Comando: "DataFileResponse rutaDelArchivo Respuesta"
-	//-Data: cantidadDeBloques-nroDeCopias-sizeEstructura-estructura
+	//-Comando: "DataFileResponse rutaDelArchivo Respuesta cantidadDeBloques-nroDeCopias-sizeEstructura"
+	//-Data: estructura
 	//estructura va a ser IPNodoX-nroDeBloqueX-IPNodoY-nroDeBloqueY-IPNodoZ-nroDeBloqueZ...
+	//1ero fila 1,2,3,4,5....
 
 	t_dictionary *fullDataDic = dictionary_create();
 
-	char *_data = recvMessage->mensaje->data;
-	char **data = string_split(_data," ");
-	char *strCantDeBloques = data[0];
-	char *strNroDeCopias = data[1];
+	char *_comando = recvMessage->mensaje->comando;
+	char **comando = string_split(_comando," ");
+	char *strCantDeBloques = comando[3];
+	char *strNroDeCopias = comando[4];
 	int16_t cantidadDeBloques = strtol(strCantDeBloques, (char **)NULL, 10);
 	int16_t nroDeCopias = strtol(strNroDeCopias, (char **)NULL, 10);
 
+	t_dictionary *dataDic = dictionary_create();
+	t_dictionary *dataMatriz[cantidadDeBloques][nroDeCopias];
+	char *data = recvMessage->mensaje->data;
+	char **dataArray = string_split(data," ");
+	int i,j;
+	for(i=0;i<nroDeCopias;i++){
+		for(j=0;j<(nroDeCopias*2);j=j+2){
+
+			t_dictionary *dic = dictionary_create();
+			char *ipNodo = dataArray[j];
+			char *nroDeBloque = dataArray[j+1];
+			dictionary_put(dic,K_Copia_IPNodo,ipNodo);
+			dictionary_put(dic,K_Copia_NroDeBloque,nroDeBloque);
+			dataMatriz[i][j] = dic;
+		}
+	}
+
 	dictionary_put(fullDataDic,K_fullData_CantidadDeBloques,cantidadDeBloques);
 	dictionary_put(fullDataDic,K_fullData_CantidadDeCopias,nroDeCopias);
-
-	//FATAL SABER COMO ME VA A LLEGAR LA "estructura"
+	dictionary_put(fullDataDic,K_fullData_Data,dataDic);
 
 	return fullDataDic;
 }

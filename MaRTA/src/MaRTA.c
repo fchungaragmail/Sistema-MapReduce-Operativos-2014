@@ -66,19 +66,19 @@ int main(void) {
 	initMaRTA();
 
 	//PRUEBAS de conexiones CLI-SERV
-	sem_init(&semPrueba, 0, 0);
-	pthread_t hiloCliente;
-	pthread_create(&hiloCliente, NULL, probarConexiones,"hiloCliente_1");
+	//sem_init(&semPrueba, 0, 0);
+	//pthread_t hiloCliente;
+	//pthread_create(&hiloCliente, NULL, probarConexiones,"hiloCliente_1");
 
 	
 	while(1)
 	{
 
-		recvMessage = listenConnections(); //--> SERVIDOR con el select();
 
-		printf("MaRTA : procesar mensaje\n");
-		printf("************************\n");
-		//processMessage(recvMessage);
+		//recvMessage = listenConnections(); //--> SERVIDOR con el select();
+
+		recvMessage = simular();
+		processMessage(recvMessage);
 
 		//***********************************
 		//si es un archivo nuevo, crear un nuevo hilo y un nuevo sem y pasar por param la direccion de memoria de este
@@ -113,7 +113,7 @@ void initMaRTA(){
 
 	initFilesStatusCenter();
 	initPlannerCenter();
-	initConexiones();
+	//initConexiones();
 
 	//CONEXION A FILE SYSTEM !!!
 	//pthread_t connectToFSThread;
