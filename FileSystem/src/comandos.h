@@ -12,8 +12,11 @@
 #include <commons/string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/mman.h>
 #include "recursosCompartidos.h"
 #include "protocolo.h"
+#include "conexiones.h"
 
 
 void procesarComando(char** comando, void(*doComando)(void*));

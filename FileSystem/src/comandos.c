@@ -24,8 +24,11 @@ int agregarNodo(char* argumentos);
 int quitarNodo(char* argumentos);
 int nomb(char* argumentos, Conexion_t* conexion);
 
+int enviarBloque(enviarBloque_t* envio);
+
 int16_t getDir(char* dir,int16_t padre);
 int32_t get_file_size(const char * file_name);
+pthread_mutex_t mListaArchivos;
 
 void procesarComando(char** comando, void(*doComando)(void*))
 {
@@ -104,6 +107,9 @@ int importar(char* argumentos){
 	    return 1;
 	}
 
+	int32_t tamanio = get_file_size(tmp[0]);
+
+	//Busco que exista el dir en el FS
 	int16_t indexPadre = 0;
 	char nombrePadre[256];
 	char nombre[50];
@@ -125,11 +131,50 @@ int importar(char* argumentos){
 		i++;
 	}
 
+
+	int archivoDisk = open(tmp[0],O_RDONLY);
+	void* archivoMap = mmap(NULL, tamanio, PROT_READ, MAP_SHARED, archivoDisk, 0);
+	close(archivoDisk);
+
+	//Chequear si puedo meter los bloques en al menos 3 nodos. Si no, que falle
+
+	t_list* listaThreads = list_create();
+	int32_t bytesEnviados = 0;
+	while (bytesEnviados < tamanio)
+	{
+		for (int i=0;i<conexiones->elements_count;i++)
+		{
+			Conexion_t* nodo = list_get(conexiones,i);
+			if (strcmp(nodo->nombre,"MaRTA") == 0) continue;
+
+			enviarBloque_t* envio = malloc(sizeof(enviarBloque_t));
+			envio->conexion = nodo;
+			envio->archivoMap = archivoMap;
+			envio->offset = bytesEnviados;
+			envio->archivoSize = tamanio;
+
+			pthread_t tEnvio;
+			list_add(listaThreads, &(tEnvio));
+			pthread_create(&tEnvio, NULL, enviarBloque, envio);
+			bytesEnviados += TAMANIO_BLOQUE;
+		}
+
+	}
+
+	for (int i=0;i<listaThreads->elements_count;i++)
+	{
+		pthread_join(*(pthread_t*)(list_get(listaThreads,i)),NULL);
+	}
+
 	t_reg_archivo* archivo = malloc(sizeof(t_reg_archivo));
 	archivo->dirPadre = indexPadre;
 	strcpy(archivo->nombre,nombre);
-	archivo->tamanio = get_file_size(tmp[0]);
+	archivo->tamanio = tamanio;
 	archivo->estado = DISPONIBLE;
+
+	pthread_mutex_lock(&mListaArchivos);
+	list_add(listaArchivos,archivo);
+	pthread_mutex_unlock(&mListaArchivos);
 	return 0;
 }
 
@@ -218,6 +263,32 @@ int16_t getDir(char* dir,int16_t padre)
 	return ret;
 }
 
+
+int enviarBloque(enviarBloque_t* envio)
+{
+	//crear el mensaje
+	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
+	mensaje->comando = string_new();
+	string_append(mensaje->comando, "setBloque ");
+	string_append(mensaje->comando, "1");	//getBloqueDisponible(conexion);
+	mensaje->comandoSize = strlen(mensaje->comando) + 1;
+	mensaje->data = envio->archivoMap + envio->offset;//Desde donde se envia
+
+	//Calculo hasta donde tengo que enviar
+	div_t result = div(envio->archivoSize-envio->offset,TAMANIO_BLOQUE);
+	if ((result.quot == 0) && (result.rem < TAMANIO_BLOQUE))
+	{
+		mensaje->dataSize = result.rem;
+	}else
+	{
+		mensaje->dataSize = TAMANIO_BLOQUE;
+	}
+
+	pthread_mutex_lock(&(envio->conexion->mSocket));
+	enviar(envio->conexion->sockfd,mensaje);
+	pthread_mutex_unlock(&(envio->conexion->mSocket));
+	return 1;
+}
 
 int32_t get_file_size(const char * file_name)
 {

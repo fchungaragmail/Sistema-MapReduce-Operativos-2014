@@ -16,6 +16,7 @@
 #include <commons/log.h>
 #include "estructuras.h"
 
+#define TAMANIO_BLOQUE 20971520
 
 extern t_list* listaArchivos;
 extern t_list* listaDirs;
