@@ -80,6 +80,7 @@ void escucharConexiones()
 		strcpy(conexionNueva->nombre, "NombreGenerico");
 		conexionNueva->sockfd = nuevoSocketfd;
 		conexionNueva->estado = CONECTADO;
+		pthread_mutex_init(&(conexionNueva->mSocket));
 		list_add(conexiones, conexionNueva);
 
 
