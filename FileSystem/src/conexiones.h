@@ -42,6 +42,7 @@ typedef struct {
 	void* archivoMap;
 	int32_t archivoSize;
 	int32_t offset;
+	int16_t bloque;
 } enviarBloque_t;
 
 

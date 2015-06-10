@@ -81,6 +81,7 @@ void escucharConexiones()
 		conexionNueva->sockfd = nuevoSocketfd;
 		conexionNueva->estado = CONECTADO;
 		pthread_mutex_init(&(conexionNueva->mSocket), NULL);
+		pthread_mutex_init(&(conexionNueva->mEstadoBloques), NULL);
 		list_add(conexiones, conexionNueva);
 
 

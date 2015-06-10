@@ -20,7 +20,8 @@ typedef struct {
 	int64_t tamanio;
 	int16_t dirPadre;
 	t_estado estado;
-	t_list** bloques; //A su vez, cada bloque tiene una lista de t_ubicacion_bloque
+	t_list* bloques; //A su vez, cada bloque tiene una lista de t_ubicacion_bloque
+	pthread_mutex_t mBloques;
 } t_reg_archivo;
 
 typedef struct {

@@ -138,27 +138,47 @@ int importar(char* argumentos){
 
 	//Chequear si puedo meter los bloques en al menos 3 nodos. Si no, que falle
 
+	t_list* listaBloques = list_create;
 	t_list* listaThreads = list_create();
 	int32_t bytesEnviados = 0;
 	while (bytesEnviados < tamanio)
 	{
-		for (int i=0;i<conexiones->elements_count;i++)
+		int bloques = (tamanio / TAMANIO_BLOQUE) + 1;
+		for (int j = 0;j<bloques;j++)
 		{
-			Conexion_t* nodo = list_get(conexiones,i);
-			if (strcmp(nodo->nombre,"MaRTA") == 0) continue;
+			t_list* ubicaciones = list_create();
+			//Asi lo copia en todos lados -> Diseniar un selector de nodo
+			for (int i=0;i<conexiones->elements_count;i++)
+			{
+				Conexion_t* nodo = list_get(conexiones,i);
+				if (strcmp(nodo->nombre,"MaRTA") == 0) continue;
 
-			enviarBloque_t* envio = malloc(sizeof(enviarBloque_t));
-			envio->conexion = nodo;
-			envio->archivoMap = archivoMap;
-			envio->offset = bytesEnviados;
-			envio->archivoSize = tamanio;
+				enviarBloque_t* envio = malloc(sizeof(enviarBloque_t));
 
-			pthread_t tEnvio;
-			list_add(listaThreads, &(tEnvio));
-			pthread_create(&tEnvio, NULL, enviarBloque, envio);
+				pthread_mutex_lock(&(nodo->mEstadoBloques));
+				envio->bloque = 1; 	//getBloqueDisponible(conexion);
+				nodo->estadoBloques[envio->bloque] = true; //Lo marco en uso
+				pthread_mutex_unlock(&(nodo->mEstadoBloques));
+
+				t_ubicacion_bloque* ubicacion = malloc(sizeof(t_ubicacion_bloque));
+				ubicacion->bloque = envio->bloque;
+				strcpy(ubicacion->nodo,nodo->nombre);
+				list_add(ubicaciones,ubicacion);
+
+				list_add(ubicaciones, ubicacion);
+
+				envio->conexion = nodo;
+				envio->archivoMap = archivoMap;
+				envio->offset = bytesEnviados;
+				envio->archivoSize = tamanio;
+
+				pthread_t tEnvio;
+				list_add(listaThreads, &(tEnvio));
+				pthread_create(&tEnvio, NULL, enviarBloque, envio);
+			}
+			list_add_in_index(listaBloques,j,ubicaciones);
 			bytesEnviados += TAMANIO_BLOQUE;
 		}
-
 	}
 
 	for (int i=0;i<listaThreads->elements_count;i++)
@@ -170,6 +190,10 @@ int importar(char* argumentos){
 	archivo->dirPadre = indexPadre;
 	strcpy(archivo->nombre,nombre);
 	archivo->tamanio = tamanio;
+	pthread_mutex_t mBloques;
+	pthread_mutex_init(&mBloques, NULL);
+	archivo->mBloques = mBloques;
+	archivo->bloques = listaBloques;
 	archivo->estado = DISPONIBLE;
 
 	pthread_mutex_lock(&mListaArchivos);
@@ -269,8 +293,8 @@ int enviarBloque(enviarBloque_t* envio)
 	//crear el mensaje
 	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
 	mensaje->comando = string_new();
-	string_append(mensaje->comando, "setBloque ");
-	string_append(mensaje->comando, "1");	//getBloqueDisponible(conexion);
+	string_append(&(mensaje->comando), "setBloque ");
+	string_append(&(mensaje->comando), string_itoa(envio->bloque));
 	mensaje->comandoSize = strlen(mensaje->comando) + 1;
 	mensaje->data = envio->archivoMap + envio->offset;//Desde donde se envia
 
