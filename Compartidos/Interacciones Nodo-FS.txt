@@ -12,9 +12,16 @@ Luego el nodo queda a la espera de cualquiera de los sigtes msjs del filesystem 
 	
 	//grabar un bloque 
 	Comando: setBloque numeroBloque
-	data: datos
+	Data: datos
 	
 	//retornar el contenido de un archivo dentro del directorio temporal
 	Comando: getFileContent nombreArchivoTemporal
-	data: vacio
+	Data: vacio
 	
+	//Llenar un bloque de '\0'
+	Comando: borrarBloque numeroBloque
+	Data: vacio
+	
+	//Formatear el espacio de datos
+	Comando: borrarBloque -1
+	Data: vacio
