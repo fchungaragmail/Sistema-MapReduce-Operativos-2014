@@ -16,6 +16,7 @@
 #include <commons/log.h>
 #include "estructuras.h"
 
+#define TAMANIO_BLOQUE 20971520
 
 extern t_list* listaArchivos;
 extern t_list* listaDirs;
@@ -26,11 +27,13 @@ extern int PUERTO_MARTA;
 extern FILE* log;
 extern t_list* conexiones;
 extern int nodosOnline;
+extern pthread_mutex_t mListaArchivos;
 
 struct _conexion {
 	int sockfd;
 	char nombre[20];
 	int estado;
+	pthread_mutex_t mSocket;
 };
 typedef struct _conexion Conexion_t;
 

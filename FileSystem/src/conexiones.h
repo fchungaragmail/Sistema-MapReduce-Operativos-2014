@@ -37,6 +37,12 @@ struct _sockaddr_in {
 };
 typedef struct _sockaddr_in Sockaddr_in;
 
+typedef struct {
+	Conexion_t* conexion;
+	void* archivoMap;
+	int32_t archivoSize;
+	int32_t offset;
+} enviarBloque_t;
 
 
 #endif /* CONEXIONES_H_ */

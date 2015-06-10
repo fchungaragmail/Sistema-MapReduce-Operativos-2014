@@ -24,9 +24,9 @@ int main(void) {
 
 	initFileSystem();
 
-	pthread_create(&tConsola, NULL, execConsola, NULL);
-
 	pthread_create(&tPrueba, NULL, probarConexiones, NULL);
+
+	pthread_create(&tConsola, NULL, execConsola, NULL);
 
 	pthread_create(&tEscucharConexiones, NULL, escucharConexiones, NULL);
 	pthread_create(&tLeerEntradas, NULL, leerEntradas, NULL);
@@ -55,6 +55,7 @@ void initFileSystem()
 	//config_destroy(archivoConfig);
 
 	listaArchivos = list_create();
+	pthread_mutex_init(&mListaArchivos, NULL);
 
 	listaDirs = list_create();
 	t_reg_directorio* raiz = malloc(sizeof(t_reg_directorio));
