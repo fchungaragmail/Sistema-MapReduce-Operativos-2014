@@ -1,5 +1,6 @@
 #include "ProcesoJob.h"
 #include <pthread.h>
+#include <stdio.h>
 #include <commons/collections/list.h>
 #include <commons/error.h>
 #include <arpa/inet.h>
@@ -7,6 +8,8 @@
 #include <commons/string.h>
 
 int socketMartaFd = -1;
+char* scriptMapperStr = NULL;
+char* scriptReduceStr = NULL;
 t_list* listaHilos;
 pthread_t threadPedidosMartaHandler;
 pthread_t threadProcesarHilos;
@@ -15,13 +18,15 @@ t_config* configuracion;
 void* pedidosMartaHandler(void* arg) {
 
 	listaHilos = list_create();
+
 	HacerPedidoMarta();
 
 	while (TRUE) {
 		mensaje_t* mensajeMarta;
+
 		recibir(socketMartaFd, mensajeMarta);
 
-		char** comandoStr = string_split(mensajeMarta, " ");
+		char** comandoStr = string_split(mensajeMarta->comando, " ");
 
 		if (strncmp(comandoStr[0], "mapFile", 7) == 0) {
 
@@ -59,9 +64,35 @@ void IniciarConfiguracion() {
 
 	configuracion = config_create("config.ini");
 	if (!configuracion) {
-		error_show("Error leyendo archivo!\n");
+		error_show("Error leyendo archivo configuracion!\n");
 		Terminar(EXIT_ERROR);
 	}
+
+	scriptMapperStr = LeerArchivo(config_get_string_value(configuracion, "MAPPER"));
+	scriptReduceStr = LeerArchivo(config_get_string_value(configuracion, "REDUCE"));
+
+}
+
+char* LeerArchivo(char* nombreArchivo){
+
+
+	FILE* archivoMapper = fopen( nombreArchivo,"r");
+	int sizeScript;
+	if (!archivoMapper){
+		error_show("Error leyendo archivo %s!\n", nombreArchivo);
+		Terminar(EXIT_ERROR);
+	}
+
+	fseek(archivoMapper, 0, SEEK_END);
+	sizeScript = ftell(archivoMapper);
+	rewind(archivoMapper);
+
+	char* archivoStr = malloc( 1 + sizeScript );
+	fread(archivoStr,sizeScript,1,archivoMapper);
+
+	fclose(archivoMapper);
+
+	return archivoStr;
 }
 
 void Terminar(int exitStatus) {
@@ -102,6 +133,7 @@ void IniciarConexionMarta() {
 
 	printf("Conexion exitosa con Marta, ip : %s, puerto :%s\n", ipMarta,
 			puertoMarta);
+
 	pthread_create(&threadPedidosMartaHandler, NULL, pedidosMartaHandler, NULL);
 
 }
@@ -136,9 +168,43 @@ void HacerPedidoMarta() {
 
 }
 
+void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado){
+
+	mensaje_t* mensajeParaMarta = malloc(sizeof(mensaje_t));
+	char* bufferMensaje;
+	switch(estado){
+
+	case ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION:
+	case ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO:
+		string_append_with_format(&bufferMensaje,"mapFileResponse %s 0",hiloJob->nombreArchivo);
+		break;
+	case ESTADO_HILO_FINALIZO_OK:
+		string_append_with_format(&bufferMensaje,"mapFileResponse %s 1",hiloJob->nombreArchivo);
+		break;
+
+	}
+
+	mensajeParaMarta->comandoSize = strlen(bufferMensaje);
+	mensajeParaMarta->comando = string_duplicate(bufferMensaje);
+	mensajeParaMarta->dataSize = 0;
+	mensajeParaMarta->data = NULL;
+
+	enviar(socketMartaFd, mensajeParaMarta);
+
+
+	if(hiloJob->socketFd != -1){
+		close(hiloJob->socketFd);
+	}
+	free(bufferMensaje);
+	free(mensajeParaMarta);
+	printf("Se termino el hilo con resultado: %d\n", estado);
+}
+
 int main(int argc, char* argv[]) {
 
 	IniciarConfiguracion();
 	IniciarConexionMarta();
+
+	pthread_join(threadPedidosMartaHandler,NULL);
 	Terminar(EXIT_OK);
 }
