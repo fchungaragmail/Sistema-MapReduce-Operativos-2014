@@ -63,7 +63,7 @@ void destruirFile_StatusData(int sckt, char *path);
 bool* soportaCombiner(int sckt, char *path);
 
 //filesStates
-void changeFileBlockState(char* path,int nroBloque,char *nuevoEstado,char* temporaryPath);
+void changeFileBlockState(char* path,int nroBloque,StatusBlockState *nuevoEstado,char* temporaryPath);
 t_dictionary *getFileStateForPath(char *path);
 void destruirFileState(char* path);
 t_list* obtenerPathsTemporalesParaNodo(char *path,char *IPnodoEnBlockState);

@@ -17,23 +17,23 @@
 // Constantes
 #define MaxPedidosEnRed 5
 
-//pedidoRealizado --> keys
-#define K_PedidoRealizado_Nodo "PedidoRealizado_Nodo"
-#define K_PedidoRealizado_Bloque "PedidoRealizado_Bloque"
-#define K_PedidoRealizado_Path "PedidoRealizado_Path"
-#define K_PedidoRealizado_TipoPedido "PedidoRealizado_TipoPedido" //map, reduce o pedido de tabla a fs
-#define K_PedidoRealizado_PathArchTemporal "PedidoRealizado_PathArchTemporal"
 
 // Variables Globales
-t_dictionary* pedidoRealizado;
 int jobSocket;
 int cantidadDeBloquesAProcesar;
 int cantidadDeBloquesProcesados;
 
+//-->PedidoRealizado
+char *pedidoRealizado_Nodo;
+char *pedidoRealizado_Bloque;
+char *pedidoRealizado_Path;
+StatusBlockState *pedidoRealizado_TipoPedido;
+char *pedidoRealizado_PathArchTemporal;
+
 // Funciones privadas
 int obtenerIdParaComando(Message *recvMessage);
 Message* planificar(Message *recvMessage,TypesMessages type);
-void actualizarPedidoRealizado(int bloque, char* ipnodo, char* path, char *pathTemporal, char *tipo );
+void actualizarPedidoRealizado(char *bloque, char* ipnodo, char* path, char *pathTemporal, StatusBlockState tipo );
 Message* obtenerProximoPedido(Message *recvMessage);
 bool* obtenerRequestResponse(Message *recvMessage,TypesMessages type);
 t_dictionary *obtenerCopiaDeConMenosCarga(Message *recvMessage,char *path,int bloqueNro);
@@ -47,10 +47,10 @@ void processMessage(Message *recvMessage);
 void initPlannerCenter()
 {
 	initFilesStatusCenter();
-	pedidoRealizado=dictionary_create();
 	jobSocket=0;
 	cantidadDeBloquesAProcesar=0;
 	cantidadDeBloquesProcesados=0;
+	pedidoRealizado_TipoPedido = malloc(sizeof(StatusBlockState));
 }
 
 void processMessage(Message *recvMessage)
@@ -156,7 +156,7 @@ int obtenerIdParaComando(Message *recvMessage)
 //Planificacion
 Message* planificar(Message *recvMessage,TypesMessages type)
 {
-	char *path = dictionary_get(pedidoRealizado,K_PedidoRealizado_Path);
+	char *path = pedidoRealizado_Path;
 
 	if(type == K_Job_NewFileToProcess){
 		//pido al FS la tabla de direcciones del archivo
@@ -203,9 +203,9 @@ Message* planificar(Message *recvMessage,TypesMessages type)
 
 		char *temporaryPath = deserializeFilePath(recvMessage,K_Job_MapResponse);
 		bool *requestResponse = deserializeRequestResponse(recvMessage,K_Job_MapResponse);
-
-		char *IPnroNodo =  dictionary_get(pedidoRealizado,K_PedidoRealizado_Nodo);
-		int nroBloque =  dictionary_get(pedidoRealizado,K_PedidoRealizado_Bloque);
+		//**************/*/***********/*/*
+		char *IPnroNodo =  pedidoRealizado_Nodo;
+		char *nroBloque =  pedidoRealizado_Bloque;
 
 		if(requestResponse){
 			printf("pedido de map realizado con exito \n");
@@ -215,14 +215,33 @@ Message* planificar(Message *recvMessage,TypesMessages type)
 			t_list *blockStatesList = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
 			t_dictionary *blockState = list_get(blockStatesList,cantidadDeBloquesProcesados);
 
+			//******************************************
 			//Actualizo blockState
-			dictionary_put(blockState,K_BlockState_state,K_MAPPED);
+			char *ptrNodo = pedidoRealizado_Nodo;
+			char *ptrBlq = pedidoRealizado_Bloque;
+			char *ptrPathTempo = pedidoRealizado_PathArchTemporal;
+
+			char *ipNodo = dictionary_get(blockState,K_BlockState_nroNodo);
+			char *nroBloqe = dictionary_get(blockState,K_BlockState_nroBloque);
+			char *tempPath = dictionary_get(blockState,K_BlockState_temporaryPath);
+			ipNodo = malloc(strlen(ptrNodo));
+			nroBloqe = malloc(strlen(ptrBlq));
+			tempPath = malloc(strlen(ptrPathTempo));
+
+			strcpy(nroBloqe,ptrBlq);
+			strcpy(tempPath,ptrPathTempo);
+			strcpy(ipNodo,ptrNodo);
+
+
+			StatusBlockState *state = dictionary_get(blockState,K_BlockState_state);
+			*state=K_MAPPED;
+			//******************************************
 			//Actualizo nodoState
 			decrementarOperacionesEnProcesoEnNodo(IPnroNodo);
 			addTemporaryFilePathToNodoData(IPnroNodo,temporaryPath);
+			//******************************************
 			//Actualizo contador de bloques procesados
 			cantidadDeBloquesProcesados++;
-
 
 			//OBTENER PROXIMO PEDIDO !!!
 			Message *sendMessage = obtenerProximoPedido(recvMessage);
@@ -253,8 +272,8 @@ Message* planificar(Message *recvMessage,TypesMessages type)
 		char *temporaryPath = deserializeFilePath(recvMessage,K_Job_ReduceResponse);
 		bool *requestResponse = deserializeRequestResponse(recvMessage,K_Job_ReduceResponse);
 
-		char *IPnroNodo =  dictionary_get(pedidoRealizado,K_PedidoRealizado_Nodo);
-		int nroBloque =  dictionary_get(pedidoRealizado,K_PedidoRealizado_Bloque);
+		char *IPnroNodo =  pedidoRealizado_Nodo;
+		int nroBloque =  pedidoRealizado_Bloque;
 
 
 		//ACTUALIZAR TABLAS!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -276,7 +295,7 @@ Message* planificar(Message *recvMessage,TypesMessages type)
 
 Message* obtenerProximoPedido(Message *recvMessage)
 {
-	char *path = dictionary_get(pedidoRealizado,K_PedidoRealizado_Path);
+	char *path = pedidoRealizado_Path;
 	t_dictionary *fileState = getFileStateForPath(path);
 
 	int size_fileState= dictionary_get(fileState,K_FileState_size);
@@ -286,9 +305,10 @@ Message* obtenerProximoPedido(Message *recvMessage)
 	for(i=0;i<size_fileState;i++){//itero en fileState hasta encontrar el siguiente a mappear
 
 		t_dictionary *blockState = list_get(blockStateArray,i);//(*blockStateArray)[i];
-		char *statusBlock = dictionary_get(blockState,K_BlockState_state);
+		char *nroNodo = dictionary_get(blockState,K_BlockState_nroNodo);
+		StatusBlockState *statusBlock = dictionary_get(blockState,K_BlockState_state);
 
-		if((strcmp(statusBlock,K_MAPPED)==0) && i==(size_fileState-1)){
+		if(((*statusBlock)==K_MAPPED) && i==(size_fileState-1)){
 			//estan todos mappeados , inculuidos el ultimo
 			printf("estan todos mapeados !!!!!!!!!!!");
 			//Actualizo estados
@@ -299,7 +319,7 @@ Message* obtenerProximoPedido(Message *recvMessage)
 			//hacer reduce en el nodo que contenga mas archivos mappeados
 
 			bool *tieneCombinerMode = soportaCombiner(recvMessage->sockfd,path);
-			char *IPnroNodoLocal = obtenerNodoConMayorCantidadDeArchivosTemporales(path);
+			char *IPnroNodoLocal = obtenerNodoConMayorCantidadDeArchivosTemporales(path);//falla
 
 			int cantidadDeNodos = obtenerCantidadDeNodosDiferentesEnBlockState(path);
 			t_list *nodosEnBlockState = obtenerNodosEnBlockStateArray(path);
@@ -358,7 +378,7 @@ Message* obtenerProximoPedido(Message *recvMessage)
 			return sendMessage;
 		}
 
-		if(strcmp(statusBlock,K_UNINITIALIZED)==0){ //este bloque no esta procesado
+		if((*statusBlock)==K_UNINITIALIZED){ //este bloque no esta procesado
 
 			//obtengo conjunto (#nodo;#bloque) con menos carga de operaciones en #nodo
 			t_dictionary *copiaConMenosCarga = obtenerCopiaDeConMenosCarga(recvMessage,path,i);
@@ -421,15 +441,29 @@ char* crearPathTemporal(char *path){
 	return path_with_temporal;
 }
 
-void actualizarPedidoRealizado(int bloque, char *ipNodo, char* path, char *pathTemporal, char *tipo )
+void actualizarPedidoRealizado(char *bloque, char *ipNodo, char* path, char *pathTemporal, StatusBlockState tipo )
 {
-	//HACER FREE DE TODOS LOS ANTERIORES
+	//HACER FREE DE TODOS LOS ANTERIORES ??
 
-	if(bloque != NULL){ dictionary_put(pedidoRealizado,K_PedidoRealizado_Bloque,bloque); }
-	if(ipNodo != NULL){ dictionary_put(pedidoRealizado,K_PedidoRealizado_Nodo,ipNodo); }
-	if(path != NULL){ dictionary_put(pedidoRealizado,K_PedidoRealizado_Path,path);}
-	if(pathTemporal != NULL){ dictionary_put( pedidoRealizado,K_PedidoRealizado_PathArchTemporal,pathTemporal); }
-	if(tipo != NULL){dictionary_put(pedidoRealizado,K_PedidoRealizado_TipoPedido,tipo);
+	if(bloque != NULL){
+		pedidoRealizado_Bloque = bloque;
+	}
+
+	if(ipNodo != NULL){
+		pedidoRealizado_Nodo = ipNodo;
+	}
+
+	if(path != NULL){
+		pedidoRealizado_Path = path;
+	}
+
+	if(pathTemporal != NULL){
+		pedidoRealizado_PathArchTemporal = pathTemporal;
+	}
+
+	if(tipo != NULL){
+
+		(*pedidoRealizado_TipoPedido) = tipo;
 	}
 }
 

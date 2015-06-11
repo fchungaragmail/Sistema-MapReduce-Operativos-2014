@@ -71,7 +71,7 @@ int main(void) {
 	//pthread_create(&hiloCliente, NULL, probarConexiones,"hiloCliente_1");
 
 	int i=0;
-	while(i<6)
+	while(i<7)
 	{
 		//recvMessage = listenConnections(); //--> SERVIDOR con el select();
 
