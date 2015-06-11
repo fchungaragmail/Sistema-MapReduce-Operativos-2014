@@ -50,15 +50,13 @@ typedef enum
 	K_Pedido_FileData = 2,
 }TypesPedidosRealizado;
 
-typedef enum {
-				UNINITIALIZED = -1, 	//sin estado
-				IN_MAPPING = 1, 	//se esta mappeando, se espera respuesta del job
-				MAPPED = 2, 		//archivo ya mappeado
-				IN_REDUCING = 3,
-				REDUCED = 4,
-				TOTAL_ERROR = 5  	// fallo la operacion y el FS no tiene otros bloques disponibles para procesar
-} statusBlock;
-
+// Keys --> StatusBlock
+#define		K_UNINITIALIZED "-10" 	//sin estado
+#define		K_IN_MAPPING  "1" 	//se esta mappeando, se espera respuesta del job
+#define		K_MAPPED "2" 		//archivo ya mappeado
+#define		K_IN_REDUCING "3"
+#define		K_REDUCED  "4"
+#define		K_TOTAL_ERROR "5"  	// fallo la operacion y el FS no tiene otros bloques disponibles para procesar
 
 /*
 // 	CONSTANTES

@@ -45,7 +45,7 @@ void addNewConnection(int socket);
 int getFSSocket();
 
 // Varias
-void addFileFullData(int sckt, char* path, t_dictionary *fullData);
+void addFileFullData(int sckt, char* path,int nroDeBloques,int nroDeCopias, t_list *fullData);
 
 //nodosData
 void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
@@ -56,14 +56,14 @@ void addTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath);
 //filesToProcess
 void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);//crea un fileState
 void darDeBajaCopiaEnBloqueYNodo(char*path,int skct,int nroBloque,char *IP_Nodo);
-t_dictionary* obtenerCopiasParaBloqueDeArchivo(int socket,int bloque,char *path);
+t_list* obtenerCopiasParaBloqueDeArchivo(int socket,int bloque,char *path);
 int obtenerNumeroDeCopiasParaArchivo(int socket,char *path);
 int obtenerNumeroDeBloquesParaArchivo(int socket,char *path);
 void destruirFile_StatusData(int sckt, char *path);
 bool* soportaCombiner(int sckt, char *path);
 
 //filesStates
-void changeFileBlockState(char* path,int nroBloque,statusBlock nuevoEstado,char* temporaryPath);
+void changeFileBlockState(char* path,int nroBloque,char *nuevoEstado,char* temporaryPath);
 t_dictionary *getFileStateForPath(char *path);
 void destruirFileState(char* path);
 t_list* obtenerPathsTemporalesParaNodo(char *path,char *IPnodoEnBlockState);

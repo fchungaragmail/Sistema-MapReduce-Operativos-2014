@@ -70,16 +70,14 @@ int main(void) {
 	//pthread_t hiloCliente;
 	//pthread_create(&hiloCliente, NULL, probarConexiones,"hiloCliente_1");
 
-	
-	while(1)
+	int i=0;
+	while(i<6)
 	{
-
-
 		//recvMessage = listenConnections(); //--> SERVIDOR con el select();
 
 		recvMessage = simular();
 		processMessage(recvMessage);
-
+		i++;
 		//***********************************
 		//si es un archivo nuevo, crear un nuevo hilo y un nuevo sem y pasar por param la direccion de memoria de este
 		//"recvMessage" sera una var global a la cual tendran acceso los hilos
@@ -88,7 +86,8 @@ int main(void) {
 		//MaRTA debe destrabar el semaforo correspondiente al hilo , para que este agarre la var global
 		//***********************************
 	}
-	closeServidores();
+	printf("MaRTA FINALIZO !!!");
+	//closeServidores();
 	return EXIT_SUCCESS;
 }
 
@@ -182,9 +181,9 @@ void* probarConexiones(void* arg)
 
 void enviar(int socket, mensaje_t* mensaje)
 {
-	if(send(socket,&(mensaje->comandoSize), sizeof(int16_t), 0)<0){printf("ERROR EN EL SEND");};
-	if(send(socket, mensaje->comando, mensaje->comandoSize, 0)<0){printf("ERROR EN EL SEND");};
-	if(send(socket, &(mensaje->dataSize), sizeof(int32_t), 0)<0){printf("ERROR EN EL SEND");};
+	if(send(socket,&(mensaje->comandoSize), sizeof(int16_t), 0)<0){printf("ERROR EN EL SEND\n");};
+	if(send(socket, mensaje->comando, mensaje->comandoSize, 0)<0){printf("ERROR EN EL SEND\n");};
+	if(send(socket, &(mensaje->dataSize), sizeof(int32_t), 0)<0){printf("ERROR EN EL SEND\n");};
 	//if(send(socket, mensaje->data, mensaje->dataSize, 0)<0){printf("ERROR EN EL SEND");};
 
 }
