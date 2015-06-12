@@ -453,13 +453,13 @@ t_list* obtenerPathsTemporalesParaNodo(char *path,char *IPnodoEnBlockState){
 	sem_post(&semFilesStates);
 
 	int size_fileState = dictionary_get(fileState,K_FileState_size);
-	t_dictionary *(*blockStateArray)[size_fileState];
-	blockStateArray = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
+
+	t_list *blockStateArray = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
 	int i;
 	t_list *pathsTemporalesEnNodo = list_create();
 
 	for(i=0;i<size_fileState;i++){
-		t_dictionary *blockState = (*blockStateArray)[i];
+		t_dictionary *blockState = list_get(blockStateArray,i);
 		char *IPnroDeNodo = dictionary_get(blockState,K_BlockState_nroNodo);
 		if( strcmp(IPnroDeNodo,IPnodoEnBlockState) == 0 ){
 			char *pathTemp = dictionary_get(blockState,K_BlockState_temporaryPath);
@@ -500,7 +500,7 @@ t_list* obtenerNodosEnBlockStateArray(char *path){
 		t_dictionary *blockState = list_get(blockStateArray,i);
 		char *IPnroDeNodo = dictionary_get(blockState,K_BlockState_nroNodo);
 		bool *estaEnLista = isNodoInList(nodosEnBlockStateArray,IPnroDeNodo);
-		if(!estaEnLista){
+		if(!(*estaEnLista)){
 			list_add(nodosEnBlockStateArray,IPnroDeNodo);
 		}
 		free(estaEnLista);

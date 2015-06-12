@@ -217,24 +217,25 @@ Message* planificar(Message *recvMessage,TypesMessages type)
 
 			//******************************************
 			//Actualizo blockState
-			char *ptrNodo = pedidoRealizado_Nodo;
-			char *ptrBlq = pedidoRealizado_Bloque;
-			char *ptrPathTempo = pedidoRealizado_PathArchTemporal;
+			char *ptrNodo = malloc(strlen(pedidoRealizado_Nodo));
+			ptrNodo=pedidoRealizado_Nodo;
+			char *ptrBlq = malloc(strlen(pedidoRealizado_Bloque));
+			ptrBlq=pedidoRealizado_Bloque;
+			char *ptrPathTempo = malloc(strlen(pedidoRealizado_PathArchTemporal));
+			ptrPathTempo=pedidoRealizado_PathArchTemporal;
 
-			char *ipNodo = dictionary_get(blockState,K_BlockState_nroNodo);
-			char *nroBloqe = dictionary_get(blockState,K_BlockState_nroBloque);
-			char *tempPath = dictionary_get(blockState,K_BlockState_temporaryPath);
-			ipNodo = malloc(strlen(ptrNodo));
-			nroBloqe = malloc(strlen(ptrBlq));
-			tempPath = malloc(strlen(ptrPathTempo));
-
-			strcpy(nroBloqe,ptrBlq);
-			strcpy(tempPath,ptrPathTempo);
-			strcpy(ipNodo,ptrNodo);
-
-
-			StatusBlockState *state = dictionary_get(blockState,K_BlockState_state);
+			StatusBlockState *state = malloc(sizeof(StatusBlockState));
 			*state=K_MAPPED;
+			dictionary_destroy(blockState);
+
+			t_dictionary *newBlckState = dictionary_create();
+			dictionary_put(newBlckState,K_BlockState_nroBloque,ptrBlq);
+			dictionary_put(newBlckState,K_BlockState_nroNodo,ptrNodo);
+			dictionary_put(newBlckState,K_BlockState_temporaryPath,ptrPathTempo);
+			dictionary_put(newBlckState,K_BlockState_state,state);
+
+			list_remove(blockStatesList,cantidadDeBloquesProcesados);
+			list_add_in_index(blockStatesList,cantidadDeBloquesProcesados,newBlckState);
 			//******************************************
 			//Actualizo nodoState
 			decrementarOperacionesEnProcesoEnNodo(IPnroNodo);
@@ -331,12 +332,12 @@ Message* obtenerProximoPedido(Message *recvMessage)
 			addStringToStream(stream,IPnroNodoLocal);
 			addStringToStream(stream,pathTemporalLocal);
 
-			if(tieneCombinerMode){
+			if(*tieneCombinerMode){
 				//planificar con combiner
 
 			}
 
-			if(!tieneCombinerMode){
+			if(!(*tieneCombinerMode)){
 				//planificar sin combiner
 
 				//****************************************************
@@ -375,6 +376,7 @@ Message* obtenerProximoPedido(Message *recvMessage)
 			}
 
 			Message *sendMessage = armarMensajeParaEnvio(recvMessage,stream,"reduceFile");
+			printf("el stream q se va a enviar es : %s\n",stream);
 			return sendMessage;
 		}
 

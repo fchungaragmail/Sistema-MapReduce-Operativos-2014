@@ -32,6 +32,7 @@ Message *simular()
 	if(nroDeLlamado == 2){ return simulacion_FS_DataFullResponse(); }
 	if(nroDeLlamado < 7 ){ return simulacion_Job_mapResponse(); }
 
+
 }
 Message* simulacion_FS_DataFullResponse()
 {
