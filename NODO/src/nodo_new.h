@@ -21,6 +21,7 @@
 #include <sys/types.h>
 #include "commons/string.h"
 #include <sys/stat.h>
+#include "nodo_fs_functions_new.h"
 
 extern char* ARCHIVO_BIN;
 
