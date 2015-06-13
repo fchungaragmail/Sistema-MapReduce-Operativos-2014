@@ -50,15 +50,16 @@ typedef enum
 	K_Pedido_FileData = 2,
 }TypesPedidosRealizado;
 
-typedef enum {
-				UNINITIALIZED = -1, 	//sin estado
-				IN_MAPPING = 1, 	//se esta mappeando, se espera respuesta del job
-				MAPPED = 2, 		//archivo ya mappeado
-				IN_REDUCING = 3,
-				REDUCED = 4,
-				TOTAL_ERROR = 5  	// fallo la operacion y el FS no tiene otros bloques disponibles para procesar
-} statusBlock;
-
+// Keys --> StatusBlock
+typedef enum
+{
+	K_UNINITIALIZED = 1, 	//sin estado
+	K_IN_MAPPING =2,//se esta mappeando, se espera respuesta del job
+	K_MAPPED = 3, 		//archivo ya mappeado
+	K_IN_REDUCING = 4,
+	K_REDUCED = 5,
+	K_TOTAL_ERROR = 6  	// fallo la operacion y el FS no tiene otros bloques disponibles para procesar
+}StatusBlockState;
 
 /*
 // 	CONSTANTES
@@ -67,6 +68,7 @@ typedef enum {
 //BlockState
 #define K_BlockState_UninitializedPath "BlockState_UninitializedPath"
 #define K_BlockState_UninitializedNodo "BlockState_UninitializedNodo"
+#define K_BlockState_UninitializedBlqe "BlockState_UninitializedBlqe"
 
 //Copia de FullData(tabla que envia el FS)
 #define K_Copia_DarDeBajaIPNodo "Copia_DarDeBajaIPNodo"

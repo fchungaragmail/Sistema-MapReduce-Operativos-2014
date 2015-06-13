@@ -14,6 +14,7 @@ t_list* listaHilos;
 pthread_t threadPedidosMartaHandler;
 pthread_t threadProcesarHilos;
 t_config* configuracion;
+pthread_mutex_t mMarta;
 
 void* pedidosMartaHandler(void* arg) {
 
@@ -55,6 +56,7 @@ void* pedidosMartaHandler(void* arg) {
 		}
 
 		free(comandoStr);
+		free(mensajeMarta);
 
 	}
 	list_destroy(listaHilos);
@@ -135,6 +137,7 @@ void IniciarConexionMarta() {
 			puertoMarta);
 
 	pthread_create(&threadPedidosMartaHandler, NULL, pedidosMartaHandler, NULL);
+	pthread_mutex_init(&mMarta,NULL);
 
 }
 
@@ -158,7 +161,9 @@ void HacerPedidoMarta() {
 		mensaje->dataSize = 0;
 		mensaje->data = NULL;
 
+
 		enviar(socketMartaFd, mensaje);
+
 
 		printf("Enviado a MaRTA el comando: %s\n", mensaje->comando);
 		free(buffer);
@@ -171,31 +176,35 @@ void HacerPedidoMarta() {
 void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado){
 
 	mensaje_t* mensajeParaMarta = malloc(sizeof(mensaje_t));
-	char* bufferMensaje;
+	char* bufferComandoStr = string_new();
 	switch(estado){
 
 	case ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION:
 	case ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO:
-		string_append_with_format(&bufferMensaje,"mapFileResponse %s 0",hiloJob->nombreArchivo);
+		string_append_with_format(&bufferComandoStr,"mapFileResponse %s 0",hiloJob->nombreArchivo);
 		break;
 	case ESTADO_HILO_FINALIZO_OK:
-		string_append_with_format(&bufferMensaje,"mapFileResponse %s 1",hiloJob->nombreArchivo);
+		string_append_with_format(&bufferComandoStr,"mapFileResponse %s 1",hiloJob->nombreArchivo);
 		break;
 
 	}
 
-	mensajeParaMarta->comandoSize = strlen(bufferMensaje);
-	mensajeParaMarta->comando = string_duplicate(bufferMensaje);
+	mensajeParaMarta->comandoSize = strlen(bufferComandoStr);
+	mensajeParaMarta->comando = bufferComandoStr;
 	mensajeParaMarta->dataSize = 0;
 	mensajeParaMarta->data = NULL;
 
+	/*
+	 * varios hilos pueden estar reportando a marta
+	 */
+	pthread_mutex_lock(&mMarta);
 	enviar(socketMartaFd, mensajeParaMarta);
-
+	pthread_mutex_unlock(&mMarta);
 
 	if(hiloJob->socketFd != -1){
 		close(hiloJob->socketFd);
 	}
-	free(bufferMensaje);
+	free(bufferComandoStr);
 	free(mensajeParaMarta);
 	printf("Se termino el hilo con resultado: %d\n", estado);
 }

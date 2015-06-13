@@ -15,7 +15,9 @@ char *deserializeFilePath(Message *recvMessage,TypesMessages type);
 bool* deserializeSoportaCombiner(Message *recvMessage);
 bool* deserializeRequestResponse(Message *recvMessage,TypesMessages type);
 char* deserializeComando(Message *recvMessage);
-t_dictionary* deserializarFullDataResponse(Message *recvMessage);
+t_list* deserializarFullDataResponse(Message *recvMessage);
+int deserializarFullDataResponse_nroDeCopias(Message *recvMessage);
+int deserializarFullDataResponse_nroDeBloques(Message *recvMessage);
 
 char* createStream();
 void addIntToStream(char *stream, int value,IntTypes type);
@@ -120,7 +122,7 @@ char* deserializeComando(Message *recvMessage)
 	return comandoArray[0];
 }
 
-t_dictionary* deserializarFullDataResponse(Message *recvMessage)
+int deserializarFullDataResponse_nroDeCopias(Message *recvMessage)
 {
 	// segun protocolo
 	//-Comando: "DataFileResponse rutaDelArchivo Respuesta cantidadDeBloques-nroDeCopias-sizeEstructura"
@@ -128,37 +130,71 @@ t_dictionary* deserializarFullDataResponse(Message *recvMessage)
 	//estructura va a ser IPNodoX-nroDeBloqueX-IPNodoY-nroDeBloqueY-IPNodoZ-nroDeBloqueZ...
 	//1ero fila 1,2,3,4,5....
 
-	t_dictionary *fullDataDic = dictionary_create();
+	char *_comando = recvMessage->mensaje->comando;
+	char **comando = string_split(_comando," ");
+	char *strNroDeCopias = comando[4];
+
+	int nroDeCopias = strtol(strNroDeCopias, (char **)NULL, 10);
+
+	return nroDeCopias;
+}
+
+int deserializarFullDataResponse_nroDeBloques(Message *recvMessage)
+{
+	// segun protocolo
+	//-Comando: "DataFileResponse rutaDelArchivo Respuesta cantidadDeBloques-nroDeCopias-sizeEstructura"
+	//-Data: estructura
+	//estructura va a ser IPNodoX-nroDeBloqueX-IPNodoY-nroDeBloqueY-IPNodoZ-nroDeBloqueZ...
+	//1ero fila 1,2,3,4,5....
+
+	char *_comando = recvMessage->mensaje->comando;
+	char **comando = string_split(_comando," ");
+	char *strCantDeBloques = comando[3];
+
+	int cantidadDeBloques = strtol(strCantDeBloques, (char **)NULL, 10);
+
+	return cantidadDeBloques;
+}
+
+t_list *deserializarFullDataResponse(Message *recvMessage)
+{
+	// segun protocolo
+	//-Comando: "DataFileResponse rutaDelArchivo Respuesta cantidadDeBloques-nroDeCopias-sizeEstructura"
+	//-Data: estructura
+	//estructura va a ser IPNodoX-nroDeBloqueX-IPNodoY-nroDeBloqueY-IPNodoZ-nroDeBloqueZ...
+	//1ero fila 1,2,3,4,5....
 
 	char *_comando = recvMessage->mensaje->comando;
 	char **comando = string_split(_comando," ");
 	char *strCantDeBloques = comando[3];
 	char *strNroDeCopias = comando[4];
-	int16_t cantidadDeBloques = strtol(strCantDeBloques, (char **)NULL, 10);
-	int16_t nroDeCopias = strtol(strNroDeCopias, (char **)NULL, 10);
 
-	t_dictionary *dataDic = dictionary_create();
-	t_dictionary *dataMatriz[cantidadDeBloques][nroDeCopias];
+	int cantidadDeBloques = strtol(strCantDeBloques, (char **)NULL, 10);
+	int nroDeCopias = strtol(strNroDeCopias, (char **)NULL, 10);
+	//t_dictionary *dataMatriz[cantidadDeBloques][nroDeCopias];
+	t_list *listaPadreDeBloques = list_create();
+
 	char *data = recvMessage->mensaje->data;
 	char **dataArray = string_split(data," ");
-	int i,j;
-	for(i=0;i<nroDeCopias;i++){
-		for(j=0;j<(nroDeCopias*2);j=j+2){
+	int i,j,k;
+	k=0;
+	for(i=0;i<cantidadDeBloques;i++){
+		t_list *listaHijaDeCopias = list_create();
+		for(j=0;j<nroDeCopias;j++){
 
 			t_dictionary *dic = dictionary_create();
-			char *ipNodo = dataArray[j];
-			char *nroDeBloque = dataArray[j+1];
+			char *ipNodo = dataArray[k];
+			char *nroDeBloque = dataArray[k+1];
 			dictionary_put(dic,K_Copia_IPNodo,ipNodo);
 			dictionary_put(dic,K_Copia_NroDeBloque,nroDeBloque);
-			dataMatriz[i][j] = dic;
+			//dataMatriz[i][j] = dic;
+			k=k+2;
+			list_add(listaHijaDeCopias,dic);
 		}
+		list_add(listaPadreDeBloques,listaHijaDeCopias);
 	}
 
-	dictionary_put(fullDataDic,K_fullData_CantidadDeBloques,cantidadDeBloques);
-	dictionary_put(fullDataDic,K_fullData_CantidadDeCopias,nroDeCopias);
-	dictionary_put(fullDataDic,K_fullData_Data,dataDic);
-
-	return fullDataDic;
+	return listaPadreDeBloques;
 }
 char* createStream()
 {

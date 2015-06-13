@@ -34,6 +34,8 @@ Interacciones MaRTA-Job
 //nroDeNodoLocal sera el nodo donde se guardaran el resultado final de aplicar las rutinas de reduce
 
 *******************************************
+El reduceConCombiner se hara en 2 pedidos, en el 1er pedido se envian TODOS los pedidos para hacer los reduces locales y luego el Job le respondera.
+Una vez q el Job responde entonces MaRTA enviara el ultimo pedido para hacer el reduce final.
 
 *comando: "reduceFileConCombiner NodoLocal nombreArchTemp CantDeArchEnNodoLocalAProcesar RAT1 RAT2 -etc...-
                 ...NodoRemoto1 nombreArchTemp CantDeArchEnNodoRemotoAProcesar RTA1 RAT2 -etc... 

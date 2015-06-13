@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include "Utilities.h"
 #include <commons/collections/dictionary.h>
+#include <commons/collections/list.h>
 
 typedef enum{
 	K_int16_t = 1,
@@ -23,7 +24,9 @@ char *deserializeFilePath(Message *recvMessage,TypesMessages type);
 bool* deserializeSoportaCombiner(Message *recvMessage);
 bool* deserializeRequestResponse(Message *recvMessage,TypesMessages type);
 char* deserializeComando(Message *recvMessage);
-t_dictionary* deserializarFullDataResponse(Message *recvMessage);
+t_list* deserializarFullDataResponse(Message *recvMessage);
+int deserializarFullDataResponse_nroDeCopias(Message *recvMessage);
+int deserializarFullDataResponse_nroDeBloques(Message *recvMessage);
 
 char* createStream();
 void addIntToStream(char *stream, int value,IntTypes type);

@@ -50,7 +50,7 @@ void addNewConnection(int socket);
 // FS
 int getFSSocket();
 // Varias
-void addFileFullData(int sckt, char* path, t_dictionary *fullData);
+void addFileFullData(int sckt, char* path,int nroDeBloques,int nroDeCopias, t_list *fullData);
 //nodosData
 void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
 void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
@@ -59,13 +59,13 @@ void addTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath);
 //filesToProcess
 void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);//crea un fileState
 void darDeBajaCopiaEnBloqueYNodo(char*path,int skct,int nroBloque,char *IP_nroNodo);
-t_dictionary* obtenerCopiasParaBloqueDeArchivo(int socket,int bloque, char *path);
+t_list* obtenerCopiasParaBloqueDeArchivo(int socket,int bloque, char *path);
 int obtenerNumeroDeCopiasParaArchivo(int socket,char *path);
 int obtenerNumeroDeBloquesParaArchivo(int socket,char *path);
 void destruirFile_StatusData(int sckt, char *path);
 bool* soportaCombiner(int sckt, char *path);
 //filesStates
-void changeFileBlockState(char* path,int nroBloque,statusBlock nuevoEstado,char* temporaryPath);
+void changeFileBlockState(char* path,int nroBloque,StatusBlockState* nuevoEstado,char* temporaryPath);
 t_dictionary *getFileStateForPath(char *path);
 void destruirFileState(char* path);
 t_list* obtenerPathsTemporalesParaNodo(char *path,char *IPnodoEnBlockState);
@@ -79,6 +79,7 @@ bool* isNodoInList(t_list *lista,char *IPnroDeNodo);
 void initFilesStatusCenter()
 {
 	fs_socket=-1;
+
 }
 
 void addFSConnection(int fs_sckt)
@@ -121,7 +122,7 @@ void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket)
 	free(dic_key);
 }
 
-void addFileFullData(int sckt, char* path, t_dictionary *fullData)
+void addFileFullData(int sckt, char* path,int nroDeBloques,int nroDeCopias, t_list *fullData)
 {	// fullData me lo envia el FS
 	// aca va la respuesta del FS
 	// tiene la info de los bloques y nodos donde esta el archivo a procesar
@@ -136,33 +137,41 @@ void addFileFullData(int sckt, char* path, t_dictionary *fullData)
 	t_dictionary *file_StatusData = dictionary_get(filesToProcessPerJob,path);
 	sem_post(&semFilesToProcessPerJob);
 
-	int cantidadDeBloques = dictionary_get(fullData,K_fullData_CantidadDeBloques);
-	dictionary_put(file_StatusData,K_file_StatusData_BloquesSize,cantidadDeBloques);
+	dictionary_put(file_StatusData,K_file_StatusData_BloquesSize,nroDeBloques);
+	dictionary_put(file_StatusData,K_file_StatusData_CopiasSize,nroDeCopias);
 
-	int copiasCantidad = dictionary_get(fullData,K_fullData_CantidadDeCopias);
-	dictionary_put(file_StatusData,K_file_StatusData_CopiasSize,copiasCantidad);
 
-	t_dictionary *(*fileData)[cantidadDeBloques][copiasCantidad];
-	fileData = dictionary_get(fullData,K_fullData_Data);
-	dictionary_put(file_StatusData,K_file_StatusData_Bloques,fileData);
-
+	dictionary_put(file_StatusData,K_file_StatusData_Bloques,fullData);
 	//Construyo un "fileState"
-	t_dictionary *blocksStatesArray[cantidadDeBloques];
+
+	t_list *blocksStatesList = list_create();
 	int i;
-	for(i=0;i<cantidadDeBloques;i++){
+	for(i=0;i<nroDeBloques;i++){
 
 		t_dictionary *blockState = dictionary_create();
-		dictionary_put(blockState,K_BlockState_state,UNINITIALIZED);
+		StatusBlockState *blkState = malloc(sizeof(StatusBlockState));
+		*blkState = K_UNINITIALIZED;
+
+		char *uninitializedNroDeBloqe = malloc(strlen(K_BlockState_UninitializedBlqe));
+		char *uninitializedNodo = malloc(strlen(K_BlockState_UninitializedNodo));
+		char *uninitializedPath = malloc(strlen(K_BlockState_UninitializedPath));
+
+		strcpy(uninitializedNodo,K_BlockState_UninitializedNodo);
+		strcpy(uninitializedPath,K_BlockState_UninitializedPath);
+		strcpy(uninitializedNroDeBloqe,K_BlockState_UninitializedBlqe);
+
+		dictionary_put(blockState,K_BlockState_state,blkState);
+		dictionary_put(blockState,K_BlockState_nroBloque,uninitializedNroDeBloqe);
 		dictionary_put(blockState,K_BlockState_nroNodo,K_BlockState_UninitializedNodo);
-		dictionary_put(blockState,K_BlockState_nroBloque,UNINITIALIZED);
 		dictionary_put(blockState,K_BlockState_temporaryPath,K_BlockState_UninitializedPath);
-		blocksStatesArray[i]=blockState;
+
+		list_add(blocksStatesList,blockState);
 	}
 
 	//Agrego "filesState" a "filesStates"
 	t_dictionary *fileState = dictionary_create();
-	dictionary_put(fileState,K_FileState_arrayOfBlocksStates,blocksStatesArray);
-	dictionary_put(fileState,K_FileState_size,cantidadDeBloques);
+	dictionary_put(fileState,K_FileState_arrayOfBlocksStates,blocksStatesList);
+	dictionary_put(fileState,K_FileState_size,nroDeBloques);
 
 	sem_wait(&semFilesStates);
 	dictionary_put(filesStates,path,fileState);
@@ -171,7 +180,7 @@ void addFileFullData(int sckt, char* path, t_dictionary *fullData)
 	free(key);
 }
 
-void changeFileBlockState(char *path,int nroBloque,statusBlock nuevoEstado,char *temporaryPath)
+void changeFileBlockState(char *path,int nroBloque,StatusBlockState *nuevoEstado,char *temporaryPath)
 {	//ESTO LO HAGO EN MI ESTRUCTURA "filesStates"
 	//VER SI ES nroBloque o (nroBloque-1)!!!!!
 
@@ -179,14 +188,12 @@ void changeFileBlockState(char *path,int nroBloque,statusBlock nuevoEstado,char 
 	t_dictionary *fileState = dictionary_get(filesStates,path);
 	sem_post(&semFilesStates);
 
-	int size = dictionary_get(fileState,K_FileState_size);
 
-	t_dictionary *(*blocksStatesArray)[size];
-	blocksStatesArray= dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
 
-	t_dictionary *blockState = (*blocksStatesArray)[nroBloque];
-	int estadoBloque = nuevoEstado;
-	dictionary_put(blockState,K_BlockState_state,estadoBloque);
+	t_list *blocksStatesArray= dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
+
+	t_dictionary *blockState = list_get(blocksStatesArray,nroBloque);
+	dictionary_put(blockState,K_BlockState_state,nuevoEstado);
 
 	dictionary_put(blockState,K_BlockState_temporaryPath,temporaryPath);
 
@@ -198,7 +205,7 @@ int getCantidadDeOperacionesEnProcesoEnNodo(char *IPnroNodo)
 	bool hasKey = dictionary_has_key(nodosData,IPnroNodo);
 	sem_post(&semNodosData);
 
-	if(hasKey == true){
+	if(hasKey){
 		//el nodo existe
 		sem_wait(&semNodosData);
 		t_dictionary *nodoState = dictionary_get(nodosData,IPnroNodo);
@@ -221,7 +228,7 @@ void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo)
 	bool hasKey = dictionary_has_key(nodosData,IPnroNodo);
 	sem_post(&semNodosData);
 
-		if(hasKey == true){
+		if(hasKey){
 			//busco el dic y le sumo una operacionProcesando
 			sem_post(&semNodosData);
 			t_dictionary *nodoState = dictionary_get(nodosData,IPnroNodo);
@@ -250,7 +257,6 @@ void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo)
 			dictionary_put(nodosData,IPnroNodo,nodoState);
 			sem_post(&semNodosData);
 		}
-
 }
 
 void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo)
@@ -258,9 +264,9 @@ void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo)
 	//se llama cuando envio un pedido de map o reduce al Job
 	sem_wait(&semNodosData);
 	bool hasKey = dictionary_has_key(nodosData,IPnroNodo);
-	sem_wait(&semNodosData);
+	sem_post(&semNodosData);
 
-	if(hasKey == true){
+	if(hasKey){
 		//busco el dic y le sumo una operacionProcesando
 		sem_wait(&semNodosData);
 		t_dictionary *nodoState = dictionary_get(nodosData,IPnroNodo);
@@ -331,7 +337,7 @@ t_dictionary *getFileStateForPath(char *path)
 	return fileState;
 }
 
-t_dictionary* obtenerCopiasParaBloqueDeArchivo(int socket,int bloque ,char *path)
+t_list* obtenerCopiasParaBloqueDeArchivo(int socket,int bloque ,char *path)
 {
 	char *key = intToCharPtr(socket);
 	sem_wait(&semFilesToProcess);
@@ -346,12 +352,19 @@ t_dictionary* obtenerCopiasParaBloqueDeArchivo(int socket,int bloque ,char *path
 	int nroDeBloques = obtenerNumeroDeBloquesParaArchivo(socket,path);
 	int i,j;
 
-	t_dictionary *(*bloquesArray)[nroDeBloques][nroDeCopias];
-	bloquesArray = dictionary_get(file_StatusData,K_file_StatusData_Bloques);
+	//t_dictionary *(*bloquesArray)[nroDeBloques][nroDeCopias];
+	t_list *blocksList = dictionary_get(file_StatusData,K_file_StatusData_Bloques);
+	t_list *listaDeCopias = list_get(blocksList,bloque);
 
-	t_dictionary *copiasParaBloque[nroDeCopias];
+	t_list *copiasParaBloque = list_create();
 
-	for(i=0;i<nroDeCopias;i++){ copiasParaBloque[i] = (*bloquesArray)[bloque][i]; }
+	for(i=0;i<nroDeCopias;i++){
+		list_get(blocksList,bloque);
+		t_dictionary *copia = list_get(listaDeCopias,i);
+		char *ip = dictionary_get(copia,K_Copia_IPNodo);
+		char *b = dictionary_get(copia,K_Copia_NroDeBloque);
+		list_add(copiasParaBloque, copia);
+	}
 
 	free(key);
 
@@ -440,13 +453,13 @@ t_list* obtenerPathsTemporalesParaNodo(char *path,char *IPnodoEnBlockState){
 	sem_post(&semFilesStates);
 
 	int size_fileState = dictionary_get(fileState,K_FileState_size);
-	t_dictionary *(*blockStateArray)[size_fileState];
-	blockStateArray = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
+
+	t_list *blockStateArray = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
 	int i;
 	t_list *pathsTemporalesEnNodo = list_create();
 
 	for(i=0;i<size_fileState;i++){
-		t_dictionary *blockState = (*blockStateArray)[i];
+		t_dictionary *blockState = list_get(blockStateArray,i);
 		char *IPnroDeNodo = dictionary_get(blockState,K_BlockState_nroNodo);
 		if( strcmp(IPnroDeNodo,IPnodoEnBlockState) == 0 ){
 			char *pathTemp = dictionary_get(blockState,K_BlockState_temporaryPath);
@@ -478,17 +491,18 @@ t_list* obtenerNodosEnBlockStateArray(char *path){
 	sem_post(&semFilesStates);
 
 	int sizeBlocksArray = dictionary_get(fileState,K_FileState_size);
-	t_dictionary *(*blockStateArray)[sizeBlocksArray];
-	blockStateArray = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
+	t_list *blockStateArray = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
 
 	int i;
 	t_list *nodosEnBlockStateArray = list_create();
 	for(i=0;i<sizeBlocksArray;i++){
 
-		t_dictionary *blockState = (*blockStateArray)[i];
+		t_dictionary *blockState = list_get(blockStateArray,i);
 		char *IPnroDeNodo = dictionary_get(blockState,K_BlockState_nroNodo);
 		bool *estaEnLista = isNodoInList(nodosEnBlockStateArray,IPnroDeNodo);
-		if(estaEnLista == false){ list_add(nodosEnBlockStateArray,IPnroDeNodo); }
+		if(!(*estaEnLista)){
+			list_add(nodosEnBlockStateArray,IPnroDeNodo);
+		}
 		free(estaEnLista);
 	}
 	return nodosEnBlockStateArray;
@@ -538,10 +552,13 @@ bool* isNodoInList(t_list *lista,char *IPnroDeNodo)
 	int listSize = list_size(lista);
 	int i;
 	bool *response = malloc(sizeof(bool));
-	response = false;
+	*response = false;
 	for(i=0;i<listSize;i++){
 		char *IPnroDeNodoEnLista= list_get(lista,i);
-		if( strcmp(IPnroDeNodo,IPnroDeNodoEnLista) == 0 ){ return true; }
+		if( strcmp(IPnroDeNodo,IPnroDeNodoEnLista) == 0 ){
+			*response = true;
+			return response;
+		}
 	}
 	return response;
 }
