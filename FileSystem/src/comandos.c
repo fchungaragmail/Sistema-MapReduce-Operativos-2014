@@ -26,8 +26,10 @@ int nomb(char* argumentos, Conexion_t* conexion);
 
 int enviarBloque(enviarBloque_t* envio);
 
+
 int16_t getDir(char* dir,int16_t padre);
 int32_t get_file_size(const char * file_name);
+int getNombreArchivo(char* ruta,char* nombre,int16_t *indexPadre);
 pthread_mutex_t mListaArchivos;
 
 void procesarComando(char** comando, void(*doComando)(void*))
@@ -110,27 +112,11 @@ int importar(char* argumentos){
 	int32_t tamanio = get_file_size(tmp[0]);
 
 	//Busco que exista el dir en el FS
-	int16_t indexPadre = 0;
-	char nombrePadre[256];
+	int16_t indexPadre;
 	char nombre[50];
-	int i = 1;
 
-	char** ruta = string_split(tmp[1], "/");
-	strcpy(nombre,ruta[i-1]);
-
-	while (ruta[i] != NULL)
-	{
-		strcpy(nombrePadre,ruta[i-1]);
-		indexPadre = getDir(nombrePadre,indexPadre);
-		if (indexPadre < 0 )
-		{
-			log_error(log, "Directorio no encontrado %s", nombrePadre);
-			return -1;
-		}
-		strcpy(nombre,ruta[i]);
-		i++;
-	}
-
+	if (getNombreArchivo(tmp[1],nombre,&indexPadre) != EXIT_SUCCESS)
+		return -1;
 
 	int archivoDisk = open(tmp[0],O_RDONLY);
 	void* archivoMap = mmap(NULL, tamanio, PROT_READ, MAP_SHARED, archivoDisk, 0);
@@ -138,7 +124,7 @@ int importar(char* argumentos){
 
 	//Chequear si puedo meter los bloques en al menos 3 nodos. Si no, que falle
 
-	t_list* listaBloques = list_create;
+	t_list* listaBloques = list_create();
 	t_list* listaThreads = list_create();
 	int32_t bytesEnviados = 0;
 	while (bytesEnviados < tamanio)
@@ -217,6 +203,10 @@ int md5(char* argumentos){
 
 int bloques(char* argumentos){
 	printf("Mostrar bloques de un archivos\n");
+	//argumentos = nombre del archivo
+
+
+
 	return 0;
 }
 
@@ -271,7 +261,7 @@ int nomb(char* argumentos, Conexion_t* conexion)
 
 int16_t getDir(char* dir,int16_t padre)
 {
-	int ret = -1;
+	int16_t ret = -1;
 	int length = list_size(listaDirs);
 	for (int i=0;i<length;i++)
 	{
@@ -319,5 +309,29 @@ int32_t get_file_size(const char * file_name)
     struct stat sb;
     stat (file_name, & sb);
     return sb.st_size;
+}
+
+int getNombreArchivo(char* ruta,char* nombre,int16_t* indexPadre)
+{
+	indexPadre = 0;
+	char nombrePadre[256];
+	int i = 1;
+
+	char** directorios = string_split(ruta, "/");
+	strcpy(nombre,directorios[0]);
+
+	while (directorios[i] != NULL)
+	{
+		strcpy(nombrePadre,directorios[i-1]);
+		indexPadre = getDir(nombrePadre,indexPadre);
+		if (indexPadre < 0 )
+		{
+			log_error(log, "Directorio no encontrado %s", nombrePadre);
+			return -1;
+		}
+		strcpy(nombre,directorios[i]);
+		i++;
+	}
+	return EXIT_SUCCESS;
 }
 
