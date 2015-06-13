@@ -32,7 +32,7 @@ extern pthread_mutex_t mListaArchivos;
 struct _conexion {
 	int sockfd;
 	pthread_mutex_t mSocket;
-	char nombre[20];
+	char nombre[22];
 	int estado;
 	bool estadoBloques[52]; //en uso? Todo por default False
 	pthread_mutex_t mEstadoBloques;
