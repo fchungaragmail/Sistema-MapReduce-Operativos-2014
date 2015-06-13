@@ -10,8 +10,11 @@ Interacciones MaRTA-Job
 // Ej del comando: archivoAProcesar /user/juan/datos/temperatura2012.txt/ 1
 ************************************************************************************************************************************************************************************************
 -->MaRTA le dice al Job que haga una rutina de mapping
-*comando: "mapFile direccionNodo puertoEscucha nroDeBloque rutaArchivoTemporal"
-*data: NADA
+*comando: "mapFile nombreArchivo" 
+*data:      direccionNodo puertoEscucha nroDeBloque rutaArchivoTemporal
+		...direccionNodo puertoEscucha nroDeBloque rutaArchivoTemporal...
+		...direccionNodo puertoEscucha nroDeBloque rutaArchivoTemporal...
+
 // La ruta del archivo temporal siempre sera el nombreDelArchivo y se le concatenara los hh:mm:ss:mmmm devuelto por la funcion temporal.h que nos da la catedra
 // se pondra un guion como separador, de esta manera se podra distinguir entre la ruta del archivo y el hh:mm:ss:mmmm agregado, de esta manera se va a poder 
 // obtener la ruta del archivo si hiciera falta--> por ejemplo "/user/juan/datos/temperatura2012.txt/-23:43:45:2345"
