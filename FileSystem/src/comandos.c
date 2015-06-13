@@ -30,6 +30,7 @@ int enviarBloque(enviarBloque_t* envio);
 int16_t getDir(char* dir,int16_t padre);
 int32_t get_file_size(const char * file_name);
 int getNombreArchivo(char* ruta,char* nombre,int16_t *indexPadre);
+int getArchivo(char* nombre,int16_t indexPadre, t_reg_archivo** archivo);
 pthread_mutex_t mListaArchivos;
 
 void procesarComando(char** comando, void(*doComando)(void*))
@@ -37,7 +38,7 @@ void procesarComando(char** comando, void(*doComando)(void*))
 	pthread_t tDoComando;
 	char* message = string_from_format("Procesando comando: %s, "
 					"con los argumentos: %s", comando[0], comando[1]);
-	log_info(log, message);
+	log_debug(log, message);
 	pthread_create(&tDoComando, NULL, (*doComando), comando[1]);
 }
 
@@ -98,6 +99,12 @@ int crearDir(char* argumentos){
 
 
 int importar(char* argumentos){
+	if (strcmp(argumentos,"/?") == 0 )
+	{
+		printf("import rutaDelArchivoLocal rutaDelArchivoEnMDFS\n");
+		return 0;
+	}
+
 	char** tmp;
 	tmp = string_split(argumentos, " ");
 	//tmp[0]: ruta del archivo local
@@ -202,11 +209,45 @@ int md5(char* argumentos){
 
 
 int bloques(char* argumentos){
-	printf("Mostrar bloques de un archivos\n");
-	//argumentos = nombre del archivo
+	if (strcmp(argumentos,"/?") == 0 )
+	{
+		printf("showb rutaDelArchivoEnMDFS\n");
+		return 0;
+	}
+
+	char nombre[50];
+	int16_t indexPadre;
+	t_reg_archivo* archivo;
+
+	if (getNombreArchivo(argumentos,nombre,&indexPadre) != EXIT_SUCCESS)
+	{
+		printf("Archivo no encontrado\n");
+		return -1;
+	} else
+	{
+		if (getArchivo(nombre,indexPadre, &archivo) != EXIT_SUCCESS)
+		{
+			printf("Archivo no encontrado\n");
+			return -1;
+		}
+	}
 
 
-
+	for (int i=0;i<archivo->bloques->elements_count;i++)
+	{
+		char* bloques = string_new();
+		string_append_with_format(&bloques,"Bloque: %d", i);
+		t_list* bloque = list_get(archivo->bloques, i);
+		for (int j=0;j<bloque->elements_count;j++)
+		{
+			t_ubicacion_bloque* ubicacion = list_get(bloque,j);
+			string_append_with_format(&bloques,"| Nodo: %s - Bloque: %d ",ubicacion->bloque,
+					ubicacion->bloque);
+		}
+		string_append(&bloques,"\n");
+		printf(bloques);
+		free(bloques);
+	}
 	return 0;
 }
 
@@ -262,11 +303,9 @@ int nomb(char* argumentos, Conexion_t* conexion)
 int16_t getDir(char* dir,int16_t padre)
 {
 	int16_t ret = -1;
-	int length = list_size(listaDirs);
-	for (int i=0;i<length;i++)
+	for (int i=0;i<listaDirs->elements_count;i++)
 	{
 		t_reg_directorio* dirListado = list_get(listaDirs,i);
-
 		if ((strcmp(dirListado->directorio,dir) == 0) &&
 				(dirListado->padre == padre) ){
 			ret = i;
@@ -313,8 +352,9 @@ int32_t get_file_size(const char * file_name)
 
 int getNombreArchivo(char* ruta,char* nombre,int16_t* indexPadre)
 {
-	indexPadre = 0;
+	*indexPadre = 0;
 	char nombrePadre[256];
+	strcpy(nombrePadre,"");
 	int i = 1;
 
 	char** directorios = string_split(ruta, "/");
@@ -323,7 +363,7 @@ int getNombreArchivo(char* ruta,char* nombre,int16_t* indexPadre)
 	while (directorios[i] != NULL)
 	{
 		strcpy(nombrePadre,directorios[i-1]);
-		indexPadre = getDir(nombrePadre,indexPadre);
+		*indexPadre = getDir(nombrePadre,*indexPadre);
 		if (indexPadre < 0 )
 		{
 			log_error(log, "Directorio no encontrado %s", nombrePadre);
@@ -335,3 +375,18 @@ int getNombreArchivo(char* ruta,char* nombre,int16_t* indexPadre)
 	return EXIT_SUCCESS;
 }
 
+int getArchivo(char* nombre,int16_t indexPadre, t_reg_archivo** archivo)
+{
+	for (int i=0;i<listaArchivos->elements_count;i++)
+	{
+		t_reg_archivo* archivoTmp = list_get(listaArchivos, i);
+		if ((strcmp(archivoTmp->nombre,nombre) == 0)
+			&& (archivoTmp->dirPadre == indexPadre))
+		{
+			*archivo = archivoTmp;
+			return EXIT_SUCCESS;
+		}
+	}
+
+	return -1;
+}
