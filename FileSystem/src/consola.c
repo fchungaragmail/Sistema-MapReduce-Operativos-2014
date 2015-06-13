@@ -176,7 +176,9 @@ void mostrarAyuda()
 			"rmb	Borra un bloque\n"
 			"cpb	Copia un bloque\n"
 			"addn	Agregar nodo\n"
-			"deln	Quitar nodo\n");
+			"deln	Quitar nodo\n"
+			"\n"
+			"Teclee `comando /?' para saber más sobre la función `comando'.\n");
 }
 
 void cerrarConsola()
