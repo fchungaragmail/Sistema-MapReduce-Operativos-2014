@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <inttypes.h>
 #include "recursosCompartidos.h"
 #include "protocolo.h"
 #include "conexiones.h"

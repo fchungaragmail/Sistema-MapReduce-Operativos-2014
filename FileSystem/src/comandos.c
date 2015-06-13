@@ -31,14 +31,13 @@ int16_t getDir(char* dir,int16_t padre);
 int32_t get_file_size(const char * file_name);
 int getNombreArchivo(char* ruta,char* nombre,int16_t *indexPadre);
 int getArchivo(char* nombre,int16_t indexPadre, t_reg_archivo** archivo);
+int getBloqueDisponible(Conexion_t* conexion);
 pthread_mutex_t mListaArchivos;
+FILE* logFile;
 
 void procesarComando(char** comando, void(*doComando)(void*))
 {
 	pthread_t tDoComando;
-	char* message = string_from_format("Procesando comando: %s, "
-					"con los argumentos: %s", comando[0], comando[1]);
-	log_debug(log, message);
 	pthread_create(&tDoComando, NULL, (*doComando), comando[1]);
 }
 
@@ -68,8 +67,6 @@ int borrar(char* argumentos){
 
 
 int crearDir(char* argumentos){
-	printf("Crear Directorio\n");
-
 	char** dirs = string_split(argumentos,"/");
 
 	char* dir;
@@ -86,7 +83,8 @@ int crearDir(char* argumentos){
 			strcpy(directorio->directorio, dir);
 			directorio->padre = padre;
 			padre = list_add(listaDirs, directorio);
-			log_debug(log, "Directorio agregado: %s padre: %d", dir, directorio->padre);
+			log_debug(logFile, "Directorio agregado: %s "
+					"indice: %d padre: %d", dir, padre,directorio->padre);
 		}else
 		{
 			padre = index;
@@ -149,7 +147,7 @@ int importar(char* argumentos){
 				enviarBloque_t* envio = malloc(sizeof(enviarBloque_t));
 
 				pthread_mutex_lock(&(nodo->mEstadoBloques));
-				envio->bloque = 1; 	//getBloqueDisponible(conexion);
+				envio->bloque = getBloqueDisponible(nodo);
 				nodo->estadoBloques[envio->bloque] = true; //Lo marco en uso
 				pthread_mutex_unlock(&(nodo->mEstadoBloques));
 
@@ -157,8 +155,6 @@ int importar(char* argumentos){
 				ubicacion->bloque = envio->bloque;
 				strcpy(ubicacion->nodo,nodo->nombre);
 				list_add(ubicaciones,ubicacion);
-
-				list_add(ubicaciones, ubicacion);
 
 				envio->conexion = nodo;
 				envio->archivoMap = archivoMap;
@@ -192,6 +188,12 @@ int importar(char* argumentos){
 	pthread_mutex_lock(&mListaArchivos);
 	list_add(listaArchivos,archivo);
 	pthread_mutex_unlock(&mListaArchivos);
+	log_debug(logFile, "Archivo agregado al FS:\n"
+			"Nombre: %s\n"
+			"Tamanio: %d\n"
+			"DirPadre: %d\n"
+			"Cantidad de Bloques: %d\n",
+			archivo->nombre,archivo->tamanio,archivo->dirPadre);
 	return 0;
 }
 
@@ -241,7 +243,7 @@ int bloques(char* argumentos){
 		for (int j=0;j<bloque->elements_count;j++)
 		{
 			t_ubicacion_bloque* ubicacion = list_get(bloque,j);
-			string_append_with_format(&bloques,"| Nodo: %s - Bloque: %d ",ubicacion->bloque,
+			string_append_with_format(&bloques,"| Nodo: %s - Bloque: %d ",ubicacion->nodo,
 					ubicacion->bloque);
 		}
 		string_append(&bloques,"\n");
@@ -283,17 +285,17 @@ int nomb(char* argumentos, Conexion_t* conexion)
 	if (strcmp(conexion->nombre,tmp[1]) == 0)
 	{
 		//El nodo ya existia
-		log_info(log, "El nodo %s ya estaba identificado", conexion->nombre);
+		log_info(logFile, "El nodo %s ya estaba identificado", conexion->nombre);
 		return 0;
 	}
 
 	strcpy(conexion->nombre, tmp[1]);
-	log_info(log, "Identificado el nodo %s", conexion->nombre);
+	log_info(logFile, "Identificado el nodo %s", conexion->nombre);
 	if (strcmp(conexion->nombre, "MaRTA") != 0)
 	{
 		nodosOnline++;
 		if (nodosOnline == LISTA_NODOS)
-			log_info(log, "Cantidad minima de nodos (%d) alcanzada.", LISTA_NODOS);
+			log_info(logFile, "Cantidad minima de nodos (%d) alcanzada.", LISTA_NODOS);
 	}
 
 	free(tmp);
@@ -364,9 +366,9 @@ int getNombreArchivo(char* ruta,char* nombre,int16_t* indexPadre)
 	{
 		strcpy(nombrePadre,directorios[i-1]);
 		*indexPadre = getDir(nombrePadre,*indexPadre);
-		if (indexPadre < 0 )
+		if (*indexPadre < 0 )
 		{
-			log_error(log, "Directorio no encontrado %s", nombrePadre);
+			log_error(logFile, "Directorio no encontrado %s", nombrePadre);
 			return -1;
 		}
 		strcpy(nombre,directorios[i]);
@@ -388,5 +390,15 @@ int getArchivo(char* nombre,int16_t indexPadre, t_reg_archivo** archivo)
 		}
 	}
 
+	return -1;
+}
+
+int getBloqueDisponible(Conexion_t* conexion)
+{
+	for (int i=0;i<BLOQUES_NODO;i++)
+	{
+		if (conexion->estadoBloques[i] == false)
+			return i;
+	}
 	return -1;
 }
