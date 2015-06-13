@@ -22,7 +22,7 @@ int deserializarFullDataResponse_nroDeBloques(Message *recvMessage);
 char* createStream();
 void addIntToStream(char *stream, int value,IntTypes type);
 void addBoolToStream(char *stream, bool value);
-void addStringToStream(char *stream,char *value);
+void addStringToStream(char **stream,char *value);
 
 char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 {
@@ -171,7 +171,6 @@ t_list *deserializarFullDataResponse(Message *recvMessage)
 
 	int cantidadDeBloques = strtol(strCantDeBloques, (char **)NULL, 10);
 	int nroDeCopias = strtol(strNroDeCopias, (char **)NULL, 10);
-	//t_dictionary *dataMatriz[cantidadDeBloques][nroDeCopias];
 	t_list *listaPadreDeBloques = list_create();
 
 	char *data = recvMessage->mensaje->data;
@@ -187,7 +186,6 @@ t_list *deserializarFullDataResponse(Message *recvMessage)
 			char *nroDeBloque = dataArray[k+1];
 			dictionary_put(dic,K_Copia_IPNodo,ipNodo);
 			dictionary_put(dic,K_Copia_NroDeBloque,nroDeBloque);
-			//dataMatriz[i][j] = dic;
 			k=k+2;
 			list_add(listaHijaDeCopias,dic);
 		}
@@ -211,11 +209,12 @@ void addIntToStream(char *stream, int value,IntTypes type)
 
 void addBoolToStream(char *stream, bool value)
 {
-	if(value == true){ string_append(&stream," 1");};
-	if(value == false){ string_append(&stream," 0");};
+	if(value == true){ string_append(stream," 1");};
+	if(value == false){ string_append(stream," 0");};
 }
 
-void addStringToStream(char *stream, char *str)
+void addStringToStream(char **stream, char *str)
 {
-	string_append(&stream,str);
+	string_append(stream," ");
+	string_append(stream,str);
 }

@@ -19,6 +19,7 @@ Message* simulacion_FS_DataFullResponse();
 Message *simulacion_Job_newFileToProcess();
 Message *simulacion_Job_mapResponse();
 Message *simulacion_Job_reduceResponse();
+Message *simulacion_Job_mapResponse_Fallo();
 
 //Ambos
 Message *simulacion_NewConnection(int sckt);
@@ -30,7 +31,21 @@ Message *simular()
 	if(nroDeLlamado == 0){ return simulacion_NewConnection(K_Simulacion_ScktJob); }
 	if(nroDeLlamado == 1){ return simulacion_Job_newFileToProcess(); }
 	if(nroDeLlamado == 2){ return simulacion_FS_DataFullResponse(); }
-	if(nroDeLlamado < 7 ){ return simulacion_Job_mapResponse(); }
+	//************
+	if(nroDeLlamado == 5){ return simulacion_Job_mapResponse_Fallo(); }
+	if(nroDeLlamado == 6){ return simulacion_Job_mapResponse_Fallo(); }
+	if(nroDeLlamado == 7){ return simulacion_Job_mapResponse_Fallo(); }
+	if(nroDeLlamado == 8){
+
+		return simulacion_FS_DataFullResponse();
+	}
+
+	if(nroDeLlamado < 11 ){ return simulacion_Job_mapResponse(); }
+	//************
+	if(nroDeLlamado == 12){
+		printf("se llamo el reduceResponse");
+		return simulacion_Job_reduceResponse();
+	}
 
 
 }
@@ -115,9 +130,45 @@ Message *simulacion_Job_mapResponse()
 	return jobMsj;
 }
 
+Message *simulacion_Job_mapResponse_Fallo()
+{
+	//-->Job responde a Marta con el resultado de la operacion de map
+	//*comando : "mapFileResponse rutaArchivoTemporal Respuesta"
+	//*data:NADA
+
+	Message *jobMsj = malloc(sizeof(Message));
+	jobMsj->mensaje  = malloc(sizeof(mensaje_t));
+	char *comando = string_new();
+	string_append(&comando,"mapFileResponse /user/juan/datos/temperatura2012.txt/-23:43:45:2345 0");
+	jobMsj->mensaje->comandoSize = strlen(comando);
+	jobMsj->mensaje->comando=malloc(strlen(comando));
+	jobMsj->mensaje->comando = comando;
+
+	jobMsj->mensaje->data = malloc(0);
+	jobMsj->mensaje->dataSize = 0;
+	jobMsj->mensaje->data = "";
+	jobMsj->sockfd = K_Simulacion_ScktJob;
+	return jobMsj;
+}
 Message *simulacion_Job_reduceResponse()
 {
-	return simulacion_Job_mapResponse();
+	//-->Job responde a Marta con el resultado de la operacion de map
+	//*comando : "mapFileResponse rutaArchivoTemporal Respuesta"
+	//*data:NADA
+
+	Message *jobMsj = malloc(sizeof(Message));
+	jobMsj->mensaje  = malloc(sizeof(mensaje_t));
+	char *comando = string_new();
+	string_append(&comando,"reduceFileResponse /user/juan/datos/temperatura2012.txt/-23:43:45:2345 1");
+	jobMsj->mensaje->comandoSize = strlen(comando);
+	jobMsj->mensaje->comando=malloc(strlen(comando));
+	jobMsj->mensaje->comando = comando;
+
+	jobMsj->mensaje->data = malloc(0);
+	jobMsj->mensaje->dataSize = 0;
+	jobMsj->mensaje->data = "";
+	jobMsj->sockfd = K_Simulacion_ScktJob;
+	return jobMsj;
 }
 
 Message *simulacion_NewConnection(int sckt){

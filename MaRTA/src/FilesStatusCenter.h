@@ -46,7 +46,7 @@ int getFSSocket();
 
 // Varias
 void addFileFullData(int sckt, char* path,int nroDeBloques,int nroDeCopias, t_list *fullData);
-
+void reloadFileFullData(int sckt, char* path,int nroDeBloques,int nroDeCopias, t_list *fullData);
 //nodosData
 void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
 void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
@@ -55,7 +55,7 @@ void addTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath);
 
 //filesToProcess
 void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);//crea un fileState
-void darDeBajaCopiaEnBloqueYNodo(char*path,int skct,int nroBloque,char *IP_Nodo);
+void darDeBajaCopiaEnBloqueYNodo(char*path,int skct,char *nroBloque,char *IP_Nodo,int indiceDeBloqe);
 t_list* obtenerCopiasParaBloqueDeArchivo(int socket,int bloque,char *path);
 int obtenerNumeroDeCopiasParaArchivo(int socket,char *path);
 int obtenerNumeroDeBloquesParaArchivo(int socket,char *path);

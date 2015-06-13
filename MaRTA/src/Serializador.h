@@ -31,6 +31,6 @@ int deserializarFullDataResponse_nroDeBloques(Message *recvMessage);
 char* createStream();
 void addIntToStream(char *stream, int value,IntTypes type);
 void addBoolToStream(char *stream, bool value);
-void addStringToStream(char *stream,char *value);
+void addStringToStream(char **stream,char *value);
 
 #endif /* SERIALIZADOR_H_ */
