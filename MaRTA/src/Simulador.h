@@ -19,7 +19,7 @@ Message* simulacion_FS_DataFullResponse();
 
 //Simulador Job
 Message *simulacion_Job_newFileToProcess();
-Message *simulacion_Job_mapResponse();
+Message *simulacion_Job_mapResponse(int x);
 Message *simulacion_Job_reduceResponse();
 
 //Ambos

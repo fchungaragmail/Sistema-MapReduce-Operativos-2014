@@ -18,11 +18,28 @@ char* deserializeComando(Message *recvMessage);
 t_list* deserializarFullDataResponse(Message *recvMessage);
 int deserializarFullDataResponse_nroDeCopias(Message *recvMessage);
 int deserializarFullDataResponse_nroDeBloques(Message *recvMessage);
+char *deserializeTempFilePath(Message *recvMessage,TypesMessages type);
 
 char* createStream();
 void addIntToStream(char *stream, int value,IntTypes type);
 void addBoolToStream(char *stream, bool value);
-void addStringToStream(char *stream,char *value);
+void addStringToStream(char **stream,char *value);
+
+char *deserializeTempFilePath(Message *recvMessage,TypesMessages type)
+{
+	if(type == K_Job_MapResponse || type == K_Job_ReduceResponse){
+			//Segun protocolo recvMessage->mensaje->data sera
+			//*comando(map) : "mapFileResponse rutaArchivoTemporal Respuesta"
+			//*comando(reduce) : "reduceFileResponse rutaArchivoTemporal Respuesta"
+			//*data:NADA
+			//necesito obtener "rutaArchivoTemporal"
+
+			char *comandoStr = recvMessage->mensaje->comando;
+			char **comandoArray = string_split(comandoStr," ");
+			char *tempPath = comandoArray[1];
+			return tempPath;
+		}
+}
 
 char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 {
@@ -62,7 +79,10 @@ char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 
 		char *comandoStr = recvMessage->mensaje->comando;
 		char **comandoArray = string_split(comandoStr," ");
-		return comandoArray[1];
+		char *tempPath = comandoArray[1];
+		char **tempPathSplit = string_split(tempPath,"-");
+		char *path = tempPathSplit[0];
+		return path;
 	}
 
 	return filePath;
@@ -171,7 +191,6 @@ t_list *deserializarFullDataResponse(Message *recvMessage)
 
 	int cantidadDeBloques = strtol(strCantDeBloques, (char **)NULL, 10);
 	int nroDeCopias = strtol(strNroDeCopias, (char **)NULL, 10);
-	//t_dictionary *dataMatriz[cantidadDeBloques][nroDeCopias];
 	t_list *listaPadreDeBloques = list_create();
 
 	char *data = recvMessage->mensaje->data;
@@ -187,7 +206,6 @@ t_list *deserializarFullDataResponse(Message *recvMessage)
 			char *nroDeBloque = dataArray[k+1];
 			dictionary_put(dic,K_Copia_IPNodo,ipNodo);
 			dictionary_put(dic,K_Copia_NroDeBloque,nroDeBloque);
-			//dataMatriz[i][j] = dic;
 			k=k+2;
 			list_add(listaHijaDeCopias,dic);
 		}
@@ -211,11 +229,12 @@ void addIntToStream(char *stream, int value,IntTypes type)
 
 void addBoolToStream(char *stream, bool value)
 {
-	if(value == true){ string_append(&stream," 1");};
-	if(value == false){ string_append(&stream," 0");};
+	if(value == true){ string_append(stream," 1");};
+	if(value == false){ string_append(stream," 0");};
 }
 
-void addStringToStream(char *stream, char *str)
+void addStringToStream(char **stream, char *str)
 {
-	string_append(&stream,str);
+	string_append(stream," ");
+	string_append(stream,str);
 }
