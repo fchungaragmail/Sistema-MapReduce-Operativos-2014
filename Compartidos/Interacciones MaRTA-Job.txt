@@ -66,7 +66,13 @@ Una vez q el Job responde entonces MaRTA enviara el ultimo pedido para hacer el 
 ************************************************************************************************************************************************************************************************
 -->Job responde a Marta con el resultado de la operacion de reduce
 *comando:"reduceFileResponse nombreArch Respuesta"-----> "reduceFileResponse" en realidad sera "reduceFileConCombiner-Pedido1","reduceFileConCombiner-Pedido2","reduceFileSinCombiner"
-*data:VACIO
+*data: XXXX ---> si el pedido de reduce es exitoso en el data nose manda NADA, si no es exitoso en el data se mandan los archivos que fallaron 
+			    ---> en caso de que falle van a existir 2 formas de responderle a MaRTA y son las siguientes:
+				   *si fallan los pedidos"reduceFileSinCombiner" o "reduceFileConCombiner-Pedido1" enviara lo siguiente: "IPnodo1 CantDeArchEnNodo RTA1 RAT2 RAT3..."
+                              																													        "...IPnodo2 CantDeArchEnNodo RTA1 RAT2 RAT3..."
+				
+				   *si falla el pedido "reduceFileConCombiner-Pedido2" enviara lo siguiente : "Nodo1 nombreArchTempLocal "
+																								     "...Nodo2 nombreArchTempLocal..."
 
 // Debe devolver el "NombreArchTemp" asi MaRTA sabe a que pedido de reduce corresponde, ya que seguramente envio varios.
 // la "Respuesta" debe ser 0 si es false o 1 si es true
