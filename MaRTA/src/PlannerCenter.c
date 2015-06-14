@@ -114,13 +114,26 @@ void processMessage(Message *recvMessage)
 			printf("PlannerCenter : planificar Job_ReduceResponse");
 
 			bool *_response = deserializeRequestResponse(recvMessage,K_Job_ReduceResponse);
+			//tipos de rtas
+			//**************
+			//*comando: "reduceFileConCombiner-Pedido1 pathArchivo"
+			//*comando: "reduceFileConCombiner-Pedido2 pathArchivo"
+			//*comando: "reduceFileSinCombiner NombreArchTempFinal "
 
-			if(*_response){
+			char **reduceSplit = string_split(recvMessage->mensaje->comando," ");
+			char *reduceResponse = reduceSplit[0];
+
+			if((*_response)&&((strcmp(reduceResponse,"reduceFileConCombiner-Pedido2")==0)||(strcmp(reduceResponse,"reduceFileSinCombiner")==0))){
 				//reduce realizado con exito
 				//actualizar tablas !!
 				actualizarTablas_RtaDeMapExitosa(recvMessage);
 				char *tempPath = deserializeFilePath(recvMessage,K_Job_ReduceResponse);
 				printf("archivo %s reducido con exito !\n",tempPath);
+
+			}
+			if((*_response)&&(strcmp(reduceResponse,"reduceFileConCombiner-Pedido1")==0)){
+				//hacer reduceFileConCombiner-Pedido2
+				//ACTUALIZAR TABLAS !!!!
 
 			}else{
 
@@ -289,10 +302,6 @@ Message* obtenerProximoPedido(Message *recvMessage)
 		//HACER REDUCE !!! --> usar fileState para ver las ubicaciones
 		//VER SI SOPORTA COMBINER O NO
 		//hacer reduce en el nodo que contenga mas archivos mappeados
-		//*comando: "reduceFileSinCombiner NombreArchTempFinal "
-		//*data:	    NodoLocal  CantDeArchEnNodoLocalAProcesar RAT1 RAT2-...etc...-
-		//           ...NodoRemoto1 CantDeArchEnNodoRemotoAProcesar RTA1 RAT2 RAT3 -etc...
-		//	         ...NodoRemoto2-...."
 
 		bool *tieneCombinerMode = soportaCombiner(recvMessage->sockfd,path);
 		char *IPnroNodoLocal = obtenerNodoConMayorCantidadDeArchivosTemporales(path);
@@ -308,23 +317,31 @@ Message* obtenerProximoPedido(Message *recvMessage)
 
 			//1er pedido
 			//***********
-			//*comando: "reduceFileConCombiner pathArchivo"
+			//*comando: "reduceFileConCombiner-Pedido1 pathArchivo"
 			//*data:      Nodo1 nombreArchTemp1 CantDeArchEnNodoAProcesar RAT1 RAT2 -etc...-
 			//         ...Nodo2 nombreArchTemp2 CantDeArchEnNodoAProcesar RTA1 RAT2 -etc...
 			//		   ...Nodo3 ....
 
 			//2do pedido
 			//***********
-			//*comando: "reduceFileConCombiner nombreArchTempFinal"
+			//*comando: "reduceFileConCombiner-Pedido2 nombreArchTempFinal"
 			//*data:      NodoLocal nombreArchTempLocal
 			//         ...NodoRemoto1 nombreArchTemp1...
 			//		   ...NodoRemoto2 nombreArchTemp2...
 			//	       ...etc...
 
+
+
 		}
 
 		if(!(*tieneCombinerMode)){
 			//planificar sin combiner
+
+			//*comando: "reduceFileSinCombiner NombreArchTempFinal "
+			//*data:	    NodoLocal  CantDeArchEnNodoLocalAProcesar RAT1 RAT2-...etc...-
+			//           ...NodoRemoto1 CantDeArchEnNodoRemotoAProcesar RTA1 RAT2 RAT3 -etc...
+			//	         ...NodoRemoto2-...."
+
 			//****************************************************
 			//PRIMERO PONER LOS PATH CORRESPONDIENTES AL NODO LOCAL
 
@@ -364,6 +381,9 @@ Message* obtenerProximoPedido(Message *recvMessage)
 			}
 			printf("el archivo %s no soporta Combiner\n",pedidoRealizado_Path);
 			printf("el pedido de reduce es : %s\n",stream);
+			//actualizar Tablas !!
+			incrementarOperacionesEnProcesoEnNodo(IPnroNodoLocal);
+			setBlockStatesListInReducingState(path);
 		}
 
 		Message *sendMessage = armarMensajeParaEnvio(recvMessage,stream,"reduceFile");

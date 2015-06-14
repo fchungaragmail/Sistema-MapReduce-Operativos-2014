@@ -43,14 +43,14 @@ Una vez q el Job responde entonces MaRTA enviara el ultimo pedido para hacer el 
 1er pedido
 ***********
 
-*comando: "reduceFileConCombiner pathArchivo"
+*comando: "reduceFileConCombiner-Pedido1 pathArchivo"
 *data:      Nodo1 nombreArchTemp1 CantDeArchEnNodoAProcesar RAT1 RAT2 -etc...-
                 ...Nodo2 nombreArchTemp2 CantDeArchEnNodoAProcesar RTA1 RAT2 -etc... 
 		...Nodo3 ....
 
 2do pedido
 ***********
-*comando: "reduceFileConCombiner nombreArchTempFinal"
+*comando: "reduceFileConCombiner-Pedido2 nombreArchTempFinal"
 *data:      NodoLocal nombreArchTempLocal 
                 ...NodoRemoto1 nombreArchTemp1... 
 		...NodoRemoto2 nombreArchTemp2...
@@ -65,7 +65,7 @@ Una vez q el Job responde entonces MaRTA enviara el ultimo pedido para hacer el 
 //tipo de estructura del mensaje debe esperar, ya que el mismo Job sabe si soporta combiner o no.
 ************************************************************************************************************************************************************************************************
 -->Job responde a Marta con el resultado de la operacion de reduce
-*comando:"reduceFileResponse nombreArch Respuesta"
+*comando:"reduceFileResponse nombreArch Respuesta"-----> "reduceFileResponse" en realidad sera "reduceFileConCombiner-Pedido1","reduceFileConCombiner-Pedido2","reduceFileSinCombiner"
 *data:VACIO
 
 // Debe devolver el "NombreArchTemp" asi MaRTA sabe a que pedido de reduce corresponde, ya que seguramente envio varios.

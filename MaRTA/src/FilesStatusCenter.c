@@ -83,6 +83,7 @@ bool* isPathInList(t_list *lista,char *path);
 bool* isNodoInList(t_list *lista,char *IPnroDeNodo);
 int obtenerPosicionDeBloqueEnBlockStatesList(char *path,char *ipNodo,char *bloque);
 t_dictionary *obtenerBlockState(char *path,char *tempPath);
+void setBlockStatesListInReducingState(char *path);
 
 void initFilesStatusCenter()
 {
@@ -596,4 +597,17 @@ t_dictionary *obtenerBlockState(char *path,char *tempPath)
 		}
 	}
 	return blockState;
+}
+
+void setBlockStatesListInReducingState(char *path)
+{
+	t_dictionary *fileState = getFileState(path);
+	t_list *blockStatesList = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
+	int size = list_size(blockStatesList);
+	int i;
+	for(i=0;i<size;i++){
+		t_dictionary *blockState = list_get(blockStatesList,i);
+		StatusBlockState *state = dictionary_get(blockState,K_BlockState_state);
+		*state = K_IN_REDUCING;
+	}
 }
