@@ -62,6 +62,7 @@ void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
 void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
 int getCantidadDeOperacionesEnProcesoEnNodo(char *IPnroNodo);
 void addTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath);
+void removeTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath);
 //filesToProcess
 void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);//crea un fileState
 void darDeBajaCopiaEnBloqueYNodo(char*path,int skct,char* nroBloque,char *IP_nroNodo,int indiceDeBloqe);
@@ -296,7 +297,20 @@ void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo)
 		sem_post(&semNodoState);
 	}
 }
+void removeTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath){
+	t_dictionary *nodoState = getNodoState(IPnroNodo);
+	t_list *listaTemporales = getNodoState_listaTemporales(nodoState);
+	int size = list_size(listaTemporales);
+	int i;
 
+	for(i=0;i<size;i++){
+		char *tempPath = list_get(listaTemporales,i);
+
+		if(strcmp(tempPath,filePath)==0){
+			list_remove(listaTemporales,i);
+		}
+	}
+}
 void addTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath)
 {//el NodoState tiene que estar si o si creado, pues tiene que haber pasado por
  //"incrementarOperacionesEnProcesoEnNodo"
