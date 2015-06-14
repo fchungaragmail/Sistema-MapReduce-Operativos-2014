@@ -27,6 +27,7 @@ char* deserializeComando(Message *recvMessage);
 t_list* deserializarFullDataResponse(Message *recvMessage);
 int deserializarFullDataResponse_nroDeCopias(Message *recvMessage);
 int deserializarFullDataResponse_nroDeBloques(Message *recvMessage);
+char *deserializeTempFilePath(Message *recvMessage,TypesMessages type);
 
 char* createStream();
 void addIntToStream(char *stream, int value,IntTypes type);

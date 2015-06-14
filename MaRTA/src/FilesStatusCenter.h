@@ -71,5 +71,7 @@ int obtenerCantidadDePathsTemporalesEnNodo(char *path,char *IPnodoEnBlockState);
 t_list* obtenerNodosEnBlockStateArray(char *path);
 int obtenerCantidadDeNodosDiferentesEnBlockState(char *path);
 char* obtenerNodoConMayorCantidadDeArchivosTemporales(char *path);
+int obtenerPosicionDeBloqueEnBlockStatesList(char *path,char *ipNodo,char *bloque);
+t_dictionary *obtenerBlockState(char *path,char *tempPath);
 
 #endif /* FILESTATUSCENTER_H_ */

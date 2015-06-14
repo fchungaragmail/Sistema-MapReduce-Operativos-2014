@@ -18,11 +18,28 @@ char* deserializeComando(Message *recvMessage);
 t_list* deserializarFullDataResponse(Message *recvMessage);
 int deserializarFullDataResponse_nroDeCopias(Message *recvMessage);
 int deserializarFullDataResponse_nroDeBloques(Message *recvMessage);
+char *deserializeTempFilePath(Message *recvMessage,TypesMessages type);
 
 char* createStream();
 void addIntToStream(char *stream, int value,IntTypes type);
 void addBoolToStream(char *stream, bool value);
 void addStringToStream(char **stream,char *value);
+
+char *deserializeTempFilePath(Message *recvMessage,TypesMessages type)
+{
+	if(type == K_Job_MapResponse || type == K_Job_ReduceResponse){
+			//Segun protocolo recvMessage->mensaje->data sera
+			//*comando(map) : "mapFileResponse rutaArchivoTemporal Respuesta"
+			//*comando(reduce) : "reduceFileResponse rutaArchivoTemporal Respuesta"
+			//*data:NADA
+			//necesito obtener "rutaArchivoTemporal"
+
+			char *comandoStr = recvMessage->mensaje->comando;
+			char **comandoArray = string_split(comandoStr," ");
+			char *tempPath = comandoArray[1];
+			return tempPath;
+		}
+}
 
 char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 {
@@ -62,7 +79,10 @@ char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 
 		char *comandoStr = recvMessage->mensaje->comando;
 		char **comandoArray = string_split(comandoStr," ");
-		return comandoArray[1];
+		char *tempPath = comandoArray[1];
+		char **tempPathSplit = string_split(tempPath,"-");
+		char *path = tempPathSplit[0];
+		return path;
 	}
 
 	return filePath;

@@ -17,9 +17,9 @@ Message* simulacion_FS_DataFullResponse();
 
 //Job
 Message *simulacion_Job_newFileToProcess();
-Message *simulacion_Job_mapResponse();
+Message *simulacion_Job_mapResponse(int x);
 Message *simulacion_Job_reduceResponse();
-Message *simulacion_Job_mapResponse_Fallo();
+Message *simulacion_Job_mapResponse_Fallo(int x);
 
 //Ambos
 Message *simulacion_NewConnection(int sckt);
@@ -32,17 +32,19 @@ Message *simular()
 	if(nroDeLlamado == 1){ return simulacion_Job_newFileToProcess(); }
 	if(nroDeLlamado == 2){ return simulacion_FS_DataFullResponse(); }
 	//************
-	if(nroDeLlamado == 5){ return simulacion_Job_mapResponse_Fallo(); }
-	if(nroDeLlamado == 6){ return simulacion_Job_mapResponse_Fallo(); }
-	if(nroDeLlamado == 7){ return simulacion_Job_mapResponse_Fallo(); }
+	if(nroDeLlamado == 3){ return simulacion_Job_mapResponse(0); }
+	if(nroDeLlamado == 4){ return simulacion_Job_mapResponse(1); }
+	if(nroDeLlamado == 5){ return simulacion_Job_mapResponse_Fallo(2); }
+	if(nroDeLlamado == 6){ return simulacion_Job_mapResponse_Fallo(2); }
+	if(nroDeLlamado == 7){ return simulacion_Job_mapResponse_Fallo(2); }
 	if(nroDeLlamado == 8){
 
 		return simulacion_FS_DataFullResponse();
 	}
-
-	if(nroDeLlamado < 11 ){ return simulacion_Job_mapResponse(); }
+	if(nroDeLlamado == 9){ return simulacion_Job_mapResponse(2); }
+	if(nroDeLlamado == 10){ return simulacion_Job_mapResponse(3); }
 	//************
-	if(nroDeLlamado == 12){
+	if(nroDeLlamado == 11){
 		printf("se llamo el reduceResponse");
 		return simulacion_Job_reduceResponse();
 	}
@@ -109,16 +111,20 @@ Message *simulacion_Job_newFileToProcess()
 		return jobMsj;
 }
 
-Message *simulacion_Job_mapResponse()
+Message *simulacion_Job_mapResponse(int x)
 {
 	//-->Job responde a Marta con el resultado de la operacion de map
 	//*comando : "mapFileResponse rutaArchivoTemporal Respuesta"
 	//*data:NADA
+    char *_x = intToCharPtr(x);
 
 	Message *jobMsj = malloc(sizeof(Message));
 	jobMsj->mensaje  = malloc(sizeof(mensaje_t));
 	char *comando = string_new();
-	string_append(&comando,"mapFileResponse /user/juan/datos/temperatura2012.txt/-23:43:45:2345 1");
+	string_append(&comando,"mapFileResponse /user/juan/datos/temperatura2012.txt/-");
+	string_append(&comando,_x);
+	string_append(&comando," 1");
+
 	jobMsj->mensaje->comandoSize = strlen(comando);
 	jobMsj->mensaje->comando=malloc(strlen(comando));
 	jobMsj->mensaje->comando = comando;
@@ -130,16 +136,19 @@ Message *simulacion_Job_mapResponse()
 	return jobMsj;
 }
 
-Message *simulacion_Job_mapResponse_Fallo()
+Message *simulacion_Job_mapResponse_Fallo(int x)
 {
 	//-->Job responde a Marta con el resultado de la operacion de map
 	//*comando : "mapFileResponse rutaArchivoTemporal Respuesta"
 	//*data:NADA
-
+	char *_x = intToCharPtr(x);
 	Message *jobMsj = malloc(sizeof(Message));
 	jobMsj->mensaje  = malloc(sizeof(mensaje_t));
 	char *comando = string_new();
-	string_append(&comando,"mapFileResponse /user/juan/datos/temperatura2012.txt/-23:43:45:2345 0");
+	string_append(&comando,"mapFileResponse /user/juan/datos/temperatura2012.txt/-");
+	string_append(&comando,_x);
+	string_append(&comando," 0");
+
 	jobMsj->mensaje->comandoSize = strlen(comando);
 	jobMsj->mensaje->comando=malloc(strlen(comando));
 	jobMsj->mensaje->comando = comando;
@@ -159,7 +168,7 @@ Message *simulacion_Job_reduceResponse()
 	Message *jobMsj = malloc(sizeof(Message));
 	jobMsj->mensaje  = malloc(sizeof(mensaje_t));
 	char *comando = string_new();
-	string_append(&comando,"reduceFileResponse /user/juan/datos/temperatura2012.txt/-23:43:45:2345 1");
+	string_append(&comando,"reduceFileResponse /user/juan/datos/temperatura2012.txt/-X 1");
 	jobMsj->mensaje->comandoSize = strlen(comando);
 	jobMsj->mensaje->comando=malloc(strlen(comando));
 	jobMsj->mensaje->comando = comando;
