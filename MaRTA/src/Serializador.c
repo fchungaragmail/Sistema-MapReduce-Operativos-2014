@@ -19,6 +19,7 @@ t_list* deserializarFullDataResponse(Message *recvMessage);
 int deserializarFullDataResponse_nroDeCopias(Message *recvMessage);
 int deserializarFullDataResponse_nroDeBloques(Message *recvMessage);
 char *deserializeTempFilePath(Message *recvMessage,TypesMessages type);
+t_list *deserializeFailedReduceResponse(Message *recvMessage);
 
 char* createStream();
 void addIntToStream(char *stream, int value,IntTypes type);
@@ -137,8 +138,6 @@ char* deserializeComando(Message *recvMessage)
 	//Segun protocolo el "comando" siempre es lo 1ero del stream
 	char *comandoStr = recvMessage->mensaje->comando;
 	char **comandoArray = string_split(comandoStr," ");
-	char *soportaCombinerStr = comandoArray[2];
-
 	return comandoArray[0];
 }
 
@@ -213,6 +212,48 @@ t_list *deserializarFullDataResponse(Message *recvMessage)
 	}
 
 	return listaPadreDeBloques;
+}
+
+t_list *deserializeFailedReduceResponse(Message *recvMessage)
+{
+	char *reduceType = deserializeComando(recvMessage);
+	char *data = recvMessage->mensaje->data;
+	char **dataSplit = string_split(data," ");
+	t_list *listaP = list_create();
+
+	if((strcmp(reduceType,"reduceFileConCombiner-Pedido1")==0)||(strcmp(reduceType,"reduceFileSinCombiner")==0)){
+
+		//*data: --> "IPnodo1 IPnodo2..."
+		int i=0;
+		while(1)
+		{
+			char *ipNodo = dataSplit[i];
+			if(ipNodo==NULL){ break; }
+			i++;
+			list_add(listaP,ipNodo);
+		}
+	}
+
+	if(strcmp(reduceType,"reduceFileConCombiner-Pedido2")){
+		//*data: --> "Nodo1 nombreArchTempLocal "
+		//		  "...Nodo2 nombreArchTempLocal..."
+		int i=0;
+		while(1){
+
+			t_dictionary *nodoDic = dictionary_create();
+
+			char *ipNodo = dataSplit[i];
+			if(ipNodo==NULL){ break; }
+			i++;
+			char *pathTempo = dataSplit[i];
+
+			dictionary_put(nodoDic,"ipNodo",ipNodo);
+			dictionary_put(nodoDic,"tempPath",pathTempo);
+			list_add(listaP,nodoDic);
+		}
+	}
+
+	return listaP;
 }
 char* createStream()
 {

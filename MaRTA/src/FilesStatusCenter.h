@@ -52,6 +52,7 @@ void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
 void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
 int getCantidadDeOperacionesEnProcesoEnNodo(char *IPnroNodo);
 void addTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath);
+void removeTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath);
 
 //filesToProcess
 void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);//crea un fileState

@@ -30,32 +30,12 @@ void* pedidosMartaHandler(void* arg) {
 		char** comandoStr = string_split(mensajeMarta->comando, " ");
 
 		if (strncmp(comandoStr[0], "mapFile", 7) == 0) {
-
-			/// TO DO , usar enums o defines
-			////                    0        1       2     3                    4
-			//// Ej del comando: mapFile  127.0.0.1 9999 12345 /user/juan/datos/temperatura2012.txt/-23:43:45:2345
-			Sockaddr_in their_addr;
-
-			their_addr.sin_family = AF_INET;
-			their_addr.sin_port = htons(comandoStr[1]);
-			inet_aton(comandoStr[2], &(their_addr.sin_addr));
-			memset(&(their_addr.sin_zero), '\o', 8);
-
-			HiloJob* hiloJob = malloc(sizeof(HiloJob));
-			hiloJob->direccionNodo = their_addr;
-			hiloJob->threadhilo = NULL;
-			hiloJob->socketFd = -1;
-			hiloJob->nroBloque = atoi(comandoStr[3]);
-			hiloJob->nombreArchivo = string_duplicate(comandoStr[4]);
-
-			list_add(listaHilos, (void*) hiloJob);
-			CrearHiloMapper(hiloJob);
-
+			PlanificarHilosMapper(mensajeMarta);
 		} else if (strncmp(mensajeMarta->comando, "reduceFile", 10) == 0) {
-
+			PlanificarHilosReduce(mensajeMarta);
 		}
 
-		free(comandoStr);
+		FreeStringArray(&comandoStr);
 		free(mensajeMarta);
 
 	}
@@ -177,11 +157,13 @@ void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado){
 
 	mensaje_t* mensajeParaMarta = malloc(sizeof(mensaje_t));
 	char* bufferComandoStr = string_new();
+	char* bufferDataStr = string_new();
+
 	switch(estado){
 
 	case ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION:
-	case ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO:
 		string_append_with_format(&bufferComandoStr,"mapFileResponse %s 0",hiloJob->nombreArchivo);
+		string_append_with_format(&bufferDataStr,"%s", inet_ntoa(hiloJob->direccionNodo.sin_addr));
 		break;
 	case ESTADO_HILO_FINALIZO_OK:
 		string_append_with_format(&bufferComandoStr,"mapFileResponse %s 1",hiloJob->nombreArchivo);
@@ -191,8 +173,8 @@ void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado){
 
 	mensajeParaMarta->comandoSize = strlen(bufferComandoStr);
 	mensajeParaMarta->comando = bufferComandoStr;
-	mensajeParaMarta->dataSize = 0;
-	mensajeParaMarta->data = NULL;
+	mensajeParaMarta->dataSize = strlen(bufferDataStr);
+	mensajeParaMarta->data = bufferDataStr;
 
 	/*
 	 * varios hilos pueden estar reportando a marta
@@ -208,6 +190,57 @@ void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado){
 	free(mensajeParaMarta);
 	printf("Se termino el hilo con resultado: %d\n", estado);
 }
+
+
+void PlanificarHilosMapper(mensaje_t* mensaje){
+
+	char** dataStr = string_split(mensaje->data," ");
+
+
+	//direccionNodo puertoEscucha nroDeBloque rutaArchivoTemporal
+
+	int i = 0;
+	while(dataStr[i] != NULL){
+
+		Sockaddr_in their_addr;
+
+		their_addr.sin_family = AF_INET;
+		their_addr.sin_port = htons(dataStr[i++]);
+		inet_aton(dataStr[i++], &(their_addr.sin_addr));
+		memset(&(their_addr.sin_zero), '\o', 8);
+
+		HiloJob* hiloJob = malloc(sizeof(HiloJob));
+		hiloJob->direccionNodo = their_addr;
+		hiloJob->threadhilo = NULL;
+		hiloJob->socketFd = -1;
+		hiloJob->nroBloque = atoi(dataStr[i++]);
+		hiloJob->nombreArchivo = string_duplicate(dataStr[i++]);
+
+		list_add(listaHilos, (void*) hiloJob);
+		CrearHiloMapper(hiloJob);
+
+	}
+
+	FreeStringArray(&dataStr);
+}
+
+
+void PlanificarHilosReduce(mensaje_t* mensaje){
+
+	//TODO
+}
+
+void FreeStringArray(char*** stringArray){
+	char** array = *stringArray;
+
+	int i;
+	for(i = 0; array[i] != NULL; ++i){
+		free(array[i]);
+	}
+
+	free(array);
+}
+
 
 int main(int argc, char* argv[]) {
 
