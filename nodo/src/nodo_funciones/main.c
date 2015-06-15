@@ -12,12 +12,13 @@ char* obtenerBloque(){
 
 int main(int argc, char **argv) {
 
-	//getBloque
-	char *bloque = getBloque("datos.bin", 0);
-	//printf("%c\n", bloque[0]);
 
 	//setBloque
 	setBloque("datos.bin",0, obtenerBloque());
+
+	//getBloque
+	char *bloque = getBloque("datos.bin", 0);
+	//printf("%c\n", bloque[0]);
 
 	//getFileContent
 	t_fileContent *archivoTemporal = getFileContent("tmp/201301hourly.txt");
