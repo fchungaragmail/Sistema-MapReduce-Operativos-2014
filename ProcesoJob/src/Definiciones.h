@@ -17,6 +17,12 @@
 #define FALSE 0
 #define TRUE 1
 
+#define BUILD_CON_MOCK 0
+
+#define MENSAJE_COMANDO 0
+#define MENSAJE_COMANDO_NOMBREARCHIVO 1
+
+
 typedef enum {
 	ESTADO_HILO_NUEVO,
 	ESTADO_HILO_FINALIZO_OK,

@@ -18,7 +18,7 @@ void* hiloMapperHandler(void* arg){
 	HiloJob* hiloJob = (HiloJob*) arg;
 
 
-	if ((hiloJob->socketFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+	if ((hiloJob->socketFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) { //<--- CREO QUE SI OCURRE ESTO, FALLO JOB Y DEBE ABORTAR
 		ReportarResultadoHilo(hiloJob,ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION);
 		error_show("Error al crear socket para el nodo\n");
 		return NULL;
