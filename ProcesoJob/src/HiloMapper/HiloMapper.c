@@ -17,7 +17,7 @@ void* hiloMapperHandler(void* arg){
 
 	HiloJob* hiloJob = (HiloJob*) arg;
 
-
+#ifndef BUILD_PARA_TEST
 	if ((hiloJob->socketFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) { //<--- CREO QUE SI OCURRE ESTO, FALLO JOB Y DEBE ABORTAR
 		ReportarResultadoHilo(hiloJob,ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION);
 		error_show("Error al crear socket para el nodo\n");
@@ -31,8 +31,10 @@ void* hiloMapperHandler(void* arg){
 		error_show("Error al conectarse con el nodo\n");
 		return NULL;
 	}
-
-	printf("Conexion exitosa con nodo");
+#else
+	hiloJob->socketFd = 99;
+#endif
+	printf("-----Conexion exitosa con nodo ip:%s puerto:%d-----\n", inet_ntoa(hiloJob->direccionNodo.sin_addr), ntohs(hiloJob->direccionNodo.sin_port));
 
 
 	mensaje_t* mensajeParaNodo = malloc(sizeof(mensaje_t));
@@ -48,16 +50,20 @@ void* hiloMapperHandler(void* arg){
 	mensajeParaNodo->dataSize = strlen(bufferData);
 	mensajeParaNodo->data = bufferData;
 
+#ifndef BUILD_PARA_TEST
 	enviar(hiloJob->socketFd, mensajeParaNodo);
-
-	printf("Enviado a MaRTA el comando: %s\n", mensajeParaNodo->comando);
+#endif
+	printf("-----Enviado al nodo %s-----\nComando: %s\nData: %s\n----------\n", inet_ntoa(hiloJob->direccionNodo.sin_addr), mensajeParaNodo->comando, mensajeParaNodo->data);
 	free(bufferComando);
 	free(bufferData);
 	free(mensajeParaNodo);
 
-
-	mensaje_t* mensajeDeNodo;
-	recibir(hiloJob->socketFd,mensajeDeNodo);
+#ifdef BUILD_PARA_TEST
+	int tiempoParaDormir = rand() % 5;
+	sleep(tiempoParaDormir);
+#endif
+	//mensaje_t* mensajeDeNodo;
+	//recibir(hiloJob->socketFd,mensajeDeNodo);
 	//TODO define
 
 	ReportarResultadoHilo(hiloJob,ESTADO_HILO_FINALIZO_OK);
