@@ -20,7 +20,6 @@
 #define K_BlockState_temporaryPath "BlockState_temporaryPath"
 
 //fileState --> keys
-#define K_FileState_size "FileState_size"
 #define K_FileState_arrayOfBlocksStates "FileState_arrayOfBlocksStates"
 
 //fullData --> keys (data pedida al FS)
@@ -45,8 +44,9 @@ void addNewConnection(int socket);
 int getFSSocket();
 
 // Varias
-void addFileFullData(int sckt, char* path,int nroDeBloques,int nroDeCopias, t_list *fullData);
-void reloadFileFullData(int sckt, char* path,int nroDeBloques,int nroDeCopias, t_list *fullData);
+void addFileFullData(int sckt, char* path, t_list *fullData);
+void reloadFileFullData(int sckt, char* path, t_list *fullData);
+
 //nodosData
 void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
 void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);

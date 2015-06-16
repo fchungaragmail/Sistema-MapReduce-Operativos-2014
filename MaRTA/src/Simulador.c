@@ -18,7 +18,7 @@ Message* simulacion_FS_DataFullResponse();
 //Job
 Message *simulacion_Job_newFileToProcess();
 Message *simulacion_Job_mapResponse(int x);
-Message *simulacion_Job_reduceResponse();
+Message *simulacion_Job_reduceResponse(char *tipo);
 Message *simulacion_Job_mapResponse_Fallo(int x);
 
 //Ambos
@@ -45,10 +45,12 @@ Message *simular()
 	if(nroDeLlamado == 10){ return simulacion_Job_mapResponse(3); }
 	//************
 	if(nroDeLlamado == 11){
-		printf("se llamo el reduceResponse");
-		return simulacion_Job_reduceResponse();
+		return simulacion_Job_reduceResponse("reduceFileConCombiner-Pedido1");
 	}
 
+	if(nroDeLlamado == 12){
+			return simulacion_Job_reduceResponse("reduceFileConCombiner-Pedido2");
+		}
 
 }
 Message* simulacion_FS_DataFullResponse()
@@ -98,7 +100,7 @@ Message *simulacion_Job_newFileToProcess()
 		Message *jobMsj = malloc(sizeof(Message));
 		jobMsj->mensaje= malloc(sizeof(mensaje_t));
 		char *comando = string_new();
-		string_append(&comando,"archivoAProcesar /user/juan/datos/temperatura2012.txt/ 0");
+		string_append(&comando,"archivoAProcesar /user/juan/datos/temperatura2012.txt/ 1");
 
 		jobMsj->mensaje->comandoSize = strlen(comando);
 		jobMsj->mensaje->comando = malloc(strlen(comando));
@@ -159,7 +161,7 @@ Message *simulacion_Job_mapResponse_Fallo(int x)
 	jobMsj->sockfd = K_Simulacion_ScktJob;
 	return jobMsj;
 }
-Message *simulacion_Job_reduceResponse()
+Message *simulacion_Job_reduceResponse(char *tipo)
 {
 	//-->Job responde a Marta con el resultado de la operacion de map
 	//*comando : "mapFileResponse rutaArchivoTemporal Respuesta"
@@ -168,7 +170,8 @@ Message *simulacion_Job_reduceResponse()
 	Message *jobMsj = malloc(sizeof(Message));
 	jobMsj->mensaje  = malloc(sizeof(mensaje_t));
 	char *comando = string_new();
-	string_append(&comando,"reduceFileResponse /user/juan/datos/temperatura2012.txt/-X 1");
+	string_append(&comando,tipo);
+	string_append(&comando," /user/juan/datos/temperatura2012.txt/-X 1");
 	jobMsj->mensaje->comandoSize = strlen(comando);
 	jobMsj->mensaje->comando=malloc(strlen(comando));
 	jobMsj->mensaje->comando = comando;
@@ -184,10 +187,10 @@ Message *simulacion_NewConnection(int sckt){
 
 	Message *newConnection;
 	newConnection=malloc(sizeof(Message));
-	newConnection->mensaje=malloc(sizeof(*newConnection->mensaje));
+	newConnection->mensaje=malloc(sizeof(mensaje_t));
 
-	newConnection->mensaje->comandoSize=(strlen("newConnection")+1);
-	newConnection->mensaje->comando=malloc(strlen("newConnection")+1);
+	newConnection->mensaje->comandoSize=(strlen("newConnection"));
+	newConnection->mensaje->comando=malloc(strlen("newConnection"));
 	strcpy(newConnection->mensaje->comando,"newConnection");
 
 	newConnection->mensaje->data = malloc(0);

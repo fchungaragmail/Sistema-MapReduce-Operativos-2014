@@ -16,8 +16,6 @@ bool* deserializeSoportaCombiner(Message *recvMessage);
 bool* deserializeRequestResponse(Message *recvMessage,TypesMessages type);
 char* deserializeComando(Message *recvMessage);
 t_list* deserializarFullDataResponse(Message *recvMessage);
-int deserializarFullDataResponse_nroDeCopias(Message *recvMessage);
-int deserializarFullDataResponse_nroDeBloques(Message *recvMessage);
 char *deserializeTempFilePath(Message *recvMessage,TypesMessages type);
 t_list *deserializeFailedReduceResponse(Message *recvMessage);
 
@@ -37,16 +35,17 @@ char *deserializeTempFilePath(Message *recvMessage,TypesMessages type)
 
 			char *comandoStr = recvMessage->mensaje->comando;
 			char **comandoArray = string_split(comandoStr," ");
-			char *tempPath = comandoArray[1];
-			return tempPath;
-		}
+			char *tempFilePath = malloc(strlen(comandoArray[1]));
+			strcpy(tempFilePath,comandoArray[1]);
+
+			free(comandoArray);
+			return tempFilePath;
+	}
 }
 
 char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 {
 	char* filePath;
-	int offset,size;
-	size = 0; offset = 0;
 
 	if(type == K_Job_NewFileToProcess){
 		//Segun protocolo recvMessage->mensaje->comando sera
@@ -56,7 +55,11 @@ char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 
 		char *comandStr = recvMessage->mensaje->comando;
 		char **comandoArray = string_split(comandStr," ");
-		return comandoArray[1];
+		filePath = malloc(strlen(comandoArray[1]));
+		strcpy(filePath,comandoArray[1]);
+
+		free(comandoArray);
+		return filePath;
 	}
 
 	if(type == K_FS_FileFullData){
@@ -68,7 +71,11 @@ char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 
 		char *comandoStr = recvMessage->mensaje->comando;
 		char **comandoArray = string_split(comandoStr," ");
-		return comandoArray[1];
+		filePath = malloc(strlen(comandoArray[1]));
+		strcpy(filePath,comandoArray[1]);
+
+		free(comandoArray);
+		return filePath;
 	}
 
 	if(type == K_Job_MapResponse || type == K_Job_ReduceResponse){
@@ -82,8 +89,12 @@ char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 		char **comandoArray = string_split(comandoStr," ");
 		char *tempPath = comandoArray[1];
 		char **tempPathSplit = string_split(tempPath,"-");
-		char *path = tempPathSplit[0];
-		return path;
+		filePath = malloc(strlen(tempPathSplit[0]));
+		strcpy(filePath,tempPathSplit[0]);
+
+		free(comandoArray);
+		free(tempPathSplit);
+		return filePath;
 	}
 
 	return filePath;
@@ -102,15 +113,15 @@ bool* deserializeSoportaCombiner(Message *recvMessage)
 
 	bool* soportaCombiner = malloc(sizeof(bool));
 	if(strcmp(soportaCombinerStr,"1") == 0){ *soportaCombiner = true; }
-	if(strcmp(soportaCombinerStr,"1") != 0){ *soportaCombiner = false; }
+	if(strcmp(soportaCombinerStr,"0") == 0){ *soportaCombiner = false; }
 
+	free(comandoArray);
 	return soportaCombiner;
-
 }
 
 bool* deserializeRequestResponse(Message *recvMessage,TypesMessages type)
 {
-		bool* requestResponse = malloc(sizeof(bool));
+		bool* requestResponse;
 
 		if(type==K_Job_MapResponse || type==K_Job_ReduceResponse){
 			//segun protocolo el data sera
@@ -138,41 +149,11 @@ char* deserializeComando(Message *recvMessage)
 	//Segun protocolo el "comando" siempre es lo 1ero del stream
 	char *comandoStr = recvMessage->mensaje->comando;
 	char **comandoArray = string_split(comandoStr," ");
-	return comandoArray[0];
-}
+	char *comando = malloc(strlen(comandoArray[0]));
+	strcpy(comando,comandoArray[0]);
 
-int deserializarFullDataResponse_nroDeCopias(Message *recvMessage)
-{
-	// segun protocolo
-	//-Comando: "DataFileResponse rutaDelArchivo Respuesta cantidadDeBloques-nroDeCopias-sizeEstructura"
-	//-Data: estructura
-	//estructura va a ser IPNodoX-nroDeBloqueX-IPNodoY-nroDeBloqueY-IPNodoZ-nroDeBloqueZ...
-	//1ero fila 1,2,3,4,5....
-
-	char *_comando = recvMessage->mensaje->comando;
-	char **comando = string_split(_comando," ");
-	char *strNroDeCopias = comando[4];
-
-	int nroDeCopias = strtol(strNroDeCopias, (char **)NULL, 10);
-
-	return nroDeCopias;
-}
-
-int deserializarFullDataResponse_nroDeBloques(Message *recvMessage)
-{
-	// segun protocolo
-	//-Comando: "DataFileResponse rutaDelArchivo Respuesta cantidadDeBloques-nroDeCopias-sizeEstructura"
-	//-Data: estructura
-	//estructura va a ser IPNodoX-nroDeBloqueX-IPNodoY-nroDeBloqueY-IPNodoZ-nroDeBloqueZ...
-	//1ero fila 1,2,3,4,5....
-
-	char *_comando = recvMessage->mensaje->comando;
-	char **comando = string_split(_comando," ");
-	char *strCantDeBloques = comando[3];
-
-	int cantidadDeBloques = strtol(strCantDeBloques, (char **)NULL, 10);
-
-	return cantidadDeBloques;
+	free(comandoArray);
+	return comando;
 }
 
 t_list *deserializarFullDataResponse(Message *recvMessage)
