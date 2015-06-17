@@ -44,7 +44,7 @@ void* pedidosMartaHandler(void* arg) {
 		printf("-----Recibido mensaje de Marta-----\nComando: %s \nData: %s \n------------------\n", mensajeMarta->comando, mensajeMarta->data);
 		char** comandoStr = string_split(mensajeMarta->comando, " ");
 
-		if (strncmp(comandoStr[0], "mapFile", 7) == 0) {
+		if (strncmp(comandoStr[MENSAJE_COMANDO], "mapFile", 7) == 0) {
 			PlanificarHilosMapper(mensajeMarta);
 		} else if (strncmp(mensajeMarta->comando, "reduceFile", 10) == 0) {
 			PlanificarHilosReduce(mensajeMarta);
@@ -185,6 +185,7 @@ void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado){
 	switch(estado){
 
 	case ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION:
+	case ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO:
 		string_append_with_format(&bufferComandoStr,"mapFileResponse %s 0",hiloJob->nombreArchivo);
 		string_append_with_format(&bufferDataStr,"%s", inet_ntoa(hiloJob->direccionNodo.sin_addr));
 		break;
