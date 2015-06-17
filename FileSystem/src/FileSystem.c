@@ -16,6 +16,7 @@
 
 void initFileSystem();
 void exitFileSystem();
+FILE* logFile;
 
 
 int main(void) {
@@ -38,7 +39,7 @@ int main(void) {
 
 void initFileSystem()
 {
-	log = log_create("./FileSystem.log","FileSystem", true, LOG_LEVEL_TRACE);
+	logFile = log_create("./FileSystem.log","FileSystem", true, LOG_LEVEL_TRACE);
 
 
 	t_config* archivoConfig = config_create("./FileSystem.config");
@@ -70,7 +71,7 @@ void initFileSystem()
 void exitFileSystem()
 {
 	list_destroy(listaArchivos);
-	log_destroy(log);
-	//cerrarConexiones();
+	log_destroy(logFile);
+	cerrarConexiones();
 	exit(0);
 }

@@ -39,7 +39,7 @@ typedef enum
 	K_Job_NewFileToProcess = 1,
 	K_Job_MapResponse = 2,
 	K_Job_ReduceResponse = 3,
-
+	K_Job_JobCaido = 4,
 	K_FS_FileFullData = 5, //FS envia tabla con direccion de archivo en los distintos nodos
 }TypesMessages;
 

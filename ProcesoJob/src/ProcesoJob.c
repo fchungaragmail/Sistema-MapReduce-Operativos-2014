@@ -25,38 +25,37 @@ void* pedidosMartaHandler(void* arg) {
 	while (TRUE) {
 		mensaje_t* mensajeMarta;
 
+#ifndef BUILD_PARA_TEST
 		recibir(socketMartaFd, mensajeMarta);
-
+#else
+		static int alternar = 0;
+		if( alternar == 0){
+			mensajeMarta = malloc(sizeof(mensaje_t));
+			mensajeMarta->comando = strdup("mapFile todo1.txt");
+			mensajeMarta->data = strdup("255.0.0.1 250 11 /ruta_temp1 244.0.1.7 250 12 /ruta_temp2 128.3.1.3 250 999 ruta_temp3");
+			alternar = 1;
+		} else{
+			mensajeMarta = malloc(sizeof(mensaje_t));
+			mensajeMarta->comando = strdup("mapFile todo1.txt");
+			mensajeMarta->data = strdup("227.4.6.1 250 11 /ruta_temp1 117.4.5.1 250 12 /ruta_temp2 167.5.4.1 250 999 ruta_temp3");
+			alternar = 0;
+		}
+#endif
+		printf("-----Recibido mensaje de Marta-----\nComando: %s \nData: %s \n------------------\n", mensajeMarta->comando, mensajeMarta->data);
 		char** comandoStr = string_split(mensajeMarta->comando, " ");
 
-		if (strncmp(comandoStr[0], "mapFile", 7) == 0) {
-
-			/// TO DO , usar enums o defines
-			////                    0        1       2     3                    4
-			//// Ej del comando: mapFile  127.0.0.1 9999 12345 /user/juan/datos/temperatura2012.txt/-23:43:45:2345
-			Sockaddr_in their_addr;
-
-			their_addr.sin_family = AF_INET;
-			their_addr.sin_port = htons(comandoStr[1]);
-			inet_aton(comandoStr[2], &(their_addr.sin_addr));
-			memset(&(their_addr.sin_zero), '\o', 8);
-
-			HiloJob* hiloJob = malloc(sizeof(HiloJob));
-			hiloJob->direccionNodo = their_addr;
-			hiloJob->threadhilo = NULL;
-			hiloJob->socketFd = -1;
-			hiloJob->nroBloque = atoi(comandoStr[3]);
-			hiloJob->nombreArchivo = string_duplicate(comandoStr[4]);
-
-			list_add(listaHilos, (void*) hiloJob);
-			CrearHiloMapper(hiloJob);
-
+		if (strncmp(comandoStr[MENSAJE_COMANDO], "mapFile", 7) == 0) {
+			PlanificarHilosMapper(mensajeMarta);
 		} else if (strncmp(mensajeMarta->comando, "reduceFile", 10) == 0) {
-
+			PlanificarHilosReduce(mensajeMarta);
 		}
 
-		free(comandoStr);
+		FreeStringArray(&comandoStr);
 		free(mensajeMarta);
+
+#ifdef BUILD_PARA_TEST
+		sleep(15);
+#endif
 
 	}
 	list_destroy(listaHilos);
@@ -112,6 +111,11 @@ void Terminar(int exitStatus) {
 
 void IniciarConexionMarta() {
 
+
+	char* ipMarta = config_get_string_value(configuracion, "IP_MARTA");
+	char* puertoMarta = config_get_string_value(configuracion, "PUERTO_MARTA");
+
+#ifndef BUILD_PARA_TEST
 	struct sockaddr_in their_addr;
 
 	if ((socketMartaFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
@@ -119,11 +123,8 @@ void IniciarConexionMarta() {
 		Terminar(EXIT_ERROR);
 	}
 
-	char* ipMarta = config_get_string_value(configuracion, "IP_MARTA");
-	char* puertoMarta = config_get_string_value(configuracion, "PUERTO_MARTA");
-
 	their_addr.sin_family = AF_INET;
-	their_addr.sin_port = htons(ipMarta);
+	their_addr.sin_port = htons(atoi(ipMarta));
 	inet_aton(puertoMarta, &(their_addr.sin_addr));
 	memset(&(their_addr.sin_zero), '\o', 8);
 
@@ -132,7 +133,9 @@ void IniciarConexionMarta() {
 		error_show("Error al conectarse con MARTA\n");
 		Terminar(EXIT_ERROR);
 	}
-
+#else
+	socketMartaFd = 999;
+#endif
 	printf("Conexion exitosa con Marta, ip : %s, puerto :%s\n", ipMarta,
 			puertoMarta);
 
@@ -161,9 +164,9 @@ void HacerPedidoMarta() {
 		mensaje->dataSize = 0;
 		mensaje->data = NULL;
 
-
+#ifndef BUILD_PARA_TEST
 		enviar(socketMartaFd, mensaje);
-
+#endif
 
 		printf("Enviado a MaRTA el comando: %s\n", mensaje->comando);
 		free(buffer);
@@ -177,11 +180,14 @@ void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado){
 
 	mensaje_t* mensajeParaMarta = malloc(sizeof(mensaje_t));
 	char* bufferComandoStr = string_new();
+	char* bufferDataStr = string_new();
+
 	switch(estado){
 
 	case ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION:
 	case ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO:
 		string_append_with_format(&bufferComandoStr,"mapFileResponse %s 0",hiloJob->nombreArchivo);
+		string_append_with_format(&bufferDataStr,"%s", inet_ntoa(hiloJob->direccionNodo.sin_addr));
 		break;
 	case ESTADO_HILO_FINALIZO_OK:
 		string_append_with_format(&bufferComandoStr,"mapFileResponse %s 1",hiloJob->nombreArchivo);
@@ -191,12 +197,13 @@ void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado){
 
 	mensajeParaMarta->comandoSize = strlen(bufferComandoStr);
 	mensajeParaMarta->comando = bufferComandoStr;
-	mensajeParaMarta->dataSize = 0;
-	mensajeParaMarta->data = NULL;
+	mensajeParaMarta->dataSize = strlen(bufferDataStr);
+	mensajeParaMarta->data = bufferDataStr;
 
 	/*
 	 * varios hilos pueden estar reportando a marta
 	 */
+#ifndef BUILD_PARA_TEST
 	pthread_mutex_lock(&mMarta);
 	enviar(socketMartaFd, mensajeParaMarta);
 	pthread_mutex_unlock(&mMarta);
@@ -204,13 +211,70 @@ void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado){
 	if(hiloJob->socketFd != -1){
 		close(hiloJob->socketFd);
 	}
+#endif
+
+	printf("---Enviado a MaRTA el mensaje---\nComando: %s \nData: %s\n---------\n", mensajeParaMarta->comando, mensajeParaMarta->data);
 	free(bufferComandoStr);
 	free(mensajeParaMarta);
-	printf("Se termino el hilo con resultado: %d\n", estado);
+
 }
+
+
+void PlanificarHilosMapper(mensaje_t* mensaje){
+
+	char** dataStr = string_split(mensaje->data," ");
+
+
+	//direccionNodo puertoEscucha nroDeBloque rutaArchivoTemporal
+
+	int i = 0;
+	while(dataStr[i] != NULL){
+
+		Sockaddr_in their_addr;
+
+		their_addr.sin_family = AF_INET;
+		inet_aton(dataStr[i++], &(their_addr.sin_addr));
+		their_addr.sin_port = htons(atoi(dataStr[i++]));
+		memset(&(their_addr.sin_zero), '\o', 8);
+
+		HiloJob* hiloJob = malloc(sizeof(HiloJob));
+		hiloJob->direccionNodo = their_addr;
+		hiloJob->threadhilo = NULL;
+		hiloJob->socketFd = -1;
+		hiloJob->nroBloque = atoi(dataStr[i++]);
+		hiloJob->nombreArchivo = string_duplicate(dataStr[i++]);
+
+		list_add(listaHilos, (void*) hiloJob);
+		CrearHiloMapper(hiloJob);
+
+	}
+
+	FreeStringArray(&dataStr);
+}
+
+
+void PlanificarHilosReduce(mensaje_t* mensaje){
+
+	//TODO
+}
+
+void FreeStringArray(char*** stringArray){
+	char** array = *stringArray;
+
+	int i;
+	for(i = 0; array[i] != NULL; ++i){
+		free(array[i]);
+	}
+
+	free(array);
+}
+
 
 int main(int argc, char* argv[]) {
 
+#ifdef BUILD_PARA_TEST
+	srand(time(NULL));
+#endif
 	IniciarConfiguracion();
 	IniciarConexionMarta();
 

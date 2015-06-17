@@ -15,6 +15,7 @@ t_list* conexiones;
 fd_set nodos;
 pthread_mutex_t mNodos;
 int nodosOnline;
+FILE* logFile;
 
 int initConexiones();
 void escucharConexiones();
@@ -34,11 +35,11 @@ int initConexiones()
 	nodosOnline = 0;
 	escuchaConexiones = socket(AF_INET, SOCK_STREAM, 0);
 	if (escuchaConexiones == -1){
-		log_error(log,"No se pudo crear el socket para escuchar "
+		log_error(logFile,"No se pudo crear el socket para escuchar "
 				"nuevas conexiones.");
 	} else
 	{
-		log_info(log, "El socket para escuchar nuevas conexiones se "
+		log_info(logFile, "El socket para escuchar nuevas conexiones se "
 				"creo correctamente.");
 	}
 
@@ -55,12 +56,12 @@ int initConexiones()
 
 	if (listen(escuchaConexiones, NODOS_MAX+1) == -1)
 	{
-		log_error(log,"No se pueden escuchar conexiones."
+		log_error(logFile,"No se pueden escuchar conexiones."
 				"El FileSystem se cerrara");
 		return(-1);
 	} else
 	{
-		log_info(log, "Escuchando conexiones.");
+		log_info(logFile, "Escuchando conexiones.");
 	}
 }
 
@@ -90,7 +91,7 @@ void escucharConexiones()
 		write(desbloquearSelect[1], "", 1);
 		pthread_mutex_unlock(&mNodos);
 
-		log_info(log, "Nueva conexion con %s. \n"
+		log_info(logFile, "Nueva conexion con %s. \n"
 				"Esperando identificacion.", inet_ntoa(their_addr.sin_addr));
 	}
 }
@@ -98,9 +99,9 @@ void escucharConexiones()
 
 void cerrarConexiones()
 {
-	//close(escucharConexiones);
+	close(escucharConexiones);
 	//list_iterate(conexiones, freeConexion);
-	list_destroy(conexiones);
+	//list_destroy(conexiones);
 	close(desbloquearSelect[0]);
 	close(desbloquearSelect[1]);
 }
@@ -173,7 +174,7 @@ void cerrarConexion(Conexion_t* conexion)
 	pthread_mutex_unlock(&mNodos);
 	close(conexion->sockfd);
 	conexion->estado = DESCONECTADO;
-	log_info(log, "Desconectado de %s", conexion->nombre);
+	log_info(logFile, "Desconectado de %s", conexion->nombre);
 }
 
 
@@ -200,9 +201,6 @@ void probarConexiones()
 	memcpy(mensaje->data, NULL, 0);
 	mensaje->dataSize = 0;
 
-	for(int i=0;i<10;i++)
-	{
 	enviar(socketPrueba, mensaje);
-	}
 }
 

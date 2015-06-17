@@ -14,11 +14,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <inttypes.h>
 #include "recursosCompartidos.h"
 #include "protocolo.h"
 #include "conexiones.h"
 
-
+void initComandos();
 void procesarComando(char** comando, void(*doComando)(void*));
 int mover(char* argumentos);
 int borrar(char* argumentos);

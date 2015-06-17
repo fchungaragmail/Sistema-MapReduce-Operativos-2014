@@ -49,7 +49,7 @@ int main(void) {
 	initMaRTA();
 
 	int i=0;
-	while(i<12)
+	while(i<13)
 	{
 		//recvMessage = listenConnections(); //--> SERVIDOR con el select();
 
