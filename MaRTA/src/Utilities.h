@@ -73,6 +73,12 @@ typedef enum
 //Copia de FullData(tabla que envia el FS)
 #define K_Copia_DarDeBajaIPNodo "Copia_DarDeBajaIPNodo"
 
+// HiloDic --> keys
+#define K_HiloDic_Sem "HiloDic_Sem"
+#define K_HiloDic_Path "HiloDic_Path"
+#define K_HiloDic_JobSocket "HiloDic_JobSocket"
+#define K_HiloDic_PedidosQueue "PedidosQueue"
+
 //Varias
 #define K_PUERTO_LOCAL 6851
 #define K_FS_IP -1 //DEFINIR

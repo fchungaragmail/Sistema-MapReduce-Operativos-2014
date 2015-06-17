@@ -202,7 +202,9 @@ t_list *deserializeFailedReduceResponse(Message *recvMessage)
 	char **dataSplit = string_split(data," ");
 	t_list *listaP = list_create();
 
-	if((strcmp(reduceType,"reduceFileConCombiner-Pedido1")==0)||(strcmp(reduceType,"reduceFileSinCombiner")==0)){
+	if((strcmp(reduceType,"reduceFileConCombiner-Pedido1")==0)||
+			(strcmp(reduceType,"reduceFileSinCombiner")==0)||
+			(strcmp(reduceType,"reduceFileConCombiner-Pedido2")==0)){
 
 		//*data: --> "IPnodo1 IPnodo2..."
 		int i=0;
@@ -212,25 +214,6 @@ t_list *deserializeFailedReduceResponse(Message *recvMessage)
 			if(ipNodo==NULL){ break; }
 			i++;
 			list_add(listaP,ipNodo);
-		}
-	}
-
-	if(strcmp(reduceType,"reduceFileConCombiner-Pedido2")){
-		//*data: --> "Nodo1 nombreArchTempLocal "
-		//		  "...Nodo2 nombreArchTempLocal..."
-		int i=0;
-		while(1){
-
-			t_dictionary *nodoDic = dictionary_create();
-
-			char *ipNodo = dataSplit[i];
-			if(ipNodo==NULL){ break; }
-			i++;
-			char *pathTempo = dataSplit[i];
-
-			dictionary_put(nodoDic,"ipNodo",ipNodo);
-			dictionary_put(nodoDic,"tempPath",pathTempo);
-			list_add(listaP,nodoDic);
 		}
 	}
 

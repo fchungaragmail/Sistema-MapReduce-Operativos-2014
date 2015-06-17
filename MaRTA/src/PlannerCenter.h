@@ -10,7 +10,7 @@
 
 #include "Utilities.h"
 
-void processMessage(Message *recvMessage);
+bool processMessage(Message *recvMessage);
 void initPlannerCenter();
 
 #endif /* PLANNERCENTER_H_ */
