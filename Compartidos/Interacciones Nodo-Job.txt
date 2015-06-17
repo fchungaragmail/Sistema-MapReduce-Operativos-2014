@@ -1,0 +1,26 @@
+Interacciones Nodo-Job
+************************
+
+***********************************************
+-->handShake a Nodo
+*comando: "handShake"
+*data: NADA
+
+***********************************************
+-->respuesta de Nodo
+*comando: "bienvenido"
+*data: NADA
+
+************************************************************************************************************************************************************************************************
+-->Job le dice al Nodo que haga una rutina de mapping
+*comando: "mapFile rutaArchivoTemporal nroDeBloque" 
+*data: todo el script a aplicar
+
+************************************************************************************************************************************************************************************************
+-->Nodo responde a Job con el resultado de la operacion de map
+*comando : "mapFileResponse Respuesta"
+*data: NADA
+// la "Respuesta" debe ser 0 o 1 ( deberia ser siempre 1 en este caso, salvo que falle el script ? )
+// Ej del comando: mapFileResponse 1
+************************************************************************************************************************************************************************************************
+
