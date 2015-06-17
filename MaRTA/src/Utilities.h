@@ -67,8 +67,9 @@ typedef enum
 
 //BlockState
 #define K_BlockState_UninitializedPath "BlockState_UninitializedPath"
-#define K_BlockState_UninitializedNodo "BlockState_UninitializedNodo"
+#define K_BlockState_UninitializedIPNodo "BlockState_UninitializedIPNodo"
 #define K_BlockState_UninitializedBlqe "BlockState_UninitializedBlqe"
+#define K_BlockState_UninitializedPuertoNodo"BlockState_UninitializedPuertoNodo"
 
 //Copia de FullData(tabla que envia el FS)
 #define K_Copia_DarDeBajaIPNodo "Copia_DarDeBajaIPNodo"

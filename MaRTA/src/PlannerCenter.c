@@ -18,12 +18,10 @@
 
 // VARIABLES GLOBALES
 int jobSocket;
-t_list *nodosReduceList_Pedido1;
-int pedidosDeFullDataRealizados;
 char *filePathAProcesar;
+t_list *nodosReduceList_Pedido1;
 t_list *listaDeNodos_EnCasoDeFalloDeJob;
-int tareasPendientesDeMapping;
-int tareasPendientesDeReduce;
+int pedidosDeFullDataRealizados;
 
 //-->PedidoRealizado
 char *ipNodoLocalDePedidoDeReduce;
@@ -60,8 +58,6 @@ void initPlannerCenter()
 	pedidosDeFullDataRealizados=0;
 	nodosReduceList_Pedido1 = list_create();
 	listaDeNodos_EnCasoDeFalloDeJob = list_create();
-	tareasPendientesDeMapping=0;
-	tareasPendientesDeReduce=0;
 }
 
 bool processMessage(Message *recvMessage)
@@ -278,7 +274,6 @@ void planificar(Message *recvMessage,TypesMessages type)
 			int pos = obtenerPosicionDeBloqueEnBlockStatesList(path,ipNodo,nroDeBloque,recvMessage->sockfd);
 			printf("fallo pedido de map del archivo %s al nodo %s bloque %s en posicion %d\n",path,ipNodo,nroDeBloque,pos);
 			printf("el nodo %s seguramente esta caido\n",ipNodo);
-			printf("el job %d para el archivo %s debe mappear %d bloques\n",recvMessage->sockfd,path,tareasPendientesDeMapping);
 
 			actualizarTablas_RtaDeMapFallo(recvMessage);
 
@@ -300,7 +295,6 @@ void planificar(Message *recvMessage,TypesMessages type)
 			//PLANIFICAR reduceFileConCombiner-Pedido2 // ACTUALIZAR TABLAS !!!!
 			//*comando: "reduceFileConCombiner-Pedido1 pathArchivo Respuesta"
 			printf("reduce-Pedido1 realizado con exito \n");
-			printf("el job %d para el archivo %s debe procesar %d bloques\n",recvMessage->sockfd,path,tareasPendientesDeMapping);
 			decrementarOperacionesEnReduceList();
 			Message* sendMessage = obtenerProximoPedido(recvMessage);
 			//enviar(sendMessage->sockfd,sendMessage->mensaje);
@@ -402,7 +396,9 @@ Message* obtenerProximoPedido(Message *recvMessage)
 				int i;
 				for(i=0;i<cantidadDeNodos;i++){
 
-					char *IPnodoEnBlockState = list_get(nodosEnBlockState,i);
+					t_dictionary *nodo= list_get(nodosEnBlockState,i);
+					char *IPnodoEnBlockState  = dictionary_get(nodo,"ip");
+					char *puertonodoEnBlockState  = dictionary_get(nodo,"puerto");
 					t_list *pathsTemporalesParaNodo = obtenerPathsTemporalesParaArchivo(path, IPnodoEnBlockState,recvMessage->sockfd);
 					int cantidadDePathsTempEnNodo = list_size(pathsTemporalesParaNodo);
 					char *_pathTempo = crearPathTemporal(_path);
@@ -411,12 +407,14 @@ Message* obtenerProximoPedido(Message *recvMessage)
 					t_dictionary *reduceBlock = dictionary_create();
 					dictionary_put(reduceBlock,"reduceBlock_tempPath",_pathTempo);
 					dictionary_put(reduceBlock,"reduceBlock_ip",IPnodoEnBlockState);
+					dictionary_put(reduceBlock,"reduceBlock_puerto",puertonodoEnBlockState);
 					list_add(nodosReduceList_Pedido1,reduceBlock);
 					list_add(listaDeNodos_EnCasoDeFalloDeJob,IPnodoEnBlockState);
 					incrementarOperacionesEnProcesoEnNodo(IPnodoEnBlockState);
 
 					//agregar a el serializado --> "Nodo1 nombreArchTemp1 CantDeArchEnNodoAProcesar"
 					addStringToStream(&stream,IPnodoEnBlockState);
+					addStringToStream(&stream,puertonodoEnBlockState);
 					addStringToStream(&stream,_pathTempo);
 					addIntToStream(stream,cantidadDePathsTempEnNodo,K_int16_t);
 
@@ -462,8 +460,10 @@ Message* obtenerProximoPedido(Message *recvMessage)
 				//1ero NodoLocal --> tomo el 1ero porque si
 				t_dictionary *reduceBlock = list_get(nodosReduceList_Pedido1,0);
 				char *ip = dictionary_get(reduceBlock,"reduceBlock_ip");
+				char *puerto = dictionary_get(reduceBlock,"reduceBlock_puerto");
 				char *tempPath = dictionary_get(reduceBlock,"reduceBlock_tempPath");
 				addStringToStream(&stream,ip);
+				addStringToStream(&stream,puerto);
 				addStringToStream(&stream,tempPath);
 				ipNodoLocalDePedidoDeReduce = ip;
 				incrementarOperacionesEnProcesoEnNodo(ip);
@@ -474,8 +474,10 @@ Message* obtenerProximoPedido(Message *recvMessage)
 				for(i=1;i<size;i++){
 					t_dictionary *reduceBlock = list_get(nodosReduceList_Pedido1,i);
 					char *ip = dictionary_get(reduceBlock,"reduceBlock_ip");
+					char *puerto = dictionary_get(reduceBlock,"reduceBlock_puerto");
 					char *tempPath = dictionary_get(reduceBlock,"reduceBlock_tempPath");
 					addStringToStream(&stream,ip);
+					addStringToStream(&stream,puerto);
 					addStringToStream(&stream,tempPath);
 					list_add(listaDeNodos_EnCasoDeFalloDeJob,ip);
 				}
@@ -497,12 +499,18 @@ Message* obtenerProximoPedido(Message *recvMessage)
 
 			//****************************************************
 			//PRIMERO PONER LOS PATH CORRESPONDIENTES AL NODO LOCAL
-			char *stream = createStream();
-			char *IPnroNodoLocal = obtenerNodoConMayorCantidadDeArchivosTemporales(path,recvMessage->sockfd);
+
+			t_dictionary *nodoLocal = obtenerNodoConMayorCantidadDeArchivosTemporales(path,recvMessage->sockfd);
+			char *IPnroNodoLocal = dictionary_get(nodoLocal,"ip");
+			char *puertoNodoLocal = dictionary_get(nodoLocal,"puerto");
 			t_list *pathsTemporalesParaNodoLocal = obtenerPathsTemporalesParaArchivo(path, IPnroNodoLocal,recvMessage->sockfd);
 			int cantidadDePathsTempEnNodoLocal = list_size(pathsTemporalesParaNodoLocal);
-			addIntToStream(stream,cantidadDePathsTempEnNodoLocal,K_int16_t);
 			list_add(listaDeNodos_EnCasoDeFalloDeJob,IPnroNodoLocal);
+
+			char *stream = createStream();
+			addStringToStream(&stream,IPnroNodoLocal);
+			addStringToStream(&stream,puertoNodoLocal);
+			addIntToStream(stream,cantidadDePathsTempEnNodoLocal,K_int16_t);
 
 			int k;
 			for(k=0;k<cantidadDePathsTempEnNodoLocal;k++){
@@ -515,7 +523,9 @@ Message* obtenerProximoPedido(Message *recvMessage)
 			//*****************************************************
 			int i;
 			for(i=0;i<cantidadDeNodos;i++){
-				char *IPnodoEnBlockState = list_get(nodosEnBlockState,i);
+				t_dictionary *nodo = list_get(nodosEnBlockState,i);
+				char *IPnodoEnBlockState = dictionary_get(nodo,"ip");
+				char *puertonodoEnBlockState = dictionary_get(nodo,"puerto");
 
 				if( strcmp(IPnodoEnBlockState,IPnroNodoLocal) != 0 ){
 
@@ -525,6 +535,7 @@ Message* obtenerProximoPedido(Message *recvMessage)
 
 					//agregar a el serializado --> "cantidadDePathsTempEnNodo"
 					addStringToStream(&stream,IPnodoEnBlockState);
+					addStringToStream(&stream,puertonodoEnBlockState);
 					addIntToStream(stream,cantidadDePathsTempEnNodo,K_int16_t);
 
 					int j;
@@ -587,9 +598,11 @@ Message* obtenerProximoPedido(Message *recvMessage)
 				string_append(&path_with_temporal,temporal);
 				//******************
 				char *ipNodo = dictionary_get(copiaConMenosCarga,K_Copia_IPNodo);
+				char *puertoNodo = dictionary_get(copiaConMenosCarga,K_Copia_PuertoNodo);
 				char *nroDeBloque = dictionary_get(copiaConMenosCarga,K_Copia_NroDeBloque);
 
 				addStringToStream(&stream,ipNodo);
+				addStringToStream(&stream,puertoNodo);
 				addStringToStream(&stream,nroDeBloque);
 				addStringToStream(&stream,path_with_temporal);
 
@@ -604,6 +617,9 @@ Message* obtenerProximoPedido(Message *recvMessage)
 				dictionary_put(blockState,K_BlockState_nroNodo,ipNodo);
 				dictionary_put(blockState,K_BlockState_nroBloque,nroDeBloque);
 				dictionary_put(blockState,K_BlockState_temporaryPath,path_with_temporal);
+				dictionary_put(blockState,K_BlockState_puertoNodo,puertoNodo);
+
+				list_add(listaDeNodos_EnCasoDeFalloDeJob,ipNodo);
 			}
 		}
 
@@ -906,6 +922,7 @@ void sacarCargasDeNodos_FalloDeJob(){
 	for(i=0;i<size;i++){
 		char *ip = list_get(listaDeNodos_EnCasoDeFalloDeJob,i);
 		decrementarOperacionesEnProcesoEnNodo(ip);
+		informarTareasPendientesDeMapping(filePathAProcesar,jobSocket);
 	}
 	list_destroy(listaDeNodos_EnCasoDeFalloDeJob);
 }

@@ -18,6 +18,7 @@
 #define K_BlockState_nroNodo "BlockState_nroNodo"
 #define K_BlockState_nroBloque "BlockState_nroBloque"
 #define K_BlockState_temporaryPath "BlockState_temporaryPath"
+#define K_BlockState_puertoNodo "BlockState_puertoNodo"
 
 //fileState --> keys
 #define K_FileState_arrayOfBlocksStates "FileState_arrayOfBlocksStates"
@@ -30,9 +31,9 @@
 //Copia de FullData --> keys (tabla que envia el FS)
 #define K_Copia_IPNodo "Copia_IPNodo"
 #define K_Copia_NroDeBloque "Copia_NroDeBloque"
+#define K_Copia_PuertoNodo "Copia_PuertoNodo"
 
 //*******************************************************
-
 // Inicializar
 void initFilesStatusCenter();
 
@@ -69,7 +70,7 @@ t_list* obtenerPathsTemporalesParaArchivo(char *path,char *IPnodoEnBlockState, i
 int obtenerCantidadDePathsTemporalesEnNodo(char *path,char *IPnodoEnBlockState,int socket);
 t_list* obtenerNodosEnBlockStateArray(char *path,int socket);
 int obtenerCantidadDeNodosDiferentesEnBlockState(char *path,int socket);
-char* obtenerNodoConMayorCantidadDeArchivosTemporales(char *path,int socket);
+t_dictionary* obtenerNodoConMayorCantidadDeArchivosTemporales(char *path,int socket);
 int obtenerPosicionDeBloqueEnBlockStatesList(char *path,char *ipNodo,char *bloque,int socket);
 t_dictionary *obtenerBlockState(char *path,char *tempPath,int socket);
 void setBlockStatesListInReducingState(char *path,int socket);

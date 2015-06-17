@@ -28,10 +28,8 @@ t_list* deserializarFullDataResponse(Message *recvMessage);
 char *deserializeTempFilePath(Message *recvMessage,TypesMessages type);
 t_list *deserializeFailedReduceResponse(Message *recvMessage);
 
-
 char* createStream();
 void addIntToStream(char *stream, int value,IntTypes type);
-void addBoolToStream(char *stream, bool value);
 void addStringToStream(char **stream,char *value);
 
 #endif /* SERIALIZADOR_H_ */

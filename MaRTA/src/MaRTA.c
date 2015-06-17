@@ -51,31 +51,34 @@ int main(void) {
 
 	initMaRTA();
 
-	while(1)
+	int i=0;
+	while(i<30)
 	{
 		//***********
-		//recvMessage = listenConnections(); //--> SERVIDOR con el select();
+		//recvMessage = listenConnections();
+		//administrarHilos();
+		//***********
 		recvMessage = simular();
-		administrarHilos();
-		//processMessage(recvMessage);
-		//i++;
+		processMessage(recvMessage);
+		i++;
 		//***********
 	}
+
 	printf("MaRTA FINALIZO !!!");
 	//closeServidores();
 	return EXIT_SUCCESS;
 }
 
-void planificar(void* args){
+void planificarHilo(void* args){
 
 	t_dictionary *hiloDic = (t_dictionary*)args;
 	initPlannerCenter();
-	sem_t semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
+	sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
 	t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
 
 	while(1){
 
-		sem_wait(&semHilo);
+		sem_wait(semHilo);
 		Message *recvMessage = list_get(colaDePedidos,0);
 		bool finalizarHilo = processMessage(recvMessage);
 		list_remove(colaDePedidos,0);
@@ -84,12 +87,6 @@ void planificar(void* args){
 	}
 
 	 pthread_exit(0);
-}
-void* connectToFileSystem(void *arg)
-{
-	int fileSystemSocket = connectToFS();
-	addFSConnection(fileSystemSocket);
-	pthread_exit(NULL);
 }
 
 void initMaRTA(){
@@ -108,13 +105,12 @@ void initMaRTA(){
 	sem_init(&semNodoState, 0, 1);
 	sem_init(&semFullDataTables, 0, 1);
 
-	initFilesStatusCenter();
-	//initPlannerCenter();
-	//initConexiones();
-
 	//CONEXION A FILE SYSTEM !!!
-	//pthread_t connectToFSThread;
-	//pthread_create(&connectToFSThread, NULL,connectToFileSystem,NULL);
+	//connectToFileSystem();
+
+	initFilesStatusCenter();
+	initPlannerCenter();
+	//initConexiones();
 }
 
 void administrarHilos(){
@@ -132,11 +128,11 @@ void administrarHilos(){
 			int jobSocket = dictionary_get(hiloDic,K_HiloDic_JobSocket);
 			if(jobSocket == recvMessage->sockfd){
 
-				sem_t semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
+				sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
 				t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
 				list_clean(colaDePedidos);
-				list_add(recvMessage);
-				sem_post(&semHilo);
+				list_add(colaDePedidos,recvMessage);
+				sem_post(semHilo);
 			}
 		}
 		return;
@@ -150,21 +146,21 @@ void administrarHilos(){
 
 		if((strcmp(hiloPath,path)==0)&&(hiloJobSocket==recvMessage->sockfd)){
 
-			//el hilo ya existe
+			//EL HILO YA EXISTE
 			hiloYaExiste = true;
 			t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
-			sem_t semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
+			sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
 			list_add(colaDePedidos,recvMessage);
-			sem_post(&semHilo);
+			sem_post(semHilo);
 			break;
 		}
 	}
 
 	if(hiloYaExiste == false){
 
-		//lanzar hilo
-		sem_t semHilo;
-		sem_init(&semHilo, 0, 1);
+		//LANZAR HILO NUEVO
+		sem_t *semHilo;
+		sem_init(semHilo, 0, 1);
 		char *_path = deserializeFilePath(recvMessage,command);
 		t_list *colaDePedidos = list_create();
 		list_add(colaDePedidos,recvMessage);
@@ -178,8 +174,15 @@ void administrarHilos(){
 		list_add(hilosData,hiloDic);
 
 		pthread_t tPlanificador;
-		pthread_create(&tPlanificador, NULL, (void*)planificar, hiloDic);
+		pthread_create(&tPlanificador, NULL, (void*)planificarHilo, hiloDic);
 
 	}
 	free(path);
+}
+
+void* connectToFileSystem(void *arg)
+{
+	int fileSystemSocket = connectToFS();
+	addFSConnection(fileSystemSocket);
+	pthread_exit(NULL);
 }

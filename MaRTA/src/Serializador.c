@@ -21,7 +21,6 @@ t_list *deserializeFailedReduceResponse(Message *recvMessage);
 
 char* createStream();
 void addIntToStream(char *stream, int value,IntTypes type);
-void addBoolToStream(char *stream, bool value);
 void addStringToStream(char **stream,char *value);
 
 char *deserializeTempFilePath(Message *recvMessage,TypesMessages type)
@@ -35,7 +34,7 @@ char *deserializeTempFilePath(Message *recvMessage,TypesMessages type)
 
 			char *comandoStr = recvMessage->mensaje->comando;
 			char **comandoArray = string_split(comandoStr," ");
-			char *tempFilePath = malloc(strlen(comandoArray[1]));
+			char *tempFilePath = malloc(strlen(comandoArray[1])+1);
 			strcpy(tempFilePath,comandoArray[1]);
 
 			free(comandoArray);
@@ -55,7 +54,7 @@ char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 
 		char *comandStr = recvMessage->mensaje->comando;
 		char **comandoArray = string_split(comandStr," ");
-		filePath = malloc(strlen(comandoArray[1]));
+		filePath = malloc(strlen(comandoArray[1])+1);
 		strcpy(filePath,comandoArray[1]);
 
 		free(comandoArray);
@@ -64,14 +63,13 @@ char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 
 	if(type == K_FS_FileFullData){
 		//Tengo que ver como me pasa Juan el FullData
-		//-Comando: "DataFileResponse rutaDelArchivo Respuesta cantidadDeBloques-nroDeCopias-sizeEstructura"
-		//-Data: estructura
-		//estructura va a ser IPNodoX-nroDeBloqueX-IPNodoY-nroDeBloqueY-IPNodoZ-nroDeBloqueZ...
+		//-Comando: "DataFileResponse rutaDelArchivo Disponible"
+		//-Data: Tabla
 		//Debo obtener "rutaDelArchivo"
 
 		char *comandoStr = recvMessage->mensaje->comando;
 		char **comandoArray = string_split(comandoStr," ");
-		filePath = malloc(strlen(comandoArray[1]));
+		filePath = malloc(strlen(comandoArray[1])+1);
 		strcpy(filePath,comandoArray[1]);
 
 		free(comandoArray);
@@ -89,7 +87,7 @@ char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 		char **comandoArray = string_split(comandoStr," ");
 		char *tempPath = comandoArray[1];
 		char **tempPathSplit = string_split(tempPath,"-");
-		filePath = malloc(strlen(tempPathSplit[0]));
+		filePath = malloc(strlen(tempPathSplit[0])+1);
 		strcpy(filePath,tempPathSplit[0]);
 
 		free(comandoArray);
@@ -135,9 +133,8 @@ bool* deserializeRequestResponse(Message *recvMessage,TypesMessages type)
 
 		if(type == K_FS_FileFullData){
 			//segun protocolo
-			//-Comando: "DataFileResponse rutaDelArchivo Respuesta cantidadDeBloques-nroDeCopias-sizeEstructura"
-			//-Data: estructura
-			//estructura va a ser IPNodoX-nroDeBloqueX-IPNodoY-nroDeBloqueY-IPNodoZ-nroDeBloqueZ...
+			//-Comando: "DataFileResponse rutaDelArchivo Disponible"
+			//-Data: Tabla
 			//debo obtener "Respuesta"
 			requestResponse = deserializeSoportaCombiner(recvMessage);
 			return requestResponse;
@@ -149,44 +146,76 @@ char* deserializeComando(Message *recvMessage)
 	//Segun protocolo el "comando" siempre es lo 1ero del stream
 	char *comandoStr = recvMessage->mensaje->comando;
 	char **comandoArray = string_split(comandoStr," ");
-	char *comando = malloc(strlen(comandoArray[0]));
+	char *comando = malloc(strlen((char*)(comandoArray[0]))+1);
 	strcpy(comando,comandoArray[0]);
 
 	free(comandoArray);
 	return comando;
 }
+int fullData_obtenerCantidadDeBloqes(char **dataArray)
+{
+	int cantidadDeBloques=0;
 
+	while(1){
+		char *bloque = dataArray[cantidadDeBloques];
+		if(bloque==NULL){
+			break;
+		}
+		cantidadDeBloques++;
+	}
+	return cantidadDeBloques;
+
+}
+
+int fullData_obtenerCantidadDeCopias(char **copiasArray)
+{
+	int nroDeCopias = 0 ;
+
+	while(1){
+		char *elementoCopia = copiasArray[nroDeCopias];
+		if(elementoCopia==NULL){
+				break;
+		}
+			nroDeCopias++;
+	}
+	nroDeCopias = nroDeCopias - 1;
+	nroDeCopias = (nroDeCopias/3);
+
+	return nroDeCopias;
+}
 t_list *deserializarFullDataResponse(Message *recvMessage)
 {
 	// segun protocolo
-	//-Comando: "DataFileResponse rutaDelArchivo Respuesta cantidadDeBloques-nroDeCopias-sizeEstructura"
-	//-Data: estructura
-	//estructura va a ser IPNodoX-nroDeBloqueX-IPNodoY-nroDeBloqueY-IPNodoZ-nroDeBloqueZ...
-	//1ero fila 1,2,3,4,5....
+	//-Comando: "DataFileResponse rutaDelArchivo Disponible"
+	//-Data: Tabla
+	/*// Ej: "0;Nodo1;3;Nodo8;2;Nodo2;45;
+		1;Nodo2;1;Nodo1;2;Nodo3;10;"*/
 
 	char *_comando = recvMessage->mensaje->comando;
 	char **comando = string_split(_comando," ");
-	char *strCantDeBloques = comando[3];
-	char *strNroDeCopias = comando[4];
-
-	int cantidadDeBloques = strtol(strCantDeBloques, (char **)NULL, 10);
-	int nroDeCopias = strtol(strNroDeCopias, (char **)NULL, 10);
-	t_list *listaPadreDeBloques = list_create();
-
 	char *data = recvMessage->mensaje->data;
-	char **dataArray = string_split(data," ");
-	int i,j,k;
-	k=0;
+	char **dataArray = string_split(data," ");//---> \n !!!!!!!!!!!!!!
+	int cantidadDeBloques = fullData_obtenerCantidadDeBloqes(dataArray);
+
+	t_list *listaPadreDeBloques = list_create();
+	int i,j;
+
 	for(i=0;i<cantidadDeBloques;i++){
+
 		t_list *listaHijaDeCopias = list_create();
-		for(j=0;j<nroDeCopias;j++){
+		char **copiasArray = string_split(dataArray[i],";");
+		int nroDeCopias= fullData_obtenerCantidadDeCopias(copiasArray);
+		int k = 1;
+		for(j=1;j<nroDeCopias;j++){
 
 			t_dictionary *dic = dictionary_create();
-			char *ipNodo = dataArray[k];
-			char *nroDeBloque = dataArray[k+1];
+			char *ipNodo = copiasArray[k];
+			char *puertoNodo = copiasArray[k+1];
+			char *nroDeBloque = copiasArray[k+2];
 			dictionary_put(dic,K_Copia_IPNodo,ipNodo);
+			dictionary_put(dic,K_Copia_PuertoNodo,puertoNodo);
 			dictionary_put(dic,K_Copia_NroDeBloque,nroDeBloque);
-			k=k+2;
+			k=k+3;
 			list_add(listaHijaDeCopias,dic);
 		}
 		list_add(listaPadreDeBloques,listaHijaDeCopias);
@@ -219,6 +248,7 @@ t_list *deserializeFailedReduceResponse(Message *recvMessage)
 
 	return listaP;
 }
+
 char* createStream()
 {
 	char *stream = string_new();
@@ -232,14 +262,8 @@ void addIntToStream(char *stream, int value,IntTypes type)
 	string_append(&stream,intValue);
 }
 
-void addBoolToStream(char *stream, bool value)
-{
-	if(value == true){ string_append(stream," 1");};
-	if(value == false){ string_append(stream," 0");};
-}
-
 void addStringToStream(char **stream, char *str)
 {
-	string_append(stream," ");
 	string_append(stream,str);
+	string_append(stream," ");
 }

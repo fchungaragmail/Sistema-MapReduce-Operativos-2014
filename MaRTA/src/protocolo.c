@@ -5,7 +5,7 @@
  *      Author: utnso
  */
 
-#include <protocolo.h>
+#include "protocolo.h"
 
 
 int recibir(int socket, mensaje_t* mensaje);
