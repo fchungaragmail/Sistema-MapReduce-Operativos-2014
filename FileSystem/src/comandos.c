@@ -34,12 +34,16 @@ int getNombreArchivo(char* ruta,char* nombre,int16_t *indexPadre);
 int getArchivo(char* nombre,int16_t indexPadre, t_reg_archivo** archivo);
 int getBloqueDisponible(Conexion_t* conexion);
 pthread_mutex_t mListaArchivos;
+int nodosOnline;
+pthread_mutex_t mNodosOnline;
 FILE* logFile;
 t_dictionary* comandosRemotos;
 
 
 void initComandos()
 {
+	nodosOnline = 0;
+	pthread_mutex_init(&mNodosOnline, NULL);
 	comandosRemotos = dictionary_create();
 	dictionary_put(comandosRemotos,"nombre",1);
 	dictionary_put(comandosRemotos,"dataFile",2);
@@ -319,7 +323,9 @@ int nomb(char* argumentos, Conexion_t* conexion)
 	log_info(logFile, "Identificado el nodo %s", conexion->nombre);
 	if (strcmp(conexion->nombre, "MaRTA") != 0)
 	{
+		pthread_mutex_lock(&mNodosOnline);
 		nodosOnline++;
+		pthread_mutex_unlock(&mNodosOnline);
 		if (nodosOnline == LISTA_NODOS)
 			log_info(logFile, "Cantidad minima de nodos (%d) alcanzada.", LISTA_NODOS);
 	}

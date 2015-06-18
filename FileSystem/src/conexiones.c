@@ -14,7 +14,6 @@ int desbloquearSelect[2];
 t_list* conexiones;
 fd_set nodos;
 pthread_mutex_t mNodos;
-int nodosOnline;
 FILE* logFile;
 
 int initConexiones();
@@ -32,7 +31,6 @@ int initConexiones()
 	conexiones = list_create();
 	FD_ZERO(&nodos);
 	pthread_mutex_init(&mNodos, NULL);
-	nodosOnline = 0;
 	escuchaConexiones = socket(AF_INET, SOCK_STREAM, 0);
 	if (escuchaConexiones == -1){
 		log_error(logFile,"No se pudo crear el socket para escuchar "
