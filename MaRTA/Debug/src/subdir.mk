@@ -10,7 +10,8 @@ C_SRCS += \
 ../src/PlannerCenter.c \
 ../src/Serializador.c \
 ../src/Simulador.c \
-../src/Utilities.c 
+../src/Utilities.c \
+../src/protocolo.c 
 
 OBJS += \
 ./src/ConexionCenter.o \
@@ -19,7 +20,8 @@ OBJS += \
 ./src/PlannerCenter.o \
 ./src/Serializador.o \
 ./src/Simulador.o \
-./src/Utilities.o 
+./src/Utilities.o \
+./src/protocolo.o 
 
 C_DEPS += \
 ./src/ConexionCenter.d \
@@ -28,7 +30,8 @@ C_DEPS += \
 ./src/PlannerCenter.d \
 ./src/Serializador.d \
 ./src/Simulador.d \
-./src/Utilities.d 
+./src/Utilities.d \
+./src/protocolo.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

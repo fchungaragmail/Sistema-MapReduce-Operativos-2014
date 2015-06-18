@@ -18,6 +18,16 @@ void Terminar(int);
 char* LeerArchivo(char*);
 void ReportarResultadoHilo(HiloJob*, EstadoHilo);
 
+/*
+ *
+ * PLANIFICACION DE HILOS
+ *
+ */
+void PlanificarHilosMapper(mensaje_t*);
+void PlanificarHilosReduce(mensaje_t*);
+/*
+ * HANDLERS
+ */
 void* pedidosMartaHandler(void*);
 
 #endif /* SRC_PROCESOJOB_H_ */

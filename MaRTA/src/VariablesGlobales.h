@@ -14,18 +14,13 @@
 extern t_dictionary *filesToProcess;
 extern t_dictionary *filesStates;
 extern t_dictionary *nodosData;
+extern t_dictionary *fullDataTables;
 
 extern sem_t semFilesToProcess;
 extern sem_t semFilesToProcessPerJob;
 extern sem_t semFilesStates;
 extern sem_t semNodosData;
 extern sem_t semNodoState;
-
-extern int MaxPedidosEnRed;
-extern int pedidosEnRed;
-
-//***************************************
-//PRUEBAS de conexiones CLI-SERV
-extern sem_t semPrueba;
+extern sem_t semFullDataTables;
 
 #endif /* VARIABLESGLOBALES_H_ */

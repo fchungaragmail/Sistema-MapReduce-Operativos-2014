@@ -10,8 +10,11 @@ Interacciones MaRTA-Job
 // Ej del comando: archivoAProcesar /user/juan/datos/temperatura2012.txt/ 1
 ************************************************************************************************************************************************************************************************
 -->MaRTA le dice al Job que haga una rutina de mapping
-*comando: "mapFile direccionNodo puertoEscucha nroDeBloque rutaArchivoTemporal"
-*data: NADA
+*comando: "mapFile nombreArchivo" 
+*data:      direccionNodo puertoEscucha nroDeBloque rutaArchivoTemporal
+		...direccionNodo puertoEscucha nroDeBloque rutaArchivoTemporal...
+		...direccionNodo puertoEscucha nroDeBloque rutaArchivoTemporal...
+
 // La ruta del archivo temporal siempre sera el nombreDelArchivo y se le concatenara los hh:mm:ss:mmmm devuelto por la funcion temporal.h que nos da la catedra
 // se pondra un guion como separador, de esta manera se podra distinguir entre la ruta del archivo y el hh:mm:ss:mmmm agregado, de esta manera se va a poder 
 // obtener la ruta del archivo si hiciera falta--> por ejemplo "/user/juan/datos/temperatura2012.txt/-23:43:45:2345"
@@ -30,7 +33,6 @@ Interacciones MaRTA-Job
                 ...NodoRemoto1 CantDeArchEnNodoRemotoAProcesar RTA1 RAT2 RAT3 -etc... 
 		...NodoRemoto2-...."
 		
-//"CantDeArchEnNodoLocalAProcesar" y "CantDeArchEnNodoRemotoAProcesar" seran un int16_t
 //nroDeNodoLocal sera el nodo donde se guardaran el resultado final de aplicar las rutinas de reduce
 
 *******************************************
@@ -40,14 +42,14 @@ Una vez q el Job responde entonces MaRTA enviara el ultimo pedido para hacer el 
 1er pedido
 ***********
 
-*comando: "reduceFileConCombiner pathArchivo"
+*comando: "reduceFileConCombiner-Pedido1 pathArchivo"
 *data:      Nodo1 nombreArchTemp1 CantDeArchEnNodoAProcesar RAT1 RAT2 -etc...-
                 ...Nodo2 nombreArchTemp2 CantDeArchEnNodoAProcesar RTA1 RAT2 -etc... 
 		...Nodo3 ....
 
 2do pedido
 ***********
-*comando: "reduceFileConCombiner nombreArchTempFinal"
+*comando: "reduceFileConCombiner-Pedido2 nombreArch nombreArchTempFinal"
 *data:      NodoLocal nombreArchTempLocal 
                 ...NodoRemoto1 nombreArchTemp1... 
 		...NodoRemoto2 nombreArchTemp2...
@@ -56,17 +58,18 @@ Una vez q el Job responde entonces MaRTA enviara el ultimo pedido para hacer el 
 // NombreArchTemp es el nombre del archivo donde el Nodo guardara el resultado de su rutina de Reduce, luego los resultados que tiene cada nodo de su rutina de reduce deberan ser
 // reducidos de vuelta o concatenados (no lei bien esta parta la verdad) en #NodoLocal
 
-//"CantDeArchEnNodoLocalAProcesar" y "CantDeArchEnNodoRemotoAProcesar" seran un int16_t
-
 //MaRTA tendra dos formas de ejecutar este comando dependiendo si el Job soporta combiner o no, de cualquiera de las formas que MaRTA lo envie, el Job tendra que saber que 
 //tipo de estructura del mensaje debe esperar, ya que el mismo Job sabe si soporta combiner o no.
 ************************************************************************************************************************************************************************************************
 -->Job responde a Marta con el resultado de la operacion de reduce
-*comando:"reduceFileResponse nombreArch Respuesta"
-*data:VACIO
-
+*comando:"reduceFileResponse nombreArch Respuesta"-----> "reduceFileResponse" en realidad sera "reduceFileConCombiner-Pedido1","reduceFileConCombiner-Pedido2","reduceFileSinCombiner"
+*data: XXXX ---> si el pedido de reduce es exitoso en el data nose manda NADA, si no es exitoso en el data se mandan los IP de los nodos que fallaron
+			   
 // Debe devolver el "NombreArchTemp" asi MaRTA sabe a que pedido de reduce corresponde, ya que seguramente envio varios.
 // la "Respuesta" debe ser 0 si es false o 1 si es true
 // Ej de comando: reduceFileResponse /user/juan/datos/temperatura2012.txt/  0
 
 ************************************************************************************************************************************************************************************************
+--> Una vez que se finalizo la rutina de reduce con exito, MaRTA le avisa al Job que esto sucedio
+*comando: "FileSuccess pathArchivo"
+*data: VACIO
