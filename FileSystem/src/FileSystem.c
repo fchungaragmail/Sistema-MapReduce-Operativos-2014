@@ -65,6 +65,7 @@ void initFileSystem()
 	list_add(listaDirs, raiz);
 
 	initConsola();
+	initComandos();
 	initConexiones();
 }
 
