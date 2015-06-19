@@ -24,3 +24,19 @@ Interacciones Nodo-Job
 // Ej del comando: mapFileResponse 1
 ************************************************************************************************************************************************************************************************
 
+************************************************************************************************************************************************************************************************
+-->Job le indica al Nodo en que archivos aplicar Reduce // Para que sea mas legible usos los sinonimos:  "RutaArchivoTemporal" == "RAT" ; "NroDeNodo(Remoto/Local)" == " #Nodo(Remoto/Local)" ;
+
+*comando: "reduceFileSinCombiner NombreArchTempFinal CantDeArchEnNodoLocalAProcesar RAT1 RAT2-...etc...-"
+		  "...IpRemoto1 PuertoRemoto1 CantDeArchEnNodoRemotoAProcesar RTA1 RAT2 RAT3 -etc... "
+		  "...IpRemoto2 PuertoRemoto2 CantDeArchEnNodoRemotoAProcesar RTA1 RAT2 RAT3 -etc... "		  
+*data:	 todo el script a aplicar
+		
+************************************************************************************************************************************************************************************************
+-->Nodo responde a Job con el resultado de la operacion de reduce
+*comando:"reduceFileResponse Respuesta"
+*data: XXXX ---> si el pedido de reduce es exitoso en el data nose manda NADA, si no es exitoso en el data se mandan los IP de los nodos que fallaron
+			   
+// la "Respuesta" debe ser 0 si es false o 1 si es true
+// Ej de comando: reduceFileResponse  0
+		    data: 127.1.1.3 129.3.6.9
