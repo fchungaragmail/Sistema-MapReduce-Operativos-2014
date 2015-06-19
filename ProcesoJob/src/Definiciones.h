@@ -45,6 +45,8 @@ typedef struct {
 	pthread_t* threadhilo;
 	int socketFd;
 	char* nombreArchivo;
+	char* parametros;
+	char* parametrosError;
 	int nroBloque;
 
 } HiloJob ;

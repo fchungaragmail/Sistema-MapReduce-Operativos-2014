@@ -36,8 +36,8 @@ void* pedidosMartaHandler(void* arg) {
 			alternar = 1;
 		} else{
 			mensajeMarta = malloc(sizeof(mensaje_t));
-			mensajeMarta->comando = strdup("mapFile todo1.txt");
-			mensajeMarta->data = strdup("227.4.6.1 250 11 /ruta_temp1 117.4.5.1 250 12 /ruta_temp2 167.5.4.1 250 999 ruta_temp3");
+			mensajeMarta->comando = strdup("reduceFileSinCombiner todoSC1.txt");
+			mensajeMarta->data = strdup("227.4.6.1 999  2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 1 ruta_temp5");
 			alternar = 0;
 		}
 #endif
@@ -46,8 +46,8 @@ void* pedidosMartaHandler(void* arg) {
 
 		if (strncmp(comandoStr[MENSAJE_COMANDO], "mapFile", 7) == 0) {
 			PlanificarHilosMapper(mensajeMarta);
-		} else if (strncmp(mensajeMarta->comando, "reduceFile", 10) == 0) {
-			PlanificarHilosReduce(mensajeMarta);
+		} else if (strncmp(mensajeMarta->comando, "reduceFileSinCombiner", 21) == 0) {
+			PlanificarHilosReduce(mensajeMarta, FALSE);
 		}
 
 		FreeStringArray(&comandoStr);
@@ -187,7 +187,7 @@ void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado){
 	case ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION:
 	case ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO:
 		string_append_with_format(&bufferComandoStr,"mapFileResponse %s 0",hiloJob->nombreArchivo);
-		string_append_with_format(&bufferDataStr,"%s", inet_ntoa(hiloJob->direccionNodo.sin_addr));
+		string_append_with_format(&bufferDataStr,"%s", hiloJob->parametrosError != NULL ? hiloJob->parametrosError : inet_ntoa(hiloJob->direccionNodo.sin_addr));
 		break;
 	case ESTADO_HILO_FINALIZO_OK:
 		string_append_with_format(&bufferComandoStr,"mapFileResponse %s 1",hiloJob->nombreArchivo);
@@ -241,6 +241,8 @@ void PlanificarHilosMapper(mensaje_t* mensaje){
 		hiloJob->direccionNodo = their_addr;
 		hiloJob->threadhilo = NULL;
 		hiloJob->socketFd = -1;
+		hiloJob->parametros = NULL;
+		hiloJob->parametrosError = NULL;
 		hiloJob->nroBloque = atoi(dataStr[i++]);
 		hiloJob->nombreArchivo = string_duplicate(dataStr[i++]);
 
@@ -253,9 +255,48 @@ void PlanificarHilosMapper(mensaje_t* mensaje){
 }
 
 
-void PlanificarHilosReduce(mensaje_t* mensaje){
+void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner){
 
-	//TODO
+	char** comandoStr = string_split(mensaje->comando, " ");
+	char** dataStr = string_split(mensaje->data," ");
+
+	if(!conCombiner){
+
+		//*comando: "reduceFileSinCombiner NombreArchTempFinal "
+		//*data:	ipLoc puertoLoc  CantDeArchEnNodoLocalAProcesar RAT1 RAT2-...etc...-
+		//          ipRem puertoRem CantDeArchEnNodoRemotoAProcesar RTA1 RAT2 RAT3 -etc...
+		//			...ipRem2 puertoRem2...."
+		int i = 0;
+
+		Sockaddr_in their_addr;
+
+		their_addr.sin_family = AF_INET;
+		inet_aton(dataStr[i++], &(their_addr.sin_addr));
+		their_addr.sin_port = htons(atoi(dataStr[i++]));
+		memset(&(their_addr.sin_zero), '\o', 8);
+
+		HiloJob* hiloJob = malloc(sizeof(HiloJob));
+		hiloJob->direccionNodo = their_addr;
+		hiloJob->threadhilo = NULL;
+		hiloJob->socketFd = -1;
+		hiloJob->parametros = NULL;
+		hiloJob->parametrosError = NULL;
+		hiloJob->nombreArchivo = string_duplicate(comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO]);
+
+		char* parametrosBuffer = string_new();
+
+		string_append_with_format(&parametrosBuffer, "%s",dataStr[i++]);
+		while(dataStr[i] != NULL){
+			string_append_with_format(&parametrosBuffer, " %s",dataStr[i++]);
+		}
+
+		hiloJob->parametros = parametrosBuffer;
+		CrearHiloReducer(hiloJob);
+	}
+
+	FreeStringArray(&dataStr);
+	FreeStringArray(&comandoStr);
+
 }
 
 void FreeStringArray(char*** stringArray){

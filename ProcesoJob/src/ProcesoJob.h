@@ -24,7 +24,7 @@ void ReportarResultadoHilo(HiloJob*, EstadoHilo);
  *
  */
 void PlanificarHilosMapper(mensaje_t*);
-void PlanificarHilosReduce(mensaje_t*);
+void PlanificarHilosReduce(mensaje_t*, int);
 /*
  * HANDLERS
  */

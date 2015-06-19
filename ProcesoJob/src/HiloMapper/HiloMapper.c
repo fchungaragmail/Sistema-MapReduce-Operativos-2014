@@ -47,8 +47,8 @@ void* hiloMapperHandler(void* arg){
 	mensaje_t* mensajeParaNodo = malloc(sizeof(mensaje_t));
 	mensajeParaNodo->comando= strdup("handshake");
 	mensajeParaNodo->comandoSize = strlen("handshake");
-	mensajeParaNodo->data = string_new();
-	mensajeParaNodo->dataSize = 0;
+	mensajeParaNodo->data = NULL;
+	mensajeParaNodo->dataSize = NULL;
 
 #ifndef BUILD_PARA_TEST
 	enviar(hiloJob->socketFd, mensajeParaNodo);
@@ -112,8 +112,16 @@ void* hiloMapperHandler(void* arg){
 #else
 	estadoConexion = CONECTADO;
 	mensajeDeNodo = malloc(sizeof(mensaje_t));
-	mensajeDeNodo->comando = strdup("mapFileResponse 1");
-	mensajeDeNodo->data = string_new();
+	static int alternar = 1;
+	if(alternar == 1 ){
+		mensajeDeNodo->comando = strdup("mapFileResponse 1");
+		mensajeDeNodo->data = NULL;
+		alternar = 0;
+	} else{
+		mensajeDeNodo->comando = strdup("mapFileResponse 0");
+		mensajeDeNodo->data = NULL;
+		alternar = 1;
+	}
 #endif
 
 	if(estadoConexion == DESCONECTADO){
