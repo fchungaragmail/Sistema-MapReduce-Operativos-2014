@@ -14,20 +14,19 @@
 #include <commons/temporal.h>
 #include <commons/string.h>
 #include "Serializador.h"
+#include <unistd.h>
 
-// Variables Globales
+// VARIABLES GLOBALES
 int jobSocket;
-int cantidadDePedidosAlFS;
+char *filePathAProcesar;
 t_list *nodosReduceList_Pedido1;
+t_list *listaDeNodos_EnCasoDeFalloDeJob;
+int pedidosDeFullDataRealizados;
 
 //-->PedidoRealizado
-char *pedidoRecibido_Nodo;
-char *pedidoRecibido_Bloque;
-char *pedidoRecibido_Path;
-StatusBlockState *pedidoRecibido_TipoPedido;
-char *pedidoRecibido_PathArchTemporal;
+char *ipNodoLocalDePedidoDeReduce;
 
-// Funciones privadas
+// FUNCIONES PRIVADAS
 int obtenerIdParaComando(Message *recvMessage);
 void planificar(Message *recvMessage,TypesMessages type);
 void actualizarPedidoRealizado(char *bloque, char* ipnodo, char* path, char *pathTemporal, StatusBlockState tipo );
@@ -37,25 +36,31 @@ char* crearPathTemporal(char *path);
 Message* armarMensajeParaEnvio(Message *recvMessage,void *stream,char *comando);
 void actualizarTablas_RtaDeMapExitosa(Message *recvMessage);
 Message *createFSrequest();
-bool *obtenerEstadoDeReduce();
+bool *obtenerEstadoDeReduce(Message *msj);
 void actualizarTablas_RtaDeMapFallo(Message *recvMessage);
 void decrementarOperacionesEnReduceList();
 void resetBlockStateConNodo(char *path,char *ipNodoCaido);
 void actualizarTablas_ReduceFallo(char *path,Message *recvMessage);
+void liberarMensaje(Message *msj);
+void liberarNodosReduceList_Pedido1();
+void liberarFileState_Y_nodoState(Message *recvMessage);
+Message *crearMensajeAJobDeFinalizado(Message *msj);
+void sacarCargasDeNodos_FalloDeJob();
 
-// Funciones publicas
+// FUNCIONES PUBLICAS
 void initPlannerCenter();
-void processMessage(Message *recvMessage);
+bool processMessage(Message *recvMessage);
 
 void initPlannerCenter()
 {
 	initFilesStatusCenter();
 	jobSocket=0;
+	pedidosDeFullDataRealizados=0;
 	nodosReduceList_Pedido1 = list_create();
-	cantidadDePedidosAlFS=0;
+	listaDeNodos_EnCasoDeFalloDeJob = list_create();
 }
 
-void processMessage(Message *recvMessage)
+bool processMessage(Message *recvMessage)
 {
 	int comandoId = obtenerIdParaComando(recvMessage);
 	switch (comandoId) {
@@ -70,14 +75,13 @@ void processMessage(Message *recvMessage)
 			printf("PlannerCenter : planificar Job_NewFileToProcess:\n");
 
 			char* filePath = deserializeFilePath(recvMessage,K_Job_NewFileToProcess);
+			filePathAProcesar = filePath;
 			bool *soportaCombiner = deserializeSoportaCombiner(recvMessage);
 			//******************
 			// --> se agrega un file_StatusData a filesToProcessPerJob
 			addNewFileForProcess(filePath,soportaCombiner,recvMessage->sockfd);
 			//******************
 			planificar(recvMessage,K_Job_NewFileToProcess);
-
-			free(filePath);
 
 			printf("***************\n");
 			break;
@@ -90,9 +94,13 @@ void processMessage(Message *recvMessage)
 			bool *response = deserializeRequestResponse(recvMessage,K_FS_FileFullData);
 
 			if(!(*response)){
+
 				//si es false entonces no esta disponible el archivo en el FS
 				char *tempPath = deserializeFilePath(recvMessage,K_Job_MapResponse);
+
 				printf("el pedido al FS del archivo %s fallo, MaRTA no puede continuar la operacion\n",tempPath);
+				free(tempPath);
+				return true;
 			}
 
 			if(*response){
@@ -112,7 +120,7 @@ void processMessage(Message *recvMessage)
 			printf("***************\n");
 			break;
 		case K_Job_ReduceResponse:
-			printf("PlannerCenter : planificar Job_ReduceResponse");
+			printf("PlannerCenter : planificar Job_ReduceResponse\n");
 
 			//tipos de rtas
 			//**************
@@ -127,9 +135,16 @@ void processMessage(Message *recvMessage)
 			//FINALIZADO
 			if((*_response)&&((strcmp(reduceType,"reduceFileConCombiner-Pedido2")==0)||(strcmp(reduceType,"reduceFileSinCombiner")==0))){
 
-				//Reduce realizado con exito // Actualizar tablas !!
-				decrementarOperacionesEnProcesoEnNodo(pedidoRecibido_Nodo);
+				// Actualizar tablas !!
+				//LIBERAR MEMORIA !!!!!!
+				liberarNodosReduceList_Pedido1();
+				liberarFileState_Y_nodoState(recvMessage);
+				decrementarOperacionesEnProcesoEnNodo(ipNodoLocalDePedidoDeReduce);
 				printf("archivo %s reducido con exito !\n",path);
+
+				Message *jobMsj = crearMensajeAJobDeFinalizado(recvMessage);
+				//enviar(jobMsj->sockfd,jobMsj->mensaje);
+				return true;
 			}
 
 			//TERMINO 1ER PEDIDO
@@ -142,9 +157,19 @@ void processMessage(Message *recvMessage)
 
 				planificar(recvMessage,K_Job_ReduceResponse);
 			}
-			free(_response);
 
+			free(path);
+			free(reduceType);
+			free(_response);
 			printf("***************\n");
+			break;
+		case K_Job_JobCaido:
+
+			printf("el Job con socket %d se cayo, MaRTA no puede seguir procesando sus archivos \n",recvMessage->sockfd);
+			liberarFileState_Y_nodoState(recvMessage);
+			sacarCargasDeNodos_FalloDeJob();
+			return true;
+
 			break;
 		default:
 
@@ -153,7 +178,9 @@ void processMessage(Message *recvMessage)
 
 			break;
 	}
-	free(recvMessage);
+
+	liberarMensaje(recvMessage);
+	return false;
 }
 
 int obtenerIdParaComando(Message *recvMessage)
@@ -168,10 +195,12 @@ int obtenerIdParaComando(Message *recvMessage)
 	if(strcmp(comando,"reduceFileConCombiner-Pedido1")==0){type = K_Job_ReduceResponse;}
 	if(strcmp(comando,"reduceFileConCombiner-Pedido2")==0){type = K_Job_ReduceResponse;}
 	if(strcmp(comando,"reduceFileSinCombiner")==0){type = K_Job_ReduceResponse;}
+	if(strcmp(comando,"JobCaido")==0){type = K_Job_JobCaido;}
 
 	free(comando);
 	return type;
 }
+
 
 //Planificacion
 void planificar(Message *recvMessage,TypesMessages type)
@@ -181,10 +210,9 @@ void planificar(Message *recvMessage,TypesMessages type)
 		//pido al FS la tabla de direcciones del archivo
 		//segun protocolo ---> -Comando: "DataFile rutaDelArchivo" /// -Data: Vacio
 
-		pedidoRecibido_Path = deserializeFilePath(recvMessage,K_Job_NewFileToProcess);
-		Message *fsRequest = createFSrequest();
+		Message *fsRequest = createFSrequest(recvMessage);
 		//enviar(fsRequest->sockfd,fsRequest->mensaje);
-
+		liberarMensaje(fsRequest);
 	}
 
 	if(type==K_FS_FileFullData){
@@ -192,164 +220,166 @@ void planificar(Message *recvMessage,TypesMessages type)
 		//--> FS responde con tabla de archivo pedida
 		//-Comando: "DataFileResponse rutaDelArchivo Respuesta cantidadDeBloques-nroDeCopias-sizeEstructura-"
 
-		//ACTUALIZO TABLAS
 		char *path = deserializeFilePath(recvMessage,K_FS_FileFullData);
-		int nroDeBloques = deserializarFullDataResponse_nroDeBloques(recvMessage);
-		int nroDeCopias = deserializarFullDataResponse_nroDeCopias(recvMessage);
-		t_list *listaPadreDeBloques = deserializarFullDataResponse(recvMessage);
-		pedidoRecibido_Path=path;
 
-		if(cantidadDePedidosAlFS==0){
+		if(pedidosDeFullDataRealizados==0){
 			//se completa filesToProcess y se crea un fileState
-			addFileFullData(jobSocket, path,nroDeBloques,nroDeCopias,listaPadreDeBloques);
+			addFileFullData(jobSocket, path,recvMessage);
 		}
-
-		if(cantidadDePedidosAlFS>0){
-			//reload fullData
-			reloadFileFullData(jobSocket, path,nroDeBloques,nroDeCopias,listaPadreDeBloques);
+		if(pedidosDeFullDataRealizados>0){
+			t_list *listaPadreDeBloques = deserializarFullDataResponse(recvMessage);
+			reloadFileFullData(jobSocket,path,listaPadreDeBloques);
 		}
 
 		//Obtengo proximoPedido CON info actualizada
 		Message *sendMessage = obtenerProximoPedido(recvMessage);
-
 		//enviar(sendMessage->sockfd,sendMessage->mensaje);
+
+		liberarMensaje(sendMessage);
+		free(path);
 	}
 
 	if(type==K_Job_MapResponse){
 
-		//*data:sizeRutaArchivoTemporal-rutaArchivoTemporal-Respuesta
+		//*comando : "mapFileResponse rutaArchivoTemporal Respuesta"
+
+		list_clean(listaDeNodos_EnCasoDeFalloDeJob);
 		char *path = deserializeFilePath(recvMessage,K_Job_MapResponse);
 		char *tempPath = deserializeTempFilePath(recvMessage,K_Job_MapResponse);
-		t_dictionary *blockState = obtenerBlockState(path,tempPath);
-		pedidoRecibido_Bloque = dictionary_get(blockState,K_BlockState_nroBloque);
-		pedidoRecibido_Nodo= dictionary_get(blockState,K_BlockState_nroNodo);
-		pedidoRecibido_Path=path;
-		pedidoRecibido_PathArchTemporal = tempPath;
+		t_dictionary *blockState = obtenerBlockState(path,tempPath,recvMessage->sockfd);
 
-		int pos = obtenerPosicionDeBloqueEnBlockStatesList(path,pedidoRecibido_Nodo,pedidoRecibido_Bloque);
+		char *nroDeBloque = dictionary_get(blockState,K_BlockState_nroBloque);
+		char *ipNodo= dictionary_get(blockState,K_BlockState_nroNodo);
+
+		int pos = obtenerPosicionDeBloqueEnBlockStatesList(path,ipNodo,nroDeBloque,recvMessage->sockfd);
 		bool *requestResponse = deserializeRequestResponse(recvMessage,K_Job_MapResponse);
 
 		if(*requestResponse){
 
 			//actualizo tablas y obtengo prox pedido
-			printf("pedido de map realizado con exito, se mapeo la parte nro %d \n",pos);
 			actualizarTablas_RtaDeMapExitosa(recvMessage);
-			bool *todosMappeados = obtenerEstadoDeReduce();
+			bool *todosMappeados = obtenerEstadoDeReduce(recvMessage);
 			if(*todosMappeados){
 				Message *sendMessage = obtenerProximoPedido(recvMessage);
 				//enviar(sendMessage->sockfd,sendMessage->mensaje);
 			}
+			free(todosMappeados);
 		}
 
 		if(!(*requestResponse)){
 
 			//REPLANIFICAR
-			printf("fallo pedido de map del archivo %s al nodo %s bloque %s \n",pedidoRecibido_Path,pedidoRecibido_Nodo,pedidoRecibido_Bloque);
+			char *nroDeBloque = dictionary_get(blockState,K_BlockState_nroBloque);
+			char *ipNodo= dictionary_get(blockState,K_BlockState_nroNodo);
+			int pos = obtenerPosicionDeBloqueEnBlockStatesList(path,ipNodo,nroDeBloque,recvMessage->sockfd);
+			printf("fallo pedido de map del archivo %s al nodo %s bloque %s en posicion %d\n",path,ipNodo,nroDeBloque,pos);
+			printf("el nodo %s seguramente esta caido\n",ipNodo);
+
 			actualizarTablas_RtaDeMapFallo(recvMessage);
 
 			//OBTENER PROXIMO PEDIDO (se va a enviar devuelta el mismo, siempre y cuando haya copias disponibles)
 			Message* sendMessage = obtenerProximoPedido(recvMessage);
 			//enviar(sendMessage->sockfd,sendMessage->mensaje);
 		}
+
 		free(requestResponse);
 	}
 
 	if(type==K_Job_ReduceResponse){
 
+		list_clean(listaDeNodos_EnCasoDeFalloDeJob);
 		bool *requestResponse = deserializeRequestResponse(recvMessage,K_Job_ReduceResponse);
 		char *path = deserializeFilePath(recvMessage,K_Job_ReduceResponse);
 
 		if(*requestResponse){
 			//PLANIFICAR reduceFileConCombiner-Pedido2 // ACTUALIZAR TABLAS !!!!
-
 			//*comando: "reduceFileConCombiner-Pedido1 pathArchivo Respuesta"
+			printf("reduce-Pedido1 realizado con exito \n");
 			decrementarOperacionesEnReduceList();
 			Message* sendMessage = obtenerProximoPedido(recvMessage);
-			free(requestResponse);
 			//enviar(sendMessage->sockfd,sendMessage->mensaje);
+			liberarMensaje(sendMessage);
 		}
 
 		if(!(*requestResponse)){
 
+			//*data: --> "IPnodo1 IPnodo2..."
+			//Dar de baja en tabla los ips
+			//actualizar Nodo State
+			//actualizar el blockStatesList en K_UNINITIALIZED
+
 			char *reduceType = deserializeComando(recvMessage);
 			t_list *reduceResponse = deserializeFailedReduceResponse(recvMessage);
+			Message* sendMessage;
 
 			if(strcmp(reduceType,"reduceFileSinCombiner")==0){
-				//*data: --> "IPnodo1 IPnodo2..."
 
-				//Dar de baja en tabla los ips
-				//actualizar Nodo State
-				//actualizar el blockStatesList en K_UNINITIALIZED
-				char *ipNodo = pedidoRecibido_Nodo;
+				printf("reduceSinCombiner fallo \n");
+
+				char *ipNodo = ipNodoLocalDePedidoDeReduce;
 				decrementarOperacionesEnProcesoEnNodo(ipNodo);
 				actualizarTablas_ReduceFallo(path,recvMessage);
-
-				Message* sendMessage = obtenerProximoPedido(recvMessage);
-				free(requestResponse);
+				//VACIAR LISTA DE PEDIDOS!!!!
+				sendMessage = obtenerProximoPedido(recvMessage);
 			   //enviar(sendMessage->sockfd,sendMessage->mensaje);
 			}
 
 			if(strcmp(reduceType,"reduceFileConCombiner-Pedido1")==0){
-				//*data: --> "IPnodo1 IPnodo2..."
 
-				//actualizar Nodo State
-				//Dar de baja en tabla los ips
-				//actualizar el blockStatesList en K_UNINITIALIZED
+				printf("reduce-Pedido1 fallo \n");
 				decrementarOperacionesEnReduceList();
 				actualizarTablas_ReduceFallo(path,recvMessage);
-
-				Message* sendMessage = obtenerProximoPedido(recvMessage);
-				free(requestResponse);
+				sendMessage = obtenerProximoPedido(recvMessage);
 			   //enviar(sendMessage->sockfd,sendMessage->mensaje);
+				liberarNodosReduceList_Pedido1();
+
 			}
 
-			if(strcmp(reduceType,"reduceFileConCombiner-Pedido2")){
-				//*data: --> "Nodo1 Nodo2..."
+			if(strcmp(reduceType,"reduceFileConCombiner-Pedido2")==0){
 
-				//Dar de baja en tabla los ips
-				//actualizar Nodo State
-				//actualizar el blockStatesList en K_UNINITIALIZED
-				char *ipNodo = pedidoRecibido_Nodo;
+				printf("reduce-Pedido2 fallo \n");
+				char *ipNodo = ipNodoLocalDePedidoDeReduce;
 				decrementarOperacionesEnProcesoEnNodo(ipNodo);
-
 				actualizarTablas_ReduceFallo(path,recvMessage);
+				liberarNodosReduceList_Pedido1();
 
-				Message* sendMessage = obtenerProximoPedido(recvMessage);
-				free(requestResponse);
-			   //enviar(sendMessage->sockfd,sendMessage->mensaje);
+				sendMessage = obtenerProximoPedido(recvMessage);
+				//enviar(sendMessage->sockfd,sendMessage->mensaje);
 			}
+			liberarMensaje(sendMessage);
 		}
+
+		free(requestResponse);
+		free(path);
 	}
 }
 
 Message* obtenerProximoPedido(Message *recvMessage)
 {
-	char *path = pedidoRecibido_Path;
-	t_dictionary *fileState = getFileStateForPath(path);
+	int tipoComando = obtenerIdParaComando(recvMessage);
+	char *path = deserializeFilePath(recvMessage,tipoComando);
+	t_dictionary *fileState = getFileStateForPath(path,jobSocket);
 	t_list *blockStateArray = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
 	int size_fileState= list_size(blockStateArray);
-	bool *todosMappeados = obtenerEstadoDeReduce();
+	bool *todosMappeados = obtenerEstadoDeReduce(recvMessage);
+	Message *msjParaEnviar;
+	informarTareasPendientesDeMapping(path,jobSocket);
 
 	if(*todosMappeados){
 		//estan todos mappeados
 		printf("estan todos mapeados ! \n");
 
-		//Actualizo estados
 		bool *tieneCombinerMode = soportaCombiner(recvMessage->sockfd,path);
-		char *IPnroNodoLocal = obtenerNodoConMayorCantidadDeArchivosTemporales(path);
-		int cantidadDeNodos = obtenerCantidadDeNodosDiferentesEnBlockState(path);
-		t_list *nodosEnBlockState = obtenerNodosEnBlockStateArray(path);
-
-		// iniciar el serializado --> nroNodoLocal-pathTemporalLocal
-		char *stream = createStream();
-		addStringToStream(&stream,IPnroNodoLocal);
+		int cantidadDeNodos = obtenerCantidadDeNodosDiferentesEnBlockState(path,recvMessage->sockfd);
+		t_list *nodosEnBlockState = obtenerNodosEnBlockStateArray(path,recvMessage->sockfd);
+		char *finalStream;
 
 		if(*tieneCombinerMode){
 
 			//planificar con combiner
-			char *comando = deserializeComando(recvMessage);
+			char *comandoResponse = deserializeComando(recvMessage);
 
-			if((strcmp(comando,"mapFileResponse")==0)){
+			if((strcmp(comandoResponse,"mapFileResponse")==0)){
 			//1er pedido
 			//***********
 			//*comando: "reduceFileConCombiner-Pedido1 pathArchivo"
@@ -358,27 +388,33 @@ Message* obtenerProximoPedido(Message *recvMessage)
 			//		   ...Nodo3 ....
 
 				char *_path = deserializeFilePath(recvMessage,K_Job_MapResponse);
-				char *comando = createStream();
-				addStringToStream(&comando,"reduceFileConCombiner-Pedido1");
-				addStringToStream(&comando,_path);
+				char *command= createStream();
+				char *stream = createStream();
+				addStringToStream(&command,"reduceFileConCombiner-Pedido1");
+				addStringToStream(&command,_path);
 
 				int i;
 				for(i=0;i<cantidadDeNodos;i++){
 
-					char *IPnodoEnBlockState = list_get(nodosEnBlockState,i);
-					t_list *pathsTemporalesParaNodo = obtenerPathsTemporalesParaNodo(path, IPnodoEnBlockState);
+					t_dictionary *nodo= list_get(nodosEnBlockState,i);
+					char *IPnodoEnBlockState  = dictionary_get(nodo,"ip");
+					char *puertonodoEnBlockState  = dictionary_get(nodo,"puerto");
+					t_list *pathsTemporalesParaNodo = obtenerPathsTemporalesParaArchivo(path, IPnodoEnBlockState,recvMessage->sockfd);
 					int cantidadDePathsTempEnNodo = list_size(pathsTemporalesParaNodo);
 					char *_pathTempo = crearPathTemporal(_path);
 
 					//actualizar a tablas
 					t_dictionary *reduceBlock = dictionary_create();
-					dictionary_put(reduceBlock,"tempPath",_pathTempo);
-					dictionary_put(reduceBlock,"ip",IPnodoEnBlockState);
+					dictionary_put(reduceBlock,"reduceBlock_tempPath",_pathTempo);
+					dictionary_put(reduceBlock,"reduceBlock_ip",IPnodoEnBlockState);
+					dictionary_put(reduceBlock,"reduceBlock_puerto",puertonodoEnBlockState);
+					list_add(nodosReduceList_Pedido1,reduceBlock);
+					list_add(listaDeNodos_EnCasoDeFalloDeJob,IPnodoEnBlockState);
 					incrementarOperacionesEnProcesoEnNodo(IPnodoEnBlockState);
-					list_add(nodosReduceList_Pedido1,IPnodoEnBlockState);
 
 					//agregar a el serializado --> "Nodo1 nombreArchTemp1 CantDeArchEnNodoAProcesar"
 					addStringToStream(&stream,IPnodoEnBlockState);
+					addStringToStream(&stream,puertonodoEnBlockState);
 					addStringToStream(&stream,_pathTempo);
 					addIntToStream(stream,cantidadDePathsTempEnNodo,K_int16_t);
 
@@ -389,13 +425,20 @@ Message* obtenerProximoPedido(Message *recvMessage)
 						//agregar a el serializado "tempPath"
 						addStringToStream(&stream,tempPath);
 					}
+					list_destroy(pathsTemporalesParaNodo);
+
 				}
-				Message *sendMessage = armarMensajeParaEnvio(recvMessage,stream,comando);
-				return sendMessage;
+				printf("el Pedido1 de ReduceConCombiner es : %s\n",stream);
+				msjParaEnviar = armarMensajeParaEnvio(recvMessage,stream,command);
+				finalStream=stream;
+
+				free(command);
 			}
+
 			//**************************************************************
+
 			//ARMAR 2DO PEDIDO
-			if((strcmp(comando,"reduceFileConCombiner-Pedido1")==0)){
+			if((strcmp(comandoResponse,"reduceFileConCombiner-Pedido1")==0)){
 			//*****************
 			//2do pedido
 			//***********
@@ -407,31 +450,43 @@ Message* obtenerProximoPedido(Message *recvMessage)
 				char *_path = deserializeFilePath(recvMessage,K_Job_MapResponse);
 				char *pathTempo = crearPathTemporal(_path);
 				char *comando = createStream();
+				char *stream = createStream();
 				addStringToStream(&comando,"reduceFileConCombiner-Pedido2");
 				addStringToStream(&comando,pathTempo);
+				free(_path);
+				free(pathTempo);
 
-				char *stream = createStream();
 				//******************************************
-				//1ero NodoLocal
+				//1ero NodoLocal --> tomo el 1ero porque si
 				t_dictionary *reduceBlock = list_get(nodosReduceList_Pedido1,0);
-				char *ip = dictionary_get(reduceBlock,"ip");
-				char *tempPath = dictionary_get(reduceBlock,"tempPath");
+				char *ip = dictionary_get(reduceBlock,"reduceBlock_ip");
+				char *puerto = dictionary_get(reduceBlock,"reduceBlock_puerto");
+				char *tempPath = dictionary_get(reduceBlock,"reduceBlock_tempPath");
 				addStringToStream(&stream,ip);
+				addStringToStream(&stream,puerto);
 				addStringToStream(&stream,tempPath);
-				pedidoRecibido_Nodo = ip;
+				ipNodoLocalDePedidoDeReduce = ip;
+				incrementarOperacionesEnProcesoEnNodo(ip);
+				list_add(listaDeNodos_EnCasoDeFalloDeJob,ip);
 				//******************************************
 				int size = list_size(nodosReduceList_Pedido1);
 				int i;
 				for(i=1;i<size;i++){
 					t_dictionary *reduceBlock = list_get(nodosReduceList_Pedido1,i);
-					char *ip = dictionary_get(reduceBlock,"ip");
-					char *tempPath = dictionary_get(reduceBlock,"tempPath");
+					char *ip = dictionary_get(reduceBlock,"reduceBlock_ip");
+					char *puerto = dictionary_get(reduceBlock,"reduceBlock_puerto");
+					char *tempPath = dictionary_get(reduceBlock,"reduceBlock_tempPath");
 					addStringToStream(&stream,ip);
+					addStringToStream(&stream,puerto);
 					addStringToStream(&stream,tempPath);
+					list_add(listaDeNodos_EnCasoDeFalloDeJob,ip);
 				}
-				Message *sendMessage = armarMensajeParaEnvio(recvMessage,stream,comando);
-				return sendMessage;
+				printf("el Pedido2 de ReduceConCombiner es : %s\n",stream);
+				finalStream=stream;
+				msjParaEnviar = armarMensajeParaEnvio(recvMessage,stream,comando);
+
 			}
+			free(comandoResponse);
 		}
 
 		if(!(*tieneCombinerMode)){
@@ -445,8 +500,16 @@ Message* obtenerProximoPedido(Message *recvMessage)
 			//****************************************************
 			//PRIMERO PONER LOS PATH CORRESPONDIENTES AL NODO LOCAL
 
-			t_list *pathsTemporalesParaNodoLocal = obtenerPathsTemporalesParaNodo(path, IPnroNodoLocal);
+			t_dictionary *nodoLocal = obtenerNodoConMayorCantidadDeArchivosTemporales(path,recvMessage->sockfd);
+			char *IPnroNodoLocal = dictionary_get(nodoLocal,"ip");
+			char *puertoNodoLocal = dictionary_get(nodoLocal,"puerto");
+			t_list *pathsTemporalesParaNodoLocal = obtenerPathsTemporalesParaArchivo(path, IPnroNodoLocal,recvMessage->sockfd);
 			int cantidadDePathsTempEnNodoLocal = list_size(pathsTemporalesParaNodoLocal);
+			list_add(listaDeNodos_EnCasoDeFalloDeJob,IPnroNodoLocal);
+
+			char *stream = createStream();
+			addStringToStream(&stream,IPnroNodoLocal);
+			addStringToStream(&stream,puertoNodoLocal);
 			addIntToStream(stream,cantidadDePathsTempEnNodoLocal,K_int16_t);
 
 			int k;
@@ -456,18 +519,23 @@ Message* obtenerProximoPedido(Message *recvMessage)
 				//agregar a el serializado "tempPath"
 				addStringToStream(&stream,tempPath);
 			}
+			list_destroy(pathsTemporalesParaNodoLocal);
 			//*****************************************************
 			int i;
 			for(i=0;i<cantidadDeNodos;i++){
-				char *IPnodoEnBlockState = list_get(nodosEnBlockState,i);
+				t_dictionary *nodo = list_get(nodosEnBlockState,i);
+				char *IPnodoEnBlockState = dictionary_get(nodo,"ip");
+				char *puertonodoEnBlockState = dictionary_get(nodo,"puerto");
 
 				if( strcmp(IPnodoEnBlockState,IPnroNodoLocal) != 0 ){
 
-					t_list *pathsTemporalesParaNodo = obtenerPathsTemporalesParaNodo(path, IPnodoEnBlockState);
+					t_list *pathsTemporalesParaNodo = obtenerPathsTemporalesParaArchivo(path, IPnodoEnBlockState,recvMessage->sockfd);
 					int cantidadDePathsTempEnNodo = list_size(pathsTemporalesParaNodo);
+					list_add(listaDeNodos_EnCasoDeFalloDeJob,IPnodoEnBlockState);
 
 					//agregar a el serializado --> "cantidadDePathsTempEnNodo"
 					addStringToStream(&stream,IPnodoEnBlockState);
+					addStringToStream(&stream,puertonodoEnBlockState);
 					addIntToStream(stream,cantidadDePathsTempEnNodo,K_int16_t);
 
 					int j;
@@ -477,20 +545,20 @@ Message* obtenerProximoPedido(Message *recvMessage)
 						//agregar a el serializado "tempPath"
 						addStringToStream(&stream,tempPath);
 					}
+					list_destroy(pathsTemporalesParaNodo);
 				}
 			}
-			printf("el archivo %s no soporta Combiner\n",pedidoRecibido_Path);
+			char *path = deserializeFilePath(recvMessage,K_Job_MapResponse);
+			printf("el archivo %s no soporta Combiner\n",path);
 			printf("el pedido de reduce es : %s\n",stream);
+
 			//actualizar Tablas !!
 			incrementarOperacionesEnProcesoEnNodo(IPnroNodoLocal);
 			//setBlockStatesListInReducingState(path);
-
-			pedidoRecibido_Nodo = IPnroNodoLocal;
-
+			ipNodoLocalDePedidoDeReduce = IPnroNodoLocal;
+			finalStream=stream;
+			msjParaEnviar = armarMensajeParaEnvio(recvMessage,finalStream,"reduceFile");
 		}
-
-		Message *sendMessage = armarMensajeParaEnvio(recvMessage,stream,"reduceFile");
-		return sendMessage;
 	}
 
 	if(!(*todosMappeados)){
@@ -510,17 +578,11 @@ Message* obtenerProximoPedido(Message *recvMessage)
 				if( strcmp(IPnroDeNodo,K_Copia_DarDeBajaIPNodo) == 0){//checkeo q haya copias disponibles
 
 					//NO HAY COPIAS DISPONIBLES !!!!!
-					if(cantidadDePedidosAlFS==0){
-						printf("no hay mas copias disponibles!!!\n");
-						printf("hacer pedido FS_FileFullData aver si al FileSystem se le cargo nuevos nodos !\n");
-						Message *fsRequest = createFSrequest();
-						cantidadDePedidosAlFS++;
-						return fsRequest;
-					}else{
-						printf("no hay mas copias disponibles!!!\n");
-						printf("ya se le hizo un pedido al FS previamente, MaRTA no puede continuar con la operacion \n");
-						//HACER UN RETURN ACA !!!
-					}
+					printf("no hay mas copias disponibles!!!\n");
+					printf("hacer pedido FS_FileFullData aver si al FileSystem se le cargo nuevos nodos !\n");
+					Message *fsRequest = createFSrequest(recvMessage);
+					pedidosDeFullDataRealizados++;
+					return fsRequest;
 				}
 
 				//armo pedido de map, segun protocolo es
@@ -536,9 +598,11 @@ Message* obtenerProximoPedido(Message *recvMessage)
 				string_append(&path_with_temporal,temporal);
 				//******************
 				char *ipNodo = dictionary_get(copiaConMenosCarga,K_Copia_IPNodo);
+				char *puertoNodo = dictionary_get(copiaConMenosCarga,K_Copia_PuertoNodo);
 				char *nroDeBloque = dictionary_get(copiaConMenosCarga,K_Copia_NroDeBloque);
 
 				addStringToStream(&stream,ipNodo);
+				addStringToStream(&stream,puertoNodo);
 				addStringToStream(&stream,nroDeBloque);
 				addStringToStream(&stream,path_with_temporal);
 
@@ -546,23 +610,30 @@ Message* obtenerProximoPedido(Message *recvMessage)
 				incrementarOperacionesEnProcesoEnNodo(ipNodo);
 
 				//actualizoBlockState
-				StatusBlockState *status = malloc(sizeof(StatusBlockState));
+				StatusBlockState *status = dictionary_get(blockState,K_BlockState_state);
 				*status = K_IN_MAPPING;
 				dictionary_clean(blockState);
 				dictionary_put(blockState,K_BlockState_state,status);
 				dictionary_put(blockState,K_BlockState_nroNodo,ipNodo);
 				dictionary_put(blockState,K_BlockState_nroBloque,nroDeBloque);
 				dictionary_put(blockState,K_BlockState_temporaryPath,path_with_temporal);
+				dictionary_put(blockState,K_BlockState_puertoNodo,puertoNodo);
+
+				list_add(listaDeNodos_EnCasoDeFalloDeJob,ipNodo);
 			}
 		}
 
 		printf("se envia pedido de map, el stream es %s\n",stream);
-		Message *msjParaEnviar = armarMensajeParaEnvio(recvMessage,stream,"mapFile");
-		return msjParaEnviar;
+		msjParaEnviar = armarMensajeParaEnvio(recvMessage,stream,"mapFile");
 	}
+	free(path);
+	free(todosMappeados);
+	return msjParaEnviar;
 }
 
 char* crearPathTemporal(char *path){
+
+	usleep(10000);// sino me tira todos los "temporal_get_string_time()" iguales
 	char *temporal = temporal_get_string_time();
 	char *path_with_temporal = string_new();
 	string_append(&path_with_temporal,path);
@@ -570,10 +641,11 @@ char* crearPathTemporal(char *path){
 	string_append(&path_with_temporal,temporal);
 	return path_with_temporal;
 }
-bool *obtenerEstadoDeReduce()
+bool *obtenerEstadoDeReduce(Message *msj)
 {
-	char *path = pedidoRecibido_Path;
-	t_dictionary *fileState = getFileStateForPath(path);
+	int tipoDeCommando = obtenerIdParaComando(msj);
+	char *path = deserializeFilePath(msj,tipoDeCommando);
+	t_dictionary *fileState = getFileStateForPath(path,jobSocket);
 	t_list *blockStateArray = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
 	int size_fileState= list_size(blockStateArray);
 
@@ -585,6 +657,7 @@ bool *obtenerEstadoDeReduce()
 		StatusBlockState *statusBlock = dictionary_get(blockState,K_BlockState_state);
 		if((*statusBlock)!= K_MAPPED){
 			*todosMappeados = false;
+			break;
 		}
 	}
 	return todosMappeados;
@@ -639,41 +712,26 @@ void actualizarTablas_RtaDeMapExitosa(Message *recvMessage)
 {
 	//*data:sizeRutaArchivoTemporal-rutaArchivoTemporal-Respuesta
 
-	char *temporaryPath = pedidoRecibido_PathArchTemporal;
-	char *IPnroNodo =  pedidoRecibido_Nodo;
-	char *nroBloque =  pedidoRecibido_Bloque;
-	int pos = obtenerPosicionDeBloqueEnBlockStatesList(pedidoRecibido_Path,pedidoRecibido_Nodo,pedidoRecibido_Bloque);
-
-	t_dictionary *fileState = getFileStateForPath(pedidoRecibido_Path);
-	t_list *blockStatesList = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
-	t_dictionary *blockState = list_get(blockStatesList,pos);
+	char *path = deserializeFilePath(recvMessage,K_Job_MapResponse);
+	char *temporaryPath = deserializeTempFilePath(recvMessage,K_Job_MapResponse);
+	t_dictionary *blockState = obtenerBlockState(path,temporaryPath,recvMessage->sockfd);
+	char *nroBloque = dictionary_get(blockState,K_BlockState_nroBloque);
+	char *IPnroNodo= dictionary_get(blockState,K_BlockState_nroNodo);
+	int pos = obtenerPosicionDeBloqueEnBlockStatesList(path,IPnroNodo,nroBloque,recvMessage->sockfd);
 
 	//******************************************
 	//Actualizo blockState
-	char *ptrNodo = malloc(strlen(IPnroNodo));
-	ptrNodo=pedidoRecibido_Nodo;
-	char *ptrBlq = malloc(strlen(nroBloque));
-	ptrBlq=pedidoRecibido_Bloque;
-	char *ptrPathTempo = malloc(strlen(temporaryPath));
-	ptrPathTempo=pedidoRecibido_PathArchTemporal;
+	StatusBlockState *status = dictionary_get(blockState,K_BlockState_state);
+	*status = K_MAPPED;
 
-	StatusBlockState *state = malloc(sizeof(StatusBlockState));
-	*state=K_MAPPED;
-	dictionary_destroy(blockState);
-
-	t_dictionary *newBlckState = dictionary_create();
-	dictionary_put(newBlckState,K_BlockState_nroBloque,ptrBlq);
-	dictionary_put(newBlckState,K_BlockState_nroNodo,ptrNodo);
-	dictionary_put(newBlckState,K_BlockState_temporaryPath,ptrPathTempo);
-	dictionary_put(newBlckState,K_BlockState_state,state);
-
-	list_remove(blockStatesList,pos);
-	list_add_in_index(blockStatesList,pos,newBlckState);
 	//******************************************
 	//Actualizo nodoState
 	decrementarOperacionesEnProcesoEnNodo(IPnroNodo);
 	addTemporaryFilePathToNodoData(IPnroNodo,temporaryPath);
 
+	informarTareasPendientesDeMapping(path,jobSocket);
+	free(path);
+	free(temporaryPath);
 }
 
 void actualizarTablas_RtaDeMapFallo(Message *recvMessage){
@@ -681,17 +739,21 @@ void actualizarTablas_RtaDeMapFallo(Message *recvMessage){
 	//actualizar tablas y reenviar si existen copias
 	char *path = deserializeFilePath(recvMessage,K_Job_MapResponse);
 	char *tempPath = deserializeTempFilePath(recvMessage,K_Job_MapResponse);
-	char *IPnroNodo =  pedidoRecibido_Nodo;
-	char *nroBloque =  pedidoRecibido_Bloque;
-	int pos = obtenerPosicionDeBloqueEnBlockStatesList(path,pedidoRecibido_Nodo,pedidoRecibido_Bloque);
+	t_dictionary *blockState = obtenerBlockState(path,tempPath,recvMessage->sockfd);
+	char *nroDeBloque = dictionary_get(blockState,K_BlockState_nroBloque);
+	char *ipNodo= dictionary_get(blockState,K_BlockState_nroNodo);
+	int pos = obtenerPosicionDeBloqueEnBlockStatesList(path,ipNodo,nroDeBloque,recvMessage->sockfd);
 
 	//PONER -1 EN COPIAS
-	darDeBajaCopiaEnBloqueYNodo(path,recvMessage->sockfd,nroBloque,IPnroNodo,pos);
-	decrementarOperacionesEnProcesoEnNodo(IPnroNodo);
+	darDeBajaCopiaEnBloqueYNodo(path,recvMessage->sockfd,ipNodo);
+	decrementarOperacionesEnProcesoEnNodo(ipNodo);
 
-	t_dictionary *blockState = obtenerBlockState(path,tempPath);
 	StatusBlockState *status = dictionary_get(blockState,K_BlockState_state);
 	*status = K_UNINITIALIZED;
+
+	informarTareasPendientesDeMapping(path,jobSocket);
+	free(path);
+	free(tempPath);
 }
 
 void decrementarOperacionesEnReduceList()
@@ -699,13 +761,24 @@ void decrementarOperacionesEnReduceList()
 	int size = list_size(nodosReduceList_Pedido1);
 	int i;
 	for(i=0;i<size;i++){
-		char *ipNodo = list_get(nodosReduceList_Pedido1,i);
+		t_dictionary *reduceBlock = list_get(nodosReduceList_Pedido1,i);
+		char *ipNodo = dictionary_get(reduceBlock,"reduceBlock_ip");
 		decrementarOperacionesEnProcesoEnNodo(ipNodo);
 	}
 }
-Message *createFSrequest(){
 
-	char *path = pedidoRecibido_Path;
+void liberarMensaje(Message *msj)
+{
+	return;
+	free(msj->mensaje->comando);
+	free(msj->mensaje->data);
+	free(msj->mensaje);
+	free(msj);
+}
+Message *createFSrequest(Message *msj){
+
+	int tipoDeCommando = obtenerIdParaComando(msj);
+	char *path = deserializeFilePath(msj,tipoDeCommando);
 	Message *fsRequest = malloc(sizeof(Message));
 	fsRequest->mensaje = malloc(sizeof(mensaje_t));
 
@@ -718,9 +791,34 @@ Message *createFSrequest(){
 	fsRequest->mensaje->comandoSize = (int16_t)strlen(stream);
 	fsRequest->mensaje->comando = stream;
 	fsRequest->mensaje->dataSize = 0;
-	fsRequest->mensaje->data = "";
+	fsRequest->mensaje->data = malloc(strlen(""));
+	strcpy(fsRequest->mensaje->data,"");
+
 	return fsRequest;
 }
+
+Message *crearMensajeAJobDeFinalizado(Message *msj){
+
+	int tipoDeCommando = obtenerIdParaComando(msj);
+	char *path = deserializeFilePath(msj,tipoDeCommando);
+	Message *fsRequest = malloc(sizeof(Message));
+	fsRequest->mensaje = malloc(sizeof(mensaje_t));
+
+	//armo stream a mano
+	char *stream = string_new();
+	string_append(&stream,"FileSuccess ");
+	string_append(&stream,path);
+
+	fsRequest->sockfd = jobSocket;
+	fsRequest->mensaje->comandoSize = (int16_t)strlen(stream);
+	fsRequest->mensaje->comando = stream;
+	fsRequest->mensaje->dataSize = 0;
+	fsRequest->mensaje->data = malloc(strlen(""));
+	strcpy(fsRequest->mensaje->data,"");
+
+	return fsRequest;
+}
+
 Message* armarMensajeParaEnvio(Message *recvMessage,void *stream,char *comando)
 {
 	Message *msjParaEnvio = malloc(sizeof(Message));
@@ -746,13 +844,21 @@ void actualizarTablas_ReduceFallo(char *path,Message *recvMessage)
 	for(i=0;i<sizeNodosCaidos;i++){
 
 		char *ipNodoCaido = list_get(nodosCaidos,i);
+		printf("el pedido de reduce al nodo %s fallo\n",ipNodoCaido);
+		printf("seguramente el nodo %s esta caido\n",ipNodoCaido);
 		resetBlockStateConNodo(path,ipNodoCaido);
-		//darDeBajaCopiaEnBloqueYNodo(ipNodoCaido); --> descomentar !!!!!!!!!
+		darDeBajaCopiaEnBloqueYNodo(path,recvMessage->sockfd,ipNodoCaido);
 	}
+
+	for(i=0;i<sizeNodosCaidos;i++){
+			char *ipNodoCaido = list_get(nodosCaidos,i);
+			free(ipNodoCaido);
+	}
+	list_destroy(nodosCaidos);
 }
 void resetBlockStateConNodo(char *path,char *ipNodoCaido)
 {
-	t_dictionary *fileState = getFileState(path);
+	t_dictionary *fileState = getFileState(path,jobSocket);
 	t_list *blockStatesList = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
 	int listSize = list_size(blockStatesList);
 	int j;
@@ -766,9 +872,57 @@ void resetBlockStateConNodo(char *path,char *ipNodoCaido)
 	}
 }
 
-// Idea de planificaion : se hara map y reduce de los bloques en orden ascendente.
-// Hago map de todos los bloques de un archivo y ahi lanzo el reduce.
-// Habra un MAXIMO de envios por la red, hasta que no responda un envio, nose hara otro(Productor-Consumidor)
-// Si vuelve con error, entonces se rePlanifica y se vuelve a mandar el mismo pero a otro NODO.
-// Si NO hay otro NODO disponible entonces, se informa que el proceso del archivo quedo incompleto--> no se que hacer luego.
-// Si la operacion enviada falla porque se cayo el Nodo o simplemente fallo entonces se RE-PLANIFICA, si se cae el Job NO hay nada mas que hacer.
+void liberarNodosReduceList_Pedido1()
+{
+	int i;
+	int size = list_size(nodosReduceList_Pedido1);
+	for(i=0;i<size;i++){
+		t_dictionary *reduceBlock = list_get(nodosReduceList_Pedido1,i);
+		char *tempPath = dictionary_get(reduceBlock,"reduceBlock_tempPath");
+		//NO LIBERO EL IP PORQE ESTA ASOCIADO A UN BLOCK_STATE TMB
+		free(tempPath);
+		dictionary_destroy(reduceBlock);
+	}
+	list_clean(nodosReduceList_Pedido1);
+}
+
+void liberarFileState_Y_nodoState(Message *recvMessage)
+{
+	//*comando: "reduceFileConCombiner-Pedido2 NombreArchTempFinal Respuesta"
+	//*comando: "reduceFileSinCombiner NombreArchTempFinal Respuesta"
+
+	char *path = filePathAProcesar;
+
+	//LIBERO NODO_STATE
+	//IMPLEMENTAR !!!!!!!!!!!
+
+	//LIBERO FILE_STATE
+	t_dictionary *fileState = getFileState(path,jobSocket);
+	t_list *blocksStatesList = dictionary_get(fileState,K_FileState_arrayOfBlocksStates);
+	int size = list_size(blocksStatesList);
+	int i;
+	for(i=0;i<size;i++){
+
+		t_dictionary *blockState = list_get(blocksStatesList,i);
+		//LIBERO SOLO archTempo y state --> los otros pueden estar siendo apuntados por otras estructuras
+		char *archTempo = dictionary_get(blockState,K_BlockState_temporaryPath);
+		StatusBlockState *status = dictionary_get(blockState,K_BlockState_state);
+		free(status);
+		free(archTempo);
+		dictionary_destroy(blockState);
+	}
+	list_destroy(blocksStatesList);
+
+}
+
+void sacarCargasDeNodos_FalloDeJob(){
+
+	int size = list_size(listaDeNodos_EnCasoDeFalloDeJob);
+	int i;
+	for(i=0;i<size;i++){
+		char *ip = list_get(listaDeNodos_EnCasoDeFalloDeJob,i);
+		decrementarOperacionesEnProcesoEnNodo(ip);
+		informarTareasPendientesDeMapping(filePathAProcesar,jobSocket);
+	}
+	list_destroy(listaDeNodos_EnCasoDeFalloDeJob);
+}

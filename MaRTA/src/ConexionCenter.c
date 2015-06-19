@@ -19,9 +19,7 @@
 #include <commons/txt.h>
 #include <commons/error.h>
 #include <commons/collections/list.h>
-
 #include "ConexionCenter.h"
-
 #include "VariablesGlobales.h"
 
 // CONSTANTES
@@ -61,32 +59,29 @@ int nbytes;
 int yes=1;        // para setsockopt() SO_REUSEADDR, más abajo
 int addrlen;
 int conexionesProcesadas;
-sem_t accesoAMaster;
 
-// Funciones publicas
+// FUNCIONES PUBLICAS
 void initConexiones();
 void closeServidores();
 int connectToFS();
 Message* listenConnections();
 
-//Funciones privadas
+//FUNCIONES PRIVADAS
 int createSocket(int puerto,int socketFd);
 void createListener();
 void prepareConnections();
 Message* createErrorMessage();
 void setnonblocking();
+Message *crearMessageWithCommand(char *command,int socket);
 
 //JUAN - Protocolo
 mensaje_t* recibir(int socket);
 
 void initConexiones()
 {
-	sem_init(&accesoAMaster, 0, 1);
-
 	createListener();
 	prepareConnections();
 	conexionesProcesadas=-1;
-
 	printf("INICIO DEL SERVIDOR-MaRTA CON EXITO\n\n");
 }
 
@@ -111,7 +106,7 @@ void prepareConnections()
 
 Message* listenConnections()
 {
-	printf(" SELECT  !!!\n");
+	printf(" SELECT en espera !!!\n");
 	read_fds = master; // cópialo
 	if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) {
 		perror("select");
@@ -132,26 +127,14 @@ Message* listenConnections()
 					perror("accept");
 				} else {
 
-					sem_wait(&accesoAMaster);
 					FD_SET(newfd, &master); // añadir al conjunto maestro
 					if (newfd > fdmax) {fdmax = newfd;} // actualizar el máximo
-					sem_post(&accesoAMaster);
 
 					//setnonblocking();
 
 					printf("selectserver: new connection from %s on "
 						"socket %d\n", inet_ntoa(remoteaddr.sin_addr), newfd);
-
-					Message *newConnection;
-					newConnection=malloc(sizeof(Message));
-					newConnection->mensaje=malloc(sizeof(*newConnection->mensaje));
-
-
-					newConnection->mensaje->comandoSize=(strlen("newConnection")+1);
-					newConnection->mensaje->comando=malloc(strlen("newConnection")+1);
-					strcpy(newConnection->mensaje->comando,"newConnection");
-					newConnection->sockfd=newfd;
-					return newConnection;
+					return crearMessageWithCommand("newConnection",newfd);
 				}
 			} else {
 				// gestionar datos de un cliente
@@ -164,37 +147,36 @@ Message* listenConnections()
 						perror("recv");
 					}
 					close(i); // bye!
-					//ENVIAR AL PLANIFICADOR QUE SE CERRO EL SOCKET
 					FD_CLR(i, &master); // eliminar del conjunto maestro
+					return crearMessageWithCommand("JobCaido",i);
 				} else {
 
+					//********************************************************
 					// tenemos datos de algún cliente
-					printf("llegaron datos de algun cliente - nroDeMsje %d\n",conexionesProcesadas);
-
-					Message *recvMesage = malloc(sizeof(Message));
-					//recvMesage->mensaje = recibir(i);
-					recvMesage->sockfd=i;
+				/*	printf("llegaron datos de algun cliente - nroDeMsje %d\n",conexionesProcesadas);
+					Message *_recvMesage = malloc(sizeof(Message));
+					_recvMessage->mensaje = malloc(sizeof(mensaje_t));
+					//recibir(i,recvMessage->mensaje);*/
 
 					/*printf("se recibio nroDeMensaje %d \n",recvMesage->mensaje->dataSize);
 					printf("se recibio comandoSize %d \n",recvMesage->mensaje->comandoSize);
 					printf("se recibio el comando %s \n",recvMesage->mensaje->comando);*/
 					//printf("se recibio la data %s \n",recvMesage->mensaje->data);
-
-					int count;
+					//********************************************************
+					//VEO SI QUEDAN DATOS EN EL BUFFER
+					/*int count;
 					ioctl(socket, FIONREAD, &count);
 					while(count>0){
 						ioctl(socket, FIONREAD, &count);
 						if(count >0){
-							recvMesage->mensaje = recibir(i);
+							_recvMesage->mensaje = recibir(i);
 
 							printf("todabia quedan msjes en el buffer y los mensajes son :\n");
-							/*printf("se recibio nroDeMensaje %d \n",recvMesage->mensaje->dataSize);
-							printf("se recibio comandoSize %d \n",recvMesage->mensaje->comandoSize);
-							printf("se recibio el comando %s \n",recvMesage->mensaje->comando);*/
-							//printf("se recibio la data %s \n",recvMesage->mensaje->data);
+
 						}
 					}
-					return recvMesage;
+					//********************************************************
+					return _recvMesage;*/
 				}
 			}
 		}
@@ -203,20 +185,6 @@ Message* listenConnections()
 	return createErrorMessage();						//xq el select() es bloqueante
 }
 
-mensaje_t* recibir(int socket){
-
-	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
-
-	recv(socket, &(mensaje->comandoSize), sizeof(int16_t),0);
-	mensaje->comando = malloc((mensaje->comandoSize));
-	recv(socket, mensaje->comando, mensaje->comandoSize,0);
-
-	recv(socket, &(mensaje->dataSize), sizeof(int32_t),0);
-	//mensaje->data = malloc((mensaje->dataSize));
-	//recv(socket, mensaje->data, mensaje->dataSize,0);
-
-	return mensaje;
-}
 int connectToFS(){
 
 	struct sockaddr_in their_addr;
@@ -231,22 +199,20 @@ int connectToFS(){
 	inet_aton(K_FS_PUERTO, &(their_addr.sin_addr));
 	memset(&(their_addr.sin_zero), '\o', 8);
 
-	//COMENTADO PARA TEST
-/*
 	if (connect(socketFd, (Sockaddr_in*) &their_addr, sizeof(Sockaddr_in))
 			== -1) {
-		error_show("Error al conectarse con MARTA\n");
-		Terminar(EXIT_ERROR);
+		error_show("Error al conectarse con FS\n");
+		return (EXIT_FAILURE);
 	}
-*/
-	/////
+
 	printf("Conexion exitosa con FS, ip : %s, puerto :%s\n",K_FS_IP,K_FS_PUERTO);
 
-	sem_wait(&accesoAMaster);
 	FD_SET(socketFd, &master); // añadir al conjunto maestro
 	if (socketFd > fdmax) {fdmax = socketFd;} // actualizar el máximo
-	sem_post(&accesoAMaster);
 
+	//HANDSHAKE A FS
+	Message *msj = crearMessageWithCommand("nombre MaRTA",socketFd);
+	//enviar(msj->sockfd,msj->mensaje);
 	return socketFd;
 
 }
@@ -273,7 +239,7 @@ Message* createErrorMessage()
 	error=malloc(sizeof(Message));
 	error->mensaje = malloc(sizeof(mensaje_t));
 	error->mensaje->comando=malloc(strlen("error")+1);
-	error->mensaje->comandoSize=(strlen("error")+1);
+	error->mensaje->comandoSize=(strlen("error"));
 	strcpy(error->mensaje->comando,"error");
 	return error;
 }
@@ -338,4 +304,18 @@ int createSocket(int puerto,int socketFd)
 	printf("createSocket realizado con exito\n");
 	return socketFd;
 
+}
+
+Message *crearMessageWithCommand(char *command,int socket)
+{
+	Message *newConnection;
+	newConnection=malloc(sizeof(Message));
+	newConnection->mensaje=malloc(sizeof(mensaje_t));
+
+	newConnection->mensaje->comandoSize=(strlen(command));
+	newConnection->mensaje->comando=malloc(strlen(command)+1);
+	strcpy(newConnection->mensaje->comando,command);
+	newConnection->sockfd=socket;
+
+	return newConnection;
 }

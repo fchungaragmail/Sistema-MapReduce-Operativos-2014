@@ -20,7 +20,8 @@ Message* simulacion_FS_DataFullResponse();
 //Simulador Job
 Message *simulacion_Job_newFileToProcess();
 Message *simulacion_Job_mapResponse(int x);
-Message *simulacion_Job_reduceResponse();
+Message *simulacion_Job_reduceResponse(char *tipo);
+Message *simulacion_Job_reduceResponse_Fallo(char *tipo,char *ipFallo);
 
 //Ambos
 Message *simulacion_NewConnection(int sckt);

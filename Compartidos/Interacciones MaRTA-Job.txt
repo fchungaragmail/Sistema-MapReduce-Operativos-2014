@@ -70,3 +70,6 @@ Una vez q el Job responde entonces MaRTA enviara el ultimo pedido para hacer el 
 // Ej de comando: reduceFileResponse /user/juan/datos/temperatura2012.txt/  0
 
 ************************************************************************************************************************************************************************************************
+--> Una vez que se finalizo la rutina de reduce con exito, MaRTA le avisa al Job que esto sucedio
+*comando: "FileSuccess pathArchivo"
+*data: VACIO
