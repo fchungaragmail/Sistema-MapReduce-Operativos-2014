@@ -10,7 +10,8 @@
 
 
 #define MESSAGE_LENGTH 256
-#define MESSAGE_PROTOCOL_LENGTH 2
+#define SHAKEHAND_MESSAGE_LENGTH 3
+#define COMANDO_LENGTH 256
 
 #include <stdio.h>
 #include <fcntl.h>
@@ -22,6 +23,7 @@
 #include "commons/string.h"
 #include <sys/stat.h>
 #include "nodo_fs_functions_new.h"
+#include "nodo_job_functions_new.h"
 
 extern char* ARCHIVO_BIN;
 

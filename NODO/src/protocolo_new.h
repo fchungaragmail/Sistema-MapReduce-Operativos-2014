@@ -30,7 +30,7 @@
 
 typedef struct mensaje
 {
-	char id[2];
+//	char id[2];
 	int16_t comandoSize;
 	char* comando;
 	int32_t dataSize; 	//Pongo int32_t asi entra el valor correspondiente a 20mb
