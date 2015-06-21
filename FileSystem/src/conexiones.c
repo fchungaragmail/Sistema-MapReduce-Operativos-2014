@@ -12,6 +12,7 @@ int escuchaConexiones;
 int MaRTA;
 int desbloquearSelect[2];
 t_list* conexiones;
+pthread_mutex_t mConexiones;
 fd_set nodos;
 pthread_mutex_t mNodos;
 FILE* logFile;
@@ -29,6 +30,7 @@ void probarConexiones();
 int initConexiones()
 {
 	conexiones = list_create();
+	pthread_mutex_init(&mConexiones, NULL);
 	FD_ZERO(&nodos);
 	pthread_mutex_init(&mNodos, NULL);
 	escuchaConexiones = socket(AF_INET, SOCK_STREAM, 0);
@@ -81,8 +83,10 @@ void escucharConexiones()
 		conexionNueva->estado = CONECTADO;
 		pthread_mutex_init(&(conexionNueva->mSocket), NULL);
 		pthread_mutex_init(&(conexionNueva->mEstadoBloques), NULL);
-		list_add(conexiones, conexionNueva);
 
+		pthread_mutex_lock(&mConexiones);
+		list_add(conexiones, conexionNueva);
+		pthread_mutex_unlock(&mConexiones);
 
 		pthread_mutex_lock(&mNodos);
 		FD_SET(nuevoSocketfd, &nodos);
@@ -137,7 +141,9 @@ void leerEntradas()
 		//Chequeo los fd de las conexiones
 		for (int i=0; i<conexiones->elements_count ;i++)
 		{
+			pthread_mutex_lock(&mConexiones);
 			Conexion_t* conexion = list_get(conexiones,i);
+			pthread_mutex_unlock(&mConexiones);
 			if (true != FD_ISSET(conexion->sockfd,&nodosSelect))
 			{
 				continue;

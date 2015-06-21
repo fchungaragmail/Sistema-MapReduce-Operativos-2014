@@ -33,16 +33,28 @@ int32_t get_file_size(const char * file_name);
 int getNombreArchivo(char* ruta,char* nombre,int16_t *indexPadre);
 int getArchivo(char* nombre,int16_t indexPadre, t_reg_archivo** archivo);
 int getBloqueDisponible(Conexion_t* conexion);
+int getCantidadBloquesDisponibles(Conexion_t* conexion);
+int elegirNodos(int bloques, t_list* ubicaciones);
+bool tieneMasEspacio(Conexion_t* nodo1,Conexion_t* nodo2);
+bool esNodo(Conexion_t* conexion);
 pthread_mutex_t mListaArchivos;
 int nodosOnline;
 pthread_mutex_t mNodosOnline;
+pthread_mutex_t mElegirNodos;
 FILE* logFile;
 t_dictionary* comandosRemotos;
+
+
+typedef struct {
+	Conexion_t* nodo;
+	int bloqueN;
+} ubicacion_bloque;
 
 
 void initComandos()
 {
 	nodosOnline = 0;
+	pthread_mutex_init(&mElegirNodos, NULL);
 	pthread_mutex_init(&mNodosOnline, NULL);
 	comandosRemotos = dictionary_create();
 	dictionary_put(comandosRemotos,"nombre",1);
@@ -160,29 +172,31 @@ int importar(char* argumentos){
 	void* archivoMap = mmap(NULL, tamanio, PROT_READ, MAP_SHARED, archivoDisk, 0);
 	close(archivoDisk);
 
-	//Chequear si puedo meter los bloques en al menos 3 nodos. Si no, que falle
+	int bloques = (tamanio / TAMANIO_BLOQUE) + 1;
+	t_list* ubicacionesElegidas = list_create();
+	if (elegirNodos(bloques, ubicacionesElegidas) != EXIT_SUCCESS)
+	{
+		return -1;
+	}
 
 	t_list* listaBloques = list_create();
 	t_list* listaThreads = list_create();
 	int32_t bytesEnviados = 0;
 	while (bytesEnviados < tamanio)
 	{
-		int bloques = (tamanio / TAMANIO_BLOQUE) + 1;
 		for (int j = 0;j<bloques;j++)
 		{
 			t_list* ubicaciones = list_create();
+			t_list* bloque = list_get(ubicacionesElegidas,j);
 			//Asi lo copia en todos lados -> Diseniar un selector de nodo
-			for (int i=0;i<conexiones->elements_count;i++)
+			for (int i=0;i<ubicacionesElegidas->elements_count;i++)
 			{
-				Conexion_t* nodo = list_get(conexiones,i);
-				if (strcmp(nodo->nombre,"MaRTA") == 0) continue;
+				ubicacion_bloque* ubicacionElegida = list_get(bloque,i);
+				Conexion_t* nodo = ubicacionElegida->nodo;
 
 				enviarBloque_t* envio = malloc(sizeof(enviarBloque_t));
 
-				pthread_mutex_lock(&(nodo->mEstadoBloques));
-				envio->bloque = getBloqueDisponible(nodo);
-				nodo->estadoBloques[envio->bloque] = true; //Lo marco en uso
-				pthread_mutex_unlock(&(nodo->mEstadoBloques));
+				envio->bloque = ubicacionElegida->bloqueN;
 
 				t_ubicacion_bloque* ubicacion = malloc(sizeof(t_ubicacion_bloque));
 				ubicacion->bloque = envio->bloque;
@@ -227,7 +241,7 @@ int importar(char* argumentos){
 			"DirPadre: %d\n"
 			"Cantidad de Bloques: %d\n",
 			archivo->nombre,archivo->tamanio,archivo->dirPadre,archivo->bloques->elements_count);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 
@@ -495,4 +509,95 @@ int getBloqueDisponible(Conexion_t* conexion)
 			return i;
 	}
 	return -1;
+}
+
+void revertirAsignaciones(t_list* ubicaciones)
+{
+	for (int i=0;i<ubicaciones->elements_count;i++)
+	{
+		t_list* bloque = list_get(ubicaciones,i);
+		for (int j=0;j<bloque->elements_count;j++)
+		{
+			ubicacion_bloque* ubicacion = list_get(bloque,j);
+
+			pthread_mutex_lock(&(ubicacion->nodo->mSocket));
+			ubicacion->nodo->estadoBloques[ubicacion->bloqueN] = false;
+			//devuelvo a NO EN USO a los bloques seleccionados
+			pthread_mutex_unlock(&(ubicacion->nodo->mSocket));
+			free(ubicacion);
+		}
+		list_destroy(bloque);
+	}
+}
+
+
+int elegirNodos(int bloques, t_list* ubicaciones)
+{
+	pthread_mutex_lock(&mElegirNodos);
+
+	for (int i=0;i<bloques;i++)
+	{
+		pthread_mutex_lock(&mConexiones);
+		t_list* nodos = list_filter(conexiones, esNodo);
+		pthread_mutex_unlock(&mConexiones);
+		if (nodos->elements_count < LISTA_NODOS)
+		{
+			revertirAsignaciones(ubicaciones);
+			return-1; //No hay suficientes nodos
+		}
+
+		list_sort(nodos,tieneMasEspacio);
+
+		t_list* bloque = list_create();
+		list_add_in_index(ubicaciones, i, bloque);
+
+		for (int j=0;j<LISTA_NODOS;j++)
+		{
+			Conexion_t* nodo = list_get(nodos,j);
+			int bloqueDisponible = getBloqueDisponible(nodo);
+			if (bloqueDisponible == -1)
+			{
+				revertirAsignaciones(ubicaciones);
+				return -1;//De los tres primeros nodos, alguno no tiene bloques disponibles
+			}
+
+			pthread_mutex_lock(&(nodo->mEstadoBloques));
+			nodo->estadoBloques[bloqueDisponible] = true; //Lo marco en uso
+			pthread_mutex_unlock(&(nodo->mEstadoBloques));
+
+			ubicacion_bloque* ubicacion = malloc(sizeof(ubicacion_bloque));
+			ubicacion->bloqueN = bloqueDisponible;
+			ubicacion->nodo = nodo;
+
+			list_add(bloque,ubicacion);
+		}
+	}
+	pthread_mutex_unlock(&mElegirNodos);
+	return EXIT_SUCCESS;
+}
+
+
+int getCantidadBloquesDisponibles(Conexion_t* conexion)
+{
+	int bloquesDisponibles = 0;
+	for (int i=0;i<BLOQUES_NODO;i++)
+	{
+		if (conexion->estadoBloques[i] == false)
+			bloquesDisponibles++;
+	}
+	return bloquesDisponibles;
+}
+
+bool tieneMasEspacio(Conexion_t* nodo1,Conexion_t* nodo2)
+{
+	if (getCantidadBloquesDisponibles(nodo1) >= getCantidadBloquesDisponibles(nodo2))
+		return true;
+	return false;
+}
+
+bool esNodo(Conexion_t* conexion)
+{
+	if (strcmp(conexion->nombre,"MaRTA") == 0)
+		return false;
+	return true;
 }

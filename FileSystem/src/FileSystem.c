@@ -49,8 +49,6 @@ void initFileSystem()
 	strcpy(IP_LISTEN,tmp);
 	free(tmp);
 
-	PUERTO_MARTA = config_get_int_value(archivoConfig, "PUERTO_MARTA");
-
 	LISTA_NODOS = config_get_int_value(archivoConfig, "LISTA_NODOS");
 
 	//config_destroy(archivoConfig);

@@ -17,7 +17,7 @@
 #include "estructuras.h"
 
 #define TAMANIO_BLOQUE 20971520
-#define BLOQUES_NODO 52
+#define BLOQUES_NODO 50
 
 extern t_list* listaArchivos;
 extern t_list* listaDirs;
@@ -27,6 +27,7 @@ extern int LISTA_NODOS;
 extern int PUERTO_MARTA;
 extern FILE* logFile;
 extern t_list* conexiones;
+extern pthread_mutex_t mConexiones;
 extern int nodosOnline;
 extern pthread_mutex_t mListaArchivos;
 
