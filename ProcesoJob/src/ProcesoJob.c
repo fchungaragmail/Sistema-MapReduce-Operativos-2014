@@ -34,20 +34,32 @@ void* pedidosMartaHandler(void* arg) {
 			mensajeMarta->comando = strdup("mapFile todo1.txt");
 			mensajeMarta->data = strdup("255.0.0.1 250 11 /ruta_temp1 244.0.1.7 250 12 /ruta_temp2 128.3.1.3 250 999 ruta_temp3");
 			alternar = 1;
-		} else{
+		} else if ( alternar == 1){
 			mensajeMarta = malloc(sizeof(mensaje_t));
 			mensajeMarta->comando = strdup("reduceFileSinCombiner todoSC1.txt");
-			mensajeMarta->data = strdup("227.4.6.1 999  2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 1 ruta_temp5");
+			mensajeMarta->data = strdup("227.4.6.1 999 2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 1 ruta_temp5");
+			alternar = 2;
+		} else if ( alternar == 2){
+			mensajeMarta = malloc(sizeof(mensaje_t));
+			mensajeMarta->comando = strdup("reduceFileConCombiner-Pedido1 todoCC1.txt");
+			mensajeMarta->data = strdup("227.4.6.1 999 archTempCC1 2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 archTempCC2 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 archTempCC3 1 ruta_temp5");
+			alternar = 3;
+		} else {
+			mensajeMarta = malloc(sizeof(mensaje_t));
+			mensajeMarta->comando = strdup("reduceFileConCombiner-Pedido2 todoCC2.txt");
+			mensajeMarta->data = strdup("227.4.6.1 999 1 /ruta_temp1 117.4.5.1 259 1 /ruta_temp3 167.5.4.1 250 1 ruta_temp5");
 			alternar = 0;
 		}
 #endif
 		printf("-----Recibido mensaje de Marta-----\nComando: %s \nData: %s \n------------------\n", mensajeMarta->comando, mensajeMarta->data);
 		char** comandoStr = string_split(mensajeMarta->comando, " ");
 
-		if (strncmp(comandoStr[MENSAJE_COMANDO], "mapFile", 7) == 0) {
+		if (strcmp(comandoStr[MENSAJE_COMANDO], "mapFile") == 0) {
 			PlanificarHilosMapper(mensajeMarta);
-		} else if (strncmp(mensajeMarta->comando, "reduceFileSinCombiner", 21) == 0) {
+		} else if (strcmp(comandoStr[MENSAJE_COMANDO], "reduceFileSinCombiner") == 0 || strcmp(comandoStr[MENSAJE_COMANDO], "reduceFileConCombiner-Pedido2") == 0 ) {
 			PlanificarHilosReduce(mensajeMarta, FALSE);
+		} else if( strcmp(comandoStr[MENSAJE_COMANDO], "reduceFileConCombiner-Pedido1") == 0){
+			PlanificarHilosReduce(mensajeMarta, TRUE);
 		}
 
 		FreeStringArray(&comandoStr);
@@ -182,15 +194,17 @@ void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado){
 	char* bufferComandoStr = string_new();
 	char* bufferDataStr = string_new();
 
+	string_append_with_format(&bufferComandoStr, hiloJob->tipoHilo == TIPO_HILO_MAPPER ? "mapFileResponse %s" : "reduceFileResponse %s" ,hiloJob->nombreArchivo);
+
 	switch(estado){
 
 	case ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION:
 	case ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO:
-		string_append_with_format(&bufferComandoStr,"mapFileResponse %s 0",hiloJob->nombreArchivo);
+		string_append(&bufferComandoStr," 0");
 		string_append_with_format(&bufferDataStr,"%s", hiloJob->parametrosError != NULL ? hiloJob->parametrosError : inet_ntoa(hiloJob->direccionNodo.sin_addr));
 		break;
 	case ESTADO_HILO_FINALIZO_OK:
-		string_append_with_format(&bufferComandoStr,"mapFileResponse %s 1",hiloJob->nombreArchivo);
+		string_append(&bufferComandoStr," 1");
 		break;
 
 	}
@@ -292,7 +306,54 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner){
 
 		hiloJob->parametros = parametrosBuffer;
 		CrearHiloReducer(hiloJob);
+	} else{
+
+		//*comando: "reduceFileConCombiner-Pedido1 pathArchivo"
+		//*data:      Nodo1 nombreArchTemp1 CantDeArchEnNodoAProcesar RAT1 RAT2 -etc...-
+		//                ...Nodo2 nombreArchTemp2 CantDeArchEnNodoAProcesar RTA1 RAT2 -etc...
+		//		...Nodo3 ....
+
+
+		int i = 0;
+		while(dataStr[i] != NULL){
+
+			Sockaddr_in their_addr;
+
+			their_addr.sin_family = AF_INET;
+			inet_aton(dataStr[i++], &(their_addr.sin_addr));
+			their_addr.sin_port = htons(atoi(dataStr[i++]));
+			memset(&(their_addr.sin_zero), '\o', 8);
+
+			HiloJob* hiloJob = malloc(sizeof(HiloJob));
+			hiloJob->direccionNodo = their_addr;
+			hiloJob->threadhilo = NULL;
+			hiloJob->socketFd = -1;
+			hiloJob->parametros = NULL;
+			hiloJob->parametrosError = NULL;
+			hiloJob->nombreArchivo = string_duplicate(dataStr[i++]);
+
+			int archivosTotalesAProcesar = atoi(dataStr[i++]);
+			int leerHasta = i + archivosTotalesAProcesar ;
+
+			char* parametrosBuffer = string_new();
+			string_append_with_format(&parametrosBuffer, "%d %s",archivosTotalesAProcesar, dataStr[i++]);
+
+			while(i < leerHasta ){
+				string_append_with_format(&parametrosBuffer, " %s",dataStr[i++]);
+			}
+			hiloJob->parametros = parametrosBuffer;
+
+			list_add(listaHilos, (void*) hiloJob);
+			CrearHiloReducer(hiloJob);
+
+			printf("CREADO %s\n", hiloJob->parametros);
+
+		}
+
+
 	}
+
+
 
 	FreeStringArray(&dataStr);
 	FreeStringArray(&comandoStr);
