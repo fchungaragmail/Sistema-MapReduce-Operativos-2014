@@ -26,10 +26,10 @@ void connectToFileSistem(int*);
 void setValuesToSockaddr(Sockaddr_in*, int, char*);
 char** generate_fields();
 void freeMemory(char**);
-void *fs_nodo_conection_handler(void*);
 
+void *fs_nodo_conection_handler(void*);
 void *map_conection_handler(void*);
-//void *reduce_conection_handler(void*);
+void *reduce_conection_handler(void*);
 //void *nodo_conection_handler(void*);
 
 
@@ -39,22 +39,24 @@ int main() {
 	int sockFD; //socket nodo servidor
 	int sockAccept; //socket nodo servidor acepta conexiones
 	int sockFS; //socket nodo cliente para conectarse con FS
-	int* sockForThread = malloc(sizeof(sockFS)); //sockFS que paso por parametro al thread que queda hablando con FS
+	int* sockForThread;//sockFS que paso por parametro al thread que queda hablando con FS
 	socklen_t size;
 	Sockaddr_in client_sock; //sockaddr que se usa en accept de nodo servidor
 	pthread_t nodo_handler;
 	pthread_t fs_handler;
 	pthread_t map_handler;
-//	pthread_t reduce_handler;
-//	mensaje_t* buffer_recv = malloc(sizeof(mensaje_t));
-	char* buffer_shakehand = malloc(sizeof(SHAKEHAND_MESSAGE_LENGTH));
+	pthread_t reduce_handler;
+	mensaje_t* buffer_shakehand = malloc(sizeof(mensaje_t));
+	mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
 
 
 	getConfig();
 
 	connectToFileSistem(&sockFS);
 	sockForThread = &sockFS;
-	pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockForThread);
+	pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, NULL);
+	pthread_join(fs_handler,NULL);
+
 
 	int value = initServer(&sockFD);
 	if(value == -1) {
@@ -75,26 +77,32 @@ int main() {
 		return -1;
 	}
 
-	recv(sockAccept, buffer_shakehand, SHAKEHAND_MESSAGE_LENGTH, 0);
-	send(sockAccept, "Bienvenido al Nodo... al gran Nodo" , MESSAGE_LENGTH, 0);
+	recibir(sockAccept, buffer_shakehand); //recibo mensaje shakehand
+	buffer_send->comandoSize = SHAKEHAND_MESSAGE_LENGTH;
+	buffer_send->comando = "Bienvenido al Nodo";
+	buffer_send->dataSize = 1; //es 1 pq no envio nada y hace un malloc de 1 asi no ocupa memoria
+	buffer_send->data = "\0"; //aca no le envio nada
+	enviar(sockAccept, buffer_send);
 
-	if(strcmp(buffer_shakehand, "nd") == 0) {
+	if(strcmp(buffer_shakehand->comando, "nd") == 0) {
 		int* sockAux = malloc(sizeof(int));
 		sockAux = &sockAccept;
 		printf("Se obtuvo una conexión desde NODO: %s\n", inet_ntoa(client_sock.sin_addr));
 		pthread_create(&nodo_handler, NULL, fs_nodo_conection_handler, sockAux);
 	}
 
-	if(strcmp(buffer_shakehand, "mp") == 0){
+	if(strcmp(buffer_shakehand->comando, "mp") == 0){
 	    int* sockAux = malloc(sizeof(int));
 	    sockAux = &sockAccept;
 		printf("Se obtuvo una conexión desde JOB: %s\n", inet_ntoa(client_sock.sin_addr));
 		pthread_create(&map_handler, NULL, map_conection_handler, sockAux);
 	}
-//
-//	if(strcmp(buffer_shakehand, "rd") == 0) {
-//		pthread_create(&reduce_handler, NULL, reduce_conection_handler, NULL);
-//	}
+
+	if(strcmp(buffer_shakehand->comando, "rd") == 0) {
+		int* sockAux = malloc(sizeof(int));
+		sockAux = &sockAccept;
+		pthread_create(&reduce_handler, NULL, reduce_conection_handler, sockAux);
+	}
 
 
 	} //while
@@ -164,7 +172,7 @@ void connectToFileSistem(int* sock) {
 	char* port = malloc(6);
 	char* message = malloc(140);
 
-//	setValuesToSockaddr(&server_addr, PUERTO_FS, IP_FS);
+	setValuesToSockaddr(&server_addr, PUERTO_FS, IP_FS);
 
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(PUERTO_FS);
@@ -211,80 +219,69 @@ void setValuesToSockaddr(Sockaddr_in* addr, int port, char* ip) {
 void *fs_nodo_conection_handler(void* ptr){
 
 	int sockFD = *((int*)ptr);
+	char** result;
 
 	while(1) {
 
 		mensaje_t* buffer_recv = malloc(sizeof(mensaje_t));
 		mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
-		char** result = generate_fields(2);
-
 		recibir(sockFD, buffer_recv);
 		result = string_split(buffer_recv->comando, " ");
 
 			if (strcmp(result[0], "getBloque") == 0) {
 
-								buffer_send->comandoSize = 1;
-								buffer_send->comando = malloc(sizeof(int16_t));
-								buffer_send->comando = "\0";
-								buffer_send->dataSize = sizeof(result[1]);
-								buffer_send->data = malloc(sizeof(int32_t));
-								buffer_send->data = result[1];
-								enviar(sockFD, buffer_send);
-
-//				char* bloque = malloc(TAMANIO_BLOQUE);
-//				bloque = getBloque(atoi(result[1]));  //getBloque bloque
-//				buffer_send->comandoSize = 1;
-//				buffer_send->comando = "\0";
-//				buffer_send->dataSize = sizeof(int32_t);
-//				buffer_send->data = bloque;
-//				enviar(sockFD, buffer_send);
-//				free(bloque);
+				char* bloque = malloc(TAMANIO_BLOQUE);
+				bloque = getBloque(atoi(result[1]));  //getBloque bloque
+				buffer_send->comandoSize = 1;
+				buffer_send->comando = "\0";
+				buffer_send->dataSize = sizeof(int32_t);
+				buffer_send->data = bloque;
+				enviar(sockFD, buffer_send);
+				free(bloque);
 				free(buffer_send);
 				free(buffer_recv);
-				freeMemory(result);
-
 			}
-//			if (strcmp(result[0], "setBloque") == 0) {   //setBloque bloque [datos]
-//				setBloque(atoi(result[1]), buffer_recv->data);
-//				free(buffer_send);
-//				free(buffer_recv);
-//				freeMemory(&result);
-//			}
-//			if (strcmp(result[0], "getFileContent") == 0) { //getFileContent nombre
-//				t_fileContent* fileContent;
-//				fileContent = getFileContent(result[1]);
-//				buffer_send->comandoSize = 1;
-//				buffer_send->comando = "\0";
-//				buffer_send->dataSize = fileContent->size;
-//				buffer_send->data = fileContent->contenido;
-//				enviar(sockFD, buffer_send);
-//				free(buffer_send);
-//				free(buffer_recv);
-//				freeMemory(&result);
-//			}
+
+			if (strcmp(result[0], "setBloque") == 0) {   //setBloque bloque [datos]
+				setBloque(atoi(result[1]), buffer_recv->data);
+				free(buffer_send);
+				free(buffer_recv);
+			}
+
+			if (strcmp(result[0], "getFileContent") == 0) { //getFileContent nombre
+				t_fileContent* fileContent;
+				fileContent = getFileContent(result[1]);
+				buffer_send->comandoSize = 1;
+				buffer_send->comando = "\0";
+				buffer_send->dataSize = fileContent->size;
+				buffer_send->data = fileContent->contenido;
+				enviar(sockFD, buffer_send);
+				free(buffer_send);
+				free(buffer_recv);
+			}
 
 	} //cierra while(1)
 
 } //cierra thread
 
 
-char** generate_fields(int size) {
-		char** result = malloc(size*sizeof(char*));
-		int i = 0;
-		for(i ; i < size; i++) {
-			result[i] = malloc(COMANDO_LENGTH);
-		}
-
-		return result;
-}
-
-void freeMemory(char** result) {
-	int i = 0;
-	for (i ; i < 2; i++) {
-		free(result[i]);
-	}
-	free(result);
-}
+//char** generate_fields(int size) {
+//		char** result = malloc(size*sizeof(char*));
+//		int i = 0;
+//		for(i ; i < size; i++) {
+//			result[i] = malloc(COMANDO_LENGTH);
+//		}
+//
+//		return result;
+//}
+//
+//void freeMemory(char** result) {
+//	int i = 0;
+//	for (i ; i < 2; i++) {
+//		free(result[i]);
+//	}
+//	free(result);
+//}
 
 
 void *map_conection_handler(void* ptr){  //int bloque  char* nombreArchTemp
@@ -295,19 +292,19 @@ void *map_conection_handler(void* ptr){  //int bloque  char* nombreArchTemp
 
 		mensaje_t* buffer_recv = malloc(sizeof(mensaje_t));
 		mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
-		char** result = generate_fields(2);
+		char** result;
 		int numBloque;
 
 		recibir(sockFD, buffer_recv);
 
-		int scriptFD = open("script.txt", O_CREAT, 0777);
+		int scriptFD = open("/tmp/map.sh", O_CREAT, 0777);
 		write(scriptFD, buffer_recv->data, sizeof(buffer_recv->data));
 
-		result = string_split(buffer_recv->comando, " ");
+		result = string_split(buffer_recv->comando, " "); //pos 0 = numBloque  , pos 1 = nombreArchivoTemporal
 
 		numBloque = atoi(result[0]); //paso el string "numBloque" a tipo int , pq mapping recibe int NumBloque
 
-		int mapResult = mapping("script.txt", numBloque, result[1], "archivoFinalFinal.txt");
+		int mapResult = mapping("./tmp/map.sh", numBloque, result[1]);
 		if(mapResult == 0) {
 			//informar a job que termino bien, send normal? o enviar y se pasa por data o comando?
 		} else {
@@ -316,13 +313,37 @@ void *map_conection_handler(void* ptr){  //int bloque  char* nombreArchTemp
 
 		free(buffer_recv);
 		free(buffer_send);
-		freeMemory(result);
 
 	} //while
 
 } //cierra thread
 
 
-//void *reduce_conection_handler(void* ptr){}
-//void *nodo_conection_handler(void* ptr){}
+void *reduce_conection_handler(void* ptr) {
+
+	int sockFD = *((int*)ptr);
+
+	while(1) {
+
+		mensaje_t* buffer_recv = malloc(sizeof(mensaje_t));
+		mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
+		char** result;
+		char* archivosParaReduce;
+		int i = 2;
+
+		recibir(sockFD, buffer_recv);
+
+		//execReduce archiTemp cantArchNodoLocal a1 a2 aN ipNodoRemoto puertoNodoRemoto a1 a2 aN
+		result = string_split(buffer_recv->comando, " ");
+
+		archivosParaReduce = malloc(sizeof(result));
+		for(;i < sizeof(result); i++){
+			archivosParaReduce = strcat(archivosParaReduce, result[i]);
+		}
+
+		reducing(buffer_recv->data, archivosParaReduce ,result[1]);
+	}
+
+
+}
 

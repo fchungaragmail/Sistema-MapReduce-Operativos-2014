@@ -13,36 +13,34 @@
 #include <sys/types.h>
 #include <string.h>
 #include <stdlib.h>
-#include <commons/collections/list.h>
+#include <commons/string.h>
 
 #define TAMANIO_BLOQUE 20971520
 
 
-int aparearArchivos(t_list* listaArchivos) {
+char* aparearArchivos(char* listaArchivos) {
 
-	t_list* elemento;
 	int apareoArchivo;
-	char* buffer;
+	int i = 0;
+	char* buffer = malloc(sizeof(int));
+	char* path = "/home/utnso/Escritorio/apareo/apareo.txt";
 
-	buffer = malloc(TAMANIO_BLOQUE);
+	apareoArchivo = open(path, O_APPEND | O_CREAT | O_RDWR); //si no existe lo crea (O_CREATE) y lo hace en
+																                                   //modo append (O_APPEND)
+	char** archivo = string_split(listaArchivos, " ");
 
-	apareoArchivo = open("apareo.txt", O_APPEND);
-
-	while (!list_is_empty(listaArchivos)) {
-		int i = 0;
-		elemento = list_get(listaArchivos, i);
-
-		while(fgets(buffer, TAMANIO_BLOQUE, elemento->head->data /*->nombreArchivo*/) != NULL) {
-			write(apareoArchivo, buffer, TAMANIO_BLOQUE);
+	for (; i < sizeof(archivo); i++) {
+		int archivoFD = open(archivo[i], O_RDONLY);
+		while(read(archivoFD, buffer, sizeof(buffer)) != 0) {
+			write(apareoArchivo, buffer, sizeof(buffer));
 		}
-
-		i++;
+		close(archivoFD);
 	}
+
+
 
 	close(apareoArchivo);
 
-
-
-	return apareoArchivo;
+	return path;
 
 }

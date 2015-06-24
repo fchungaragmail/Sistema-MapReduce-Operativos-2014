@@ -10,8 +10,8 @@
 
 
 #define MESSAGE_LENGTH 256
-#define SHAKEHAND_MESSAGE_LENGTH 3
-#define COMANDO_LENGTH 256
+#define SHAKEHAND_MESSAGE_LENGTH 50
+#define COMANDO_LENGTH 50
 
 #include <stdio.h>
 #include <fcntl.h>
