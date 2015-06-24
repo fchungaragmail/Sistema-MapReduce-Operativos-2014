@@ -32,6 +32,11 @@ typedef enum {
 	ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO,
 } EstadoHilo;
 
+typedef enum {
+	TIPO_HILO_MAPPER,
+	TIPO_HILO_REDUCE
+} TipoHilo;
+
 
 typedef struct {
 	short int sin_family;
@@ -48,7 +53,7 @@ typedef struct {
 	char* parametros;
 	char* parametrosError;
 	int nroBloque;
-
+	TipoHilo tipoHilo;
 } HiloJob ;
 
 #endif /* SRC_DEFINICIONES_H_ */

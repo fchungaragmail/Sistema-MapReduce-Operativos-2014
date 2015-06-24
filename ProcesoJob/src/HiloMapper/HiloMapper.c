@@ -7,6 +7,7 @@ pthread_t* CrearHiloMapper(HiloJob* hiloJob){
 
 	pthread_t* hiloMapper;
 
+	hiloJob->tipoHilo = TIPO_HILO_MAPPER;
 	pthread_create(&hiloMapper,NULL,hiloMapperHandler, (void*)hiloJob);
 	hiloJob->threadhilo = hiloMapper;
 
@@ -45,8 +46,8 @@ void* hiloMapperHandler(void* arg){
 	//TODO mejorar la creacion de mensaje_t
 	mensaje_t* mensajeDeNodo;
 	mensaje_t* mensajeParaNodo = malloc(sizeof(mensaje_t));
-	mensajeParaNodo->comando= strdup("handshake");
-	mensajeParaNodo->comandoSize = strlen("handshake");
+	mensajeParaNodo->comando= strdup("mp");
+	mensajeParaNodo->comandoSize = strlen("mp");
 	mensajeParaNodo->data = NULL;
 	mensajeParaNodo->dataSize = NULL;
 

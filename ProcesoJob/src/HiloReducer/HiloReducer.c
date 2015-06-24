@@ -6,6 +6,7 @@ pthread_t* CrearHiloReducer(HiloJob* hiloJob){
 
 	pthread_t* hiloReducer;
 
+	hiloJob->tipoHilo = TIPO_HILO_REDUCE;
 	pthread_create(&hiloReducer,NULL,hiloReducerHandler, (void*)hiloJob);
 	hiloJob->threadhilo = hiloReducer;
 
@@ -44,8 +45,8 @@ void* hiloReducerHandler(void* arg){
 	//TODO mejorar la creacion de mensaje_t
 	mensaje_t* mensajeDeNodo;
 	mensaje_t* mensajeParaNodo = malloc(sizeof(mensaje_t));
-	mensajeParaNodo->comando= strdup("handshake");
-	mensajeParaNodo->comandoSize = strlen("handshake");
+	mensajeParaNodo->comando= strdup("rd");
+	mensajeParaNodo->comandoSize = strlen("rd");
 	mensajeParaNodo->data = NULL;
 	mensajeParaNodo->dataSize = NULL;
 
