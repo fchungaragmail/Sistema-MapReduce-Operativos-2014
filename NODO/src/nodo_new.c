@@ -5,7 +5,6 @@
  *      Author: utnso
  */
 
-#include "sockets_struct_new.h"
 #include "nodo_new.h"
 
 
@@ -17,20 +16,6 @@ char* DIR_TEMP;
 char* NODO_NUEVO;
 char* IP_NODO;
 int PUERTO_NODO;
-
-
-//Headers
-void getConfig();
-int initServer(int*);
-void connectToFileSistem(int*);
-void setValuesToSockaddr(Sockaddr_in*, int, char*);
-char** generate_fields();
-void freeMemory(char**);
-
-void *fs_nodo_conection_handler(void*);
-void *map_conection_handler(void*);
-void *reduce_conection_handler(void*);
-//void *nodo_conection_handler(void*);
 
 
 //Main Programm
@@ -54,7 +39,7 @@ int main() {
 
 	connectToFileSistem(&sockFS);
 	sockForThread = &sockFS;
-	pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, NULL);
+	pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockForThread);
 	pthread_join(fs_handler,NULL);
 
 
@@ -341,7 +326,13 @@ void *reduce_conection_handler(void* ptr) {
 			archivosParaReduce = strcat(archivosParaReduce, result[i]);
 		}
 
-		reducing(buffer_recv->data, archivosParaReduce ,result[1]);
+		int reduceResult = reducing(buffer_recv->data, archivosParaReduce ,result[1]);
+		if(reduceResult == 0) {
+			buffer_send->comandoSize = sizeof(reduceResult);
+			buffer_send->comando = reduceResult;
+			buffer_send->dataSize = 1;
+			buffer_send->data = "\0";
+		}
 	}
 
 
