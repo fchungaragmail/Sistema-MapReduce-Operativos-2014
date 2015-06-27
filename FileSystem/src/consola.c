@@ -132,6 +132,12 @@ int procesarEntrada(char entrada[],bool* continuar)
 		procesarComando(comando,espacioTotal);
 		break;
 	}
+	case 14:
+	{
+		//Formatear espacio de datos
+		procesarComando(comando,format);
+		break;
+	}
 	case 90:
 	{
 		cerrarConsola();
@@ -166,6 +172,7 @@ void initConsola()
 	dictionary_put(diccionarioComandos,"addn",11);
 	dictionary_put(diccionarioComandos,"deln",12);
 	dictionary_put(diccionarioComandos,"space",13);
+	dictionary_put(diccionarioComandos,"format",14);
 }
 
 void mostrarAyuda()
@@ -173,6 +180,7 @@ void mostrarAyuda()
 	printf("\nComandos disponibles:\n"
 			"help	Muestra el menu de ayuda\n"
 			"exit	Sale de la consola\n"
+			"format Formatea el FS"
 			"mv 	Mover/renombrar arcivo/direcorio. Simil UNIX\n"
 			"rm 	Borrar archivo/directorio. Simil UNIX\n"
 			"mkdir	Crear directorio. Simil UNIX\n"

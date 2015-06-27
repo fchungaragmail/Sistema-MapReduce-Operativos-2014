@@ -21,6 +21,7 @@
 
 void initComandos();
 void procesarComando(char** comando, void(*doComando)(void*));
+int format(char* argumentos);
 int mover(char* argumentos);
 int borrar(char* argumentos);
 int crearDir(char* argumentos);

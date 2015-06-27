@@ -11,6 +11,7 @@
 void initComandos();
 void procesarComando(char** comando, void(*doComando)(void*));
 void procesarComandoRemoto(mensaje_t* mensaje, Conexion_t* conexion);
+int format(char* argumentos);
 int mover(char* argumentos);
 int borrar(char* argumentos);
 int crearDir(char* argumentos);
@@ -38,6 +39,7 @@ int getCantidadBloquesDisponibles(Conexion_t* conexion);
 int elegirNodos(int bloques, t_list* ubicaciones);
 bool tieneMasEspacio(Conexion_t* nodo1,Conexion_t* nodo2);
 bool esNodo(Conexion_t* conexion);
+void formatNodo(Conexion_t* nodo);
 pthread_mutex_t mListaArchivos;
 int nodosOnline;
 pthread_mutex_t mNodosOnline;
@@ -99,6 +101,40 @@ void procesarComandoRemoto(mensaje_t* mensaje, Conexion_t* conexion)
 
 	}
 }
+
+int format(char* argumentos)
+{
+	t_list* nodos = list_filter(conexiones, esNodo);
+
+	for(int i=0;i<nodos->elements_count;i++)
+	{
+		Conexion_t* nodo = list_get(nodos,i);
+		formatNodo(nodo);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+void formatNodo(Conexion_t* nodo)
+{
+	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
+	mensaje->comando = string_new();
+	strcpy(mensaje->comando,"borrarBloque -1");
+	mensaje->comandoSize = strlen(mensaje->comando) + 1;
+	mensaje->dataSize = 0;
+
+	pthread_mutex_lock(&(nodo->mSocket));
+	enviar(nodo->sockfd,mensaje);
+	pthread_mutex_unlock(&(nodo->mSocket));
+
+	pthread_mutex_lock(&(nodo->mEstadoBloques));
+	for (int i=0;i<BLOQUES_NODO;i++)
+	{
+		nodo->estadoBloques[i] = false;
+	}
+	pthread_mutex_unlock(&(nodo->mEstadoBloques));
+}
+
 
 int mover(char* argumentos){
 	printf("Mover\n");
