@@ -137,7 +137,46 @@ void formatNodo(Conexion_t* nodo)
 
 
 int mover(char* argumentos){
-	printf("Mover\n");
+	if (strcmp(argumentos,"/?") == 0 )
+	{
+		printf("mv origen destino\n");
+		return 0;
+	}
+
+	char** rutas = string_split(argumentos," ");
+
+	char nombre[50];
+	int16_t indexPadre;
+	t_reg_archivo* archivo;
+
+	if (getNombreArchivo(argumentos,nombre,&indexPadre) != EXIT_SUCCESS)
+	{
+		printf("Archivo no encontrado\n");
+		return -1;
+	} else
+	{
+		if (getArchivo(nombre,indexPadre, &archivo) != EXIT_SUCCESS)
+		{
+			printf("Archivo no encontrado\n");
+			return -1;
+		}
+	}
+
+	char nombreDest[50];
+	int16_t indexPadreDest;
+
+	if (getNombreArchivo(argumentos,nombreDest,&indexPadreDest) != EXIT_SUCCESS)
+	{
+		return -1;
+	}
+
+	strcpy(archivo->nombre,nombreDest);
+	archivo->dirPadre = indexPadreDest;
+
+	log_debug(logFile,	"Nombre del archivo: %s\n"
+						"Directorio padre: %d",
+						archivo->nombre,
+						archivo->dirPadre);
 	return 0;
 }
 
