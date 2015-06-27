@@ -126,6 +126,12 @@ int procesarEntrada(char entrada[],bool* continuar)
 		procesarComando(comando,quitarNodo);
 		break;
 	}
+	case 13:
+	{
+		//espacioTotal
+		procesarComando(comando,espacioTotal);
+		break;
+	}
 	case 90:
 	{
 		cerrarConsola();
@@ -159,6 +165,7 @@ void initConsola()
 	dictionary_put(diccionarioComandos,"cpb",10);
 	dictionary_put(diccionarioComandos,"addn",11);
 	dictionary_put(diccionarioComandos,"deln",12);
+	dictionary_put(diccionarioComandos,"space",13);
 }
 
 void mostrarAyuda()
@@ -177,6 +184,7 @@ void mostrarAyuda()
 			"cpb	Copia un bloque\n"
 			"addn	Agregar nodo\n"
 			"deln	Quitar nodo\n"
+			"space	Muestra el espacio disponible en GB\n"
 			"\n"
 			"Teclee `comando /?' para saber más sobre la función `comando'.\n");
 }

@@ -33,6 +33,7 @@ int copiarBloque(char* argumentos);
 int agregarNodo(char* argumentos);
 int quitarNodo(char* argumentos);
 int nomb(char* argumentos, Conexion_t* conexion);
+int espacioTotal();
 void procesarComandoRemoto(mensaje_t* mensaje, Conexion_t* conexion);
 
 

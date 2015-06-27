@@ -22,6 +22,7 @@ int borrarBloque(char* argumentos);
 int copiarBloque(char* argumentos);
 int agregarNodo(char* argumentos);
 int quitarNodo(char* argumentos);
+int espacioTotal();
 int nomb(char* argumentos, Conexion_t* conexion);
 int dataFile(char* argumentos, Conexion_t* conexion);
 
@@ -600,4 +601,35 @@ bool esNodo(Conexion_t* conexion)
 	if (strcmp(conexion->nombre,"MaRTA") == 0)
 		return false;
 	return true;
+}
+
+int espacioTotal()
+{
+	float espacioTotal = 0;
+	float espacioDisponible = 0;
+
+	pthread_mutex_lock(&mConexiones);
+	t_list* nodos = list_filter(conexiones, esNodo);
+	pthread_mutex_unlock(&mConexiones);
+
+	for (int i=0;i<nodos->elements_count;i++)
+	{
+		Conexion_t* nodo = list_get(nodos,i);
+
+		espacioTotal += BLOQUES_NODO * TAMANIO_BLOQUE/1024/1024;
+		pthread_mutex_lock(&(nodo->mEstadoBloques));
+		espacioDisponible = espacioDisponible + (getCantidadBloquesDisponibles(nodo) * TAMANIO_BLOQUE/1024/1024);
+		pthread_mutex_unlock(&(nodo->mEstadoBloques));
+	}
+
+	list_destroy(nodos);
+
+	espacioTotal = (espacioTotal/1024); //Lo paso a GB
+	espacioDisponible = (espacioDisponible/1024); //Lo paso a GB
+
+	printf(	"Espacio Total : %.2f GB.\n"
+			"Espacio disponible: %.2f GB.\n",
+			espacioTotal,
+			espacioDisponible);
+	return EXIT_SUCCESS;
 }
