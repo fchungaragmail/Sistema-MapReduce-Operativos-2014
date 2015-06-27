@@ -190,7 +190,7 @@ int importar(char* argumentos){
 			t_list* ubicaciones = list_create();
 			t_list* bloque = list_get(ubicacionesElegidas,j);
 			//Asi lo copia en todos lados -> Diseniar un selector de nodo
-			for (int i=0;i<ubicacionesElegidas->elements_count;i++)
+			for (int i=0;i<bloque->elements_count;i++)
 			{
 				ubicacion_bloque* ubicacionElegida = list_get(bloque,i);
 				Conexion_t* nodo = ubicacionElegida->nodo;
