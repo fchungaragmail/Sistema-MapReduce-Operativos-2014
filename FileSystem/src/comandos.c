@@ -313,7 +313,7 @@ int importar(char* argumentos){
 	pthread_mutex_unlock(&mListaArchivos);
 	log_debug(logFile, "Archivo agregado al FS:\n"
 			"Nombre: %s\n"
-			"Tamanio: %d\n"
+			"Tamanio: %"PRId64"\n"
 			"DirPadre: %d\n"
 			"Cantidad de Bloques: %d\n",
 			archivo->nombre,archivo->tamanio,archivo->dirPadre,archivo->bloques->elements_count);
