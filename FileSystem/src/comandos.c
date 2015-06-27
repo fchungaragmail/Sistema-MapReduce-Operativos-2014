@@ -149,7 +149,7 @@ int mover(char* argumentos){
 	int16_t indexPadre;
 	t_reg_archivo* archivo;
 
-	if (getNombreArchivo(argumentos,nombre,&indexPadre) != EXIT_SUCCESS)
+	if (getNombreArchivo(rutas[0],nombre,&indexPadre) != EXIT_SUCCESS)
 	{
 		printf("Archivo no encontrado\n");
 		return -1;
@@ -165,7 +165,7 @@ int mover(char* argumentos){
 	char nombreDest[50];
 	int16_t indexPadreDest;
 
-	if (getNombreArchivo(argumentos,nombreDest,&indexPadreDest) != EXIT_SUCCESS)
+	if (getNombreArchivo(rutas[1],nombreDest,&indexPadreDest) != EXIT_SUCCESS)
 	{
 		return -1;
 	}
