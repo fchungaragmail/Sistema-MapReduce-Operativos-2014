@@ -35,3 +35,16 @@ Ejemplo "DataFile /user/juan/datos/temperatura2012.txt/"
 		1;Nodo2;1;Nodo1;2;Nodo3;10;"
 
 *********************************************************************************************************************
+
+-->Pedir tabla con todos los datos de los nodos en los que esta tal archivo 
+-Comando: "BlockFile rutaDelArchivo nroDeBloque "
+-Data: Vacio 
+
+Ejemplo "BlockFile /user/juan/datos/temperatura2012.txt/ 8"
+
+**************************************************************************************
+
+--> FS responde con bloque de archivo pedida
+-Comando: "BlockFileResponse rutaDelArchivo nroDeBloqueDisponible"
+-Data: Bloque
+// Ej: "0;Nodo1;3;Nodo8;2;Nodo2;45;"
