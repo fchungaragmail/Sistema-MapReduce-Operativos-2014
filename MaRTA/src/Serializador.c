@@ -212,9 +212,12 @@ t_list *deserializarFullDataResponse(Message *recvMessage)
 			char *ipNodo = copiasArray[k];
 			char *puertoNodo = copiasArray[k+1];
 			char *nroDeBloque = copiasArray[k+2];
+			bool *estado = malloc(sizeof(bool));
+			*estado = true;
 			dictionary_put(dic,K_Copia_IPNodo,ipNodo);
 			dictionary_put(dic,K_Copia_PuertoNodo,puertoNodo);
 			dictionary_put(dic,K_Copia_NroDeBloque,nroDeBloque);
+			dictionary_put(dic,K_Copia_Estado,estado);
 			k=k+3;
 			list_add(listaHijaDeCopias,dic);
 		}

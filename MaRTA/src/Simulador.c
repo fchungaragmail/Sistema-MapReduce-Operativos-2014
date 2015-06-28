@@ -50,7 +50,7 @@ Message *simular()
 	}
 
 	if(nroDeLlamado == 11){
-			return simulacion_Job_reduceResponse_Fallo("reduceFileConCombiner-Pedido2","192.163.2.5");
+			return simulacion_Job_reduceResponse_Fallo("reduceFileConCombiner-Pedido2","192.163.2.8");
 	}
 
 	if(nroDeLlamado == 12){
@@ -82,7 +82,7 @@ Message *simular()
 
 
 			if(nroDeLlamado == 18){
-						return simulacion_Job_reduceResponse_Fallo("reduceFileConCombiner-Pedido2","192.163.2.5");
+						return simulacion_Job_reduceResponse_Fallo("reduceFileConCombiner-Pedido2","192.163.2.8");
 				}
 
 				if(nroDeLlamado == 19){
@@ -116,8 +116,8 @@ Message* simulacion_FS_DataFullResponse()
 
 	//armo Data
 	char *data1 = "0;195.456.2.5;55;01;196.422.1.1;11;76;192.456.8.9;60;55 ";
-	char *data2 = "1;192.163.2.5;61;20;192.456.3.3;62;54;192.163.2.5;63;36 ";
-	char *data3 = "2;195.456.2.5;64;99;192.163.2.5;65;85;192.163.2.5;65;77 ";
+	char *data2 = "1;192.163.2.8;61;20;192.456.3.3;62;54;192.456.3.3;63;36 ";
+	char *data3 = "2;195.333.2.5;64;99;192.163.2.5;65;85;192.163.2.5;65;77 ";
 	char *data4 = "3;192.456.8.9;66;88;192.153.7.5;67;82;198.167.5.9;68;22";
 
 	char *data = string_new();

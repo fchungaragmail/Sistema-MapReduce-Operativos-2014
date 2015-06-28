@@ -19,6 +19,7 @@
 #define K_BlockState_nroBloque "BlockState_nroBloque"
 #define K_BlockState_temporaryPath "BlockState_temporaryPath"
 #define K_BlockState_puertoNodo "BlockState_puertoNodo"
+#define K_BlockState_nodoDisponible "BlockState_nodoDisponible"
 
 //fileState --> keys
 #define K_FileState_arrayOfBlocksStates "FileState_arrayOfBlocksStates"
@@ -32,6 +33,11 @@
 #define K_Copia_IPNodo "Copia_IPNodo"
 #define K_Copia_NroDeBloque "Copia_NroDeBloque"
 #define K_Copia_PuertoNodo "Copia_PuertoNodo"
+#define K_Copia_Estado "Copia_Estado"
+
+//file_StatusData --> keys
+#define K_file_StatusData_combinerMode "FileCombinerMode"
+#define K_file_StatusData_Bloques "file_StatusData_Bloques"
 
 //*******************************************************
 // Inicializar
@@ -74,6 +80,7 @@ t_dictionary* obtenerNodoConMayorCantidadDeArchivosTemporales(char *path,int soc
 int obtenerPosicionDeBloqueEnBlockStatesList(char *path,char *ipNodo,char *bloque,int socket);
 t_dictionary *obtenerBlockState(char *path,char *tempPath,int socket);
 void setBlockStatesListInReducingState(char *path,int socket);
+void agregarFileState(int jobSocket,char *path, int cantidadDeBloques);
 
 //fullDataTable
 void agregarFullDataTable(t_list *table,char *path);
