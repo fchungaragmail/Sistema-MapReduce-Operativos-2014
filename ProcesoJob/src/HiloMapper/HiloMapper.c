@@ -1,7 +1,8 @@
 #include "HiloMapper.h"
-
+#include <commons/log.h>
 
 extern char* scriptMapperStr;
+extern t_log* logProcesoJob;
 
 pthread_t* CrearHiloMapper(HiloJob* hiloJob){
 
@@ -21,23 +22,22 @@ void* hiloMapperHandler(void* arg){
 
 #ifndef BUILD_PARA_TEST
 	if ((hiloJob->socketFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) { //<--- CREO QUE SI OCURRE ESTO, FALLO JOB Y DEBE ABORTAR
+		log_error(logProcesoJob,"Error al crear socket para nodo %s\n",inet_ntoa(hiloJob->direccionNodo.sin_addr));
 		ReportarResultadoHilo(hiloJob,ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION);
-		error_show("Error al crear socket para el nodo\n");
 		return NULL;
 	}
 
 
 	if (connect(hiloJob->socketFd, (Sockaddr_in*) &hiloJob->direccionNodo, sizeof(Sockaddr_in))
 			== -1) {
+		log_error(logProcesoJob,"Intento de conexion fallida con nodo IP:%s PUERTO:%d\n", inet_ntoa(hiloJob->direccionNodo.sin_addr), ntohs(hiloJob->direccionNodo.sin_port));
 		ReportarResultadoHilo(hiloJob,ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION);
-		error_show("Error al conectarse con el nodo\n");
 		return NULL;
 	}
 #else
 	hiloJob->socketFd = 99;
 #endif
-	printf("-----Conexion exitosa con nodo ip:%s puerto:%d-----\n", inet_ntoa(hiloJob->direccionNodo.sin_addr), ntohs(hiloJob->direccionNodo.sin_port));
-
+	log_info(logProcesoJob,"Conexion exitosa con nodo IP:%s PUERTO:%d\n", inet_ntoa(hiloJob->direccionNodo.sin_addr), ntohs(hiloJob->direccionNodo.sin_port));
 
 	/*
 	 *  HANDSHAKE
@@ -54,7 +54,7 @@ void* hiloMapperHandler(void* arg){
 #ifndef BUILD_PARA_TEST
 	enviar(hiloJob->socketFd, mensajeParaNodo);
 #endif
-	printf("-----Enviado al nodo %s-----\nComando: %s\nData: %s\n----------\n", inet_ntoa(hiloJob->direccionNodo.sin_addr), mensajeParaNodo->comando, mensajeParaNodo->data);
+	log_info(logProcesoJob,"Enviado al nodo IP:%s PUERTO:%d\nComando: %s\nData: %s\n", inet_ntoa(hiloJob->direccionNodo.sin_addr), ntohs(hiloJob->direccionNodo.sin_port), mensajeParaNodo->comando, mensajeParaNodo->data);
 	free(mensajeParaNodo);
 	mensajeParaNodo = NULL;
 
@@ -68,12 +68,12 @@ void* hiloMapperHandler(void* arg){
 #endif
 
 	if(estadoConexion == DESCONECTADO){
-		printf("Nodo %s desconectado!\n", inet_ntoa(hiloJob->direccionNodo.sin_addr));
+		log_error(logProcesoJob,"Se perdió la conexion con nodo IP:%s PUERTO:%d\n", inet_ntoa(hiloJob->direccionNodo.sin_addr), ntohs(hiloJob->direccionNodo.sin_port));
 		ReportarResultadoHilo(hiloJob,ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION);
 		return NULL;
 	}
 
-	printf("-----Recibido del nodo %s-----\nComando: %s\nData: %s\n----------\n", inet_ntoa(hiloJob->direccionNodo.sin_addr), mensajeDeNodo->comando, mensajeDeNodo->data);
+	log_info(logProcesoJob,"Recibido del nodo IP:%s PUERTO:%d\nComando: %s\nData: %s\n", inet_ntoa(hiloJob->direccionNodo.sin_addr), ntohs(hiloJob->direccionNodo.sin_port), mensajeDeNodo->comando, mensajeDeNodo->data);
 	free(mensajeDeNodo);
 	mensajeDeNodo = NULL;
 
@@ -97,7 +97,7 @@ void* hiloMapperHandler(void* arg){
 #ifndef BUILD_PARA_TEST
 	enviar(hiloJob->socketFd, mensajeParaNodo);
 #endif
-	printf("-----Enviado al nodo %s-----\nComando: %s\nData: %s\n----------\n", inet_ntoa(hiloJob->direccionNodo.sin_addr), mensajeParaNodo->comando, mensajeParaNodo->data);
+	log_info(logProcesoJob,"Enviado al nodo IP:%s PUERTO:%d\nComando: %s\nData: %s\n", inet_ntoa(hiloJob->direccionNodo.sin_addr), ntohs(hiloJob->direccionNodo.sin_port), mensajeParaNodo->comando, mensajeParaNodo->data);
 	free(bufferComando);
 	free(bufferData);
 	free(mensajeParaNodo);
@@ -126,12 +126,12 @@ void* hiloMapperHandler(void* arg){
 #endif
 
 	if(estadoConexion == DESCONECTADO){
-		printf("Nodo %s desconectado!\n", inet_ntoa(hiloJob->direccionNodo.sin_addr));
+		log_error(logProcesoJob,"Se perdió la conexion con nodo IP:%s PUERTO:%d\n", inet_ntoa(hiloJob->direccionNodo.sin_addr), ntohs(hiloJob->direccionNodo.sin_port));
 		ReportarResultadoHilo(hiloJob,ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION);
 		return NULL;
 	}
 
-	printf("-----Recibido del nodo %s-----\nComando: %s\nData: %s\n----------\n", inet_ntoa(hiloJob->direccionNodo.sin_addr), mensajeDeNodo->comando, mensajeDeNodo->data);
+	log_info(logProcesoJob,"Recibido del nodo IP:%s PUERTO:%d\nComando: %s\nData: %s\n", inet_ntoa(hiloJob->direccionNodo.sin_addr), ntohs(hiloJob->direccionNodo.sin_port), mensajeDeNodo->comando, mensajeDeNodo->data);
 
 	char** comandoStr = string_split(mensajeDeNodo->comando, " ");
 
@@ -142,7 +142,7 @@ void* hiloMapperHandler(void* arg){
 			ReportarResultadoHilo(hiloJob,ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO);
 		}
 	} else {
-		printf("COMANDO %s DESCONOCIDO!\n", mensajeDeNodo->comando );
+		log_error(logProcesoJob,"Comando %s desconocido!! Por parte de nodo IP:%s PUERTO:%d\n",comandoStr[MENSAJE_COMANDO], inet_ntoa(hiloJob->direccionNodo.sin_addr), ntohs(hiloJob->direccionNodo.sin_port));
 		ReportarResultadoHilo(hiloJob,ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO);
 	}
 
