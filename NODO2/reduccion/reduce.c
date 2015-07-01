@@ -1,60 +1,9 @@
 /*
- * nodo_job_functions_new.c
+ * reduce.c
  *
- *  Created on: 11/6/2015
- *      Author: utnso
+ *  Created on: 27/6/2015
+ *      Author: daniel
  */
-
-
-#include "nodo_job_functions_new.h"
-#include "nodo_new.h"
-
-
-int mapping(char *script, int numeroBloque, char *archivoTemporal1, char* archivoTemporal2) {
-
-		int p[2];
-		pipe(p);
-
-		//script  (cat)
-		if(fork()==0)
-		{
-			close(p[1]);//cierro el extremo de escritura pues solo lee
-			close(0);
-			dup(p[0]);
-
-			close(1);
-			creat(archivoTemporal1, 0777);
-			execlp(script,script,NULL);
-		}
-
-
-		//escribir bloque en STDIN del script
-		if(fork()==0)
-		{
-			close(p[0]);//cierro el extremo de lectura pues solo escribe
-			close(1);
-			dup(p[1]);
-
-			char *bloque = getBloque(numeroBloque);
-			write(1, bloque, TAMANIO_BLOQUE);
-		}
-
-		//aplico sort
-		if(fork()==0)
-		{
-			close(0);
-			open(archivoTemporal1, O_RDWR);
-
-			close(1);
-			creat(archivoTemporal2, 0777);
-
-			char *bloque = getBloque(numeroBloque);
-			execlp("sort","sort",NULL);
-		}
-
-		return 0;
-
-}
 
 
 //reducing(buffer_recv->data, archivosParaReduce ,result[1]);
@@ -99,13 +48,11 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1, char* archiv
 #include <stdlib.h>
 #include "commons/string.h"
 #include <string.h>
-#include "aparearArchivos_new.h"
+
 void aplicarScriptReduce(char *script, char *archivoTemporal1, char* archivoTemporal2);
 void procesarArchivoRemoto(int conexionNodoRemoto, char* nombreArchivoRemoto);
 int conectarseANodoRemoto(char *ip, int puerto);
-
-int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal) {
-
+void reducing(char *script, char *archivosParaReduce, char *archivoTemporalFinal){
 
 	char *archivosParaApareo = malloc(150);
 	char **pedidoReduce = string_split(archivosParaReduce, " ");
@@ -143,10 +90,10 @@ int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal) {
 	}
 
 	//apareo
-	char *archivoApareado = aparearArchivos(archivosParaApareo);
-	//char *archivoApareado = "/home/daniel/workspaceC/reduccion/tmp/temporalApareado.txt";
+	//archivoApareado = aparearArchivos(archivosParaApareo);
+	char *archivoApareado = "/home/daniel/workspaceC/reduccion/tmp/temporalApareado.txt";
 	aplicarScriptReduce(script, archivoApareado, archivoTemporalFinal);
-	return 0;
+
 }
 
 #include <fcntl.h>
@@ -223,3 +170,9 @@ void procesarArchivoRemoto(int conexionNodoRemoto, char* nombreArchivoRemoto){
 	 write(archivoTemporal, msj->data, msj->dataSize);
 	 free(msj->data);
 }
+
+int main(int argc, char **argv) {
+	reducing("sort", "1 tmp1.txt 1 127.0.0.1 8000 1 temporal.txt", "/home/daniel/workspaceC/reduccion/tmp/temporalfinal.txt");
+	return 0;
+}
+

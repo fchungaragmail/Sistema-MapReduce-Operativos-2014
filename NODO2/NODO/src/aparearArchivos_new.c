@@ -5,44 +5,75 @@
  *      Author: utnso
  */
 
+#include "aparearArchivos_new.h"
 
-#include <fcntl.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <string.h>
-#include <stdlib.h>
-#include <commons/collections/list.h>
+char* aparearArchivos(char* listaArchivos) {
 
-#define TAMANIO_BLOQUE 20971520
-
-
-int aparearArchivos(t_list* listaArchivos) {
-
-	t_list* elemento;
+	int p[2];
 	int apareoArchivo;
-	char* buffer;
+	int i = 0;
+	char* buffer = malloc(sizeof(int));
+	char* path = setName(DIRECTORY_PATH, ARCHIVO_NAME);
+	char* apareoOrdenado = setName(DIRECTORY_PATH, "apareo_ordenado");
 
-	buffer = malloc(TAMANIO_BLOQUE);
+	pipe(p);
 
-	apareoArchivo = open("apareo.txt", O_APPEND);
+	if(fork() == 0) {
 
-	while (!list_is_empty(listaArchivos)) {
-		int i = 0;
-		elemento = list_get(listaArchivos, i);
+		close(p[0]);
 
-		while(fgets(buffer, TAMANIO_BLOQUE, elemento->head->data /*->nombreArchivo*/) != NULL) {
-			write(apareoArchivo, buffer, TAMANIO_BLOQUE);
+		apareoArchivo = open(path, O_APPEND | O_CREAT | O_RDWR); //si no existe lo crea (O_CREATE) y lo hace en
+															    //modo append (O_APPEND)
+		char** archivo = string_split(listaArchivos, " ");
+
+		for (; i < sizeof(archivo); i++) {
+			int archivoFD = open(archivo[i], O_RDONLY);
+			while(read(archivoFD, buffer, sizeof(buffer)) != 0) { //leer size del archivo de una usando stat
+				write(apareoArchivo, buffer, sizeof(buffer));
+			}
+			close(archivoFD);
 		}
+		close(apareoArchivo);
 
-		i++;
+		write(p[1], path, sizeof(path));
 	}
 
-	close(apareoArchivo);
+	wait(0); //esperar a que termine el proceso hijo que crea el archivo
+
+	if(fork() == 0) {
+
+		close(p[1]); //cierro lado escritura del pipe
+		close(0); //cierro entrada estandar, queda libre ese fd y el proximo fd se asociara a la entrada estandar
+		open(path, O_RDONLY); //proximo fd, se asocia a la entrada estandar
+
+		close(1); //cierro salida estandar, el fd queda libre, proximo fd se asociara a stdout
+		open(apareoOrdenado, O_RDWR | O_CREAT); //fd que se asocia a salida standard
+		system("sort"); //se aplica sort a lo que hay en stdin (fd del archivo) y sale por stdout (fd archivo ordenado)
+	}
+
+	wait(0);
+
+	return apareoOrdenado;
+
+}
 
 
+char* setName(char* directory, char* name) {
 
-	return apareoArchivo;
+	struct timeb time;
+	char* finalName = malloc(140);
+	char* miliseconds = malloc(sizeof(int));
+
+	ftime(&time);
+
+	sprintf(miliseconds, "%d", time.millitm);
+
+	finalName = strcat(finalName, directory);
+	finalName = strcat(finalName, name);
+	finalName = strcat(finalName, "_");
+	finalName = strcat(finalName, miliseconds);
+
+
+	return finalName;
 
 }
