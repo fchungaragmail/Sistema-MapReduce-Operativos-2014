@@ -1,8 +1,9 @@
 Agregar todas las interacciones entre los procesos
 
 Luego de conectarse con un nodo, el FS espera el siguiente mensaje:
--Comando: "nombre NombreDelNodo"
+-Comando: "nombre NombreDelNodo espacioDisponible"
 -Data: Vacio
+espacioDisponible debe estar en bytes. El FS se encarga de el tamanio de los bloques
 
 Luego el nodo queda a la espera de cualquiera de los sigtes msjs del filesystem u otro nodo:
 	
