@@ -148,7 +148,7 @@ Message* listenConnections()
 					}
 					close(i); // bye!
 					FD_CLR(i, &master); // eliminar del conjunto maestro
-					return crearMessageWithCommand("JobCaido",i);
+					return crearMessageWithCommand("ProcesoCaido",i);
 				} else {
 
 					//********************************************************

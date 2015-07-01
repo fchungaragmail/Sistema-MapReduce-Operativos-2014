@@ -40,10 +40,11 @@ sem_t semNodoState;
 
 t_list *hilosData;
 Message *recvMessage;
+bool fileSystemDisponible;
 
 void initMaRTA();
 void administrarHilos();
-void* connectToFileSystem(void *arg);
+void connectToFileSystem();
 
 int main(void) {
 
@@ -52,7 +53,7 @@ int main(void) {
 	initMaRTA();
 
 	int i=0;
-	while(i<30)
+	while(i<30)//while(fileSystemDisponible)
 	{
 		//***********
 		//recvMessage = listenConnections();
@@ -107,6 +108,7 @@ void initMaRTA(){
 
 	//CONEXION A FILE SYSTEM !!!
 	//connectToFileSystem();
+	//fileSystemDisponible = true;
 
 	initFilesStatusCenter();
 	initPlannerCenter();
@@ -121,7 +123,15 @@ void administrarHilos(){
 	int i;
 	bool hiloYaExiste = false;
 
-	if(command = K_Job_JobCaido){
+	if(command = K_ProcesoCaido){
+
+		if(recvMessage->sockfd == getFSSocket()){
+
+			fileSystemDisponible = false;
+			printf("El FileSystem cayo, MaRTA no puede seguir operando.");
+			//liberar todas las estructuras.
+		}
+
 		for(i=0;i<size;i++){
 
 			t_dictionary *hiloDic = list_get(hilosData,i);
@@ -130,6 +140,7 @@ void administrarHilos(){
 
 				sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
 				t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
+				//liberar elementos de colaDePedidos
 				list_clean(colaDePedidos);
 				list_add(colaDePedidos,recvMessage);
 				sem_post(semHilo);
@@ -180,7 +191,7 @@ void administrarHilos(){
 	free(path);
 }
 
-void* connectToFileSystem(void *arg)
+void connectToFileSystem()
 {
 	int fileSystemSocket = connectToFS();
 	addFSConnection(fileSystemSocket);
