@@ -128,7 +128,7 @@ void formatNodo(Conexion_t* nodo)
 	pthread_mutex_unlock(&(nodo->mSocket));
 
 	pthread_mutex_lock(&(nodo->mEstadoBloques));
-	for (int i=0;i<BLOQUES_NODO;i++)
+	for (int i=0;i<nodo->totalBloques;i++)
 	{
 		nodo->estadoBloques[i] = false;
 	}
@@ -402,17 +402,32 @@ int quitarNodo(char* argumentos){
 
 int nomb(char* argumentos, Conexion_t* conexion)
 {
-	if (strcmp(conexion->nombre,argumentos) == 0)
-	{
-		//El nodo ya existia
-		log_info(logFile, "El nodo %s ya estaba identificado", conexion->nombre);
-		return 0;
-	}
+	char** args = string_split(argumentos, " ");
 
-	strcpy(conexion->nombre, argumentos);
+	pthread_mutex_lock(&mConexiones);
+	for (int i=0;i<conexiones->elements_count;i++)
+	{
+		Conexion_t* nodo = list_get(conexiones,i);
+		if (strcmp(args[0], nodo->nombre) == 0)
+		{
+			nodo->sockfd = conexion->sockfd;
+			free(conexion->estadoBloques);
+			free(nodo);
+			pthread_mutex_unlock(&mConexiones);
+			return 0;
+		}
+	}
+	pthread_mutex_unlock(&mConexiones);
+
+
+	strcpy(conexion->nombre, args[0]);
 	log_info(logFile, "Identificado el nodo %s", conexion->nombre);
 	if (strcmp(conexion->nombre, "MaRTA") != 0)
 	{
+		conexion->totalBloques = strtoll(args[1], NULL, 10) / TAMANIO_BLOQUE;
+		conexion->estadoBloques = calloc(conexion->totalBloques, 1);
+
+
 		pthread_mutex_lock(&mNodosOnline);
 		nodosOnline++;
 		pthread_mutex_unlock(&mNodosOnline);
@@ -579,7 +594,7 @@ int getArchivo(char* nombre,int16_t indexPadre, t_reg_archivo** archivo)
 
 int getBloqueDisponible(Conexion_t* conexion)
 {
-	for (int i=0;i<BLOQUES_NODO;i++)
+	for (int i=0;i<conexion->totalBloques;i++)
 	{
 		if (conexion->estadoBloques[i] == false)
 			return i;
@@ -656,7 +671,7 @@ int elegirNodos(int bloques, t_list* ubicaciones)
 int getCantidadBloquesDisponibles(Conexion_t* conexion)
 {
 	int bloquesDisponibles = 0;
-	for (int i=0;i<BLOQUES_NODO;i++)
+	for (int i=0;i<conexion->totalBloques;i++)
 	{
 		if (conexion->estadoBloques[i] == false)
 			bloquesDisponibles++;
@@ -691,7 +706,7 @@ int espacioTotal()
 	{
 		Conexion_t* nodo = list_get(nodos,i);
 
-		espacioTotal += BLOQUES_NODO * TAMANIO_BLOQUE/1024/1024;
+		espacioTotal += nodo->totalBloques * TAMANIO_BLOQUE/1024/1024;
 		pthread_mutex_lock(&(nodo->mEstadoBloques));
 		espacioDisponible = espacioDisponible + (getCantidadBloquesDisponibles(nodo) * TAMANIO_BLOQUE/1024/1024);
 		pthread_mutex_unlock(&(nodo->mEstadoBloques));

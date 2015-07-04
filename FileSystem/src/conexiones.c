@@ -197,7 +197,7 @@ void probarConexiones()
 	connect(socketPrueba, &their_addr, sizeof(Sockaddr_in));
 
 	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
-	char comando[] = "nombre Nodo1";
+	char comando[] = "nombre Nodo1 2147483648";
 	mensaje->comando = malloc(strlen(comando)+1);
 	strcpy(mensaje->comando,comando);
 	mensaje->comandoSize = (strlen(mensaje->comando) + 1);

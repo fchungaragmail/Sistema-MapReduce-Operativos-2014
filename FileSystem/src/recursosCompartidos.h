@@ -17,7 +17,6 @@
 #include "estructuras.h"
 
 #define TAMANIO_BLOQUE 20971520
-#define BLOQUES_NODO 50
 
 extern t_list* listaArchivos;
 extern t_list* listaDirs;
@@ -36,7 +35,8 @@ struct _conexion {
 	pthread_mutex_t mSocket;
 	char nombre[22];
 	int estado;
-	bool estadoBloques[BLOQUES_NODO]; //en uso? Todos por default False
+	int totalBloques;
+	bool* estadoBloques; //en uso? Todos por default False
 	pthread_mutex_t mEstadoBloques;
 };
 typedef struct _conexion Conexion_t;
