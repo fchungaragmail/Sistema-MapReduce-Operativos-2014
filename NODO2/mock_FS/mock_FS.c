@@ -27,7 +27,7 @@
 #include "getBloque.h"
 
 int main(int argc, char **argv) {
-	int fs_server = abrir_servidor(3000);
+	int fs_server = abrir_servidor(8000);
 	int un_cliente;
 
 	mensaje_t *msj = malloc(sizeof(mensaje_t));
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 		 un_cliente = aceptar_cliente(fs_server);
 		 printf("nuevo cliente conectado al FS %d\n", un_cliente);
 
-
+		 /*
 		 //SETBLOQUE
 		 puts("enviando comando setbloque");
 		 msj->comandoSize = strlen("setBloque 1");
@@ -77,5 +77,14 @@ int main(int argc, char **argv) {
 		 //msj->data[5] = '\0';
 		 //printf("contenido %s\n", msj->data);
 		 free(msj->data);
+	*/
+
+		 recibir(un_cliente, msj);
+		 msj->comandoSize = strlen("fileContent");
+		 msj->comando = "fileContent";
+		 msj->dataSize = strlen("1\n2\n");
+		 msj->data = "1\n2\n";
+		 enviar(un_cliente, msj);
+
 	}
 }

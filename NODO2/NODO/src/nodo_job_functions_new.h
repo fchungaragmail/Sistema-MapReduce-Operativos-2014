@@ -26,7 +26,7 @@ typedef struct {
  * Luego ejecuta sort sobre archivoTemporal1 y lo almacenta en archivoTemporal2
  * */
 int mapping(char *script, int numeroBloque, char *archivoTemporal1, char* archivoTemporal2);
-int reduce(char *script, t_list* listArchivos, char *archivoTemporal);
+int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal);
 
 
 #endif /* NODO_JOB_FUNCTIONS_NEW_H_ */
