@@ -14,6 +14,7 @@
 #include <commons/collections/list.h>
 #include <commons/config.h>
 #include <commons/log.h>
+#include <protocolo.h>
 #include "estructuras.h"
 
 #define TAMANIO_BLOQUE 20971520
@@ -40,6 +41,11 @@ struct _conexion {
 	pthread_mutex_t mEstadoBloques;
 };
 typedef struct _conexion Conexion_t;
+
+typedef struct {
+	mensaje_t* mensaje;
+	Conexion_t* conexion;
+} argumentos_t;
 
 
 #endif /* RECURSOSCOMPARTIDOS_H_ */

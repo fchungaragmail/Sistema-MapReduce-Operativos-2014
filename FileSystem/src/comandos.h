@@ -16,7 +16,6 @@
 #include <sys/mman.h>
 #include <inttypes.h>
 #include "recursosCompartidos.h"
-#include "protocolo.h"
 #include "conexiones.h"
 
 void initComandos();
@@ -35,7 +34,7 @@ int agregarNodo(char* argumentos);
 int quitarNodo(char* argumentos);
 int nomb(char* argumentos, Conexion_t* conexion);
 int espacioTotal();
-void procesarComandoRemoto(mensaje_t* mensaje, Conexion_t* conexion);
+void procesarComandoRemoto(argumentos_t* args);
 
 
 #endif /* COMANDOS_H_ */

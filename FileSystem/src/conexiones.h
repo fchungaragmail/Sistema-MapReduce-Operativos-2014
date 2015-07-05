@@ -9,7 +9,6 @@
 #define CONEXIONES_H_
 
 #include "recursosCompartidos.h"
-#include <protocolo.h>
 #include "comandos.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -44,6 +43,7 @@ typedef struct {
 	int32_t offset;
 	int16_t bloque;
 } enviarBloque_t;
+
 
 
 #endif /* CONEXIONES_H_ */

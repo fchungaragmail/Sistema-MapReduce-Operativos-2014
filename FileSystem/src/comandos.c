@@ -10,7 +10,7 @@
 
 void initComandos();
 void procesarComando(char** comando, void(*doComando)(void*));
-void procesarComandoRemoto(mensaje_t* mensaje, Conexion_t* conexion);
+void procesarComandoRemoto(argumentos_t* args);
 int format(char* argumentos);
 int mover(char* argumentos);
 int borrar(char* argumentos);
@@ -72,12 +72,12 @@ void procesarComando(char** comando, void(*doComando)(void*))
 }
 
 
-void procesarComandoRemoto(mensaje_t* mensaje, Conexion_t* conexion)
+void procesarComandoRemoto(argumentos_t* args)
 {
 	bool dummy;
-	if (procesarEntrada(mensaje->comando,&dummy) != 0)
+	if (procesarEntrada(args->mensaje->comando,&dummy) != 0)
 	{
-		char** comando = string_n_split(mensaje->comando,2," ");
+		char** comando = string_n_split(args->mensaje->comando,2," ");
 
 		int eleccion = 0;
 		eleccion = dictionary_get(comandosRemotos,comando[0]);
@@ -86,13 +86,13 @@ void procesarComandoRemoto(mensaje_t* mensaje, Conexion_t* conexion)
 		case 1:
 		{
 			//Identificar conexion
-			nomb(comando[1],conexion);
+			nomb(comando[1],args->conexion);
 			break;
 		}
 		case 2:
 		{
 			//Pedido de la tabla de bloques de un archivo
-			dataFile(comando[1],conexion);
+			dataFile(comando[1],args->conexion);
 			break;
 		}
 		default:
