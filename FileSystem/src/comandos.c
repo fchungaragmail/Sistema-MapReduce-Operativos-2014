@@ -252,6 +252,8 @@ int importar(char* argumentos){
 	t_list* ubicacionesElegidas = list_create();
 	if (elegirNodos(bloques, ubicacionesElegidas) != EXIT_SUCCESS)
 	{
+		log_info(logFile, "El archivo %s no pudo ser importado al MDFS. "
+				"Verifique que haya espacio disponible con el comando space", tmp[0]);
 		return -1;
 	}
 
