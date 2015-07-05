@@ -181,7 +181,7 @@ void mostrarAyuda()
 			"help	Muestra el menu de ayuda\n"
 			"exit	Sale de la consola\n"
 			"format Formatea el FS"
-			"mv 	Mover/renombrar arcivo/direcorio. Simil UNIX\n"
+			"mv 	Mover/renombrar archivo/direcorio. Simil UNIX\n"
 			"rm 	Borrar archivo/directorio. Simil UNIX\n"
 			"mkdir	Crear directorio. Simil UNIX\n"
 			"import	Importa un archivo al MDFS\n"

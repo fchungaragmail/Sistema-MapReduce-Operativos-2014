@@ -611,10 +611,10 @@ void revertirAsignaciones(t_list* ubicaciones)
 		{
 			ubicacion_bloque* ubicacion = list_get(bloque,j);
 
-			pthread_mutex_lock(&(ubicacion->nodo->mSocket));
+			pthread_mutex_lock(&(ubicacion->nodo->mEstadoBloques));
 			ubicacion->nodo->estadoBloques[ubicacion->bloqueN] = false;
 			//devuelvo a NO EN USO a los bloques seleccionados
-			pthread_mutex_unlock(&(ubicacion->nodo->mSocket));
+			pthread_mutex_unlock(&(ubicacion->nodo->mEstadoBloques));
 			free(ubicacion);
 		}
 		list_destroy(bloque);
@@ -649,6 +649,7 @@ int elegirNodos(int bloques, t_list* ubicaciones)
 			if (bloqueDisponible == -1)
 			{
 				revertirAsignaciones(ubicaciones);
+				pthread_mutex_unlock(&mElegirNodos);
 				return -1;//De los tres primeros nodos, alguno no tiene bloques disponibles
 			}
 
