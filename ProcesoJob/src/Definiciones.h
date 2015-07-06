@@ -20,10 +20,8 @@
 //FLAG PARA BUILDEAR PARA TESTS, CON MENSAJES DE JOB Y NODO Y SLEEPS PARA SIMULACION
 #define BUILD_PARA_TEST
 
-
 #define MENSAJE_COMANDO 0
 #define MENSAJE_COMANDO_NOMBREARCHIVO 1
-
 
 typedef enum {
 	ESTADO_HILO_NUEVO,
@@ -33,17 +31,15 @@ typedef enum {
 } EstadoHilo;
 
 typedef enum {
-	TIPO_HILO_MAPPER,
-	TIPO_HILO_REDUCE
+	TIPO_HILO_MAPPER, TIPO_HILO_REDUCE
 } TipoHilo;
-
 
 typedef struct {
 	short int sin_family;
 	unsigned short int sin_port;
 	struct in_addr sin_addr;
 	unsigned char sin_zero[8];
-} Sockaddr_in ;
+} Sockaddr_in;
 
 typedef struct {
 	Sockaddr_in direccionNodo;
@@ -54,6 +50,6 @@ typedef struct {
 	char* parametrosError;
 	int nroBloque;
 	TipoHilo tipoHilo;
-} HiloJob ;
+} HiloJob;
 
 #endif /* SRC_DEFINICIONES_H_ */
