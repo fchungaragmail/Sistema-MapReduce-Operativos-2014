@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <semaphore.h>
 #include <commons/collections/list.h>
 #include <commons/config.h>
 #include <commons/log.h>
@@ -39,8 +40,17 @@ struct _conexion {
 	int totalBloques;
 	bool* estadoBloques; //en uso? Todos por default False
 	pthread_mutex_t mEstadoBloques;
+	sem_t respuestasP;//Semaforo para procesar respuestas
+	sem_t respuestasR;//Semaforo para recibir respuestas
+	int32_t respuestaSize;
+	void* respuestaBuffer;
 };
 typedef struct _conexion Conexion_t;
+
+typedef struct {
+	Conexion_t* nodo;
+	int16_t bloque;
+} t_ubicacion_bloque;
 
 typedef struct {
 	mensaje_t* mensaje;

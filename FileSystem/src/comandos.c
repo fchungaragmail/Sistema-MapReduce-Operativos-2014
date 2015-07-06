@@ -48,12 +48,6 @@ FILE* logFile;
 t_dictionary* comandosRemotos;
 
 
-typedef struct {
-	Conexion_t* nodo;
-	int bloqueN;
-} ubicacion_bloque;
-
-
 void initComandos()
 {
 	nodosOnline = 0;
@@ -62,6 +56,7 @@ void initComandos()
 	comandosRemotos = dictionary_create();
 	dictionary_put(comandosRemotos,"nombre",1);
 	dictionary_put(comandosRemotos,"dataFile",2);
+	dictionary_put(comandosRemotos,"respuesta",3);
 }
 
 
@@ -87,12 +82,27 @@ void procesarComandoRemoto(argumentos_t* args)
 		{
 			//Identificar conexion
 			nomb(comando[1],args->conexion);
+			//TODO: Destruir mensaje
 			break;
 		}
 		case 2:
 		{
 			//Pedido de la tabla de bloques de un archivo
 			dataFile(comando[1],args->conexion);
+			//TODO: Destruir mensaje
+			break;
+		}
+		case 3:
+		{
+			//Se recibe una respuesta de lo que sea
+			sem_wait(&(args->conexion->respuestasR));
+			args->conexion->respuestaSize = args->mensaje->dataSize;
+			args->conexion->respuestaBuffer = malloc(args->mensaje->dataSize);
+			memcpy(args->conexion->respuestaBuffer,
+					args->mensaje->data,
+					args->mensaje->dataSize);
+			sem_post(&(args->conexion->respuestasP));
+			//TODO: Destruir mensaje
 			break;
 		}
 		default:
@@ -269,22 +279,17 @@ int importar(char* argumentos){
 			//Asi lo copia en todos lados -> Diseniar un selector de nodo
 			for (int i=0;i<bloque->elements_count;i++)
 			{
-				ubicacion_bloque* ubicacionElegida = list_get(bloque,i);
+				t_ubicacion_bloque* ubicacionElegida = list_get(bloque,i);
 				Conexion_t* nodo = ubicacionElegida->nodo;
 
 				enviarBloque_t* envio = malloc(sizeof(enviarBloque_t));
-
-				envio->bloque = ubicacionElegida->bloqueN;
-
-				t_ubicacion_bloque* ubicacion = malloc(sizeof(t_ubicacion_bloque));
-				ubicacion->bloque = envio->bloque;
-				strcpy(ubicacion->nodo,nodo->nombre);
-				list_add(ubicaciones,ubicacion);
-
+				envio->bloque = ubicacionElegida->bloque;
 				envio->conexion = nodo;
 				envio->archivoMap = archivoMap;
 				envio->offset = bytesEnviados;
 				envio->archivoSize = tamanio;
+
+				list_add(ubicaciones,ubicacionElegida);
 
 				pthread_t tEnvio;
 				list_add(listaThreads, &(tEnvio));
@@ -324,7 +329,82 @@ int importar(char* argumentos){
 
 
 int exportar(char* argumentos){
-	printf("Exportar archivo\n");
+	if (strcmp(argumentos,"/?") == 0 )
+	{
+		printf("export rutaDelArchivoEnMDFS rutaDelArchivoLocal\n");
+		return 0;
+	}
+
+	char** tmp;
+	tmp = string_split(argumentos, " ");
+	//tmp[0]: ruta del archivo en MDFS
+	//tmp[1]: ruta del archivo local
+
+	char nombre[50];
+	int16_t indexPadre;
+	t_reg_archivo* archivo;
+
+	if (getNombreArchivo(tmp[0],nombre,&indexPadre) != EXIT_SUCCESS)
+	{
+		log_error(logFile,"No se pudo abrir el archivo %s", tmp[0]);
+		return -1;
+	} else
+	{
+		if (getArchivo(nombre,indexPadre, &archivo) != EXIT_SUCCESS)
+		{
+			log_error(logFile,"No se pudo abrir el archivo %s", tmp[0]);
+			return -1;
+		}
+	}
+	if (archivo->estado == NO_DISPONIBLE)
+	{
+		log_error(logFile,"El archivo %s no se encientra disponible", tmp[0]);
+		return -1;
+	}
+
+	FILE* fp = fopen(tmp[1], "ab+");
+	if (fp==NULL)
+	{
+		log_error(logFile,"No se pudo abrir el archivo %s", tmp[1]);
+		return -1;
+	}
+
+	for (int i=0;i<archivo->bloques->elements_count;i++)
+	{
+		t_list* bloque = list_get(bloques,i);
+		for (int j=0;j<bloque->elements_count;j++)
+		{
+			t_ubicacion_bloque* ubicacion = list_get(bloque,j);
+			if (ubicacion->nodo->estado == DISPONIBLE)
+			{
+				mensaje_t* mensaje = malloc(sizeof(mensaje_t));
+				mensaje->comando = string_new();
+				string_append_with_format(mensaje->comando,"getBloque %d",
+						ubicacion->bloque);
+				mensaje->comandoSize = strlen(mensaje->comando) + 1;
+				mensaje->dataSize = 0;
+
+				pthread_mutex_lock(&(ubicacion->nodo->mSocket));
+				enviar(ubicacion->nodo->sockfd, mensaje);
+				pthread_mutex_unlock(&(ubicacion->nodo->mSocket));
+
+
+				sem_wait(&(ubicacion->nodo->respuestasP));
+
+				fwrite(ubicacion->nodo->respuestaBuffer, 1,
+						ubicacion->nodo->respuestaSize, fp);
+				free(ubicacion->nodo->respuestaBuffer);
+				ubicacion->nodo->respuestaSize = 0;
+
+				sem_post(&(ubicacion->nodo->respuestasR));
+				break;
+			}
+		}
+	}
+
+	fclose(fp);
+
+	log_info(logFile,"Archivo exportado con exito");
 	return 0;
 }
 
@@ -368,7 +448,7 @@ int bloques(char* argumentos){
 		for (int j=0;j<bloque->elements_count;j++)
 		{
 			t_ubicacion_bloque* ubicacion = list_get(bloque,j);
-			string_append_with_format(&bloques,"| Nodo: %s - Bloque: %d ",ubicacion->nodo,
+			string_append_with_format(&bloques,"| Nodo: %s - Bloque: %d ",ubicacion->nodo->nombre,
 					ubicacion->bloque);
 		}
 		string_append(&bloques,"\n");
@@ -482,7 +562,7 @@ int dataFile(char* argumentos, Conexion_t* conexion)
 		for(int j=0;j<bloque->elements_count;j++)
 		{
 			t_ubicacion_bloque* ubicacion = list_get(bloque,j);
-			string_append_with_format(&tabla,"%s;%d;",ubicacion->nodo,ubicacion->bloque);
+			string_append_with_format(&tabla,"%s;%d;",ubicacion->nodo->nombre,ubicacion->bloque);
 		}
 		string_append(&tabla,"\n");
 	}
@@ -611,10 +691,10 @@ void revertirAsignaciones(t_list* ubicaciones)
 		t_list* bloque = list_get(ubicaciones,i);
 		for (int j=0;j<bloque->elements_count;j++)
 		{
-			ubicacion_bloque* ubicacion = list_get(bloque,j);
+			t_ubicacion_bloque* ubicacion = list_get(bloque,j);
 
 			pthread_mutex_lock(&(ubicacion->nodo->mEstadoBloques));
-			ubicacion->nodo->estadoBloques[ubicacion->bloqueN] = false;
+			ubicacion->nodo->estadoBloques[ubicacion->bloque] = false;
 			//devuelvo a NO EN USO a los bloques seleccionados
 			pthread_mutex_unlock(&(ubicacion->nodo->mEstadoBloques));
 			free(ubicacion);
@@ -659,8 +739,8 @@ int elegirNodos(int bloques, t_list* ubicaciones)
 			nodo->estadoBloques[bloqueDisponible] = true; //Lo marco en uso
 			pthread_mutex_unlock(&(nodo->mEstadoBloques));
 
-			ubicacion_bloque* ubicacion = malloc(sizeof(ubicacion_bloque));
-			ubicacion->bloqueN = bloqueDisponible;
+			t_ubicacion_bloque* ubicacion = malloc(sizeof(t_ubicacion_bloque));
+			ubicacion->bloque = bloqueDisponible;
 			ubicacion->nodo = nodo;
 
 			list_add(bloque,ubicacion);

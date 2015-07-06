@@ -10,10 +10,6 @@
 
 typedef enum {DISPONIBLE, NO_DISPONIBLE} t_estado;
 
-typedef struct {
-	char nodo[22];
-	int16_t bloque;
-} t_ubicacion_bloque;
 
 typedef struct {
 	char nombre[50];

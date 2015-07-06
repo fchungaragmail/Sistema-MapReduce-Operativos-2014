@@ -78,6 +78,8 @@ void escucharConexiones()
 
 		nuevoSocketfd = accept(escuchaConexiones, &their_addr, &sin_size);
 
+		sem_init(&(conexionNueva->respuestasR),0,1);
+		sem_init(&(conexionNueva->respuestasP),0,0);
 		strcpy(conexionNueva->nombre, "NombreGenerico");
 		conexionNueva->sockfd = nuevoSocketfd;
 		conexionNueva->estado = CONECTADO;
