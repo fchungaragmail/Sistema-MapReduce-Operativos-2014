@@ -10,7 +10,6 @@
 
 #include "Definiciones.h"
 
-
 void IniciarConexionMarta();
 void HacerPedidoMarta();
 void IniciarConfiguracion();

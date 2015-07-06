@@ -1,4 +1,5 @@
 #include "ProcesoJob.h"
+#include "Utils.h"
 #include <pthread.h>
 #include <stdio.h>
 #include <commons/collections/list.h>
@@ -29,33 +30,23 @@ void* pedidosMartaHandler(void* arg) {
 #else
 		static int alternar = 0;
 		if (alternar == 0) {
-			mensajeMarta = malloc(sizeof(mensaje_t));
-			mensajeMarta->comando = strdup("mapFile todo1.txt");
-			mensajeMarta->data =
-					strdup(
+			mensajeMarta =
+					CreateMensaje("mapFile todo1.txt",
 							"255.0.0.1 250 11 /ruta_temp1 244.0.1.7 250 12 /ruta_temp2 128.3.1.3 250 999 ruta_temp3");
 			alternar = 1;
 		} else if (alternar == 1) {
-			mensajeMarta = malloc(sizeof(mensaje_t));
-			mensajeMarta->comando = strdup("reduceFileSinCombiner todoSC1.txt");
-			mensajeMarta->data =
-					strdup(
+			mensajeMarta =
+					CreateMensaje("reduceFileSinCombiner todoSC1.txt",
 							"227.4.6.1 999 2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 1 ruta_temp5");
 			alternar = 2;
 		} else if (alternar == 2) {
-			mensajeMarta = malloc(sizeof(mensaje_t));
-			mensajeMarta->comando = strdup(
-					"reduceFileConCombiner-Pedido1 todoCC1.txt");
-			mensajeMarta->data =
-					strdup(
+			mensajeMarta =
+					CreateMensaje("reduceFileConCombiner-Pedido1 todoCC1.txt",
 							"227.4.6.1 999 archTempCC1 2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 archTempCC2 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 archTempCC3 1 ruta_temp5");
 			alternar = 3;
 		} else {
-			mensajeMarta = malloc(sizeof(mensaje_t));
-			mensajeMarta->comando = strdup(
-					"reduceFileConCombiner-Pedido2 todoCC2.txt");
-			mensajeMarta->data =
-					strdup(
+			mensajeMarta =
+					CreateMensaje("reduceFileConCombiner-Pedido2 todoCC2.txt",
 							"227.4.6.1 999 1 /ruta_temp1 117.4.5.1 259 1 /ruta_temp3 167.5.4.1 250 1 ruta_temp5");
 			alternar = 0;
 		}
@@ -78,7 +69,7 @@ void* pedidosMartaHandler(void* arg) {
 		}
 
 		FreeStringArray(&comandoStr);
-		free(mensajeMarta);
+		FreeMensaje(mensajeMarta);
 
 #ifdef BUILD_PARA_TEST
 		sleep(15);
@@ -119,7 +110,7 @@ char* LeerArchivo(char* nombreArchivo) {
 	rewind(archivoScript);
 
 	char* archivoStr = malloc(sizeScript);
-	fread(archivoStr, sizeof(char) , sizeScript , archivoScript);
+	fread(archivoStr, sizeof(char), sizeScript, archivoScript);
 
 	fclose(archivoScript);
 
@@ -186,12 +177,7 @@ void HacerPedidoMarta() {
 		string_append_with_format(&buffer, "archivoAProcesar %s %i",
 				archivos[i], soportaCombiner);
 
-		mensaje_t* mensaje = malloc(sizeof(mensaje_t));
-
-		mensaje->comandoSize = strlen(buffer);
-		mensaje->comando = buffer;
-		mensaje->dataSize = 0;
-		mensaje->data = NULL;
+		mensaje_t* mensaje = CreateMensaje(buffer, NULL);
 
 #ifndef BUILD_PARA_TEST
 		enviar(socketMartaFd, mensaje);
@@ -200,7 +186,7 @@ void HacerPedidoMarta() {
 				"Se envió a MaRTA el siguiente mensaje\nComando: %s\nData: %s\n",
 				mensaje->comando, mensaje->data);
 		free(buffer);
-		free(mensaje);
+		FreeMensaje(mensaje);
 
 	}
 
@@ -208,7 +194,7 @@ void HacerPedidoMarta() {
 
 void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado) {
 
-	mensaje_t* mensajeParaMarta = malloc(sizeof(mensaje_t));
+	mensaje_t* mensajeParaMarta;
 	char* bufferComandoStr = string_new();
 	char* bufferDataStr = string_new();
 
@@ -233,10 +219,7 @@ void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado) {
 
 	}
 
-	mensajeParaMarta->comandoSize = strlen(bufferComandoStr);
-	mensajeParaMarta->comando = bufferComandoStr;
-	mensajeParaMarta->dataSize = strlen(bufferDataStr);
-	mensajeParaMarta->data = bufferDataStr;
+	mensajeParaMarta = CreateMensaje(bufferComandoStr, bufferDataStr);
 
 	/*
 	 * varios hilos pueden estar reportando a marta
@@ -255,7 +238,7 @@ void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado) {
 			"Se envió a MaRTA el siguiente mensaje\nComando: %s\nData: %s\n",
 			mensajeParaMarta->comando, mensajeParaMarta->data);
 	free(bufferComandoStr);
-	free(mensajeParaMarta);
+	(mensajeParaMarta);
 
 }
 
@@ -385,17 +368,6 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner) {
 	FreeStringArray(&dataStr);
 	FreeStringArray(&comandoStr);
 
-}
-
-void FreeStringArray(char*** stringArray) {
-	char** array = *stringArray;
-
-	int i;
-	for (i = 0; array[i] != NULL; ++i) {
-		free(array[i]);
-	}
-
-	free(array);
 }
 
 int main(int argc, char* argv[]) {
