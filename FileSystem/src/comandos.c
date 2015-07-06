@@ -147,6 +147,7 @@ void formatNodo(Conexion_t* nodo)
 
 
 int mover(char* argumentos){
+	//POR AHORA SOLO MUEVE ARCHIVOS, FALTA DIRECTORIOS
 	if (strcmp(argumentos,"/?") == 0 )
 	{
 		printf("mv origen destino\n");
@@ -198,6 +199,13 @@ int borrar(char* argumentos){
 
 
 int crearDir(char* argumentos){
+
+	if (strcmp(argumentos,"/?") == 0 )
+	{
+		printf("mkdir directorioACrear\n");
+		return 0;
+	}
+
 	char** dirs = string_split(argumentos,"/");
 
 	char* dir;
@@ -379,7 +387,7 @@ int exportar(char* argumentos){
 			{
 				mensaje_t* mensaje = malloc(sizeof(mensaje_t));
 				mensaje->comando = string_new();
-				string_append_with_format(mensaje->comando,"getBloque %d",
+				string_append_with_format(&(mensaje->comando),"getBloque %d",
 						ubicacion->bloque);
 				mensaje->comandoSize = strlen(mensaje->comando) + 1;
 				mensaje->dataSize = 0;
@@ -410,7 +418,42 @@ int exportar(char* argumentos){
 
 
 int md5(char* argumentos){
-	printf("md5 de archivo\n");
+	if (strcmp(argumentos,"/?") == 0 )
+	{
+		printf("md5 rutaDelArchivoEnMDFS\n");
+		return 0;
+	}
+
+	srand(time(NULL));
+	int r = rand();
+	char* rutaLocal = string_new();
+	string_append_with_format(&rutaLocal,"%d",r);
+
+	char* export = string_new;
+	string_from_format("%s /tmp/%d", argumentos, rutaLocal);
+	if (exportar(export) != 0)
+	{
+		return -1;
+	}
+
+	char* cmd = string_new();
+	strcpy(cmd,"md5sum ");
+	string_append(&cmd, rutaLocal);
+	char path[1035];
+	FILE* fp = popen(cmd, "r");
+	if (fp == NULL) {
+		printf("Failed to run command\n" );
+		exit(1);
+	}
+	while (fgets(path, sizeof(path)-1, fp) != NULL) {
+		printf("%s", path);
+	}
+
+	free(rutaLocal);
+	free(cmd);
+	free(export);
+	pclose(fp);
+
 	return 0;
 }
 
