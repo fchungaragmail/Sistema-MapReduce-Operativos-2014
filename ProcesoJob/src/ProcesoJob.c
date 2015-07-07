@@ -32,7 +32,7 @@ void* pedidosMartaHandler(void* arg) {
 		if (alternar == 0) {
 			mensajeMarta =
 					CreateMensaje("mapFile todo1.txt",
-							"255.0.0.1 250 11 /ruta_temp1 244.0.1.7 250 12 /ruta_temp2 128.3.1.3 250 999 ruta_temp3");
+							"255.0.0.1 250 11 /ruta_temp1 244.0.1.7 250 12 /ruta_temp2 128.3.1.3 250 999 /ruta_temp3");
 			alternar = 1;
 		} else if (alternar == 1) {
 			mensajeMarta =
@@ -192,16 +192,16 @@ void HacerPedidoMarta() {
 
 }
 
-void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado) {
+void ReportarResultadoHilo(HiloJobInfo* hiloJobInfo, EstadoHilo estado) {
 
-	mensaje_t* mensajeParaMarta;
+	mensaje_t* mensajeParaMarta = NULL;
 	char* bufferComandoStr = string_new();
 	char* bufferDataStr = string_new();
 
 	string_append_with_format(&bufferComandoStr,
-			hiloJob->tipoHilo == TIPO_HILO_MAPPER ?
+			hiloJobInfo->tipoHilo == TIPO_HILO_MAPPER ?
 					"mapFileResponse %s" : "reduceFileResponse %s",
-			hiloJob->nombreArchivo);
+			hiloJobInfo->nombreArchivo);
 
 	switch (estado) {
 
@@ -209,9 +209,9 @@ void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado) {
 	case ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO:
 		string_append(&bufferComandoStr, " 0");
 		string_append_with_format(&bufferDataStr, "%s",
-				hiloJob->parametrosError != NULL ?
-						hiloJob->parametrosError :
-						inet_ntoa(hiloJob->direccionNodo.sin_addr));
+				hiloJobInfo->parametrosError != NULL ?
+						hiloJobInfo->parametrosError :
+						inet_ntoa(hiloJobInfo->direccionNodo.sin_addr));
 		break;
 	case ESTADO_HILO_FINALIZO_OK:
 		string_append(&bufferComandoStr, " 1");
@@ -229,8 +229,8 @@ void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado) {
 	enviar(socketMartaFd, mensajeParaMarta);
 	pthread_mutex_unlock(&mMarta);
 
-	if(hiloJob->socketFd != -1) {
-		close(hiloJob->socketFd);
+	if(hiloJobInfo->socketFd != -1) {
+		close(hiloJobInfo->socketFd);
 	}
 #endif
 
@@ -238,7 +238,8 @@ void ReportarResultadoHilo(HiloJob* hiloJob, EstadoHilo estado) {
 			"Se envió a MaRTA el siguiente mensaje\nComando: %s\nData: %s\n",
 			mensajeParaMarta->comando, mensajeParaMarta->data);
 	free(bufferComandoStr);
-	(mensajeParaMarta);
+	FreeMensaje(mensajeParaMarta);
+	FreeHiloJobInfo(hiloJobInfo);
 
 }
 
@@ -258,19 +259,19 @@ void PlanificarHilosMapper(mensaje_t* mensaje) {
 		their_addr.sin_port = htons(atoi(dataStr[i++]));
 		memset(&(their_addr.sin_zero), '\o', 8);
 
-		HiloJob* hiloJob = malloc(sizeof(HiloJob));
-		hiloJob->direccionNodo = their_addr;
-		hiloJob->threadhilo = NULL;
-		hiloJob->socketFd = -1;
-		hiloJob->parametros = NULL;
-		hiloJob->parametrosError = NULL;
-		hiloJob->nroBloque = atoi(dataStr[i++]);
-		hiloJob->nombreArchivo = string_duplicate(dataStr[i++]);
+		HiloJobInfo* hiloJobInfo = malloc(sizeof(HiloJobInfo));
+		hiloJobInfo->direccionNodo = their_addr;
+		hiloJobInfo->threadhilo = NULL;
+		hiloJobInfo->socketFd = -1;
+		hiloJobInfo->parametros = NULL;
+		hiloJobInfo->parametrosError = NULL;
+		hiloJobInfo->nroBloque = atoi(dataStr[i++]);
+		hiloJobInfo->nombreArchivo = string_duplicate(dataStr[i++]);
 
-		CrearHiloMapper(hiloJob);
+		CrearHiloJob(hiloJobInfo,TIPO_HILO_MAPPER);
 		log_info(logProcesoJob,
 				"Se creó un Hilo Mapper con los siguientes parametros\nNombre del Archivo temporal: %s\nNumero de bloque :%d\n",
-				hiloJob->nombreArchivo, hiloJob->nroBloque);
+				hiloJobInfo->nombreArchivo, hiloJobInfo->nroBloque);
 
 	}
 
@@ -299,13 +300,13 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner) {
 			their_addr.sin_port = htons(atoi(dataStr[i++]));
 			memset(&(their_addr.sin_zero), '\o', 8);
 
-			HiloJob* hiloJob = malloc(sizeof(HiloJob));
-			hiloJob->direccionNodo = their_addr;
-			hiloJob->threadhilo = NULL;
-			hiloJob->socketFd = -1;
-			hiloJob->parametros = NULL;
-			hiloJob->parametrosError = NULL;
-			hiloJob->nombreArchivo = string_duplicate(dataStr[i++]);
+			HiloJobInfo* hiloJobInfo = malloc(sizeof(HiloJobInfo));
+			hiloJobInfo->direccionNodo = their_addr;
+			hiloJobInfo->threadhilo = NULL;
+			hiloJobInfo->socketFd = -1;
+			hiloJobInfo->parametros = NULL;
+			hiloJobInfo->parametrosError = NULL;
+			hiloJobInfo->nombreArchivo = string_duplicate(dataStr[i++]);
 
 			int archivosTotalesAProcesar = atoi(dataStr[i++]);
 			int leerHasta = i + archivosTotalesAProcesar;
@@ -318,12 +319,12 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner) {
 				string_append_with_format(&parametrosBuffer, " %s",
 						dataStr[i++]);
 			}
-			hiloJob->parametros = parametrosBuffer;
+			hiloJobInfo->parametros = strdup(parametrosBuffer);
 
-			CrearHiloReducer(hiloJob);
+			CrearHiloJob(hiloJobInfo,TIPO_HILO_REDUCE);
 			log_info(logProcesoJob,
 					"Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros\nNombre del Archivo temporal: %s\nParametros: %s\n",
-					hiloJob->nombreArchivo, hiloJob->parametros);
+					hiloJobInfo->nombreArchivo, hiloJobInfo->parametros);
 
 		}
 	} else {
@@ -341,13 +342,13 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner) {
 		their_addr.sin_port = htons(atoi(dataStr[i++]));
 		memset(&(their_addr.sin_zero), '\o', 8);
 
-		HiloJob* hiloJob = malloc(sizeof(HiloJob));
-		hiloJob->direccionNodo = their_addr;
-		hiloJob->threadhilo = NULL;
-		hiloJob->socketFd = -1;
-		hiloJob->parametros = NULL;
-		hiloJob->parametrosError = NULL;
-		hiloJob->nombreArchivo = string_duplicate(
+		HiloJobInfo* hiloJobInfo = malloc(sizeof(HiloJobInfo));
+		hiloJobInfo->direccionNodo = their_addr;
+		hiloJobInfo->threadhilo = NULL;
+		hiloJobInfo->socketFd = -1;
+		hiloJobInfo->parametros = NULL;
+		hiloJobInfo->parametrosError = NULL;
+		hiloJobInfo->nombreArchivo = string_duplicate(
 				comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO]);
 
 		char* parametrosBuffer = string_new();
@@ -357,11 +358,11 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner) {
 			string_append_with_format(&parametrosBuffer, " %s", dataStr[i++]);
 		}
 
-		hiloJob->parametros = parametrosBuffer;
-		CrearHiloReducer(hiloJob);
+		hiloJobInfo->parametros = strdup(parametrosBuffer);
+		CrearHiloJob(hiloJobInfo,TIPO_HILO_REDUCE);
 		log_info(logProcesoJob,
 				"Se creó un Hilo Reduce sin combiner con los siguientes parametros\nNombre del Archivo temporal: %s\nParametros: %s\n",
-				hiloJob->nombreArchivo, hiloJob->parametros);
+				hiloJobInfo->nombreArchivo, hiloJobInfo->parametros);
 
 	}
 

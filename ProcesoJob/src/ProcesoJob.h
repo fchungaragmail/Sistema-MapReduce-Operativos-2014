@@ -15,7 +15,7 @@ void HacerPedidoMarta();
 void IniciarConfiguracion();
 void Terminar(int);
 char* LeerArchivo(char*);
-void ReportarResultadoHilo(HiloJob*, EstadoHilo);
+void ReportarResultadoHilo(HiloJobInfo*, EstadoHilo);
 
 /*
  *

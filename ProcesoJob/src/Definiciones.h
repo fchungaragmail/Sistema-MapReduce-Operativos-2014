@@ -10,7 +10,7 @@
 
 #include <netinet/in.h>
 #include <pthread.h>
-#include "Protocolo/protocolo.h" //TODO
+#include "Protocolo/protocolo.h"
 
 #define EXIT_ERROR -1
 #define EXIT_OK 1
@@ -50,6 +50,6 @@ typedef struct {
 	char* parametrosError;
 	int nroBloque;
 	TipoHilo tipoHilo;
-} HiloJob;
+} HiloJobInfo;
 
 #endif /* SRC_DEFINICIONES_H_ */

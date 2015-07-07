@@ -8,7 +8,7 @@ void FreeMensaje(mensaje_t* mensaje) {
 	if (mensaje->data != NULL) {
 		free(mensaje->data);
 	}
-
+	free(mensaje);
 	mensaje = NULL;
 }
 
@@ -44,4 +44,19 @@ void FreeStringArray(char*** stringArray) {
 	}
 
 	free(array);
+}
+
+void FreeHiloJobInfo(HiloJobInfo* hiloJobInfo) {
+
+	if(hiloJobInfo->nombreArchivo != NULL){
+		free(hiloJobInfo->nombreArchivo);
+	}
+	if(hiloJobInfo->parametros != NULL){
+		free(hiloJobInfo->parametros);
+	}
+	if(hiloJobInfo->parametrosError != NULL){
+		free(hiloJobInfo->parametrosError);
+	}
+	free(hiloJobInfo);
+	hiloJobInfo = NULL;
 }
