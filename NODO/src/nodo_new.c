@@ -7,7 +7,6 @@
 
 #include "nodo_new.h"
 
-
 //Global Variables
 int PUERTO_FS;
 char* IP_FS;
@@ -17,14 +16,13 @@ char* NODO_NUEVO;
 char* IP_NODO;
 int PUERTO_NODO;
 
-
 //Main Programm
 int main() {
 
 	int sockFD; //socket nodo servidor
 	int sockAccept; //socket nodo servidor acepta conexiones
 	int sockFS; //socket nodo cliente para conectarse con FS
-	int* sockForThread;//sockFS que paso por parametro al thread que queda hablando con FS
+	int* sockForThread; //sockFS que paso por parametro al thread que queda hablando con FS
 	socklen_t size;
 	Sockaddr_in client_sock; //sockaddr que se usa en accept de nodo servidor
 	pthread_t nodo_handler;
@@ -34,72 +32,72 @@ int main() {
 	mensaje_t* buffer_shakehand = malloc(sizeof(mensaje_t));
 	mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
 
-
 	getConfig();
 
 	connectToFileSistem(&sockFS);
 	sockForThread = &sockFS;
 	pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockForThread);
-	pthread_join(fs_handler,NULL);
-
+	pthread_join(fs_handler, NULL);
 
 	int value = initServer(&sockFD);
-	if(value == -1) {
-			printf("No se pudo crear socket que atiende conexiones");
-			printf("***********************\n");
-			return -1;
-		}
-
-	size = sizeof(struct sockaddr_in);
-
-	while(1) {
-	sockAccept = accept(sockFD, (struct sockaddr*) &client_sock, &size);
-	if (sockAccept != 1) {
-		printf("No se pudo aceptar conexión\n");
+	if (value == -1) {
+		printf("No se pudo crear socket que atiende conexiones");
 		printf("***********************\n");
-		close(sockFD);
-		close(sockAccept);
 		return -1;
 	}
 
-	recibir(sockAccept, buffer_shakehand); //recibo mensaje shakehand
-	buffer_send->comandoSize = SHAKEHAND_MESSAGE_LENGTH;
-	buffer_send->comando = "Bienvenido al Nodo";
-	buffer_send->dataSize = 1; //es 1 pq no envio nada y hace un malloc de 1 asi no ocupa memoria
-	buffer_send->data = "\0"; //aca no le envio nada
-	enviar(sockAccept, buffer_send);
+	size = sizeof(struct sockaddr_in);
 
-	if(strcmp(buffer_shakehand->comando, "nd") == 0) {
-		int* sockAux = malloc(sizeof(int));
-		sockAux = &sockAccept;
-		printf("Se obtuvo una conexión desde NODO: %s\n", inet_ntoa(client_sock.sin_addr));
-		pthread_create(&nodo_handler, NULL, fs_nodo_conection_handler, sockAux);
-	}
+	while (1) {
+		sockAccept = accept(sockFD, (struct sockaddr*) &client_sock, &size);
+		if (sockAccept != 1) {
+			printf("No se pudo aceptar conexión\n");
+			printf("***********************\n");
+			close(sockFD);
+			close(sockAccept);
+			return -1;
+		}
 
-	if(strcmp(buffer_shakehand->comando, "mp") == 0){
-	    int* sockAux = malloc(sizeof(int));
-	    sockAux = &sockAccept;
-		printf("Se obtuvo una conexión desde JOB: %s\n", inet_ntoa(client_sock.sin_addr));
-		pthread_create(&map_handler, NULL, map_conection_handler, sockAux);
-	}
+		recibir(sockAccept, buffer_shakehand); //recibo mensaje shakehand
+		buffer_send->comandoSize = SHAKEHAND_MESSAGE_LENGTH;
+		buffer_send->comando = "Bienvenido al Nodo";
+		buffer_send->dataSize = 1; //es 1 pq no envio nada y hace un malloc de 1 asi no ocupa memoria
+		buffer_send->data = "\0"; //aca no le envio nada
+		enviar(sockAccept, buffer_send);
 
-	if(strcmp(buffer_shakehand->comando, "rd") == 0) {
-		int* sockAux = malloc(sizeof(int));
-		sockAux = &sockAccept;
-		pthread_create(&reduce_handler, NULL, reduce_conection_handler, sockAux);
-	}
+		if (strcmp(buffer_shakehand->comando, "nd") == 0) {
+			int* sockAux = malloc(sizeof(int));
+			sockAux = &sockAccept;
+			printf("Se obtuvo una conexión desde NODO: %s\n",
+					inet_ntoa(client_sock.sin_addr));
+			pthread_create(&nodo_handler, NULL, fs_nodo_conection_handler,
+					sockAux);
+		}
 
+		if (strcmp(buffer_shakehand->comando, "mp") == 0) {
+			int* sockAux = malloc(sizeof(int));
+			sockAux = &sockAccept;
+			printf("Se obtuvo una conexión desde JOB: %s\n",
+					inet_ntoa(client_sock.sin_addr));
+			pthread_create(&map_handler, NULL, map_conection_handler, sockAux);
+		}
+
+		if (strcmp(buffer_shakehand->comando, "rd") == 0) {
+			int* sockAux = malloc(sizeof(int));
+			sockAux = &sockAccept;
+			pthread_create(&reduce_handler, NULL, reduce_conection_handler,
+					sockAux);
+		}
 
 	} //while
-
 
 	return 0;
 }
 
-
 void getConfig() {
 
-	t_config* archivoConfig = config_create("/home/utnso/Escritorio/Ejercicios/NODO/NODO.config");
+	t_config* archivoConfig = config_create(
+			"./NODO.config");
 
 	PUERTO_FS = config_get_int_value(archivoConfig, "PUERTO_FS");
 	IP_FS = config_get_string_value(archivoConfig, "IP_FS");
@@ -111,7 +109,6 @@ void getConfig() {
 
 }
 
-
 int initServer(int* sockFD) {
 
 	Sockaddr_in my_sock;
@@ -119,7 +116,7 @@ int initServer(int* sockFD) {
 	setValuesToSockaddr(&my_sock, PUERTO_NODO, IP_NODO);
 
 	*sockFD = socket(AF_INET, SOCK_STREAM, 0);
-	if(*sockFD == -1) {
+	if (*sockFD == -1) {
 		printf("Error al crear socket\n");
 		printf("***********************\n");
 		return -1;
@@ -128,7 +125,7 @@ int initServer(int* sockFD) {
 		printf("***********************\n");
 	}
 
-	if(bind(*sockFD, (struct sockaddr*) &my_sock, sizeof(my_sock)) == -1) {
+	if (bind(*sockFD, (struct sockaddr*) &my_sock, sizeof(my_sock)) == -1) {
 		printf("Fallo al hacer el bind\n");
 		printf("***********************\n");
 		return -1;
@@ -137,7 +134,7 @@ int initServer(int* sockFD) {
 		printf("***********************\n");
 	}
 
-	if(listen(*sockFD, 5) == -1) {
+	if (listen(*sockFD, 5) == -1) {
 		printf("Fallo en listen\n");
 		printf("***********************\n");
 		return -1;
@@ -150,12 +147,11 @@ int initServer(int* sockFD) {
 
 }
 
-
 void connectToFileSistem(int* sock) {
 
 	Sockaddr_in server_addr;
-	char* port = malloc(6);
-	char* message = malloc(140);
+	char* ipPuertoStr = string_new();
+	mensaje_t* message = malloc(sizeof(mensaje_t));
 
 	setValuesToSockaddr(&server_addr, PUERTO_FS, IP_FS);
 
@@ -165,7 +161,7 @@ void connectToFileSistem(int* sock) {
 	bzero(&(server_addr.sin_zero), 8);
 
 	*sock = socket(AF_INET, SOCK_STREAM, 0);
-	if(*sock == -1) {
+	if (*sock == -1) {
 		printf("Fallo en creacion Socket para conectarse a FS\n");
 		printf("***********************\n");
 	} else {
@@ -173,22 +169,31 @@ void connectToFileSistem(int* sock) {
 		printf("***********************\n");
 	}
 
-	if (connect(*sock, (struct sockaddr*) &server_addr, sizeof(server_addr)) == -1) {
-			printf("Fallo en establecer conexión\n");
-			printf("***********************\n");
+	if (connect(*sock, (struct sockaddr*) &server_addr, sizeof(server_addr))
+			== -1) {
+		printf("Fallo en establecer conexión\n");
+		printf("***********************\n");
 
-		} else {
-			printf("Conexión establecida con FileSystem por puerto %d\n", PUERTO_FS);
-			printf("***********************\n");
-		}
+	} else {
+		printf("Conexión establecida con FileSystem por puerto %d\n",
+				PUERTO_FS);
+		printf("***********************\n");
+	}
 
-	sprintf(port, "%d", PUERTO_NODO);
-	message = strcat(message, IP_NODO);
-	message = strcat(message, port);
-	send(*sock, message, sizeof(message), 0);
+
+	string_append_with_format(&ipPuertoStr, "nombre %s:%d %d", IP_NODO, PUERTO_NODO, 1000000000);
+	message->comando = ipPuertoStr;
+	message->comandoSize = strlen(ipPuertoStr)+1;
+	message->data = NULL;
+	message->dataSize = NULL;
+
+	enviar(*sock, message);
+
+	free(ipPuertoStr);
+	free(message);
+	//send(*sock, message, sizeof(message), 0);
 
 }
-
 
 void setValuesToSockaddr(Sockaddr_in* addr, int port, char* ip) {
 
@@ -199,56 +204,53 @@ void setValuesToSockaddr(Sockaddr_in* addr, int port, char* ip) {
 
 }
 
+void *fs_nodo_conection_handler(void* ptr) {
 
-
-void *fs_nodo_conection_handler(void* ptr){
-
-	int sockFD = *((int*)ptr);
+	int sockFD = *((int*) ptr);
 	char** result;
 
-	while(1) {
+	while (1) {
 
 		mensaje_t* buffer_recv = malloc(sizeof(mensaje_t));
 		mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
 		recibir(sockFD, buffer_recv);
 		result = string_split(buffer_recv->comando, " ");
 
-			if (strcmp(result[0], "getBloque") == 0) {
+		if (strcmp(result[0], "getBloque") == 0) {
 
-				char* bloque = malloc(TAMANIO_BLOQUE);
-				bloque = getBloque(atoi(result[1]));  //getBloque bloque
-				buffer_send->comandoSize = 1;
-				buffer_send->comando = "\0";
-				buffer_send->dataSize = sizeof(int32_t);
-				buffer_send->data = bloque;
-				enviar(sockFD, buffer_send);
-				free(bloque);
-				free(buffer_send);
-				free(buffer_recv);
-			}
+			char* bloque = malloc(TAMANIO_BLOQUE);
+			bloque = getBloque(atoi(result[1]));  //getBloque bloque
+			buffer_send->comandoSize = 1;
+			buffer_send->comando = "\0";
+			buffer_send->dataSize = sizeof(int32_t);
+			buffer_send->data = bloque;
+			enviar(sockFD, buffer_send);
+			free(bloque);
+			free(buffer_send);
+			free(buffer_recv);
+		}
 
-			if (strcmp(result[0], "setBloque") == 0) {   //setBloque bloque [datos]
-				setBloque(atoi(result[1]), buffer_recv->data);
-				free(buffer_send);
-				free(buffer_recv);
-			}
+		if (strcmp(result[0], "setBloque") == 0) {   //setBloque bloque [datos]
+			setBloque(atoi(result[1]), buffer_recv->data);
+			free(buffer_send);
+			free(buffer_recv);
+		}
 
-			if (strcmp(result[0], "getFileContent") == 0) { //getFileContent nombre
-				t_fileContent* fileContent;
-				fileContent = getFileContent(result[1]);
-				buffer_send->comandoSize = 1;
-				buffer_send->comando = "\0";
-				buffer_send->dataSize = fileContent->size;
-				buffer_send->data = fileContent->contenido;
-				enviar(sockFD, buffer_send);
-				free(buffer_send);
-				free(buffer_recv);
-			}
+		if (strcmp(result[0], "getFileContent") == 0) { //getFileContent nombre
+			t_fileContent* fileContent;
+			fileContent = getFileContent(result[1]);
+			buffer_send->comandoSize = 1;
+			buffer_send->comando = "\0";
+			buffer_send->dataSize = fileContent->size;
+			buffer_send->data = fileContent->contenido;
+			enviar(sockFD, buffer_send);
+			free(buffer_send);
+			free(buffer_recv);
+		}
 
 	} //cierra while(1)
 
 } //cierra thread
-
 
 //char** generate_fields(int size) {
 //		char** result = malloc(size*sizeof(char*));
@@ -268,12 +270,11 @@ void *fs_nodo_conection_handler(void* ptr){
 //	free(result);
 //}
 
+void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 
-void *map_conection_handler(void* ptr){  //int bloque  char* nombreArchTemp
+	int sockFD = *((int*) ptr);
 
-	int sockFD = *((int*)ptr);
-
-	while(1) {
+	while (1) {
 
 		mensaje_t* buffer_recv = malloc(sizeof(mensaje_t));
 		mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
@@ -290,7 +291,7 @@ void *map_conection_handler(void* ptr){  //int bloque  char* nombreArchTemp
 		numBloque = atoi(result[0]); //paso el string "numBloque" a tipo int , pq mapping recibe int NumBloque
 
 		int mapResult = mapping("./tmp/map.sh", numBloque, result[1]);
-		if(mapResult == 0) {
+		if (mapResult == 0) {
 			//informar a job que termino bien, send normal? o enviar y se pasa por data o comando?
 		} else {
 			//informar a job que no termino bien, misma pregunta que arriba
@@ -303,12 +304,11 @@ void *map_conection_handler(void* ptr){  //int bloque  char* nombreArchTemp
 
 } //cierra thread
 
-
 void *reduce_conection_handler(void* ptr) {
 
-	int sockFD = *((int*)ptr);
+	int sockFD = *((int*) ptr);
 
-	while(1) {
+	while (1) {
 
 		mensaje_t* buffer_recv = malloc(sizeof(mensaje_t));
 		mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
@@ -322,19 +322,19 @@ void *reduce_conection_handler(void* ptr) {
 		result = string_split(buffer_recv->comando, " ");
 
 		archivosParaReduce = malloc(sizeof(result));
-		for(;i < sizeof(result); i++){
+		for (; i < sizeof(result); i++) {
 			archivosParaReduce = strcat(archivosParaReduce, result[i]);
 		}
 
-		int reduceResult = reducing(buffer_recv->data, archivosParaReduce ,result[1]);
-		if(reduceResult == 0) {
+		int reduceResult = reducing(buffer_recv->data, archivosParaReduce,
+				result[1]);
+		if (reduceResult == 0) {
 			buffer_send->comandoSize = sizeof(reduceResult);
 			buffer_send->comando = reduceResult;
 			buffer_send->dataSize = 1;
 			buffer_send->data = "\0";
 		}
 	}
-
 
 }
 
