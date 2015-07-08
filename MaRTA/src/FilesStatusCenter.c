@@ -44,7 +44,7 @@ void addNewConnection(int socket);
 int getFSSocket();
 // Varias
 void addFileFullData(int sckt, char* path, Message *recvMessage);
-void reloadFileFullData(int sckt, char* path, t_list *fullData);
+void reloadFilaDeFileFullData(int sckt, char* path, t_list *fullData,int nroDeBloqe);
 t_dictionary *getNodoState(char *ipNroNodo);
 int getNodoState_OperacionesEnProceso(t_dictionary *nodoState);
 t_list *getNodoState_listaTemporales(t_dictionary *nodoState);
@@ -78,7 +78,7 @@ void setBlockStatesListInReducingState(char *path,int socket);
 void agregarFileState(int jobSocket,char *path, int cantidadDeBloques);
 //fullDataTable
 void agregarFullDataTable(t_list *table,char *path);
-t_list *getFullDataTable(char *path);
+t_list *getCopyFullDataTable(char *path);
 //FUNCIONES AUXILIARES
 char *crearKeyParaFileState(char*path,int socket);
 
@@ -147,13 +147,9 @@ void addFileFullData(int jobSocket, char* path, Message *recvMessage)
 	// tiene la info de los bloques y nodos donde esta el archivo a procesar
 
 	t_list *fullData;
-	if(dictionary_has_key(fullDataTables,path)){
-		fullData = getFullDataTable(path);
-	}
-	if(!dictionary_has_key(fullDataTables,path)){
-		fullData = deserializarFullDataResponse(recvMessage);
-		agregarFullDataTable(fullData,path);
-	}
+	fullData = deserializarFullDataResponse(recvMessage);
+	agregarFullDataTable(fullData,path);
+	fullData = getCopyFullDataTable(path);
 
 	t_dictionary *filesToProcessPerJob = getFilesToProcessPerJob(jobSocket);
 	t_dictionary *file_StatusData = getFile_StatusData(filesToProcessPerJob,path);
@@ -207,39 +203,57 @@ void agregarFileState(int jobSocket,char *path, int cantidadDeBloques){
 	free(key);
 }
 
-void reloadFileFullData(int sckt, char* path, t_list *fullData)
+void reloadFilaDeFileFullData(int sckt, char* path, t_list *CopiasfullData,int nroDeBloqe)
 {
+	//--> FS responde con bloque de archivo pedido
+	//-Comando: "DataFileResponse rutaDelArchivo Disponible"
+	//-Data: Bloque
+	// Ej: "0;Nodo1;3;Nodo8;2;Nodo2;45;"
+
 	t_dictionary *filesToProcessPerJob =getFilesToProcessPerJob(sckt);
 	t_dictionary *file_StatusData = getFile_StatusData(filesToProcessPerJob,path);
+	t_list *listaPadre = dictionary_get(file_StatusData,K_file_StatusData_Bloques);
+	t_list *copiasAReemplazar = list_get(listaPadre,nroDeBloqe);
+	int size = list_size(copiasAReemplazar);
+	int n = list_size(listaPadre);
 
-	bool *combinerMode = dictionary_get(file_StatusData,K_file_StatusData_combinerMode);
+	int i;
+	for(i=0;i<size;i++){
 
-	//*****************************************************
-	//LIBERO MEMORIA  --> SI LIBERO MEMORIA ACA, SE PIERDEN LAS REFERENCIAS QUE ESTAN EN BLOCK_STATE
-	/*t_list *listaBloqes = dictionary_get(file_StatusData,K_file_StatusData_Bloques);
-	int bloqesSize = list_size(listaBloqes);
-	int i,j;
-	for(i=0;i<listaBloqes;i++){
-		t_list *listaCopias = list_get(listaBloqes,i);
-		int copiasSize = list_size(listaCopias);
-		for(j=0;j<copiasSize;j++){
-
-			t_dictionary *dicCopia = list_get(listaCopias,j);
-			char *ip = dictionary_get(dicCopia,K_Copia_IPNodo);
-			char *nroDeBloqe = dictionary_get(dicCopia,K_Copia_NroDeBloque);
-			free(ip);
-			free(nroDeBloqe);
-			dictionary_destroy(dicCopia);
-
-		}
-		list_destroy(listaCopias);
+		t_dictionary *dicCopia = list_get(copiasAReemplazar,i);
+		char *ip = dictionary_get(dicCopia,K_Copia_IPNodo);
+		char *nroBloqe = dictionary_get(dicCopia,K_Copia_NroDeBloque);
+		char *puerto = dictionary_get(dicCopia,K_Copia_PuertoNodo);
+		bool *estado = dictionary_get(dicCopia,K_Copia_Estado);
+		free(ip);free(puerto);free(nroBloqe);free(estado);
+		dictionary_destroy(dicCopia);
 
 	}
-	list_destroy(listaBloqes);*/
-	//*****************************************************
-	dictionary_clean(file_StatusData);
-	dictionary_put(file_StatusData ,K_file_StatusData_Bloques,fullData);
-	dictionary_put(file_StatusData ,K_file_StatusData_combinerMode,combinerMode);
+
+	list_clean(copiasAReemplazar);
+
+	int j;
+	int s = list_size(CopiasfullData);
+	t_list *listaH = list_get(CopiasfullData,0);
+	size = list_size(listaH);
+	for(j=0;j<size;j++){
+		t_dictionary *copia = list_get(listaH,j);
+		char *ip = dictionary_get(copia,K_Copia_IPNodo);
+		list_add(copiasAReemplazar,copia);
+	}
+
+	t_list *l = list_get(listaPadre,nroDeBloqe);
+
+	t_dictionary *d = list_get(l,0);
+	char *ip = dictionary_get(d,K_Copia_IPNodo);
+
+	t_dictionary *d1 = list_get(l,1);
+	char *ip1 = dictionary_get(d1,K_Copia_IPNodo);
+
+	t_dictionary *d2 = list_get(l,2);
+	char *ip2 = dictionary_get(d2,K_Copia_IPNodo);
+
+
 }
 
 int getCantidadDeOperacionesEnProcesoEnNodo(char *IPnroNodo)
@@ -274,7 +288,8 @@ void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo)
 			t_list *tempPathsList = getNodoState_listaTemporales(nodoState);
 			operacionesEnProceso = operacionesEnProceso + 1;
 
-			printf("el nodo %s esta procesando %d pedidos\n",IPnroNodo,operacionesEnProceso);
+			char *log = string_from_format("el nodo %s esta procesando %d pedidos",IPnroNodo,operacionesEnProceso);
+			log_trace(logFile,log);free(log);
 
 			sem_wait(&semNodoState);
 			dictionary_clean(nodoState);
@@ -287,7 +302,8 @@ void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo)
 			t_dictionary *nodoState = dictionary_create();
 			int operacionesEnProceso = 1;
 
-			printf("el nodo %s esta procesando %d pedidos\n",IPnroNodo,operacionesEnProceso);
+			char *log = string_from_format("el nodo %s esta procesando %d pedidos",IPnroNodo,operacionesEnProceso);
+			log_trace(logFile,log);free(log);
 
 			sem_wait(&semNodoState);
 			dictionary_put(nodoState,K_Nodo_OperacionesEnProceso,operacionesEnProceso);
@@ -318,7 +334,9 @@ void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo)
 		t_list *tempPathsList = getNodoState_listaTemporales(nodoState);
 		operacionesEnProceso = operacionesEnProceso - 1;
 
-		printf("el nodo %s esta procesando %d pedidos\n",IPnroNodo,operacionesEnProceso);
+		char *log = string_from_format("el nodo %s esta procesando %d pedidos",IPnroNodo,operacionesEnProceso);
+		log_trace(logFile,log);free(log);
+
 
 		sem_wait(&semNodoState);
 		dictionary_clean(nodoState);
@@ -635,8 +653,9 @@ void informarTareasPendientesDeMapping(char *path,int socket)
 		StatusBlockState *state = dictionary_get(blockState,K_BlockState_state);
 		if((*state)==K_MAPPED){count--;}
 	}
-	printf("el job %d para el archivo %s ",socket,path);
-	printf("debe mappear %d bloques\n",count);
+
+	char *log = string_from_format("el job %d para el archivo %s debe mappear %d bloques",socket,path,count);
+	log_trace(logFile,log); free(log);
 }
 
 //fullDataTable
@@ -646,13 +665,52 @@ void agregarFullDataTable(t_list *table,char *path){
 	dictionary_put(fullDataTables,path,table);
 	sem_post(&semFullDataTables);
 }
-t_list *getFullDataTable(char *path){
+t_list *getCopyFullDataTable(char *path){
 
 	sem_wait(&semFullDataTables);
-	t_list *fullDataTable = dictionary_get(fullDataTable,path);
+
+	t_list *fullDataTable = dictionary_get(fullDataTables,path);
+	int cantidadDeBloques = list_size(fullDataTable);
+
+	t_list *listaPadreDeBloques = list_create();
+		int i,j;
+
+		for(i=0;i<cantidadDeBloques;i++){
+
+			t_list *listaHijaDeCopias = list_create();
+			t_list *listaDeCopias = list_get(fullDataTable,i);
+			int nroDeCopias= list_size(listaDeCopias);
+			int k = 1;
+			for(j=0;j<nroDeCopias;j++){
+
+				t_dictionary *dicPivot = list_get(listaDeCopias,j);
+				t_dictionary *dic = dictionary_create();
+				char *ipNodoPivot = dictionary_get(dicPivot,K_Copia_IPNodo);
+				char *puertoNodoPivot = dictionary_get(dicPivot,K_Copia_PuertoNodo);
+				char *nroDeBloquePivot = dictionary_get(dicPivot,K_Copia_NroDeBloque);
+				bool *estado = malloc(sizeof(bool));
+				*estado = true;
+
+				char *ipNodo = malloc(strlen(ipNodoPivot));
+				strcpy(ipNodo,ipNodoPivot);
+				char *puertoNodo = malloc(strlen(puertoNodoPivot));
+				strcpy(puertoNodo,puertoNodoPivot);
+				char *nroDeBloque = malloc(strlen(nroDeBloquePivot));
+				strcpy(nroDeBloque,nroDeBloquePivot);
+
+				dictionary_put(dic,K_Copia_IPNodo,ipNodo);
+				dictionary_put(dic,K_Copia_PuertoNodo,puertoNodo);
+				dictionary_put(dic,K_Copia_NroDeBloque,nroDeBloque);
+				dictionary_put(dic,K_Copia_Estado,estado);
+				k=k+3;
+				list_add(listaHijaDeCopias,dic);
+			}
+			list_add(listaPadreDeBloques,listaHijaDeCopias);
+		}
+
 	sem_post(&semFullDataTables);
 
-	return fullDataTable;
+	return listaPadreDeBloques;
 }
 
 

@@ -52,7 +52,7 @@ int getFSSocket();
 
 // Varias
 void addFileFullData(int sckt, char* path, Message *recvMessage);
-void reloadFileFullData(int sckt, char* path, t_list *fullData);
+void reloadFilaDeFileFullData(int sckt, char* path, t_list *fullData, int nroDeBloqe);
 void informarTareasPendientesDeMapping(char *path,int socket);
 //nodosData
 void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
@@ -84,6 +84,6 @@ void agregarFileState(int jobSocket,char *path, int cantidadDeBloques);
 
 //fullDataTable
 void agregarFullDataTable(t_list *table,char *path);
-t_list *getFullDataTable(char *path);
+t_list *getCopyFullDataTable(char *path);
 
 #endif /* FILESTATUSCENTER_H_ */

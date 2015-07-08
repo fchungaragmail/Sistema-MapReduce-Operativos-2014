@@ -21,6 +21,8 @@
 #include "PlannerCenter.h"
 #include "Utilities.h"
 #include "VariablesGlobales.h"
+#include <commons/log.h>
+#include <commons/string.h>
 
 #include "Simulador.h"
 
@@ -41,6 +43,7 @@ sem_t semNodoState;
 t_list *hilosData;
 Message *recvMessage;
 bool fileSystemDisponible;
+FILE *logFile;
 
 void initMaRTA();
 void administrarHilos();
@@ -49,7 +52,6 @@ void connectToFileSystem();
 int main(void) {
 
 	puts("MaRTA al ataque !!!");
-
 	initMaRTA();
 
 	int i=0;
@@ -87,12 +89,21 @@ void planificarHilo(void* args){
 		if(finalizarHilo){ break; }
 	}
 
+	char *path = dictionary_get(hiloDic,K_HiloDic_Path);
+	char *jobSocket = dictionary_get(hiloDic,K_HiloDic_JobSocket);
+
+	char *log = string_from_format("finalizo el hilo con path %s y numeroDeSocket %s",path,jobSocket);
+	log_trace(logFile,log);
+	free(log);
+
 	 pthread_exit(0);
 }
 
 void initMaRTA(){
 
 	//init MaRTA
+	logFile = log_create("./MaRTA.log","MaRTA", true, LOG_LEVEL_TRACE);
+
 	filesToProcess = dictionary_create();
 	filesStates = dictionary_create();
 	nodosData = dictionary_create();
@@ -128,7 +139,7 @@ void administrarHilos(){
 		if(recvMessage->sockfd == getFSSocket()){
 
 			fileSystemDisponible = false;
-			printf("El FileSystem cayo, MaRTA no puede seguir operando.");
+			log_trace(logFile,"El FileSystem cayo, MaRTA no puede seguir operando.");
 			//liberar todas las estructuras.
 		}
 
@@ -140,7 +151,7 @@ void administrarHilos(){
 
 				sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
 				t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
-				//liberar elementos de colaDePedidos
+				//TODO liberar elementos de colaDePedidos
 				list_clean(colaDePedidos);
 				list_add(colaDePedidos,recvMessage);
 				sem_post(semHilo);

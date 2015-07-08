@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include "FilesStatusCenter.h"
 #include <commons/string.h>
+#include <unistd.h>
 
 char *deserializeFilePath(Message *recvMessage,TypesMessages type);
 bool* deserializeSoportaCombiner(Message *recvMessage);
@@ -18,6 +19,7 @@ char* deserializeComando(Message *recvMessage);
 t_list* deserializarFullDataResponse(Message *recvMessage);
 char *deserializeTempFilePath(Message *recvMessage,TypesMessages type);
 t_list *deserializeFailedReduceResponse(Message *recvMessage);
+int deserializeNumeroDeBloque_PedidoDeCopias(Message *recvMessage);
 
 char* createStream();
 void addIntToStream(char *stream, int value,IntTypes type);
@@ -183,6 +185,21 @@ int fullData_obtenerCantidadDeCopias(char **copiasArray)
 
 	return nroDeCopias;
 }
+
+int deserializeNumeroDeBloque_PedidoDeCopias(Message *recvMessage){
+
+	//--> FS responde con bloque de archivo pedido
+	//-Comando: "DataFileResponse rutaDelArchivo Disponible"
+	//-Data: Bloque
+	// Ej: "0;Nodo1;3;Nodo8;2;Nodo2;45;"
+
+	char *data = recvMessage->mensaje->data;
+	char **copiasArray = string_split(data,";");
+	char *ptrInt = copiasArray[0];
+	int a = atoi(ptrInt);
+	return a;
+
+}
 t_list *deserializarFullDataResponse(Message *recvMessage)
 {
 	// segun protocolo
@@ -206,7 +223,7 @@ t_list *deserializarFullDataResponse(Message *recvMessage)
 		char **copiasArray = string_split(dataArray[i],";");
 		int nroDeCopias= fullData_obtenerCantidadDeCopias(copiasArray);
 		int k = 1;
-		for(j=1;j<nroDeCopias;j++){
+		for(j=0;j<nroDeCopias;j++){
 
 			t_dictionary *dic = dictionary_create();
 			char *ipNodo = copiasArray[k];

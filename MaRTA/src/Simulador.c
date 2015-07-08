@@ -14,7 +14,7 @@ int nroDeLlamado = -1;
 
 //FS
 Message* simulacion_FS_DataFullResponse();
-
+Message* simulacion_FS_PedidoDeCopias(char *copias);
 //Job
 Message *simulacion_Job_newFileToProcess();
 Message *simulacion_Job_mapResponse(int x);
@@ -40,7 +40,7 @@ Message *simular()
 
 	if(nroDeLlamado == 7){
 
-		return simulacion_FS_DataFullResponse();
+		return simulacion_FS_PedidoDeCopias("2;195.333.2.5;64;99;192.163.2.5;65;85;192.163.2.5;65;77");
 	}
 	if(nroDeLlamado == 8){ return simulacion_Job_mapResponse(2); }
 	if(nroDeLlamado == 9){ return simulacion_Job_mapResponse(3); }
@@ -70,7 +70,7 @@ Message *simular()
 				return simulacion_Job_reduceResponse_Fallo("reduceFileConCombiner-Pedido2","192.456.3.3");
 		}
 	if(nroDeLlamado == 15){
-				return simulacion_FS_DataFullResponse();
+				return simulacion_FS_PedidoDeCopias("1;192.163.2.8;61;20;192.456.3.3;62;54;192.456.3.3;63;36");
 			}
 		if(nroDeLlamado == 16){
 			return simulacion_Job_mapResponse(1);
@@ -99,10 +99,9 @@ Message *simular()
 }
 Message* simulacion_FS_DataFullResponse()
 {
-	//--> FS responde con tabla de archivo pedida
-	//-Comando: "DataFileResponse rutaDelArchivo Respuesta cantidadDeBloques-nroDeCopias-sizeEstructura-"
-	//-Data: estructura
-	//estructura va a ser IPNodo-nroDeBloque-IPNodo-nroDeBloque-IPNodo-nroDeBloque...
+	//-> FS responde con tabla de archivo pedida
+	//-Comando: "DataFileResponse rutaDelArchivo Disponible"
+	//-Data: Tabla
 
 	Message *fsResponse = malloc(sizeof(Message));
 
@@ -263,4 +262,33 @@ Message *simulacion_NewConnection(int sckt){
 	newConnection->mensaje->data="";
 	newConnection->sockfd=sckt;
 	return newConnection;
+}
+
+Message* simulacion_FS_PedidoDeCopias(char *copias)
+{
+	//--> FS responde con bloque de archivo pedido
+	//-Comando: "DataFileResponse rutaDelArchivo Disponible"
+	//-Data: Bloque
+	// Ej: "0;Nodo1;3;Nodo8;2;Nodo2;45;"
+
+	Message *fsResponse = malloc(sizeof(Message));
+
+	//armo Comando
+	char *comando = string_new();
+	string_append(&comando,"DataFileResponse /user/juan/datos/temperatura2012.txt/ 1");//24 elementos tiene el *data
+	fsResponse->mensaje = malloc(sizeof(mensaje_t));
+	fsResponse->mensaje->comandoSize = strlen(comando);
+	fsResponse->mensaje->comando=malloc(strlen(comando));
+	strcpy(fsResponse->mensaje->comando,comando);
+
+	char *data = string_new();
+	string_append(&data,copias);
+
+	fsResponse->mensaje->dataSize = strlen(data);
+	fsResponse->mensaje->data=malloc(strlen(data));
+	fsResponse->mensaje->data=data;
+
+	fsResponse->sockfd = K_Simulacion_ScktFS;
+
+	return fsResponse;
 }

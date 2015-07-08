@@ -1,0 +1,38 @@
+[TRACE] 19:26:39:182 MaRTA/(10216:10216): PlannerCenter : planificar NewConnection
+[TRACE] 19:26:39:183 MaRTA/(10216:10216): ***************
+[TRACE] 19:26:39:183 MaRTA/(10216:10216): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 19:26:39:184 MaRTA/(10216:10216): ***************
+[TRACE] 19:26:39:185 MaRTA/(10216:10216): PlannerCenter : planificar FS_FileFullData
+[TRACE] 19:26:39:185 MaRTA/(10216:10216): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 4 bloques
+[TRACE] 19:26:39:190 MaRTA/(10216:10216): el nodo 195.456.2.5 esta procesando 1 pedidos
+[TRACE] 19:26:39:190 MaRTA/(10216:10216): el nodo 192.163.2.8 esta procesando 1 pedidos
+[TRACE] 19:26:39:191 MaRTA/(10216:10216): el nodo 195.333.2.5 esta procesando 1 pedidos
+[TRACE] 19:26:39:191 MaRTA/(10216:10216): el nodo 192.456.8.9 esta procesando 1 pedidos
+[TRACE] 19:26:39:192 MaRTA/(10216:10216): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura2012.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura2012.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura2012.txt/-3
+
+[TRACE] 19:26:39:193 MaRTA/(10216:10216): ***************
+[TRACE] 19:26:39:194 MaRTA/(10216:10216): PlannerCenter : planificar Job_MapResponse
+[TRACE] 19:26:39:195 MaRTA/(10216:10216): el nodo 195.456.2.5 esta procesando 0 pedidos
+[TRACE] 19:26:39:195 MaRTA/(10216:10216): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 3 bloques
+[TRACE] 19:26:39:196 MaRTA/(10216:10216): ***************
+[TRACE] 19:26:39:196 MaRTA/(10216:10216): PlannerCenter : planificar Job_MapResponse
+[TRACE] 19:26:39:196 MaRTA/(10216:10216): el nodo 192.163.2.8 esta procesando 0 pedidos
+[TRACE] 19:26:39:197 MaRTA/(10216:10216): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[TRACE] 19:26:39:198 MaRTA/(10216:10216): ***************
+[TRACE] 19:26:39:198 MaRTA/(10216:10216): PlannerCenter : planificar Job_MapResponse
+[TRACE] 19:26:39:199 MaRTA/(10216:10216): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 195.333.2.5 bloque 99 en posicion 2
+[TRACE] 19:26:39:199 MaRTA/(10216:10216): el nodo 195.333.2.5 seguramente esta caido
+[TRACE] 19:26:39:199 MaRTA/(10216:10216): el nodo 195.333.2.5 esta procesando 0 pedidos
+[TRACE] 19:26:39:201 MaRTA/(10216:10216): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[TRACE] 19:26:39:202 MaRTA/(10216:10216): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[TRACE] 19:26:39:203 MaRTA/(10216:10216): el nodo 192.163.2.5 esta procesando 1 pedidos
+[TRACE] 19:26:39:203 MaRTA/(10216:10216): se envia pedido de map, el stream es 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2
+
+[TRACE] 19:26:39:204 MaRTA/(10216:10216): ***************
+[TRACE] 19:26:39:208 MaRTA/(10216:10216): PlannerCenter : planificar Job_MapResponse
+[TRACE] 19:26:39:209 MaRTA/(10216:10216): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 192.163.2.5 bloque 85 en posicion 2
+[TRACE] 19:26:39:209 MaRTA/(10216:10216): el nodo 192.163.2.5 seguramente esta caido
+[TRACE] 19:26:39:210 MaRTA/(10216:10216): el nodo 192.163.2.5 esta procesando 0 pedidos
+[TRACE] 19:26:39:211 MaRTA/(10216:10216): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[TRACE] 19:26:39:211 MaRTA/(10216:10216): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[TRACE] 19:26:39:212 MaRTA/(10216:10216): no hay mas copias disponibles!!!

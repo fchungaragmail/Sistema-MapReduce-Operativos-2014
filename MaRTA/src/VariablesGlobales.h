@@ -23,4 +23,6 @@ extern sem_t semNodosData;
 extern sem_t semNodoState;
 extern sem_t semFullDataTables;
 
+extern FILE *logFile;
+
 #endif /* VARIABLESGLOBALES_H_ */
