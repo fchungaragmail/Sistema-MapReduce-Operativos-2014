@@ -35,7 +35,12 @@ int main() {
 	getConfig();
 
 	connectToFileSistem(sockFS);
+<<<<<<< HEAD
 	pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockFS);
+=======
+	*sockForThread = sockFS;
+	pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockForThread);
+>>>>>>> bac62ec... Cambiado manejo de los sockets
 	pthread_join(fs_handler, NULL);
 
 	int value = initServer(&sockFD);
