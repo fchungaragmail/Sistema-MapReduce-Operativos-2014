@@ -233,27 +233,12 @@ void reloadFilaDeFileFullData(int sckt, char* path, t_list *CopiasfullData,int n
 	list_clean(copiasAReemplazar);
 
 	int j;
-	int s = list_size(CopiasfullData);
 	t_list *listaH = list_get(CopiasfullData,0);
 	size = list_size(listaH);
 	for(j=0;j<size;j++){
 		t_dictionary *copia = list_get(listaH,j);
-		char *ip = dictionary_get(copia,K_Copia_IPNodo);
 		list_add(copiasAReemplazar,copia);
 	}
-
-	t_list *l = list_get(listaPadre,nroDeBloqe);
-
-	t_dictionary *d = list_get(l,0);
-	char *ip = dictionary_get(d,K_Copia_IPNodo);
-
-	t_dictionary *d1 = list_get(l,1);
-	char *ip1 = dictionary_get(d1,K_Copia_IPNodo);
-
-	t_dictionary *d2 = list_get(l,2);
-	char *ip2 = dictionary_get(d2,K_Copia_IPNodo);
-
-
 }
 
 int getCantidadDeOperacionesEnProcesoEnNodo(char *IPnroNodo)

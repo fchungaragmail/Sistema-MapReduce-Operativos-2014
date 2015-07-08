@@ -55,15 +55,15 @@ int main(void) {
 	initMaRTA();
 
 	int i=0;
-	while(i<30)//while(fileSystemDisponible)
+	while(fileSystemDisponible)//while(i<30)
 	{
 		//***********
-		//recvMessage = listenConnections();
-		//administrarHilos();
+		recvMessage = listenConnections();
+		administrarHilos();
 		//***********
-		recvMessage = simular();
-		processMessage(recvMessage);
-		i++;
+		//recvMessage = simular();
+		//processMessage(recvMessage);
+		//i++;
 		//***********
 	}
 
@@ -118,12 +118,12 @@ void initMaRTA(){
 	sem_init(&semFullDataTables, 0, 1);
 
 	//CONEXION A FILE SYSTEM !!!
-	//connectToFileSystem();
-	//fileSystemDisponible = true;
+	connectToFileSystem();
+	fileSystemDisponible = true;
 
-	initFilesStatusCenter();
+	//initFilesStatusCenter();
 	initPlannerCenter();
-	//initConexiones();
+	initConexiones();
 }
 
 void administrarHilos(){
