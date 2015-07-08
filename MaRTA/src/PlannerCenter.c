@@ -17,6 +17,7 @@
 #include "Serializador.h"
 #include <unistd.h>
 #include "VariablesGlobales.h"
+#include "protocolo.h"
 
 // VARIABLES GLOBALES
 int jobSocket;
@@ -151,7 +152,7 @@ bool processMessage(Message *recvMessage)
 				free(log);
 
 				Message *jobMsj = crearMensajeAJobDeFinalizado(recvMessage);
-				//enviar(jobMsj->sockfd,jobMsj->mensaje);
+				enviar(jobMsj->sockfd,jobMsj->mensaje);
 				return true;
 			}
 
@@ -177,6 +178,7 @@ bool processMessage(Message *recvMessage)
 			char *mlog = string_from_format("el Job con socket %d se cayo, MaRTA no puede seguir procesando sus archivos",a);
 			log_trace(logFile,mlog);
 			free(mlog);*/
+			//ME TIRA ERROR EN EL LOG_TRACE !!!!!
 
 			liberarFileState_Y_nodoState(recvMessage);
 			sacarCargasDeNodos_FalloDeJob();
@@ -236,12 +238,12 @@ void planificar(Message *recvMessage,TypesMessages type)
 			agregarFileState(jobSocket,path,cantidadDeBloqes);
 
 			Message *sendMessage = obtenerProximoPedido(recvMessage);
-			//enviar(sendMessage->sockfd,sendMessage->mensaje);
+			enviar(sendMessage->sockfd,sendMessage->mensaje);
 		}
 
 		if(!(dictionary_has_key(fullDataTables,path))){
 			Message *fsRequest = createFSrequest(recvMessage,-1);
-			//enviar(fsRequest->sockfd,fsRequest->mensaje);
+			enviar(fsRequest->sockfd,fsRequest->mensaje);
 			liberarMensaje(fsRequest);
 		}
 	}
@@ -266,7 +268,7 @@ void planificar(Message *recvMessage,TypesMessages type)
 
 		//Obtengo proximoPedido CON info actualizada
 		Message *sendMessage = obtenerProximoPedido(recvMessage);
-		//enviar(sendMessage->sockfd,sendMessage->mensaje);
+		enviar(sendMessage->sockfd,sendMessage->mensaje);
 
 		liberarMensaje(sendMessage);
 		free(path);
@@ -296,7 +298,7 @@ void planificar(Message *recvMessage,TypesMessages type)
 			bool *nodosTodosDisp = obtenerEstanTodosDisponibles(recvMessage);
 			if(*todosMappeados && *nodosTodosDisp){
 				Message *sendMessage = obtenerProximoPedido(recvMessage);
-				//enviar(sendMessage->sockfd,sendMessage->mensaje);
+				enviar(sendMessage->sockfd,sendMessage->mensaje);
 			}
 			free(todosMappeados);
 			free(nodosTodosDisp);
@@ -320,7 +322,7 @@ void planificar(Message *recvMessage,TypesMessages type)
 
 			//OBTENER PROXIMO PEDIDO (se va a enviar devuelta el mismo, siempre y cuando haya copias disponibles)
 			Message* sendMessage = obtenerProximoPedido(recvMessage);
-			//enviar(sendMessage->sockfd,sendMessage->mensaje);
+			enviar(sendMessage->sockfd,sendMessage->mensaje);
 		}
 
 		free(requestResponse);
@@ -338,7 +340,7 @@ void planificar(Message *recvMessage,TypesMessages type)
 			log_trace(logFile,"reduce-Pedido1 realizado con exito");
 			decrementarOperacionesEnReduceList();
 			Message* sendMessage = obtenerProximoPedido(recvMessage);
-			//enviar(sendMessage->sockfd,sendMessage->mensaje);
+			enviar(sendMessage->sockfd,sendMessage->mensaje);
 			liberarMensaje(sendMessage);
 		}
 
@@ -360,7 +362,7 @@ void planificar(Message *recvMessage,TypesMessages type)
 				decrementarOperacionesEnProcesoEnNodo(ipNodo);
 				actualizarTablas_ReduceFallo(path,recvMessage);
 				sendMessage = obtenerProximoPedido(recvMessage);
-			   //enviar(sendMessage->sockfd,sendMessage->mensaje);
+			   enviar(sendMessage->sockfd,sendMessage->mensaje);
 			}
 
 			if(strcmp(reduceType,"reduceFileConCombiner-Pedido1")==0){
@@ -369,7 +371,7 @@ void planificar(Message *recvMessage,TypesMessages type)
 				decrementarOperacionesEnReduceList();
 				actualizarTablas_ReduceFallo(path,recvMessage);
 				sendMessage = obtenerProximoPedido(recvMessage);
-			   //enviar(sendMessage->sockfd,sendMessage->mensaje);
+			   enviar(sendMessage->sockfd,sendMessage->mensaje);
 				liberarNodosReduceList_Pedido1();
 
 			}
@@ -383,7 +385,7 @@ void planificar(Message *recvMessage,TypesMessages type)
 				liberarNodosReduceList_Pedido1();
 
 				sendMessage = obtenerProximoPedido(recvMessage);
-				//enviar(sendMessage->sockfd,sendMessage->mensaje);
+				enviar(sendMessage->sockfd,sendMessage->mensaje);
 			}
 			liberarMensaje(sendMessage);
 		}
