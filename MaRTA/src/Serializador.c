@@ -211,7 +211,7 @@ t_list *deserializarFullDataResponse(Message *recvMessage)
 	char *_comando = recvMessage->mensaje->comando;
 	char **comando = string_split(_comando," ");
 	char *data = recvMessage->mensaje->data;
-	char **dataArray = string_split(data," ");//---> \n !!!!!!!!!!!!!!
+	char **dataArray = string_split(data,"\n");//---> " " poner esto para el simulador!
 	int cantidadDeBloques = fullData_obtenerCantidadDeBloqes(dataArray);
 
 	t_list *listaPadreDeBloques = list_create();
