@@ -21,8 +21,8 @@ int main() {
 
 	int sockFD; //socket nodo servidor
 	int sockAccept; //socket nodo servidor acepta conexiones
-	int sockFS; //socket nodo cliente para conectarse con FS
-	int* sockForThread; //sockFS que paso por parametro al thread que queda hablando con FS
+	int* sockFS = malloc(sizeof(int)); //socket nodo cliente para conectarse con FS
+	int* sockForThread = malloc(sizeof(int)); //sockFS que paso por parametro al thread que queda hablando con FS
 	socklen_t size;
 	Sockaddr_in client_sock; //sockaddr que se usa en accept de nodo servidor
 	pthread_t nodo_handler;
@@ -34,8 +34,8 @@ int main() {
 
 	getConfig();
 
-	connectToFileSistem(&sockFS);
-	sockForThread = &sockFS;
+	connectToFileSistem(sockFS);
+	*sockForThread = sockFS;
 	pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockForThread);
 	pthread_join(fs_handler, NULL);
 
@@ -67,7 +67,8 @@ int main() {
 
 		if (strcmp(buffer_shakehand->comando, "nd") == 0) {
 			int* sockAux = malloc(sizeof(int));
-			sockAux = &sockAccept;
+			//sockAux = &sockAccept;
+			*sockAux = sockAccept;
 			printf("Se obtuvo una conexión desde NODO: %s\n",
 					inet_ntoa(client_sock.sin_addr));
 			pthread_create(&nodo_handler, NULL, fs_nodo_conection_handler,
@@ -76,7 +77,8 @@ int main() {
 
 		if (strcmp(buffer_shakehand->comando, "mp") == 0) {
 			int* sockAux = malloc(sizeof(int));
-			sockAux = &sockAccept;
+			//sockAux = &sockAccept;
+			*sockAux = sockAccept;
 			printf("Se obtuvo una conexión desde JOB: %s\n",
 					inet_ntoa(client_sock.sin_addr));
 			pthread_create(&map_handler, NULL, map_conection_handler, sockAux);
@@ -84,7 +86,8 @@ int main() {
 
 		if (strcmp(buffer_shakehand->comando, "rd") == 0) {
 			int* sockAux = malloc(sizeof(int));
-			sockAux = &sockAccept;
+			//sockAux = &sockAccept;
+			*sockAux = sockAccept;
 			pthread_create(&reduce_handler, NULL, reduce_conection_handler,
 					sockAux);
 		}
@@ -183,7 +186,7 @@ void connectToFileSistem(int* sock) {
 
 	string_append_with_format(&ipPuertoStr, "nombre %s:%d %d", IP_NODO, PUERTO_NODO, 1000000000);
 	message->comando = ipPuertoStr;
-	message->comandoSize = strlen(ipPuertoStr)+1;
+	message->comandoSize = strlen(ipPuertoStr) + 1;
 	message->data = NULL;
 	message->dataSize = NULL;
 
