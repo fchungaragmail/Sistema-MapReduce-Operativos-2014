@@ -121,8 +121,8 @@ void initMaRTA(){
 	connectToFileSystem();
 	fileSystemDisponible = true;
 
-	//initFilesStatusCenter();
-	initPlannerCenter();
+	initFilesStatusCenter();
+	//initPlannerCenter();
 	initConexiones();
 }
 
