@@ -6,7 +6,6 @@
  */
 
 #include "comandos.h"
-#define MARTA "MaRTA"
 
 void initComandos();
 void procesarComando(char** comando, void(*doComando)(void*));
@@ -29,7 +28,7 @@ int dataFile(char* argumentos, Conexion_t* conexion);
 
 int enviarBloque(enviarBloque_t* envio);
 
-
+void actualizarEstadoArchivos();
 int16_t getDir(char* dir,int16_t padre);
 int32_t get_file_size(const char * file_name);
 int getNombreArchivo(char* ruta,char* nombre,int16_t *indexPadre);
@@ -539,6 +538,7 @@ int nomb(char* argumentos, Conexion_t* conexion)
 			free(conexion->estadoBloques);
 			free(conexion);
 			pthread_mutex_unlock(&mConexiones);
+			actualizarEstadoArchivos();
 			return 0;
 		}
 	}
@@ -640,6 +640,49 @@ int dataFile(char* argumentos, Conexion_t* conexion)
 	return EXIT_SUCCESS;
 }
 
+
+void actualizarEstadoArchivos()
+{
+	char* actualizaciones = string_new();
+	pthread_mutex_lock(&mListaArchivos);
+	for (int i = 0;i<listaArchivos->elements_count;i++)
+	{
+		t_reg_archivo* archivo = list_get(listaArchivos,i);
+		int bloquesDisponibles = 0;
+		for (int j=0;j<archivo->bloques->elements_count;j++)
+		{
+			t_list* bloque = list_get(archivo->bloques,j);
+			for (int k=0;k<bloque->elements_count;k++)
+			{
+				t_ubicacion_bloque* ubicacion = list_get(bloque,k);
+				if (ubicacion->nodo->estado == DISPONIBLE)
+				{
+					bloquesDisponibles++;
+					break;
+				}
+			}
+		}
+		if ((archivo->estado == DISPONIBLE) &&
+				(bloquesDisponibles < archivo->bloques->elements_count))
+				{
+					string_append_with_format(&actualizaciones,
+							"El archivo %s ya no se encuentra disponible.\n",
+							archivo->nombre);
+					archivo->estado = NO_DISPONIBLE;
+				}
+		if ((archivo->estado == NO_DISPONIBLE) &&
+				(bloquesDisponibles = archivo->bloques->elements_count))
+				{
+					string_append_with_format(&actualizaciones,
+							"El archivo %s se encuentra disponible nuevamente.\n",
+							archivo->nombre);
+					archivo->estado = DISPONIBLE;
+				}
+	}
+	pthread_mutex_unlock(&mListaArchivos);
+
+	log_info(logFile, actualizaciones);
+}
 
 
 int16_t getDir(char* dir,int16_t padre)

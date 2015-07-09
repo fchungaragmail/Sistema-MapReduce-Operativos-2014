@@ -19,6 +19,7 @@
 #include "estructuras.h"
 
 #define TAMANIO_BLOQUE 20971520
+#define MARTA "MaRTA"
 
 extern t_list* listaArchivos;
 extern t_list* listaDirs;

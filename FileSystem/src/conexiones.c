@@ -186,6 +186,12 @@ void cerrarConexion(Conexion_t* conexion)
 	pthread_mutex_unlock(&mNodos);
 	close(conexion->sockfd);
 	conexion->estado = DESCONECTADO;
+
+	if (strcmp(conexion->nombre,MARTA) != 0)
+	{
+		actualizarEstadoArchivos();
+	}
+
 	log_info(logFile, "Desconectado de %s", conexion->nombre);
 }
 
