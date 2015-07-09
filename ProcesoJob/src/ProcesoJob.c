@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <commons/collections/list.h>
+#include <commons/collections/dictionary.h>
 #include <commons/error.h>
 #include <arpa/inet.h>
 #include <commons/config.h>
@@ -17,6 +18,7 @@ pthread_t threadProcesarHilos;
 t_config* configuracion;
 pthread_mutex_t mMarta;
 t_log* logProcesoJob;
+t_dictionary* diccArchivos = NULL;
 
 void* pedidosMartaHandler(void* arg) {
 
@@ -26,9 +28,10 @@ void* pedidosMartaHandler(void* arg) {
 		mensaje_t* mensajeMarta;
 
 #ifndef BUILD_PARA_TEST
+		mensajeMarta = malloc(sizeof(mensaje_t));
 		recibir(socketMartaFd, mensajeMarta);
 #else
-		static int alternar = 0;
+		static int alternar = 4;
 		if (alternar == 0) {
 			mensajeMarta =
 					CreateMensaje("mapFile todo1.txt",
@@ -44,13 +47,19 @@ void* pedidosMartaHandler(void* arg) {
 					CreateMensaje("reduceFileConCombiner-Pedido1 todoCC1.txt",
 							"227.4.6.1 999 archTempCC1 2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 archTempCC2 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 archTempCC3 1 ruta_temp5");
 			alternar = 3;
-		} else {
+		} else if (alternar == 3) {
 			mensajeMarta =
 					CreateMensaje("reduceFileConCombiner-Pedido2 todoCC2.txt",
 							"227.4.6.1 999 1 /ruta_temp1 117.4.5.1 259 1 /ruta_temp3 167.5.4.1 250 1 ruta_temp5");
+			alternar = 4;
+		} else {
+			mensajeMarta = CreateMensaje("FileSuccess todo1.txt", NULL);
 			alternar = 0;
 		}
 #endif
+		log_info(logProcesoJob, "Recibido del MaRTA:\nComando: %s\nData: %s\n",
+				mensajeMarta->comando, mensajeMarta->data);
+
 		printf(
 				"-----Recibido mensaje de Marta-----\nComando: %s \nData: %s \n------------------\n",
 				mensajeMarta->comando, mensajeMarta->data);
@@ -66,6 +75,24 @@ void* pedidosMartaHandler(void* arg) {
 		} else if (strcmp(comandoStr[MENSAJE_COMANDO],
 				"reduceFileConCombiner-Pedido1") == 0) {
 			PlanificarHilosReduce(mensajeMarta, TRUE);
+		} else if (strcmp(comandoStr[MENSAJE_COMANDO], "FileSuccess") == 0) {
+			char* dataDiccionario = dictionary_remove(diccArchivos,
+					comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO]);
+			if (dataDiccionario) {
+				free(dataDiccionario);
+				log_debug(logProcesoJob,
+						"Se completo %s, quedan %d archivos.\n",
+						comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO],
+						dictionary_size(diccArchivos));
+				if (dictionary_is_empty(diccArchivos)) {
+					break;
+				}
+			} else {
+				log_warning(logProcesoJob,
+						"Nombre de archivo: %s incorrecto o ya fue completado con anterioridad!\n",
+						comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO]);
+			}
+
 		}
 
 		FreeStringArray(&comandoStr);
@@ -93,6 +120,8 @@ void IniciarConfiguracion() {
 
 	logProcesoJob = log_create("./ProcesoJob.log", "ProcesoJob", TRUE,
 			LOG_LEVEL_TRACE);
+
+	diccArchivos = dictionary_create();
 
 }
 
@@ -125,8 +154,8 @@ void Terminar(int exitStatus) {
 	if (socketMartaFd != -1) {
 		close(socketMartaFd);
 	}
-	log_info(logProcesoJob, "Finalizacion del ProcesoJob con exit_status=%d\n",
-			exitStatus);
+	log_info(logProcesoJob,
+			"Finalizacion del ProcesoJob con exit_status = %d\n", exitStatus);
 	exit(exitStatus);
 }
 
@@ -185,6 +214,9 @@ void HacerPedidoMarta() {
 		log_info(logProcesoJob,
 				"Se envió a MaRTA el siguiente mensaje\nComando: %s\nData: %s\n",
 				mensaje->comando, mensaje->data);
+
+		dictionary_put(diccArchivos, archivos[i], string_duplicate("")); //Por ahora no hay info inportante por cada archivo
+
 		free(buffer);
 		FreeMensaje(mensaje);
 
@@ -268,7 +300,7 @@ void PlanificarHilosMapper(mensaje_t* mensaje) {
 		hiloJobInfo->nroBloque = atoi(dataStr[i++]);
 		hiloJobInfo->nombreArchivo = string_duplicate(dataStr[i++]);
 
-		CrearHiloJob(hiloJobInfo,TIPO_HILO_MAPPER);
+		CrearHiloJob(hiloJobInfo, TIPO_HILO_MAPPER);
 		log_info(logProcesoJob,
 				"Se creó un Hilo Mapper con los siguientes parametros\nNombre del Archivo temporal: %s\nNumero de bloque :%d\n",
 				hiloJobInfo->nombreArchivo, hiloJobInfo->nroBloque);
@@ -321,7 +353,7 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner) {
 			}
 			hiloJobInfo->parametros = strdup(parametrosBuffer);
 
-			CrearHiloJob(hiloJobInfo,TIPO_HILO_REDUCE);
+			CrearHiloJob(hiloJobInfo, TIPO_HILO_REDUCE);
 			log_info(logProcesoJob,
 					"Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros\nNombre del Archivo temporal: %s\nParametros: %s\n",
 					hiloJobInfo->nombreArchivo, hiloJobInfo->parametros);
@@ -359,7 +391,7 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner) {
 		}
 
 		hiloJobInfo->parametros = strdup(parametrosBuffer);
-		CrearHiloJob(hiloJobInfo,TIPO_HILO_REDUCE);
+		CrearHiloJob(hiloJobInfo, TIPO_HILO_REDUCE);
 		log_info(logProcesoJob,
 				"Se creó un Hilo Reduce sin combiner con los siguientes parametros\nNombre del Archivo temporal: %s\nParametros: %s\n",
 				hiloJobInfo->nombreArchivo, hiloJobInfo->parametros);

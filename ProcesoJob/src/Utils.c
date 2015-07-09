@@ -18,7 +18,7 @@ mensaje_t* CreateMensaje(char* comandoStr, char* dataStr) {
 
 	if (comandoStr != NULL) {
 		mensaje->comando = strdup(comandoStr);
-		mensaje->comandoSize = strlen(comandoStr);
+		mensaje->comandoSize = strlen(comandoStr) + 1;
 	} else {
 		mensaje->comando = NULL;
 		mensaje->comandoSize = NULL;
@@ -26,7 +26,7 @@ mensaje_t* CreateMensaje(char* comandoStr, char* dataStr) {
 
 	if (dataStr != NULL) {
 		mensaje->data = strdup(dataStr);
-		mensaje->dataSize = strlen(dataStr);
+		mensaje->dataSize = strlen(dataStr) + 1;
 	} else {
 		mensaje->data = NULL;
 		mensaje->dataSize = NULL;
@@ -48,13 +48,13 @@ void FreeStringArray(char*** stringArray) {
 
 void FreeHiloJobInfo(HiloJobInfo* hiloJobInfo) {
 
-	if(hiloJobInfo->nombreArchivo != NULL){
+	if (hiloJobInfo->nombreArchivo != NULL) {
 		free(hiloJobInfo->nombreArchivo);
 	}
-	if(hiloJobInfo->parametros != NULL){
+	if (hiloJobInfo->parametros != NULL) {
 		free(hiloJobInfo->parametros);
 	}
-	if(hiloJobInfo->parametrosError != NULL){
+	if (hiloJobInfo->parametrosError != NULL) {
 		free(hiloJobInfo->parametrosError);
 	}
 	free(hiloJobInfo);

@@ -66,6 +66,7 @@ void* hiloJobHandler(void* arg) {
 	FreeMensaje(mensajeParaNodo);
 
 #ifndef BUILD_PARA_TEST
+	mensajeDeNodo = malloc(sizeof(mensaje_t));
 	estadoConexion = recibir(hiloJobInfo->socketFd,mensajeDeNodo);
 #else
 	estadoConexion = CONECTADO;
@@ -87,6 +88,7 @@ void* hiloJobHandler(void* arg) {
 			inet_ntoa(hiloJobInfo->direccionNodo.sin_addr),
 			ntohs(hiloJobInfo->direccionNodo.sin_port), mensajeDeNodo->comando,
 			mensajeDeNodo->data);
+
 	FreeMensaje(mensajeDeNodo);
 
 	/*
@@ -127,6 +129,7 @@ void* hiloJobHandler(void* arg) {
 #endif
 
 #ifndef BUILD_PARA_TEST
+	mensajeDeNodo = malloc(sizeof(mensaje_t));
 	estadoConexion = recibir(hiloJobInfo->socketFd,mensajeDeNodo);
 #else
 	estadoConexion = CONECTADO;
@@ -173,11 +176,12 @@ void* hiloJobHandler(void* arg) {
 
 	char** comandoStr = string_split(mensajeDeNodo->comando, " ");
 
-	if (strcmp(comandoStr[MENSAJE_COMANDO], "mapFileResponse") == 0 || strcmp(comandoStr[MENSAJE_COMANDO], "reduceFileResponse") == 0) {
+	if (strcmp(comandoStr[MENSAJE_COMANDO], "mapFileResponse") == 0
+			|| strcmp(comandoStr[MENSAJE_COMANDO], "reduceFileResponse") == 0) {
 		if (atoi(comandoStr[1]) == 1) {
 			ReportarResultadoHilo(hiloJobInfo, ESTADO_HILO_FINALIZO_OK);
 		} else {
-			if(mensajeDeNodo->data != NULL){
+			if (mensajeDeNodo->data != NULL) {
 				hiloJobInfo->parametrosError = strdup(mensajeDeNodo->data);
 			}
 			ReportarResultadoHilo(hiloJobInfo,
