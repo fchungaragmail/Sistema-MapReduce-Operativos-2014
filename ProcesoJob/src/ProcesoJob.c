@@ -60,9 +60,6 @@ void* pedidosMartaHandler(void* arg) {
 		log_info(logProcesoJob, "Recibido del MaRTA:\nComando: %s\nData: %s\n",
 				mensajeMarta->comando, mensajeMarta->data);
 
-		printf(
-				"-----Recibido mensaje de Marta-----\nComando: %s \nData: %s \n------------------\n",
-				mensajeMarta->comando, mensajeMarta->data);
 		char** comandoStr = string_split(mensajeMarta->comando, " ");
 
 		if (strcmp(comandoStr[MENSAJE_COMANDO], "mapFile") == 0) {
