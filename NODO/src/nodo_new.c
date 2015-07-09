@@ -166,10 +166,10 @@ void connectToFileSistem(int* sock) {
 
 	setValuesToSockaddr(&server_addr, PUERTO_FS, IP_FS);
 
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(PUERTO_FS);
-	inet_aton("127.0.0.1", &(server_addr.sin_addr)); //la IP hay que pasarla tomandola del .config pero tiraba error
-	bzero(&(server_addr.sin_zero), 8);
+	//server_addr.sin_family = AF_INET;
+	//server_addr.sin_port = htons(PUERTO_FS);
+	//inet_aton(IP_FS, &(server_addr.sin_addr)); //la IP hay que pasarla tomandola del .config pero tiraba error
+	//bzero(&(server_addr.sin_zero), 8);
 
 	*sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (*sock == -1) {
