@@ -220,5 +220,11 @@ void probarConexiones()
 	mensaje->dataSize = 0;
 
 	enviar(socketPrueba, mensaje);
+
+	while(1)
+	{
+		sleep(5);
+		persistirEstructuras();
+	}
 }
 

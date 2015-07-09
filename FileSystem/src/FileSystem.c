@@ -57,8 +57,9 @@ void initFileSystem()
 	pthread_mutex_init(&mListaArchivos, NULL);
 
 	listaDirs = list_create();
+	pthread_mutex_init(&mListaDirs, NULL);
 	t_reg_directorio* raiz = malloc(sizeof(t_reg_directorio));
-	strcpy(raiz->directorio, "");
+	strcpy(raiz->directorio, "\0");
 	raiz->padre = -1;
 	list_add(listaDirs, raiz);
 

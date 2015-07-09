@@ -22,7 +22,9 @@
 #define MARTA "MaRTA"
 
 extern t_list* listaArchivos;
+extern pthread_mutex_t mListaArchivos;
 extern t_list* listaDirs;
+extern pthread_mutex_t mListaDirs;
 extern int PUERTO_LISTEN;
 extern char IP_LISTEN[16];
 extern int LISTA_NODOS;
@@ -31,7 +33,6 @@ extern FILE* logFile;
 extern t_list* conexiones;
 extern pthread_mutex_t mConexiones;
 extern int nodosOnline;
-extern pthread_mutex_t mListaArchivos;
 
 struct _conexion {
 	int sockfd;

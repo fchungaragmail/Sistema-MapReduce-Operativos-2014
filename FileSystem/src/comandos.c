@@ -40,6 +40,7 @@ bool tieneMasEspacio(Conexion_t* nodo1,Conexion_t* nodo2);
 bool esNodo(Conexion_t* conexion);
 void formatNodo(Conexion_t* nodo);
 pthread_mutex_t mListaArchivos;
+pthread_mutex_t mListaDirs;
 int nodosOnline;
 pthread_mutex_t mNodosOnline;
 pthread_mutex_t mElegirNodos;
