@@ -85,6 +85,7 @@ void escucharConexiones()
 		conexionNueva->estado = CONECTADO;
 		pthread_mutex_init(&(conexionNueva->mSocket), NULL);
 		pthread_mutex_init(&(conexionNueva->mEstadoBloques), NULL);
+		conexionNueva->totalBloques = 0;
 
 		pthread_mutex_lock(&mConexiones);
 		list_add(conexiones, conexionNueva);

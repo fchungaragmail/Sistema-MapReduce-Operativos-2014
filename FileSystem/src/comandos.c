@@ -537,7 +537,7 @@ int nomb(char* argumentos, Conexion_t* conexion)
 		{
 			nodo->sockfd = conexion->sockfd;
 			free(conexion->estadoBloques);
-			free(nodo);
+			free(conexion);
 			pthread_mutex_unlock(&mConexiones);
 			return 0;
 		}
