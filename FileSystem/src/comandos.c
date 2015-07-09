@@ -565,9 +565,10 @@ int nomb(char* argumentos, Conexion_t* conexion)
 
 int dataFile(char* argumentos, Conexion_t* conexion)
 {
+	char** args = string_split(argumentos," ");
 	char nombre[50];
 	int16_t indexPadre = 0;
-	if (getNombreArchivo(argumentos,nombre,&indexPadre) != EXIT_SUCCESS)
+	if (getNombreArchivo(args[0],nombre,&indexPadre) != EXIT_SUCCESS)
 	{
 		return -1;
 	}
@@ -582,7 +583,7 @@ int dataFile(char* argumentos, Conexion_t* conexion)
 		mensaje_t* respuesta = malloc(sizeof(mensaje_t));
 		respuesta->comando = string_new();
 		string_append_with_format(&(respuesta->comando),
-				"DataFileResponse %s noDisponible", argumentos);
+				"DataFileResponse %s noDisponible", args[0]);
 		respuesta->comandoSize = strlen(respuesta->comando) + 1;
 		memcpy(respuesta->data,NULL,0);
 		respuesta->dataSize = 0;
@@ -592,28 +593,42 @@ int dataFile(char* argumentos, Conexion_t* conexion)
 		pthread_mutex_unlock(&(conexion->mSocket));
 
 		log_info(logFile,"El archivo %s no se encuentra disponible",
-				argumentos);
+				args[0]);
 		return -1;
+	}
+
+	bool unBloque = false;
+	int nBloque;
+	if (args[1] != NULL)
+	{
+		nBloque = atoi(args[1]);
+		unBloque = true;
 	}
 
 	char* tabla = string_new();
 	for(int i=0;i<archivo->bloques->elements_count;i++)
 	{
+		if (unBloque) i = nBloque;
+
 		string_append_with_format(&tabla,"%d;",i);
 
 		t_list* bloque = list_get(archivo->bloques,i);
 		for(int j=0;j<bloque->elements_count;j++)
 		{
 			t_ubicacion_bloque* ubicacion = list_get(bloque,j);
-			string_append_with_format(&tabla,"%s;%d;",ubicacion->nodo->nombre,ubicacion->bloque);
+			if (ubicacion->nodo->estado == DISPONIBLE)
+			{
+				string_append_with_format(&tabla,"%s;%d;",ubicacion->nodo->nombre,ubicacion->bloque);
+			}
 		}
 		string_append(&tabla,"\n");
+		if (unBloque) break;
 	}
 
 	mensaje_t* respuesta = malloc(sizeof(mensaje_t));
 	respuesta->comando = string_new();
 	string_append_with_format(&(respuesta->comando),
-			"DataFileResponse %s disponible", argumentos);
+			"DataFileResponse %s Disponible", argumentos);
 	respuesta->comandoSize = strlen(respuesta->comando) + 1;
 	respuesta->data = tabla;
 	respuesta->dataSize = strlen(respuesta->data) + 1;
