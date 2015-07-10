@@ -224,7 +224,7 @@ void probarConexiones()
 	while(1)
 	{
 		sleep(5);
-		persistirEstructuras();
+	//	persistirEstructuras();
 	}
 }
 

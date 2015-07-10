@@ -11,11 +11,12 @@
 int persistirEstructuras();
 int leerPersistencia();
 int buscarSeccion(char* seccion);
+Conexion_t* getConexionByNombre(char* nombre);
 FILE* persistFile;
 pthread_mutex_t mPersistFile;
 
 
-//archivo	= nombre;dirPadre;estado;nodo;nbloque//nodo;nbloque;
+//archivo	= nombre;dirPadre;estado;tamanio;nodo;nbloque//nodo;nbloque;
 //dir		= nobmre;padre;
 //conexion	= nombre;estado;totalBloques;(estadoBloques con 1 y 0)
 
@@ -97,7 +98,6 @@ int persistirEstructuras()
 
 int leerPersistencia()
 {
-	//No usa mutex porque es previo a levantar hilos
 	pthread_mutex_init(&mPersistFile, NULL);
 	persistFile = fopen("./FileSystem.persist", "r");
 	if (persistFile == NULL) return EXIT_SUCCESS;
@@ -150,6 +150,8 @@ int leerPersistencia()
 					conexion->estadoBloques[i] = false;
 				}
 			}
+			list_add(conexiones,conexion);
+
 			ret = fgets(linea,MAX_BUFF_SIZE,persistFile);
 		}
 	}
@@ -160,13 +162,13 @@ int leerPersistencia()
 		ret = fgets(linea,MAX_BUFF_SIZE,persistFile);
 		while((ret != NULL) && (strstr(linea,"#") == NULL))
 		{
-			char** lArchivo = string_n_split(linea,4,";");
+			char** lArchivo = string_n_split(linea,5,";");
 			char** lBloques = string_split(lArchivo[4],"//");
 			t_reg_archivo* archivo = malloc(sizeof(t_reg_archivo));
 
 			strcpy(archivo->nombre,lArchivo[0]);
 			archivo->dirPadre = atoi(lArchivo[1]);
-			archivo->estado = atoi(lArchivo[2]);
+			archivo->estado = NO_DISPONIBLE;
 			archivo->tamanio = atoll(lArchivo[3]);
 			pthread_mutex_init(&(archivo->mBloques),NULL);
 			archivo->bloques = list_create();
@@ -181,13 +183,18 @@ int leerPersistencia()
 				while (lUbicaciones[0] != NULL)
 				{
 					t_ubicacion_bloque* ubicacion = malloc(sizeof(t_ubicacion_bloque));
-					strcpy(ubicacion->nodo, lUbicaciones[0]);
-					//Hay que levantar el puntero a la conexion
-					//no meter el nombre
+					ubicacion->nodo = getConexionByNombre(lUbicaciones[0]);
 					ubicacion->bloque = atoi(lUbicaciones[1]);
 					list_add(ubicaciones,ubicacion);
 
-					lUbicaciones = string_n_split(lUbicaciones[3],3,";");
+					if (lUbicaciones[3] != NULL)
+					{
+						lUbicaciones = string_n_split(lUbicaciones[3],3,";");
+					}else
+					{
+						lUbicaciones[0] = NULL;
+					}
+
 				}
 				i++;
 			}
@@ -203,15 +210,29 @@ int buscarSeccion(char* seccion)
 {
 	char linea[MAX_BUFF_SIZE];
 	bool encontrado = false;
+	fseek(persistFile,0,SEEK_SET);
 	while (!encontrado)
 	{
-		fseek(persistFile,0,SEEK_SET);
 		if (fgets(linea,MAX_BUFF_SIZE,persistFile) == NULL)
 		{
 			return -1;
 		}
-		if (strcmp(seccion,linea) == 0)
+		if (strstr(linea,seccion) != NULL)
 			encontrado = true;
 	}
 	return EXIT_SUCCESS;
+}
+
+
+Conexion_t* getConexionByNombre(char* nombre)
+{
+	for (int i=0;i<conexiones->elements_count;i++)
+	{
+		Conexion_t* conexion = list_get(conexiones,i);
+		if (strcmp(nombre,conexion->nombre) == 0)
+		{
+			return conexion;
+		}
+	}
+	return NULL;
 }

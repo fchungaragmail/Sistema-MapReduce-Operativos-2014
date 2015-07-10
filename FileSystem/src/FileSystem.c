@@ -66,6 +66,7 @@ void initFileSystem()
 	initConsola();
 	initComandos();
 	initConexiones();
+	leerPersistencia();
 }
 
 void exitFileSystem()
