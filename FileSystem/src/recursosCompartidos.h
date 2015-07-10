@@ -40,7 +40,7 @@ struct _conexion {
 	int sockfd;
 	pthread_mutex_t mSocket;
 	char nombre[22];
-	int estado;
+	t_estado estado;
 	int totalBloques;
 	bool* estadoBloques; //en uso? Todos por default False
 	pthread_mutex_t mEstadoBloques;

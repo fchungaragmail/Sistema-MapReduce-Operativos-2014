@@ -10,10 +10,12 @@
 
 int persistirEstructuras();
 int leerPersistencia();
+int buscarSeccion(char* seccion);
 FILE* persistFile;
+pthread_mutex_t mPersistFile;
 
 
-//archivo	= nombre;dirPadre;estado;bloque;nodo;nbloque//bloque;nodo;nbloque;
+//archivo	= nombre;dirPadre;estado;nodo;nbloque//nodo;nbloque;
 //dir		= nobmre;padre;
 //conexion	= nombre;estado;totalBloques;(estadoBloques con 1 y 0)
 
@@ -35,7 +37,6 @@ int persistirEstructuras()
 		for (int j=0;j<archivo->bloques->elements_count;j++)
 		{
 			if (j != 0) string_append(&estructuras, "//");
-			string_append_with_format(&estructuras,"%d;",j);
 
 			t_list* ubicaciones = list_get(archivo->bloques,j);
 			for (int k=0;k<ubicaciones->elements_count;k++)
@@ -84,14 +85,133 @@ int persistirEstructuras()
 	}
 	pthread_mutex_unlock(&mConexiones);
 
-	persistFile = fopen("./FileSistem.persist","w+");
+	pthread_mutex_lock(&mPersistFile);
+	persistFile = fopen("./FileSystem.persist","w+");
 	fprintf(persistFile,estructuras);
 	fclose(persistFile);
+	pthread_mutex_unlock(&mPersistFile);
+
 	return EXIT_SUCCESS;
 }
 
 
 int leerPersistencia()
 {
+	//No usa mutex porque es previo a levantar hilos
+	pthread_mutex_init(&mPersistFile, NULL);
+	persistFile = fopen("./FileSystem.persist", "r");
+	if (persistFile == NULL) return EXIT_SUCCESS;
+
+	char linea[MAX_BUFF_SIZE];
+	int ret = 0;
+	int index = 1; //El 0 es el directorio raiz que esta por default
+
+	if (buscarSeccion(SECCION_LISTA_DIRS) == EXIT_SUCCESS)
+	{
+		ret = fgets(linea,MAX_BUFF_SIZE,persistFile);
+		while((ret != NULL) && (strstr(linea,"#") == NULL))
+		{
+			char** lDir = string_split(linea,";");
+
+			t_reg_directorio* dir = malloc(sizeof(t_reg_directorio));
+			strcpy(dir->directorio,lDir[0]);
+			dir->padre = atoi(lDir[1]);
+			list_add_in_index(listaDirs,index,dir);
+
+			ret = fgets(linea,MAX_BUFF_SIZE,persistFile);
+			index++;
+		}
+	}
+
+	if (buscarSeccion(SECCION_LISTA_CONEXIONES) == EXIT_SUCCESS)
+	{
+		ret = fgets(linea,MAX_BUFF_SIZE,persistFile);
+		while((ret != NULL) && (strstr(linea,"#") == NULL))
+		{
+			char** lConexion = string_n_split(linea, 4, ";");
+			Conexion_t* conexion = malloc(sizeof(Conexion_t));
+
+			strcpy(conexion->nombre, lConexion[0]);
+			conexion->estado = NO_DISPONIBLE;
+			conexion->totalBloques = atoi(lConexion[2]);
+			conexion->estadoBloques = calloc(conexion->totalBloques,1);
+			sem_init(&(conexion->respuestasR),0,1);
+			sem_init(&(conexion->respuestasP),0,0);
+			pthread_mutex_init(&(conexion->mSocket), NULL);
+			pthread_mutex_init(&(conexion->mEstadoBloques), NULL);
+
+			for (int i=0;i<conexion->totalBloques;i++)
+			{
+				if (lConexion[3][i] == '1')
+				{
+					conexion->estadoBloques[i] = true;
+				}else
+				{
+					conexion->estadoBloques[i] = false;
+				}
+			}
+			ret = fgets(linea,MAX_BUFF_SIZE,persistFile);
+		}
+	}
+
+
+	if (buscarSeccion(SECCION_LISTA_ARCHIVOS) == EXIT_SUCCESS)
+	{
+		ret = fgets(linea,MAX_BUFF_SIZE,persistFile);
+		while((ret != NULL) && (strstr(linea,"#") == NULL))
+		{
+			char** lArchivo = string_n_split(linea,4,";");
+			char** lBloques = string_split(lArchivo[4],"//");
+			t_reg_archivo* archivo = malloc(sizeof(t_reg_archivo));
+
+			strcpy(archivo->nombre,lArchivo[0]);
+			archivo->dirPadre = atoi(lArchivo[1]);
+			archivo->estado = atoi(lArchivo[2]);
+			archivo->tamanio = atoll(lArchivo[3]);
+			pthread_mutex_init(&(archivo->mBloques),NULL);
+			archivo->bloques = list_create();
+
+			int i = 0;
+			char** lUbicaciones;
+			while(lBloques[i] != NULL)
+			{
+				t_list* ubicaciones = list_create();
+				list_add_in_index(archivo->bloques, i, ubicaciones);
+				lUbicaciones = string_n_split(lBloques[i],3,";");
+				while (lUbicaciones[0] != NULL)
+				{
+					t_ubicacion_bloque* ubicacion = malloc(sizeof(t_ubicacion_bloque));
+					strcpy(ubicacion->nodo, lUbicaciones[0]);
+					//Hay que levantar el puntero a la conexion
+					//no meter el nombre
+					ubicacion->bloque = atoi(lUbicaciones[1]);
+					list_add(ubicaciones,ubicacion);
+
+					lUbicaciones = string_n_split(lUbicaciones[3],3,";");
+				}
+				i++;
+			}
+			ret = fgets(linea,MAX_BUFF_SIZE,persistFile);
+		}
+	}
+
+
+	return EXIT_SUCCESS;
+}
+
+int buscarSeccion(char* seccion)
+{
+	char linea[MAX_BUFF_SIZE];
+	bool encontrado = false;
+	while (!encontrado)
+	{
+		fseek(persistFile,0,SEEK_SET);
+		if (fgets(linea,MAX_BUFF_SIZE,persistFile) == NULL)
+		{
+			return -1;
+		}
+		if (strcmp(seccion,linea) == 0)
+			encontrado = true;
+	}
 	return EXIT_SUCCESS;
 }
