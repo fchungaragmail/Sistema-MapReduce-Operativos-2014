@@ -35,6 +35,7 @@ extern FILE* logFile;
 extern t_list* conexiones;
 extern pthread_mutex_t mConexiones;
 extern int nodosOnline;
+extern sem_t sPersistencia;
 
 struct _conexion {
 	int sockfd;

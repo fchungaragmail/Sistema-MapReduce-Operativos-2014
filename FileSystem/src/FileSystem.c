@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include "consola.h"
 #include "conexiones.h"
+#include "persistencia.h"
 #include "recursosCompartidos.h"
 
 void initFileSystem();
@@ -21,14 +22,14 @@ FILE* logFile;
 
 int main(void) {
 	pthread_t tConsola, tEscucharConexiones,
-			  tConectarMaRTA, tLeerEntradas, tPrueba;
+			  tConectarMaRTA, tLeerEntradas, tPrueba, tPersistencia;
 
 	initFileSystem();
 
 	pthread_create(&tPrueba, NULL, probarConexiones, NULL);
+	pthread_create(&tPersistencia, NULL, persistirEstructuras, NULL);
 
 	pthread_create(&tConsola, NULL, execConsola, NULL);
-
 	pthread_create(&tEscucharConexiones, NULL, escucharConexiones, NULL);
 	pthread_create(&tLeerEntradas, NULL, leerEntradas, NULL);
 

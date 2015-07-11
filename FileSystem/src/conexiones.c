@@ -95,6 +95,7 @@ void escucharConexiones()
 		FD_SET(nuevoSocketfd, &nodos);
 		write(desbloquearSelect[1], "", 1);
 		pthread_mutex_unlock(&mNodos);
+		sem_post(&sPersistencia);
 
 		log_info(logFile, "Nueva conexion con %s. \n"
 				"Esperando identificacion.", inet_ntoa(their_addr.sin_addr));

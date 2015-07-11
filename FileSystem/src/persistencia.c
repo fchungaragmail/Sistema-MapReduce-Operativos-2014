@@ -14,6 +14,7 @@ int buscarSeccion(char* seccion);
 Conexion_t* getConexionByNombre(char* nombre);
 FILE* persistFile;
 pthread_mutex_t mPersistFile;
+sem_t sPersistencia;
 
 
 //archivo	= nombre;dirPadre;estado;tamanio;nodo;nbloque//nodo;nbloque;
@@ -22,6 +23,8 @@ pthread_mutex_t mPersistFile;
 
 int persistirEstructuras()
 {
+	sem_wait(&sPersistencia);
+
 	char* estructuras = string_new();
 
 	//lista de archivos
@@ -99,6 +102,8 @@ int persistirEstructuras()
 int leerPersistencia()
 {
 	pthread_mutex_init(&mPersistFile, NULL);
+	sem_init(&sPersistencia, 0, 0);
+
 	persistFile = fopen("./FileSystem.persist", "r");
 	if (persistFile == NULL) return EXIT_SUCCESS;
 

@@ -64,6 +64,8 @@ void procesarComando(char** comando, void(*doComando)(void*))
 {
 	pthread_t tDoComando;
 	pthread_create(&tDoComando, NULL, (*doComando), comando[1]);
+	pthread_join(tDoComando, NULL);
+	sem_post(&sPersistencia); //Persisto el resultado
 }
 
 
@@ -110,6 +112,7 @@ void procesarComandoRemoto(argumentos_t* args)
 		}
 
 	}
+	sem_post(&sPersistencia); //Persisto los cambios
 }
 
 int format(char* argumentos)
