@@ -25,15 +25,16 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include "Utilities.h"
 
-
+/*
 typedef struct mensaje
 {
 	int16_t comandoSize;
 	char* comando;
 	int32_t dataSize; 	//Pongo int32_t asi entra el valor correspondiente a 20mb
 	char* data;
-} mensaje_t;
+} mensaje_t;*/
 
 
 #define CONECTADO 0

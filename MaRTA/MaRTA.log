@@ -36,3 +36,8 @@
 [TRACE] 19:26:39:211 MaRTA/(10216:10216): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
 [TRACE] 19:26:39:211 MaRTA/(10216:10216): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
 [TRACE] 19:26:39:212 MaRTA/(10216:10216): no hay mas copias disponibles!!!
+[TRACE] 13:38:47:999 MaRTA/(3111:3146): PlannerCenter : planificar NewConnection
+[TRACE] 13:38:47:0 MaRTA/(3111:3146): ***************
+[TRACE] 13:39:03:411 MaRTA/(3111:3149): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 13:42:28:504 MaRTA/(3238:3273): PlannerCenter : planificar NewConnection
+[TRACE] 13:42:28:505 MaRTA/(3238:3273): ***************

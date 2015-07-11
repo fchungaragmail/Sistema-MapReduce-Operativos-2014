@@ -55,15 +55,17 @@ int main(void) {
 	initMaRTA();
 
 	int i=0;
-	while(fileSystemDisponible)//while(i<30)
+	while((i<30))//fileSystemDisponible
 	{
 		//***********
-		recvMessage = listenConnections();
+		//recvMessage = listenConnections();
+		recvMessage = simular();
 		administrarHilos();
+		i++;
 		//***********
-		//recvMessage = simular();
+		//
 		//processMessage(recvMessage);
-		//i++;
+		//
 		//***********
 	}
 
@@ -77,11 +79,12 @@ void planificarHilo(void* args){
 	t_dictionary *hiloDic = (t_dictionary*)args;
 	initPlannerCenter();
 	sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
+	sem_t _semHilo = *semHilo;
 	t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
 
 	while(1){
 
-		sem_wait(semHilo);
+		sem_wait(&_semHilo);
 		Message *recvMessage = list_get(colaDePedidos,0);
 		bool finalizarHilo = processMessage(recvMessage);
 		list_remove(colaDePedidos,0);
@@ -118,12 +121,12 @@ void initMaRTA(){
 	sem_init(&semFullDataTables, 0, 1);
 
 	//CONEXION A FILE SYSTEM !!!
-	connectToFileSystem();
-	fileSystemDisponible = true;
+	//connectToFileSystem();
+	//fileSystemDisponible = true;
 
 	initFilesStatusCenter();
 	//initPlannerCenter();
-	initConexiones();
+	//initConexiones();
 }
 
 void administrarHilos(){
@@ -134,7 +137,7 @@ void administrarHilos(){
 	int i;
 	bool hiloYaExiste = false;
 
-	if(command = K_ProcesoCaido){
+	if(command == K_ProcesoCaido){
 
 		if(recvMessage->sockfd == getFSSocket()){
 
@@ -150,11 +153,12 @@ void administrarHilos(){
 			if(jobSocket == recvMessage->sockfd){
 
 				sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
+				sem_t _semHilo = *semHilo;
 				t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
 				//TODO liberar elementos de colaDePedidos
 				list_clean(colaDePedidos);
 				list_add(colaDePedidos,recvMessage);
-				sem_post(semHilo);
+				sem_post(&_semHilo);
 			}
 		}
 		return;
@@ -172,8 +176,9 @@ void administrarHilos(){
 			hiloYaExiste = true;
 			t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
 			sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
+			sem_t _semHilo = *semHilo;
 			list_add(colaDePedidos,recvMessage);
-			sem_post(semHilo);
+			sem_post(&_semHilo);
 			break;
 		}
 	}
@@ -182,7 +187,8 @@ void administrarHilos(){
 
 		//LANZAR HILO NUEVO
 		sem_t *semHilo;
-		sem_init(semHilo, 0, 1);
+		sem_t _semHilo = *semHilo;
+		sem_init(&_semHilo, 0, 1);
 		char *_path = deserializeFilePath(recvMessage,command);
 		t_list *colaDePedidos = list_create();
 		list_add(colaDePedidos,recvMessage);
