@@ -685,7 +685,10 @@ void actualizarEstadoArchivos()
 	}
 	pthread_mutex_unlock(&mListaArchivos);
 
-	log_info(logFile, actualizaciones);
+	if (strcmp("",actualizaciones) != 0)
+	{
+		log_info(logFile, actualizaciones);
+	}
 }
 
 
