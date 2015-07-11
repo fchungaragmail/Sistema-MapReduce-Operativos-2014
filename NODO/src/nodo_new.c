@@ -49,7 +49,7 @@ int main() {
 
 	while (1) {
 		sockAccept = accept(sockFD, (struct sockaddr*) &client_sock, &size);
-		if (sockAccept != 1) {
+		if (sockAccept < 0) {
 			printf("No se pudo aceptar conexión\n");
 			printf("***********************\n");
 			close(sockFD);
@@ -129,6 +129,7 @@ int initServer(int* sockFD) {
 
 	if (bind(*sockFD, (struct sockaddr*) &my_sock, sizeof(my_sock)) == -1) {
 		printf("Fallo al hacer el bind\n");
+		//perror("");
 		printf("***********************\n");
 		return -1;
 	} else {
@@ -183,11 +184,11 @@ void connectToFileSistem(int* sock) {
 	}
 
 
-	string_append_with_format(&ipPuertoStr, "nombre %s:%d %d", IP_NODO, PUERTO_NODO, 1000000000);
+	string_append_with_format(&ipPuertoStr, "nombre %s:%d %d", IP_NODO, PUERTO_NODO, 1000000000);//tamaño espacio datos leer tamaño del datos.bin con stat
 	message->comando = ipPuertoStr;
 	message->comandoSize = strlen(ipPuertoStr) + 1;
 	message->data = NULL;
-	message->dataSize = NULL;
+	message->dataSize = 0;
 
 	enviar(*sock, message);
 
@@ -233,7 +234,8 @@ void *fs_nodo_conection_handler(void* ptr) {
 		}
 
 		if (strcmp(result[0], "setBloque") == 0) {   //setBloque bloque [datos]
-			setBloque(atoi(result[1]), buffer_recv->data);
+			int numBLoque = atoi(result[1]);
+			setBloque(numBLoque, buffer_recv->data, buffer_recv->dataSize);
 			free(buffer_send);
 			free(buffer_recv);
 		}
@@ -285,9 +287,9 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 
 		recibir(sockFD, buffer_recv);
 
-		int scriptFD = open("/tmp/map.sh", O_CREAT, 0777);
-		write(scriptFD, buffer_recv->data, sizeof(buffer_recv->data));
-
+		FILE* scriptFD = fopen("/tmp/map.sh", "w+");
+		fwrite( buffer_recv->data, buffer_recv->dataSize, 1,scriptFD);
+		fclose(scriptFD);
 		result = string_split(buffer_recv->comando, " "); //pos 0 = numBloque  , pos 1 = nombreArchivoTemporal
 
 		numBloque = atoi(result[0]); //paso el string "numBloque" a tipo int , pq mapping recibe int NumBloque
