@@ -110,7 +110,7 @@ Message* simulacion_FS_DataFullResponse()
 	string_append(&comando,"DataFileResponse /user/juan/datos/temperatura2012.txt/ 1 4 3 24");//24 elementos tiene el *data
 	fsResponse->mensaje = malloc(sizeof(mensaje_t));
 	fsResponse->mensaje->comandoSize = strlen(comando);
-	fsResponse->mensaje->comando=malloc(strlen(comando));
+	fsResponse->mensaje->comando=malloc(strlen(comando)+1);
 	strcpy(fsResponse->mensaje->comando,comando);
 
 	//armo Data
@@ -255,7 +255,7 @@ Message *simulacion_NewConnection(int sckt){
 	newConnection->mensaje=malloc(sizeof(mensaje_t));
 
 	newConnection->mensaje->comandoSize=(strlen("newConnection"));
-	newConnection->mensaje->comando=malloc(strlen("newConnection"));
+	newConnection->mensaje->comando=malloc(strlen("newConnection")+1);
 	strcpy(newConnection->mensaje->comando,"newConnection");
 
 	newConnection->mensaje->data = malloc(0);

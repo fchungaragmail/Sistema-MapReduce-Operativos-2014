@@ -21,11 +21,12 @@
 #include <commons/collections/list.h>
 #include "ConexionCenter.h"
 #include "VariablesGlobales.h"
+#include "FilesStatusCenter.h"
 
 // CONSTANTES
 
-#define LOCALHOST "127.0.0.1"
-//#define K_PUERTO_LOCAL 6707
+#define LOCALHOST "192.168.2.106"
+#define K_PUERTO_LOCAL 6860
 #define MAX_CONNECTIONS 100
 
 // ESTRUCTURAS
@@ -73,9 +74,6 @@ void prepareConnections();
 Message* createErrorMessage();
 void setnonblocking();
 Message *crearMessageWithCommand(char *command,int socket);
-
-//JUAN - Protocolo
-mensaje_t* recibir(int socket);
 
 void initConexiones()
 {
@@ -153,15 +151,16 @@ Message* listenConnections()
 
 					//********************************************************
 					// tenemos datos de algún cliente
-				/*	printf("llegaron datos de algun cliente - nroDeMsje %d\n",conexionesProcesadas);
+					printf("llegaron datos de algun cliente - nroDeMsje %d\n",conexionesProcesadas);
 					Message *_recvMesage = malloc(sizeof(Message));
-					_recvMessage->mensaje = malloc(sizeof(mensaje_t));
-					//recibir(i,recvMessage->mensaje);*/
+					_recvMesage->mensaje = malloc(sizeof(mensaje_t));
+					recibir(i,_recvMesage->mensaje);
 
-					/*printf("se recibio nroDeMensaje %d \n",recvMesage->mensaje->dataSize);
-					printf("se recibio comandoSize %d \n",recvMesage->mensaje->comandoSize);
-					printf("se recibio el comando %s \n",recvMesage->mensaje->comando);*/
-					//printf("se recibio la data %s \n",recvMesage->mensaje->data);
+					printf("se recibio dataSize %d \n",_recvMesage->mensaje->dataSize);
+					printf("se recibio la data %s \n",_recvMesage->mensaje->data);
+					printf("se recibio comandoSize %d \n",_recvMesage->mensaje->comandoSize);
+					printf("se recibio el comando %s \n",_recvMesage->mensaje->comando);
+
 					//********************************************************
 					//VEO SI QUEDAN DATOS EN EL BUFFER
 					/*int count;
@@ -209,6 +208,8 @@ int connectToFS(){
 
 	FD_SET(socketFd, &master); // añadir al conjunto maestro
 	if (socketFd > fdmax) {fdmax = socketFd;} // actualizar el máximo
+
+	addFSConnection(socketFd);
 
 	//HANDSHAKE A FS
 	Message *msj = crearMessageWithCommand("nombre MaRTA",socketFd);

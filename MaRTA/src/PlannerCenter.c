@@ -58,7 +58,6 @@ bool processMessage(Message *recvMessage);
 
 void initPlannerCenter()
 {
-	initFilesStatusCenter();
 	jobSocket=0;
 	yaPediFullDataTable=false;
 	nodosReduceList_Pedido1 = list_create();
@@ -71,13 +70,19 @@ bool processMessage(Message *recvMessage)
 	switch (comandoId) {
 		case K_NewConnection:
 			log_trace(logFile,"PlannerCenter : planificar NewConnection");
-			addNewConnection(recvMessage->sockfd);
+
 			jobSocket=recvMessage->sockfd;
 			log_trace(logFile,"***************");
 			break;
 		case K_Job_NewFileToProcess:
 
 			log_trace(logFile,"PlannerCenter : planificar Job_NewFileToProcess");
+
+			//**********
+			addNewConnection(recvMessage->sockfd);
+			jobSocket=recvMessage->sockfd;
+
+			//**********
 			char* filePath = deserializeFilePath(recvMessage,K_Job_NewFileToProcess);
 			filePathAProcesar = filePath;
 			bool *soportaCombiner = deserializeSoportaCombiner(recvMessage);
@@ -152,7 +157,7 @@ bool processMessage(Message *recvMessage)
 				free(log);
 
 				Message *jobMsj = crearMensajeAJobDeFinalizado(recvMessage);
-				enviar(jobMsj->sockfd,jobMsj->mensaje);
+				//enviar(jobMsj->sockfd,jobMsj->mensaje);
 				return true;
 			}
 
@@ -238,12 +243,12 @@ void planificar(Message *recvMessage,TypesMessages type)
 			agregarFileState(jobSocket,path,cantidadDeBloqes);
 
 			Message *sendMessage = obtenerProximoPedido(recvMessage);
-			enviar(sendMessage->sockfd,sendMessage->mensaje);
+			//enviar(sendMessage->sockfd,sendMessage->mensaje);
 		}
 
 		if(!(dictionary_has_key(fullDataTables,path))){
 			Message *fsRequest = createFSrequest(recvMessage,-1);
-			enviar(fsRequest->sockfd,fsRequest->mensaje);
+			//enviar(fsRequest->sockfd,fsRequest->mensaje);
 			liberarMensaje(fsRequest);
 		}
 	}
@@ -268,7 +273,7 @@ void planificar(Message *recvMessage,TypesMessages type)
 
 		//Obtengo proximoPedido CON info actualizada
 		Message *sendMessage = obtenerProximoPedido(recvMessage);
-		enviar(sendMessage->sockfd,sendMessage->mensaje);
+		//enviar(sendMessage->sockfd,sendMessage->mensaje);
 
 		liberarMensaje(sendMessage);
 		free(path);
@@ -298,7 +303,7 @@ void planificar(Message *recvMessage,TypesMessages type)
 			bool *nodosTodosDisp = obtenerEstanTodosDisponibles(recvMessage);
 			if(*todosMappeados && *nodosTodosDisp){
 				Message *sendMessage = obtenerProximoPedido(recvMessage);
-				enviar(sendMessage->sockfd,sendMessage->mensaje);
+				//enviar(sendMessage->sockfd,sendMessage->mensaje);
 			}
 			free(todosMappeados);
 			free(nodosTodosDisp);
@@ -322,7 +327,7 @@ void planificar(Message *recvMessage,TypesMessages type)
 
 			//OBTENER PROXIMO PEDIDO (se va a enviar devuelta el mismo, siempre y cuando haya copias disponibles)
 			Message* sendMessage = obtenerProximoPedido(recvMessage);
-			enviar(sendMessage->sockfd,sendMessage->mensaje);
+			//enviar(sendMessage->sockfd,sendMessage->mensaje);
 		}
 
 		free(requestResponse);
@@ -340,7 +345,7 @@ void planificar(Message *recvMessage,TypesMessages type)
 			log_trace(logFile,"reduce-Pedido1 realizado con exito");
 			decrementarOperacionesEnReduceList();
 			Message* sendMessage = obtenerProximoPedido(recvMessage);
-			enviar(sendMessage->sockfd,sendMessage->mensaje);
+			//enviar(sendMessage->sockfd,sendMessage->mensaje);
 			liberarMensaje(sendMessage);
 		}
 
@@ -362,7 +367,7 @@ void planificar(Message *recvMessage,TypesMessages type)
 				decrementarOperacionesEnProcesoEnNodo(ipNodo);
 				actualizarTablas_ReduceFallo(path,recvMessage);
 				sendMessage = obtenerProximoPedido(recvMessage);
-			   enviar(sendMessage->sockfd,sendMessage->mensaje);
+			   //enviar(sendMessage->sockfd,sendMessage->mensaje);
 			}
 
 			if(strcmp(reduceType,"reduceFileConCombiner-Pedido1")==0){
@@ -371,7 +376,7 @@ void planificar(Message *recvMessage,TypesMessages type)
 				decrementarOperacionesEnReduceList();
 				actualizarTablas_ReduceFallo(path,recvMessage);
 				sendMessage = obtenerProximoPedido(recvMessage);
-			   enviar(sendMessage->sockfd,sendMessage->mensaje);
+			   //enviar(sendMessage->sockfd,sendMessage->mensaje);
 				liberarNodosReduceList_Pedido1();
 
 			}
@@ -385,7 +390,7 @@ void planificar(Message *recvMessage,TypesMessages type)
 				liberarNodosReduceList_Pedido1();
 
 				sendMessage = obtenerProximoPedido(recvMessage);
-				enviar(sendMessage->sockfd,sendMessage->mensaje);
+				//enviar(sendMessage->sockfd,sendMessage->mensaje);
 			}
 			liberarMensaje(sendMessage);
 		}
@@ -898,7 +903,7 @@ Message *createFSrequest(Message *msj,int nroDeBloqe){
 	fsRequest->mensaje->comandoSize = (int16_t)strlen(stream);
 	fsRequest->mensaje->comando = stream;
 	fsRequest->mensaje->dataSize = 0;
-	fsRequest->mensaje->data = malloc(strlen(""));
+	fsRequest->mensaje->data = malloc(strlen("")+1);
 	strcpy(fsRequest->mensaje->data,"");
 
 	return fsRequest;

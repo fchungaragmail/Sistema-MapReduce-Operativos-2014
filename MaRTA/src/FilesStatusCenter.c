@@ -84,7 +84,7 @@ char *crearKeyParaFileState(char*path,int socket);
 
 void initFilesStatusCenter()
 {
-	fs_socket=-1;
+	fs_socket=3;
 
 }
 
@@ -676,11 +676,11 @@ t_list *getCopyFullDataTable(char *path){
 				bool *estado = malloc(sizeof(bool));
 				*estado = true;
 
-				char *ipNodo = malloc(strlen(ipNodoPivot));
+				char *ipNodo = malloc(strlen(ipNodoPivot)+1);
 				strcpy(ipNodo,ipNodoPivot);
-				char *puertoNodo = malloc(strlen(puertoNodoPivot));
+				char *puertoNodo = malloc(strlen(puertoNodoPivot)+1);
 				strcpy(puertoNodo,puertoNodoPivot);
-				char *nroDeBloque = malloc(strlen(nroDeBloquePivot));
+				char *nroDeBloque = malloc(strlen(nroDeBloquePivot)+1);
 				strcpy(nroDeBloque,nroDeBloquePivot);
 
 				dictionary_put(dic,K_Copia_IPNodo,ipNodo);

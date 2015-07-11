@@ -41,3 +41,120 @@
 [TRACE] 13:39:03:411 MaRTA/(3111:3149): PlannerCenter : planificar Job_NewFileToProcess
 [TRACE] 13:42:28:504 MaRTA/(3238:3273): PlannerCenter : planificar NewConnection
 [TRACE] 13:42:28:505 MaRTA/(3238:3273): ***************
+[TRACE] 15:53:51:237 MaRTA/(5442:5449): PlannerCenter : planificar NewConnection
+[TRACE] 15:53:51:239 MaRTA/(5442:5449): ***************
+[TRACE] 15:55:02:648 MaRTA/(5476:5511): PlannerCenter : planificar NewConnection
+[TRACE] 15:55:02:648 MaRTA/(5476:5511): ***************
+[TRACE] 15:57:34:425 MaRTA/(5544:5588): PlannerCenter : planificar NewConnection
+[TRACE] 15:57:34:425 MaRTA/(5544:5588): ***************
+[TRACE] 15:59:05:299 MaRTA/(5649:5685): PlannerCenter : planificar NewConnection
+[TRACE] 15:59:05:299 MaRTA/(5649:5685): ***************
+[TRACE] 15:59:08:46 MaRTA/(5649:5689): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 15:59:08:46 MaRTA/(5649:5689): ***************
+[TRACE] 16:05:33:355 MaRTA/(5960:5972): PlannerCenter : planificar NewConnection
+[TRACE] 16:05:33:355 MaRTA/(5960:5972): ***************
+[TRACE] 16:06:05:243 MaRTA/(6078:6113): PlannerCenter : planificar NewConnection
+[TRACE] 16:06:05:243 MaRTA/(6078:6113): ***************
+[TRACE] 16:09:18:3 MaRTA/(6205:6237): PlannerCenter : planificar NewConnection
+[TRACE] 16:09:18:3 MaRTA/(6205:6237): ***************
+[TRACE] 16:19:21:260 MaRTA/(6534:6559): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 16:21:02:174 MaRTA/(6596:6642): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 16:39:02:396 MaRTA/(6849:6897): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 16:39:02:396 MaRTA/(6849:6897): ***************
+[TRACE] 16:39:29:458 MaRTA/(6849:6901): PlannerCenter : planificar FS_FileFullData
+[TRACE] 16:43:29:985 MaRTA/(6979:7026): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 16:45:48:461 MaRTA/(6979:7026): ***************
+[TRACE] 16:49:04:6 MaRTA/(7198:7243): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 16:49:04:6 MaRTA/(7198:7243): ***************
+[TRACE] 16:58:58:213 MaRTA/(7487:7535): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 16:58:58:213 MaRTA/(7487:7535): ***************
+[TRACE] 17:01:16:252 MaRTA/(7652:7701): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 17:01:16:252 MaRTA/(7652:7701): ***************
+[TRACE] 17:02:19:565 MaRTA/(7652:7701): PlannerCenter : planificar FS_FileFullData
+[TRACE] 17:13:25:29 MaRTA/(7836:7845): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 17:13:25:29 MaRTA/(7836:7845): ***************
+[TRACE] 17:13:26:29 MaRTA/(7836:7845): PlannerCenter : planificar FS_FileFullData
+[TRACE] 17:16:49:687 MaRTA/(7875:7923): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 17:16:49:687 MaRTA/(7875:7923): ***************
+[TRACE] 17:18:11:431 MaRTA/(7875:7923): PlannerCenter : planificar FS_FileFullData
+[TRACE] 17:20:03:591 MaRTA/(7986:8037): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 17:20:03:591 MaRTA/(7986:8037): ***************
+[TRACE] 17:20:20:406 MaRTA/(7986:8037): PlannerCenter : planificar FS_FileFullData
+[TRACE] 17:21:29:950 MaRTA/(8082:8129): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 17:21:29:950 MaRTA/(8082:8129): ***************
+[TRACE] 17:21:57:861 MaRTA/(8082:8129): PlannerCenter : planificar FS_FileFullData
+[TRACE] 17:26:08:932 MaRTA/(8285:8336): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 17:26:25:843 MaRTA/(8285:8336): ***************
+[TRACE] 17:26:36:340 MaRTA/(8285:8336): PlannerCenter : planificar FS_FileFullData
+[TRACE] 17:37:25:937 MaRTA/(8525:8571): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 17:37:27:816 MaRTA/(8525:8571): ***************
+[TRACE] 17:37:31:744 MaRTA/(8525:8571): PlannerCenter : planificar FS_FileFullData
+[TRACE] 17:37:31:745 MaRTA/(8525:8571): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 4 bloques
+[TRACE] 17:37:31:745 MaRTA/(8525:8571): el nodo 195.456.2.5 esta procesando 1 pedidos
+[TRACE] 17:37:31:745 MaRTA/(8525:8571): el nodo 192.163.2.8 esta procesando 1 pedidos
+[TRACE] 17:37:31:745 MaRTA/(8525:8571): el nodo 195.333.2.5 esta procesando 1 pedidos
+[TRACE] 17:37:31:745 MaRTA/(8525:8571): el nodo 192.456.8.9 esta procesando 1 pedidos
+[TRACE] 17:37:31:745 MaRTA/(8525:8571): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura2012.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura2012.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura2012.txt/-3
+
+[TRACE] 17:37:31:745 MaRTA/(8525:8571): ***************
+[TRACE] 17:37:55:840 MaRTA/(8525:8571): PlannerCenter : planificar Job_MapResponse
+[TRACE] 17:37:56:1 MaRTA/(8525:8571): el nodo 195.456.2.5 esta procesando 0 pedidos
+[TRACE] 17:37:56:1 MaRTA/(8525:8571): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 3 bloques
+[TRACE] 17:38:00:96 MaRTA/(8525:8571): ***************
+[TRACE] 17:38:01:927 MaRTA/(8525:8571): PlannerCenter : planificar Job_MapResponse
+[TRACE] 17:38:01:927 MaRTA/(8525:8571): el nodo 192.163.2.8 esta procesando 0 pedidos
+[TRACE] 17:38:01:927 MaRTA/(8525:8571): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[TRACE] 17:38:01:927 MaRTA/(8525:8571): ***************
+[TRACE] 17:38:03:739 MaRTA/(8525:8571): PlannerCenter : planificar Job_MapResponse
+[TRACE] 17:38:03:739 MaRTA/(8525:8571): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 195.333.2.5 bloque 99 en posicion 2
+[TRACE] 17:38:03:739 MaRTA/(8525:8571): el nodo 195.333.2.5 seguramente esta caido
+[TRACE] 17:38:03:739 MaRTA/(8525:8571): el nodo 195.333.2.5 esta procesando 0 pedidos
+[TRACE] 17:38:03:739 MaRTA/(8525:8571): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[TRACE] 17:38:03:739 MaRTA/(8525:8571): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[TRACE] 17:38:03:739 MaRTA/(8525:8571): el nodo 192.163.2.5 esta procesando 1 pedidos
+[TRACE] 17:38:03:739 MaRTA/(8525:8571): se envia pedido de map, el stream es 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2
+
+[TRACE] 17:38:03:739 MaRTA/(8525:8571): ***************
+[TRACE] 17:38:07:318 MaRTA/(8525:8571): PlannerCenter : planificar Job_MapResponse
+[TRACE] 17:38:07:318 MaRTA/(8525:8571): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 192.163.2.5 bloque 85 en posicion 2
+[TRACE] 17:38:07:318 MaRTA/(8525:8571): el nodo 192.163.2.5 seguramente esta caido
+[TRACE] 17:38:07:318 MaRTA/(8525:8571): el nodo 192.163.2.5 esta procesando 0 pedidos
+[TRACE] 17:38:07:318 MaRTA/(8525:8571): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[TRACE] 17:38:07:318 MaRTA/(8525:8571): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[TRACE] 17:38:07:319 MaRTA/(8525:8571): no hay mas copias disponibles!!!
+[TRACE] 17:41:10:910 MaRTA/(8664:8674): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 17:41:10:910 MaRTA/(8664:8674): ***************
+[TRACE] 17:41:10:910 MaRTA/(8664:8674): PlannerCenter : planificar FS_FileFullData
+[TRACE] 17:41:10:910 MaRTA/(8664:8674): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 4 bloques
+[TRACE] 17:41:10:910 MaRTA/(8664:8674): el nodo 195.456.2.5 esta procesando 1 pedidos
+[TRACE] 17:41:10:910 MaRTA/(8664:8674): el nodo 192.163.2.8 esta procesando 1 pedidos
+[TRACE] 17:41:10:910 MaRTA/(8664:8674): el nodo 195.333.2.5 esta procesando 1 pedidos
+[TRACE] 17:41:10:910 MaRTA/(8664:8674): el nodo 192.456.8.9 esta procesando 1 pedidos
+[TRACE] 17:41:10:910 MaRTA/(8664:8674): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura2012.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura2012.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura2012.txt/-3
+
+[TRACE] 17:41:10:910 MaRTA/(8664:8674): ***************
+[TRACE] 17:41:11:911 MaRTA/(8664:8674): PlannerCenter : planificar Job_MapResponse
+[TRACE] 17:41:11:911 MaRTA/(8664:8674): el nodo 195.456.2.5 esta procesando 0 pedidos
+[TRACE] 17:41:11:911 MaRTA/(8664:8674): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 3 bloques
+[TRACE] 17:41:11:911 MaRTA/(8664:8674): ***************
+[TRACE] 17:41:12:912 MaRTA/(8664:8674): PlannerCenter : planificar Job_MapResponse
+[TRACE] 17:41:12:912 MaRTA/(8664:8674): el nodo 192.163.2.8 esta procesando 0 pedidos
+[TRACE] 17:41:12:912 MaRTA/(8664:8674): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[TRACE] 17:41:12:912 MaRTA/(8664:8674): ***************
+[TRACE] 17:41:13:912 MaRTA/(8664:8674): PlannerCenter : planificar Job_MapResponse
+[TRACE] 17:41:13:913 MaRTA/(8664:8674): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 195.333.2.5 bloque 99 en posicion 2
+[TRACE] 17:41:13:913 MaRTA/(8664:8674): el nodo 195.333.2.5 seguramente esta caido
+[TRACE] 17:41:13:913 MaRTA/(8664:8674): el nodo 195.333.2.5 esta procesando 0 pedidos
+[TRACE] 17:41:13:913 MaRTA/(8664:8674): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[TRACE] 17:41:13:913 MaRTA/(8664:8674): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[TRACE] 17:41:13:913 MaRTA/(8664:8674): el nodo 192.163.2.5 esta procesando 1 pedidos
+[TRACE] 17:41:13:913 MaRTA/(8664:8674): se envia pedido de map, el stream es 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2
+
+[TRACE] 17:41:13:913 MaRTA/(8664:8674): ***************
+[TRACE] 17:41:14:914 MaRTA/(8664:8674): PlannerCenter : planificar Job_MapResponse
+[TRACE] 17:41:14:914 MaRTA/(8664:8674): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 192.163.2.5 bloque 85 en posicion 2
+[TRACE] 17:41:14:914 MaRTA/(8664:8674): el nodo 192.163.2.5 seguramente esta caido
+[TRACE] 17:41:14:914 MaRTA/(8664:8674): el nodo 192.163.2.5 esta procesando 0 pedidos
+[TRACE] 17:41:14:914 MaRTA/(8664:8674): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[TRACE] 17:41:14:915 MaRTA/(8664:8674): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[TRACE] 17:41:31:584 MaRTA/(8664:8674): no hay mas copias disponibles!!!

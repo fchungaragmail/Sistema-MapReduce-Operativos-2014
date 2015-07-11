@@ -81,7 +81,6 @@ typedef enum
 #define K_HiloDic_PedidosQueue "PedidosQueue"
 
 //Varias
-#define K_PUERTO_LOCAL 6851
 #define K_FS_IP -1 //DEFINIR
 #define K_FS_PUERTO -1 //DEFINIR
 

@@ -1,0 +1,8 @@
+[TRACE] 16:26:07:503 MaRTA/(6702:6703): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 16:26:15:829 MaRTA/(6705:6706): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 16:33:36:449 MaRTA/(6771:6772): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 16:33:36:476 MaRTA/(6771:6772): ***************
+[TRACE] 16:33:37:394 MaRTA/(6771:6773): PlannerCenter : planificar FS_FileFullData
+[TRACE] 17:04:14:380 MaRTA/(7761:7762): PlannerCenter : planificar Job_NewFileToProcess
+[TRACE] 17:04:14:406 MaRTA/(7761:7762): ***************
+[TRACE] 17:04:15:328 MaRTA/(7761:7762): PlannerCenter : planificar FS_FileFullData
