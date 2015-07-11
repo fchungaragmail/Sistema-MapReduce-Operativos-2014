@@ -85,6 +85,7 @@ void escucharConexiones()
 		conexionNueva->estado = CONECTADO;
 		pthread_mutex_init(&(conexionNueva->mSocket), NULL);
 		pthread_mutex_init(&(conexionNueva->mEstadoBloques), NULL);
+		conexionNueva->totalBloques = 0;
 
 		pthread_mutex_lock(&mConexiones);
 		list_add(conexiones, conexionNueva);
@@ -185,6 +186,12 @@ void cerrarConexion(Conexion_t* conexion)
 	pthread_mutex_unlock(&mNodos);
 	close(conexion->sockfd);
 	conexion->estado = DESCONECTADO;
+
+	if (strcmp(conexion->nombre,MARTA) != 0)
+	{
+		actualizarEstadoArchivos();
+	}
+
 	log_info(logFile, "Desconectado de %s", conexion->nombre);
 }
 
@@ -213,5 +220,11 @@ void probarConexiones()
 	mensaje->dataSize = 0;
 
 	enviar(socketPrueba, mensaje);
+
+	while(1)
+	{
+		sleep(5);
+	//	persistirEstructuras();
+	}
 }
 

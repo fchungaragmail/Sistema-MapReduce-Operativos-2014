@@ -35,6 +35,7 @@ int quitarNodo(char* argumentos);
 int nomb(char* argumentos, Conexion_t* conexion);
 int espacioTotal();
 void procesarComandoRemoto(argumentos_t* args);
+void actualizarEstadoArchivos();
 
 
 #endif /* COMANDOS_H_ */

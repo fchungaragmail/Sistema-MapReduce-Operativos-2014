@@ -13,7 +13,7 @@
 #include "Protocolo/protocolo.h"
 
 #define EXIT_ERROR -1
-#define EXIT_OK 1
+#define EXIT_OK 0
 #define FALSE 0
 #define TRUE 1
 

@@ -6,7 +6,6 @@
  */
 
 #include "comandos.h"
-#define MARTA "MaRTA"
 
 void initComandos();
 void procesarComando(char** comando, void(*doComando)(void*));
@@ -29,7 +28,7 @@ int dataFile(char* argumentos, Conexion_t* conexion);
 
 int enviarBloque(enviarBloque_t* envio);
 
-
+void actualizarEstadoArchivos();
 int16_t getDir(char* dir,int16_t padre);
 int32_t get_file_size(const char * file_name);
 int getNombreArchivo(char* ruta,char* nombre,int16_t *indexPadre);
@@ -41,6 +40,7 @@ bool tieneMasEspacio(Conexion_t* nodo1,Conexion_t* nodo2);
 bool esNodo(Conexion_t* conexion);
 void formatNodo(Conexion_t* nodo);
 pthread_mutex_t mListaArchivos;
+pthread_mutex_t mListaDirs;
 int nodosOnline;
 pthread_mutex_t mNodosOnline;
 pthread_mutex_t mElegirNodos;
@@ -537,8 +537,9 @@ int nomb(char* argumentos, Conexion_t* conexion)
 		{
 			nodo->sockfd = conexion->sockfd;
 			free(conexion->estadoBloques);
-			free(nodo);
+			free(conexion);
 			pthread_mutex_unlock(&mConexiones);
+			actualizarEstadoArchivos();
 			return 0;
 		}
 	}
@@ -565,9 +566,10 @@ int nomb(char* argumentos, Conexion_t* conexion)
 
 int dataFile(char* argumentos, Conexion_t* conexion)
 {
+	char** args = string_split(argumentos," ");
 	char nombre[50];
 	int16_t indexPadre = 0;
-	if (getNombreArchivo(argumentos,nombre,&indexPadre) != EXIT_SUCCESS)
+	if (getNombreArchivo(args[0],nombre,&indexPadre) != EXIT_SUCCESS)
 	{
 		return -1;
 	}
@@ -582,7 +584,7 @@ int dataFile(char* argumentos, Conexion_t* conexion)
 		mensaje_t* respuesta = malloc(sizeof(mensaje_t));
 		respuesta->comando = string_new();
 		string_append_with_format(&(respuesta->comando),
-				"DataFileResponse %s noDisponible", argumentos);
+				"DataFileResponse %s noDisponible", args[0]);
 		respuesta->comandoSize = strlen(respuesta->comando) + 1;
 		memcpy(respuesta->data,NULL,0);
 		respuesta->dataSize = 0;
@@ -592,28 +594,42 @@ int dataFile(char* argumentos, Conexion_t* conexion)
 		pthread_mutex_unlock(&(conexion->mSocket));
 
 		log_info(logFile,"El archivo %s no se encuentra disponible",
-				argumentos);
+				args[0]);
 		return -1;
+	}
+
+	bool unBloque = false;
+	int nBloque;
+	if (args[1] != NULL)
+	{
+		nBloque = atoi(args[1]);
+		unBloque = true;
 	}
 
 	char* tabla = string_new();
 	for(int i=0;i<archivo->bloques->elements_count;i++)
 	{
+		if (unBloque) i = nBloque;
+
 		string_append_with_format(&tabla,"%d;",i);
 
 		t_list* bloque = list_get(archivo->bloques,i);
 		for(int j=0;j<bloque->elements_count;j++)
 		{
 			t_ubicacion_bloque* ubicacion = list_get(bloque,j);
-			string_append_with_format(&tabla,"%s;%d;",ubicacion->nodo->nombre,ubicacion->bloque);
+			if (ubicacion->nodo->estado == DISPONIBLE)
+			{
+				string_append_with_format(&tabla,"%s;%d;",ubicacion->nodo->nombre,ubicacion->bloque);
+			}
 		}
 		string_append(&tabla,"\n");
+		if (unBloque) break;
 	}
 
 	mensaje_t* respuesta = malloc(sizeof(mensaje_t));
 	respuesta->comando = string_new();
 	string_append_with_format(&(respuesta->comando),
-			"DataFileResponse %s disponible", argumentos);
+			"DataFileResponse %s Disponible", argumentos);
 	respuesta->comandoSize = strlen(respuesta->comando) + 1;
 	respuesta->data = tabla;
 	respuesta->dataSize = strlen(respuesta->data) + 1;
@@ -625,6 +641,49 @@ int dataFile(char* argumentos, Conexion_t* conexion)
 	return EXIT_SUCCESS;
 }
 
+
+void actualizarEstadoArchivos()
+{
+	char* actualizaciones = string_new();
+	pthread_mutex_lock(&mListaArchivos);
+	for (int i = 0;i<listaArchivos->elements_count;i++)
+	{
+		t_reg_archivo* archivo = list_get(listaArchivos,i);
+		int bloquesDisponibles = 0;
+		for (int j=0;j<archivo->bloques->elements_count;j++)
+		{
+			t_list* bloque = list_get(archivo->bloques,j);
+			for (int k=0;k<bloque->elements_count;k++)
+			{
+				t_ubicacion_bloque* ubicacion = list_get(bloque,k);
+				if (ubicacion->nodo->estado == DISPONIBLE)
+				{
+					bloquesDisponibles++;
+					break;
+				}
+			}
+		}
+		if ((archivo->estado == DISPONIBLE) &&
+				(bloquesDisponibles < archivo->bloques->elements_count))
+				{
+					string_append_with_format(&actualizaciones,
+							"El archivo %s ya no se encuentra disponible.\n",
+							archivo->nombre);
+					archivo->estado = NO_DISPONIBLE;
+				}
+		if ((archivo->estado == NO_DISPONIBLE) &&
+				(bloquesDisponibles = archivo->bloques->elements_count))
+				{
+					string_append_with_format(&actualizaciones,
+							"El archivo %s se encuentra disponible nuevamente.\n",
+							archivo->nombre);
+					archivo->estado = DISPONIBLE;
+				}
+	}
+	pthread_mutex_unlock(&mListaArchivos);
+
+	log_info(logFile, actualizaciones);
+}
 
 
 int16_t getDir(char* dir,int16_t padre)

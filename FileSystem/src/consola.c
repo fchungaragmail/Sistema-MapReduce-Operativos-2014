@@ -180,7 +180,7 @@ void mostrarAyuda()
 	printf("\nComandos disponibles:\n"
 			"help	Muestra el menu de ayuda\n"
 			"exit	Sale de la consola\n"
-			"format Formatea el FS"
+			"format Formatea el FS\n"
 			"mv 	Mover/renombrar archivo/direcorio. Simil UNIX\n"
 			"rm 	Borrar archivo/directorio. Simil UNIX\n"
 			"mkdir	Crear directorio. Simil UNIX\n"

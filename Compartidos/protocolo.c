@@ -9,14 +9,15 @@
 
 
 int recibir(int socket, mensaje_t* mensaje);
-void enviar(int socket, mensaje_t* mensaje);
+int enviar(int socket, mensaje_t* mensaje);
+int sendall(int s, void *buf, int32_t len);
 
 int recibir(int socket, mensaje_t* mensaje){
 
 	int estado = 0;
 
 	estado = recv(socket, &(mensaje->comandoSize), sizeof(int16_t),0);
-	if (estado == 0) return DESCONECTADO;
+	if (estado <= 0) return DESCONECTADO;
 
 	mensaje->comando = malloc(mensaje->comandoSize);
 	if (mensaje->comandoSize != 0)
@@ -31,10 +32,35 @@ int recibir(int socket, mensaje_t* mensaje){
 	return CONECTADO;
 }
 
-void enviar(int socket, mensaje_t* mensaje)
+int enviar(int socket, mensaje_t* mensaje)
 {
-	send(socket, &(mensaje->comandoSize), sizeof(int16_t), 0);
-	send(socket, mensaje->comando, mensaje->comandoSize, 0);
-	send(socket, &(mensaje->dataSize), sizeof(int32_t), 0);
-	send(socket, mensaje->data, mensaje->dataSize, 0);
+	if (sendall(socket, &(mensaje->comandoSize), sizeof(int16_t)) < 0)
+		return -1;
+	if (sendall(socket, mensaje->comando, mensaje->comandoSize) < 0)
+		return -1;
+	if (sendall(socket, &(mensaje->dataSize), sizeof(int32_t)) < 0)
+		return -1;
+	if (sendall(socket, mensaje->data, mensaje->dataSize) < 0)
+		return -1;
+
+	return EXIT_SUCCESS;
+}
+
+int sendall(int s, void* buf, int32_t len)
+{
+    int total = 0;        // how many bytes we've sent
+    int bytesleft = len; // how many we have left to send
+    int n;
+
+    while(total < len) {
+        n = send(s, buf+total, bytesleft, 0);
+        if (n == -1) { break; }
+        total += n;
+        bytesleft -= n;
+    }
+
+    //*len = total; Devolveria el total de enviados, no nos interesa y nos rompe
+    // la retrocompatibilidad
+
+    return n==-1?-1:0; // return -1 on failure, 0 on success
 }
