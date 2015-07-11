@@ -39,7 +39,7 @@ t_fileContent *getFileContent(char *archivoTemporal);
 
 
 //Escribe en el numeroBloque del espacioDatos los datos enviados(deben ser de 20Mb)
-int setBloque(int numeroBloque, char* datos);
+int setBloque(int numeroBloque, char* datos, int32_t tamaño);
 
 
 #endif /* NODO_FS_FUNCTIONS_NEW_H_ */

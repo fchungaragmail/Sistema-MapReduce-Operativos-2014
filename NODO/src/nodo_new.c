@@ -235,7 +235,7 @@ void *fs_nodo_conection_handler(void* ptr) {
 
 		if (strcmp(result[0], "setBloque") == 0) {   //setBloque bloque [datos]
 			int numBLoque = atoi(result[1]);
-			setBloque(numBLoque, buffer_recv->data);
+			setBloque(numBLoque, buffer_recv->data, buffer_recv->dataSize);
 			free(buffer_send);
 			free(buffer_recv);
 		}
