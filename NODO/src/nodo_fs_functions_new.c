@@ -58,7 +58,7 @@ t_fileContent *getFileContent(char *archivoTemporal) {
 int setBloque(int numeroBloque, char* datos) {
 
 	//MAPEO CON ESCRITURA DE ARCHIVO
-	int archivo = open(ARCHIVO_BIN,O_RDWR);
+	int archivo = fopen(ARCHIVO_BIN,"r+");
 	long int offset = numeroBloque * TAMANIO_BLOQUE;
 
 	//parametros mmap(): 1=null, 2=tamaño a mapear, 3=operaciones permitidas sobre el mapeo, 4=si el mapeo es privado o compartido, 4=archivo, 5=desplazamiento desde el inicio del archivo
