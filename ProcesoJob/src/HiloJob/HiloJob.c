@@ -22,7 +22,7 @@ void* hiloJobHandler(void* arg) {
 	HiloJobInfo* hiloJobInfo = (HiloJobInfo*) arg;
 	int estadoConexion = CONECTADO;
 
-#ifndef BUILD_PARA_TEST
+#ifndef BUILD_CON_MOCK_NODO
 	if ((hiloJobInfo->socketFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) { //<--- CREO QUE SI OCURRE ESTO, FALLO JOB Y DEBE ABORTAR
 		log_error(logProcesoJob,"Error al crear socket para nodo %s\n",inet_ntoa(hiloJobInfo->direccionNodo.sin_addr));
 		ReportarResultadoHilo(hiloJobInfo,ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION);
@@ -55,7 +55,7 @@ void* hiloJobHandler(void* arg) {
 		mensajeParaNodo = CreateMensaje("rd", NULL);
 	}
 
-#ifndef BUILD_PARA_TEST
+#ifndef BUILD_CON_MOCK_NODO
 	enviar(hiloJobInfo->socketFd, mensajeParaNodo);
 #endif
 	log_info(logProcesoJob,
@@ -65,7 +65,7 @@ void* hiloJobHandler(void* arg) {
 			mensajeParaNodo->comando, mensajeParaNodo->data);
 	FreeMensaje(mensajeParaNodo);
 
-#ifndef BUILD_PARA_TEST
+#ifndef BUILD_CON_MOCK_NODO
 	mensajeDeNodo = malloc(sizeof(mensaje_t));
 	estadoConexion = recibir(hiloJobInfo->socketFd,mensajeDeNodo);
 #else
@@ -111,7 +111,7 @@ void* hiloJobHandler(void* arg) {
 					scriptMapperStr : scriptReduceStr);
 	mensajeParaNodo = CreateMensaje(bufferComando, bufferData);
 
-#ifndef BUILD_PARA_TEST
+#ifndef BUILD_CON_MOCK_NODO
 	enviar(hiloJobInfo->socketFd, mensajeParaNodo);
 #endif
 	log_info(logProcesoJob,
@@ -123,12 +123,12 @@ void* hiloJobHandler(void* arg) {
 	free(bufferData);
 	FreeMensaje(mensajeParaNodo);
 
-#ifdef BUILD_PARA_TEST
+#ifdef BUILD_CON_MOCK_NODO
 	int tiempoParaDormir = rand() % 5;
 	sleep(tiempoParaDormir);
 #endif
 
-#ifndef BUILD_PARA_TEST
+#ifndef BUILD_CON_MOCK_NODO
 	mensajeDeNodo = malloc(sizeof(mensaje_t));
 	estadoConexion = recibir(hiloJobInfo->socketFd,mensajeDeNodo);
 #else

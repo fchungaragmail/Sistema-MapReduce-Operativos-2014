@@ -27,11 +27,11 @@ void* pedidosMartaHandler(void* arg) {
 	while (TRUE) {
 		mensaje_t* mensajeMarta;
 
-#ifndef BUILD_PARA_TEST
+#ifndef BUILD_CON_MOCK_MARTA
 		mensajeMarta = malloc(sizeof(mensaje_t));
 		recibir(socketMartaFd, mensajeMarta);
 #else
-		static int alternar = 4;
+		static int alternar = 0;
 		if (alternar == 0) {
 			mensajeMarta =
 					CreateMensaje("mapFile todo1.txt",
@@ -95,7 +95,7 @@ void* pedidosMartaHandler(void* arg) {
 		FreeStringArray(&comandoStr);
 		FreeMensaje(mensajeMarta);
 
-#ifdef BUILD_PARA_TEST
+#ifdef BUILD_CON_MOCK_MARTA
 		sleep(15);
 #endif
 
@@ -161,7 +161,7 @@ void IniciarConexionMarta() {
 	char* ipMarta = config_get_string_value(configuracion, "IP_MARTA");
 	char* puertoMarta = config_get_string_value(configuracion, "PUERTO_MARTA");
 
-#ifndef BUILD_PARA_TEST
+#ifndef BUILD_CON_MOCK_MARTA
 	struct sockaddr_in their_addr;
 
 	if ((socketMartaFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
@@ -170,8 +170,8 @@ void IniciarConexionMarta() {
 	}
 
 	their_addr.sin_family = AF_INET;
-	their_addr.sin_port = htons(atoi(ipMarta));
-	inet_aton(puertoMarta, &(their_addr.sin_addr));
+	their_addr.sin_port = htons(atoi(puertoMarta));
+	inet_aton(ipMarta, &(their_addr.sin_addr));
 	memset(&(their_addr.sin_zero), '\o', 8);
 
 	if (connect(socketMartaFd, (Sockaddr_in*) &their_addr, sizeof(Sockaddr_in))
@@ -205,7 +205,7 @@ void HacerPedidoMarta() {
 
 		mensaje_t* mensaje = CreateMensaje(buffer, NULL);
 
-#ifndef BUILD_PARA_TEST
+#ifndef BUILD_CON_MOCK_MARTA
 		enviar(socketMartaFd, mensaje);
 #endif
 		log_info(logProcesoJob,
@@ -253,7 +253,7 @@ void ReportarResultadoHilo(HiloJobInfo* hiloJobInfo, EstadoHilo estado) {
 	/*
 	 * varios hilos pueden estar reportando a marta
 	 */
-#ifndef BUILD_PARA_TEST
+#ifndef BUILD_CON_MOCK_MARTA
 	pthread_mutex_lock(&mMarta);
 	enviar(socketMartaFd, mensajeParaMarta);
 	pthread_mutex_unlock(&mMarta);
@@ -402,7 +402,7 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner) {
 
 int main(int argc, char* argv[]) {
 
-#ifdef BUILD_PARA_TEST
+#ifdef BUILD_CON_MOCK_NODO
 	srand(time(NULL));
 #endif
 	IniciarConfiguracion();
