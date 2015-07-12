@@ -68,12 +68,7 @@ bool processMessage(Message *recvMessage)
 {
 	int comandoId = obtenerIdParaComando(recvMessage);
 	switch (comandoId) {
-		case K_NewConnection:
-			log_trace(logFile,"PlannerCenter : planificar NewConnection");
 
-			jobSocket=recvMessage->sockfd;
-			log_trace(logFile,"***************");
-			break;
 		case K_Job_NewFileToProcess:
 
 			log_trace(logFile,"PlannerCenter : planificar Job_NewFileToProcess");
@@ -81,7 +76,6 @@ bool processMessage(Message *recvMessage)
 			//**********
 			addNewConnection(recvMessage->sockfd);
 			jobSocket=recvMessage->sockfd;
-
 			//**********
 			char* filePath = deserializeFilePath(recvMessage,K_Job_NewFileToProcess);
 			filePathAProcesar = filePath;
@@ -152,7 +146,7 @@ bool processMessage(Message *recvMessage)
 				liberarFileState_Y_nodoState(recvMessage);
 				decrementarOperacionesEnProcesoEnNodo(ipNodoLocalDePedidoDeReduce);
 				liberarFileStatusData();
-				char *log = string_from_format("archivo %s reducido con exito !\n",path);
+				char *log = string_from_format("archivo %s reducido con exito !",path);
 				log_trace(logFile,log);
 				free(log);
 
@@ -179,11 +173,10 @@ bool processMessage(Message *recvMessage)
 			break;
 		case K_ProcesoCaido:
 
-			/*int a = recvMessage->sockfd;
-			char *mlog = string_from_format("el Job con socket %d se cayo, MaRTA no puede seguir procesando sus archivos",a);
+			/*char *mlog = string_from_format("el Job con socket %d se cayo, MaRTA no puede seguir procesando sus archivos",recvMessage->sockfd);
 			log_trace(logFile,mlog);
 			free(mlog);*/
-			//ME TIRA ERROR EN EL LOG_TRACE !!!!!
+			//TODO ME TIRA ERROR EN EL LOG_TRACE !!!!!
 
 			liberarFileState_Y_nodoState(recvMessage);
 			sacarCargasDeNodos_FalloDeJob();
@@ -205,6 +198,7 @@ bool processMessage(Message *recvMessage)
 int obtenerIdParaComando(Message *recvMessage)
 {
 	char *comando = deserializeComando(recvMessage);
+	log_debug(logFile,comando);
 	TypesMessages type;
 	if(strcmp(comando,"newConnection")==0){type =  K_NewConnection;}
 	if(strcmp(comando,"archivoAProcesar")==0){type = K_Job_NewFileToProcess;}
@@ -649,7 +643,7 @@ Message* obtenerProximoPedido(Message *recvMessage)
 
 					//NO HAY COPIAS DISPONIBLES !!!!!
 					log_trace(logFile,"no hay mas copias disponibles!!!");
-					char *log = string_from_format("averiguo si FileSystem tiene nuevos nodos !, (%d - %s) pedido de bloqe %d",i,jobSocket,filePathAProcesar);
+					char *log = string_from_format("averiguo si FileSystem tiene nuevos nodos !, (%d - %s) pedido de bloqe %d",jobSocket,filePathAProcesar,i);
 					log_trace(logFile,log);free(log);
 
 					Message *fsRequest = createFSrequest(recvMessage,i);

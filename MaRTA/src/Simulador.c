@@ -7,8 +7,9 @@
 
 
 #include "Simulador.h"
-#include "Utilities.h"
 #include <commons/string.h>
+#include <commons/log.h>
+#include "VariablesGlobales.h"
 
 int nroDeLlamado = -1;
 
@@ -40,7 +41,9 @@ Message *simular()
 
 	if(nroDeLlamado == 7){
 
-		return simulacion_FS_PedidoDeCopias("2;195.333.2.5;64;99;192.163.2.5;65;85;192.163.2.5;65;77");
+		char *copias = malloc(strlen("2;195.333.2.5;64;99;192.163.2.5;65;85;192.163.2.5;65;77")+1);
+		strcpy(copias,"2;195.333.2.5;64;99;192.163.2.5;65;85;192.163.2.5;65;77");
+		return simulacion_FS_PedidoDeCopias(copias);
 	}
 	if(nroDeLlamado == 8){ return simulacion_Job_mapResponse(2); }
 	if(nroDeLlamado == 9){ return simulacion_Job_mapResponse(3); }
@@ -93,9 +96,13 @@ Message *simular()
 						return simulacion_Job_reduceResponse("reduceFileConCombiner-Pedido1");
 				}
 				if(nroDeLlamado == 21){
-								return simulacion_Job_reduceResponse("reduceFileConCombiner-Pedido2");
-					}
 
+					return simulacion_Job_reduceResponse("reduceFileConCombiner-Pedido2");
+				}
+
+				if(nroDeLlamado == 22){
+					log_debug(logFile,"marta finalizo el reduce con exito !!");
+				}
 }
 Message* simulacion_FS_DataFullResponse()
 {
@@ -126,7 +133,7 @@ Message* simulacion_FS_DataFullResponse()
 	string_append(&data,data4);
 
 	fsResponse->mensaje->dataSize = strlen(data);
-	fsResponse->mensaje->data=malloc(strlen(data));
+	//fsResponse->mensaje->data=malloc(strlen(data));
 	fsResponse->mensaje->data=data;
 
 	fsResponse->sockfd = K_Simulacion_ScktFS;
@@ -146,12 +153,12 @@ Message *simulacion_Job_newFileToProcess()
 		string_append(&comando,"archivoAProcesar /user/juan/datos/temperatura2012.txt/ 1");
 
 		jobMsj->mensaje->comandoSize = strlen(comando);
-		jobMsj->mensaje->comando = malloc(strlen(comando));
+		//jobMsj->mensaje->comando = malloc(strlen(comando));
 		jobMsj->mensaje->comando = comando;
 
+		jobMsj->mensaje->data = malloc(strlen("")+1);
 		jobMsj->mensaje->dataSize = 0;
-		jobMsj->mensaje->data = malloc(0);
-		jobMsj->mensaje->data = "";
+		strcpy(jobMsj->mensaje->data,"");
 		jobMsj->sockfd = K_Simulacion_ScktJob;
 		return jobMsj;
 }
@@ -171,12 +178,12 @@ Message *simulacion_Job_mapResponse(int x)
 	string_append(&comando," 1");
 
 	jobMsj->mensaje->comandoSize = strlen(comando);
-	jobMsj->mensaje->comando=malloc(strlen(comando));
+	//jobMsj->mensaje->comando=malloc(strlen(comando));
 	jobMsj->mensaje->comando = comando;
 
-	jobMsj->mensaje->data = malloc(0);
+	jobMsj->mensaje->data = malloc(strlen("")+1);
 	jobMsj->mensaje->dataSize = 0;
-	jobMsj->mensaje->data = "";
+	strcpy(jobMsj->mensaje->data,"");
 	jobMsj->sockfd = K_Simulacion_ScktJob;
 	return jobMsj;
 }
@@ -195,12 +202,12 @@ Message *simulacion_Job_mapResponse_Fallo(int x)
 	string_append(&comando," 0");
 
 	jobMsj->mensaje->comandoSize = strlen(comando);
-	jobMsj->mensaje->comando=malloc(strlen(comando));
+	//jobMsj->mensaje->comando=malloc(strlen(comando));
 	jobMsj->mensaje->comando = comando;
 
-	jobMsj->mensaje->data = malloc(0);
+	jobMsj->mensaje->data = malloc(strlen("")+1);
 	jobMsj->mensaje->dataSize = 0;
-	jobMsj->mensaje->data = "";
+	strcpy(jobMsj->mensaje->data,"");
 	jobMsj->sockfd = K_Simulacion_ScktJob;
 	return jobMsj;
 }
@@ -216,12 +223,12 @@ Message *simulacion_Job_reduceResponse(char *tipo)
 	string_append(&comando,tipo);
 	string_append(&comando," /user/juan/datos/temperatura2012.txt/-X 1");
 	jobMsj->mensaje->comandoSize = strlen(comando);
-	jobMsj->mensaje->comando=malloc(strlen(comando));
+	//jobMsj->mensaje->comando=malloc(strlen(comando));
 	jobMsj->mensaje->comando = comando;
 
-	jobMsj->mensaje->data = malloc(0);
+	jobMsj->mensaje->data = malloc(strlen("")+1);
 	jobMsj->mensaje->dataSize = 0;
-	jobMsj->mensaje->data = "";
+	strcpy(jobMsj->mensaje->data,"");
 	jobMsj->sockfd = K_Simulacion_ScktJob;
 	return jobMsj;
 }
@@ -238,12 +245,12 @@ Message *simulacion_Job_reduceResponse_Fallo(char *tipo,char *ipFallo)
 	string_append(&comando,tipo);
 	string_append(&comando," /user/juan/datos/temperatura2012.txt/-X 0");
 	jobMsj->mensaje->comandoSize = strlen(comando);
-	jobMsj->mensaje->comando=malloc(strlen(comando));
+	//jobMsj->mensaje->comando=malloc(strlen(comando)+1);
 	jobMsj->mensaje->comando = comando;
 
-	jobMsj->mensaje->data = malloc(strlen(ipFallo));
+	//jobMsj->mensaje->data = malloc(strlen(ipFallo)+1);
 	jobMsj->mensaje->dataSize = strlen(ipFallo);
-	strcpy(jobMsj->mensaje->data,ipFallo);
+	jobMsj->mensaje->data = ipFallo;
 	jobMsj->sockfd = K_Simulacion_ScktJob;
 	return jobMsj;
 }
@@ -275,17 +282,17 @@ Message* simulacion_FS_PedidoDeCopias(char *copias)
 
 	//armo Comando
 	char *comando = string_new();
-	string_append(&comando,"DataFileResponse /user/juan/datos/temperatura2012.txt/ 1");//24 elementos tiene el *data
+	string_append(&comando,"DataFileResponse /user/juan/datos/temperatura2012.txt/ 1");
 	fsResponse->mensaje = malloc(sizeof(mensaje_t));
 	fsResponse->mensaje->comandoSize = strlen(comando);
-	fsResponse->mensaje->comando=malloc(strlen(comando));
-	strcpy(fsResponse->mensaje->comando,comando);
+	//fsResponse->mensaje->comando=malloc(strlen(comando)+1);
+	fsResponse->mensaje->comando = comando;
 
 	char *data = string_new();
 	string_append(&data,copias);
 
 	fsResponse->mensaje->dataSize = strlen(data);
-	fsResponse->mensaje->data=malloc(strlen(data));
+	//fsResponse->mensaje->data=malloc(strlen(data)+1);
 	fsResponse->mensaje->data=data;
 
 	fsResponse->sockfd = K_Simulacion_ScktFS;

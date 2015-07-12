@@ -71,8 +71,8 @@ int main(void) {
 		//***********
 	}
 
-	printf("MaRTA FINALIZO !!!");
-	//closeServidores();
+	log_trace(logFile,"MaRTA FINALIZO !!!");
+	closeServidores();
 	return EXIT_SUCCESS;
 }
 
@@ -106,7 +106,7 @@ void planificarHilo(void* args){
 void initMaRTA(){
 
 	//init MaRTA
-	logFile = log_create("./MaRTA.log","MaRTA", true, LOG_LEVEL_TRACE);
+	logFile = log_create("./MaRTA.log","MaRTA", true, LOG_LEVEL_DEBUG);
 
 	filesToProcess = dictionary_create();
 	filesStates = dictionary_create();
@@ -127,8 +127,6 @@ void initMaRTA(){
 	//CONEXION A FILE SYSTEM !!!
 	//connectToFileSystem();
 	//fileSystemDisponible = true;
-
-	//initPlannerCenter();
 
 }
 

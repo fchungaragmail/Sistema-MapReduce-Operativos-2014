@@ -6,3 +6,34 @@
 [TRACE] 17:04:14:380 MaRTA/(7761:7762): PlannerCenter : planificar Job_NewFileToProcess
 [TRACE] 17:04:14:406 MaRTA/(7761:7762): ***************
 [TRACE] 17:04:15:328 MaRTA/(7761:7762): PlannerCenter : planificar FS_FileFullData
+[DEBUG] 15:51:54:607 MaRTA/(5079:5079): newConnection
+[DEBUG] 15:51:54:638 MaRTA/(5079:5079): archivoAProcesar
+[DEBUG] 15:51:54:674 MaRTA/(5079:5079): DataFileResponse
+[DEBUG] 15:51:54:683 MaRTA/(5079:5080): archivoAProcesar
+[DEBUG] 15:51:54:703 MaRTA/(5079:5080): archivoAProcesar
+[DEBUG] 15:51:54:688 MaRTA/(5079:5079): mapFileResponse
+[DEBUG] 15:51:54:707 MaRTA/(5079:5079): mapFileResponse
+[DEBUG] 15:51:54:710 MaRTA/(5079:5079): mapFileResponse
+[DEBUG] 15:51:54:715 MaRTA/(5079:5080): DataFileResponse
+[DEBUG] 15:51:54:717 MaRTA/(5079:5079): mapFileResponse
+[DEBUG] 15:51:54:720 MaRTA/(5079:5079): DataFileResponse
+[DEBUG] 15:51:54:729 MaRTA/(5079:5079): mapFileResponse
+[DEBUG] 15:51:54:746 MaRTA/(5079:5080): DataFileResponse
+[DEBUG] 15:51:54:747 MaRTA/(5079:5079): mapFileResponse
+[DEBUG] 15:51:54:749 MaRTA/(5079:5079): reduceFileConCombiner-Pedido1
+[DEBUG] 15:51:54:759 MaRTA/(5079:5079): reduceFileConCombiner-Pedido2
+[DEBUG] 15:51:54:763 MaRTA/(5079:5080): DataFileResponse
+[DEBUG] 15:51:54:766 MaRTA/(5079:5080): DataFileResponse
+[DEBUG] 15:51:54:768 MaRTA/(5079:5079): mapFileResponse
+[DEBUG] 15:51:54:769 MaRTA/(5079:5079): reduceFileConCombiner-Pedido1
+[DEBUG] 15:51:54:817 MaRTA/(5079:5080): mapFileResponse
+[DEBUG] 15:51:54:818 MaRTA/(5079:5079): reduceFileConCombiner-Pedido2
+[DEBUG] 15:51:54:821 MaRTA/(5079:5079): DataFileResponse
+[DEBUG] 15:51:54:823 MaRTA/(5079:5079): mapFileResponse
+[DEBUG] 15:51:54:825 MaRTA/(5079:5079): reduceFileConCombiner-Pedido1
+[DEBUG] 15:51:54:855 MaRTA/(5079:5080): mapFileResponse
+[DEBUG] 15:51:54:856 MaRTA/(5079:5079): reduceFileConCombiner-Pedido2
+[DEBUG] 15:51:54:858 MaRTA/(5079:5079): mapFileResponse
+[DEBUG] 15:51:54:859 MaRTA/(5079:5079): reduceFileConCombiner-Pedido1
+[DEBUG] 15:51:54:861 MaRTA/(5079:5079): reduceFileConCombiner-Pedido2
+[DEBUG] 15:51:54:862 MaRTA/(5079:5079): marta finalizo el reduce con exito !!
