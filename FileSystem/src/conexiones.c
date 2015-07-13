@@ -166,27 +166,21 @@ void leerEntradas()
 			}
 
 			int estado;
-			int count;
-			ioctl(conexion->sockfd, FIONREAD, &count);
-			while (count != 0)
+			mensaje_t* mensaje = malloc(sizeof(mensaje_t));
+			estado = recibir(conexion->sockfd, mensaje);
+			if (estado == CONECTADO)
 			{
-				mensaje_t* mensaje = malloc(sizeof(mensaje_t));
-				estado = recibir(conexion->sockfd, mensaje);
-				if (estado == CONECTADO)
-				{
-					pthread_t tProcesar;
-					argumentos_t* args = malloc(sizeof(argumentos_t));
-					args->conexion = conexion;
-					args->mensaje = mensaje;
+				pthread_t tProcesar;
+				argumentos_t* args = malloc(sizeof(argumentos_t));
+				args->conexion = conexion;
+				args->mensaje = mensaje;
 
-					pthread_create(&tProcesar, NULL, procesarComandoRemoto, args);
-					ioctl(conexion->sockfd, FIONREAD, &count);
-				} else
-				{
-					cerrarConexion(conexion);
-					count = 0;
-					continue;
-				}
+				pthread_create(&tProcesar, NULL, procesarComandoRemoto, args);
+				//ioctl(conexion->sockfd, FIONREAD, &count);
+			} else
+			{
+				cerrarConexion(conexion);
+				continue;
 			}
 		}
 	}
