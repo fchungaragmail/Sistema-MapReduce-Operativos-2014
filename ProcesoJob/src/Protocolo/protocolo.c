@@ -32,8 +32,13 @@ int recibir(int socket, mensaje_t* mensaje){
 
 void enviar(int socket, mensaje_t* mensaje)
 {
-	send(socket, &(mensaje->comandoSize), sizeof(int16_t), 0);
+	uint16_t net_comando;
+	uint32_t net_data;
+	net_comando = htons(mensaje->comandoSize);
+	net_data = htonl(mensaje->dataSize);
+
+	send(socket, &net_comando, sizeof(uint16_t), 0);
 	send(socket, mensaje->comando, mensaje->comandoSize, 0);
-	send(socket, &(mensaje->dataSize), sizeof(int32_t), 0);
+	send(socket, &net_data, sizeof(uint32_t), 0);
 	send(socket, mensaje->data, mensaje->dataSize, 0);
 }
