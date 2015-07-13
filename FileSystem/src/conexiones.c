@@ -51,7 +51,10 @@ int initConexiones()
 	miDirecc.sin_port = htons(PUERTO_LISTEN);
 	inet_aton(IP_LISTEN, &(miDirecc.sin_addr));
 	memset(&(miDirecc.sin_zero), '\0', 8);
-	bind(escuchaConexiones, (Sockaddr_in*) &miDirecc, sizeof(Sockaddr_in));
+	if (0 > bind(escuchaConexiones, (Sockaddr_in*) &miDirecc, sizeof(Sockaddr_in)))
+	{
+		log_error(logFile, "No se pudo bindear el socket para escuchar conexiones.");
+	}
 
 
 	if (listen(escuchaConexiones, NODOS_MAX+1) == -1)
@@ -105,7 +108,7 @@ void escucharConexiones()
 
 void cerrarConexiones()
 {
-	close(escucharConexiones);
+	close(escuchaConexiones);
 	//list_iterate(conexiones, freeConexion);
 	//list_destroy(conexiones);
 	close(desbloquearSelect[0]);
