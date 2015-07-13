@@ -55,21 +55,21 @@ t_fileContent *getFileContent(char *archivoTemporal) {
 
 
 
-int setBloque(int numeroBloque, char* datos, int32_t tamaño) {
+int setBloque(int numeroBloque, char* datos, int32_t tamanio) {
 
 	//MAPEO CON ESCRITURA DE ARCHIVO
 	int archivo = open(ARCHIVO_BIN,O_RDWR);
 	long int offset = numeroBloque * TAMANIO_BLOQUE;
 
 	//parametros mmap(): 1=null, 2=tamaño a mapear, 3=operaciones permitidas sobre el mapeo, 4=si el mapeo es privado o compartido, 4=archivo, 5=desplazamiento desde el inicio del archivo
-	void *bloque= mmap(NULL,  tamaño,  PROT_WRITE, MAP_SHARED,  archivo,  offset);
+	void *bloque= mmap(NULL,  tamanio,  PROT_WRITE, MAP_SHARED,  archivo,  offset);
 	close(archivo);//mmap ya tiene una copia del fd
 
 	//escribir sobre el mapeo el mensaje
-	memcpy(bloque, datos, tamaño);
+	memcpy(bloque, datos, tamanio);
 
 	//se va actualizar el archivo
-	munmap(bloque, tamaño);
+	munmap(bloque, tamanio);
 
 
 	//muestro la parte del bloque que se escribio

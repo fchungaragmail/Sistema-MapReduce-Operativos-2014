@@ -46,12 +46,23 @@ int initConexiones()
 	pipe2(desbloquearSelect, O_NONBLOCK);
 	FD_SET(desbloquearSelect[0], &nodos);
 
+
+	int yes=1;
+	if (setsockopt(escuchaConexiones,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(int)) == -1) {
+	    perror("setsockopt");
+	    exit(1);
+	}
+
+
 	Sockaddr_in miDirecc;
 	miDirecc.sin_family = AF_INET;
 	miDirecc.sin_port = htons(PUERTO_LISTEN);
 	inet_aton(IP_LISTEN, &(miDirecc.sin_addr));
 	memset(&(miDirecc.sin_zero), '\0', 8);
-	bind(escuchaConexiones, (Sockaddr_in*) &miDirecc, sizeof(Sockaddr_in));
+	if (0 > bind(escuchaConexiones, (Sockaddr_in*) &miDirecc, sizeof(Sockaddr_in)))
+	{
+		log_error(logFile, "No se pudo bindear el socket para escuchar conexiones.");
+	}
 
 
 	if (listen(escuchaConexiones, NODOS_MAX+1) == -1)
@@ -86,6 +97,7 @@ void escucharConexiones()
 		pthread_mutex_init(&(conexionNueva->mSocket), NULL);
 		pthread_mutex_init(&(conexionNueva->mEstadoBloques), NULL);
 		conexionNueva->totalBloques = 0;
+		conexionNueva->estadoBloques = malloc(1);
 
 		pthread_mutex_lock(&mConexiones);
 		list_add(conexiones, conexionNueva);
@@ -105,7 +117,7 @@ void escucharConexiones()
 
 void cerrarConexiones()
 {
-	close(escucharConexiones);
+	close(escuchaConexiones);
 	//list_iterate(conexiones, freeConexion);
 	//list_destroy(conexiones);
 	close(desbloquearSelect[0]);
@@ -148,33 +160,28 @@ void leerEntradas()
 			pthread_mutex_lock(&mConexiones);
 			Conexion_t* conexion = list_get(conexiones,i);
 			pthread_mutex_unlock(&mConexiones);
+			if (conexion->sockfd < 0) continue;
 			if (true != FD_ISSET(conexion->sockfd,&nodosSelect))
 			{
 				continue;
 			}
 
 			int estado;
-			int count;
-			ioctl(conexion->sockfd, FIONREAD, &count);
-			while (count != 0)
+			mensaje_t* mensaje = malloc(sizeof(mensaje_t));
+			estado = recibir(conexion->sockfd, mensaje);
+			if (estado == CONECTADO)
 			{
-				mensaje_t* mensaje = malloc(sizeof(mensaje_t));
-				estado = recibir(conexion->sockfd, mensaje);
-				if (estado == CONECTADO)
-				{
-					pthread_t tProcesar;
-					argumentos_t* args = malloc(sizeof(argumentos_t));
-					args->conexion = conexion;
-					args->mensaje = mensaje;
+				pthread_t tProcesar;
+				argumentos_t* args = malloc(sizeof(argumentos_t));
+				args->conexion = conexion;
+				args->mensaje = mensaje;
 
-					pthread_create(&tProcesar, NULL, procesarComandoRemoto, args);
-					ioctl(conexion->sockfd, FIONREAD, &count);
-				} else
-				{
-					cerrarConexion(conexion);
-					count = 0;
-					continue;
-				}
+				pthread_create(&tProcesar, NULL, procesarComandoRemoto, args);
+				//ioctl(conexion->sockfd, FIONREAD, &count);
+			} else
+			{
+				cerrarConexion(conexion);
+				continue;
 			}
 		}
 	}
