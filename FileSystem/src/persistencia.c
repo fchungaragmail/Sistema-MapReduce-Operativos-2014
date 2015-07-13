@@ -195,7 +195,7 @@ int leerPersistencia()
 					ubicacion->bloque = atoi(lUbicaciones[1]);
 					list_add(ubicaciones,ubicacion);
 
-					if (lUbicaciones[3] != NULL)
+					if ((lUbicaciones[2] != NULL) && (strcmp(lUbicaciones[2],"\n") != 0))
 					{
 						lUbicaciones = string_n_split(lUbicaciones[3],3,";");
 					}else
