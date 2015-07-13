@@ -46,6 +46,14 @@ int initConexiones()
 	pipe2(desbloquearSelect, O_NONBLOCK);
 	FD_SET(desbloquearSelect[0], &nodos);
 
+
+	int yes=1;
+	if (setsockopt(escuchaConexiones,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(int)) == -1) {
+	    perror("setsockopt");
+	    exit(1);
+	}
+
+
 	Sockaddr_in miDirecc;
 	miDirecc.sin_family = AF_INET;
 	miDirecc.sin_port = htons(PUERTO_LISTEN);
@@ -151,6 +159,7 @@ void leerEntradas()
 			pthread_mutex_lock(&mConexiones);
 			Conexion_t* conexion = list_get(conexiones,i);
 			pthread_mutex_unlock(&mConexiones);
+			if (conexion->sockfd < 0) continue;
 			if (true != FD_ISSET(conexion->sockfd,&nodosSelect))
 			{
 				continue;

@@ -539,9 +539,19 @@ int nomb(char* argumentos, Conexion_t* conexion)
 		if (strcmp(args[0], nodo->nombre) == 0)
 		{
 			nodo->sockfd = conexion->sockfd;
+			nodo->estado = DISPONIBLE;
+
+			for (int k=0;k<conexiones->elements_count;k++)
+			{
+				Conexion_t* nodoAQuitar = list_get(conexiones,k);
+				if (nodoAQuitar==conexion) list_remove(conexiones,k);
+			}
 			free(conexion->estadoBloques);
 			free(conexion);
 			pthread_mutex_unlock(&mConexiones);
+
+			log_info(logFile, "Reconectado con el nodo %s", nodo->nombre);
+
 			actualizarEstadoArchivos();
 			return 0;
 		}
