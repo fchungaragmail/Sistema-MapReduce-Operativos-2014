@@ -15,18 +15,33 @@
 #include <fcntl.h>
 #include <semaphore.h>
 #include <sys/ioctl.h>
-
+#include <inttypes.h>
+//*******************
+//Imple nueva
+#include <errno.h>
+#include <unistd.h>
+#include <netdb.h>
+#include <stdio.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+//*******************
 #include <commons/txt.h>
 #include <commons/error.h>
 #include <commons/collections/list.h>
 #include "ConexionCenter.h"
 #include "VariablesGlobales.h"
 #include "FilesStatusCenter.h"
+#include "protocolo.h"
 
 // CONSTANTES
 
-#define LOCALHOST "192.168.1.5"
-#define K_PUERTO_LOCAL 6861
+#define LOCALHOST "127.0.0.1"
+#define K_PUERTO_LOCAL 9008
 #define MAX_CONNECTIONS 100
 
 // ESTRUCTURAS
@@ -51,7 +66,6 @@ typedef struct _conexion Conexion;
 int listener;// descriptor de socket a la escucha
 fd_set master;   // conjunto maestro de descriptores de fichero
 fd_set read_fds; // conjunto temporal de descriptores de fichero para select()
-struct sockaddr_in myaddr;     // dirección del servidor
 struct sockaddr_in remoteaddr; // dirección del cliente
 int fdmax;        // número máximo de descriptores de fichero
 int newfd;        // descriptor de socket de nueva conexión aceptada
@@ -74,6 +88,159 @@ void prepareConnections();
 Message* createErrorMessage();
 void setnonblocking();
 Message *crearMessageWithCommand(char *command,int socket);
+
+//Nueva Implementacion
+//**************
+Message* newListenConnections();
+void newInitConexiones();
+void make_socket (uint16_t port);
+Message* read_from_client (int filedes);
+
+fd_set active_fd_set, read_fd_set;
+int sock;
+struct sockaddr_in clientname;
+#define MAXMSG  512
+
+//**************
+
+void newInitConexiones(){
+
+
+	  /* Create the socket and set it up to accept connections. */
+	  make_socket(K_PUERTO_LOCAL);
+	  if (listen (sock, 1) < 0)
+	    {
+	      perror ("listen");
+	      exit (EXIT_FAILURE);
+	    }
+
+	  /* Initialize the set of active sockets. */
+	  FD_ZERO (&active_fd_set);
+	  FD_SET (sock, &active_fd_set);
+
+	  conexionesProcesadas=-1;
+	  printf("INICIO DEL SERVIDOR-MaRTA CON EXITO - PUERTO %d\n\n",K_PUERTO_LOCAL);
+}
+
+Message* newListenConnections()
+{
+	int i;
+	size_t size;
+
+  /* Block until input arrives on one or more active sockets. */
+  read_fd_set = active_fd_set;
+
+  printf(" SELECT en espera \n");
+  printf("*******************\n");
+  if (select (FD_SETSIZE, &read_fd_set, NULL, NULL, NULL) < 0)
+	{
+	  perror ("select");
+	  exit (EXIT_FAILURE);
+	}
+  printf(" SELECT recibio \n");
+
+  /* Service all the sockets with input pending. */
+  for (i = 0; i < FD_SETSIZE; ++i)
+	if (FD_ISSET (i, &read_fd_set))
+	  {
+		if (i == sock)
+		  {
+			/* Connection request on original socket. */
+			int new;
+			size = sizeof (clientname);
+			new = accept (sock,
+						  (struct sockaddr *) &clientname,
+						  &size);
+			if (new < 0)
+			  {
+				perror ("accept");
+				exit (EXIT_FAILURE);
+			  }
+			fprintf (stderr, "Server: connect from host %s, port %" PRIu16".\n",
+					inet_ntoa (clientname.sin_addr),
+					 ntohs (clientname.sin_port));
+			FD_SET (new, &active_fd_set);
+			return crearMessageWithCommand("newConnection",new);
+
+		  }
+		else
+		  {
+			/* Data arriving on an already-connected socket. */
+			read_from_client (i);
+
+		  }
+	  }
+}
+
+Message* read_from_client (int filedes)
+{
+  char buffer[MAXMSG];
+  int nbytes;
+
+  nbytes = read (filedes, buffer, MAXMSG);
+  if (nbytes < 0)
+    {
+      /* Read error. */
+      perror ("read");
+      exit (EXIT_FAILURE);
+    }
+  else if (nbytes == 0){
+    /* End-of-file. */
+	  close (filedes);
+	  FD_CLR (filedes, &active_fd_set);
+	  return crearMessageWithCommand("ProcesoCaido",filedes);
+  }
+
+  else
+    {
+    /* Data read. */
+    //********************************************************
+	// tenemos datos de algún cliente
+    conexionesProcesadas++;
+	printf("llegaron datos de algun cliente - nroDeMsje %d\n",conexionesProcesadas);
+	Message *_recvMesage = malloc(sizeof(Message));
+	_recvMesage->mensaje = malloc(sizeof(mensaje_t));
+	recibir(filedes,_recvMesage->mensaje);
+
+	printf("se recibio comandoSize %" PRIu16 "\n",_recvMesage->mensaje->comandoSize);
+	printf("se recibio el comando %s \n",_recvMesage->mensaje->comando);
+	printf("se recibio dataSize %" PRIu32 "\n",_recvMesage->mensaje->dataSize);
+	printf("se recibio la data %s \n",_recvMesage->mensaje->data);
+
+	return _recvMesage;
+	//********************************************************
+
+    }
+}
+
+void make_socket (uint16_t port)
+{
+
+  struct sockaddr_in name;
+
+  /* Create the socket. */
+  sock = socket (PF_INET, SOCK_STREAM, 0);
+  if (sock < 0)
+    {
+      perror ("socket");
+      exit (EXIT_FAILURE);
+    }
+
+  /* Give the socket a name. */
+  name.sin_family = AF_INET;
+  name.sin_port = htons (port);
+  name.sin_addr.s_addr = htonl (INADDR_ANY);
+  if (bind (sock, (struct sockaddr *) &name, sizeof (name)) < 0)
+    {
+      perror ("bind");
+      exit (EXIT_FAILURE);
+    }
+
+}
+
+//************************
+//************************
+//************************
 
 void initConexiones()
 {
@@ -102,11 +269,37 @@ void prepareConnections()
 
 }
 
+void createListener()
+{
+	// obtener socket a la escucha
+	if ((listener = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+		perror("socket");
+		exit(1);
+	}
+	// obviar el mensaje "address already in use" (la dirección ya se está usando)
+	if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes,sizeof(int)) == -1) {
+		perror("setsockopt");
+		exit(1);
+	}
+
+	// enlazar
+	Sockaddr_in myaddr;     // dirección del servidor
+	myaddr.sin_family = AF_INET;
+	myaddr.sin_addr.s_addr = INADDR_ANY;
+	myaddr.sin_port = htons(K_PUERTO_LOCAL);
+	memset(&(myaddr.sin_zero), '\0', 8);
+	if (bind(listener, (struct sockaddr *)&myaddr, sizeof(myaddr)) == -1) {
+		perror("bind");
+		exit(1);
+	}
+}
+
 Message* listenConnections()
 {
 	printf(" SELECT en espera !!!\n");
+	printf("*******************\n");
 	read_fds = master; // cópialo
-	if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) {
+	if (select(FD_SETSIZE, &read_fds, NULL, NULL, NULL) == -1) {
 		perror("select");
 		exit(1);
 	}
@@ -259,28 +452,6 @@ void closeServidores()
 	}
 }
 
-void createListener()
-{
-	// obtener socket a la escucha
-	if ((listener = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-		perror("socket");
-		exit(1);
-	}
-	// obviar el mensaje "address already in use" (la dirección ya se está usando)
-	if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes,sizeof(int)) == -1) {
-		perror("setsockopt");
-		exit(1);
-	}
-	// enlazar
-	myaddr.sin_family = AF_INET;
-	myaddr.sin_addr.s_addr = INADDR_ANY;
-	myaddr.sin_port = htons(K_PUERTO_LOCAL);
-	memset(&(myaddr.sin_zero), '\0', 8);
-	if (bind(listener, (struct sockaddr *)&myaddr, sizeof(myaddr)) == -1) {
-		perror("bind");
-		exit(1);
-	}
-}
 
 int createSocket(int puerto,int socketFd)
 {

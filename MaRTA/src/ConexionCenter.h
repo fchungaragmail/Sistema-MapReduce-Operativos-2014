@@ -18,4 +18,7 @@ int connectToFS();
 void closeServidores();
 Message* listenConnections();
 
+Message* newListenConnections();
+void newInitConexiones();
+
 #endif /* CONEXIONCENTER_H_ */

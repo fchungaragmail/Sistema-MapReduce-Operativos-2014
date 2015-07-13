@@ -8,6 +8,8 @@
 #ifndef UTILITIES_H_
 #define UTILITIES_H_
 
+#include "stdint.h"
+
 /*
 //Funciones auxiliares
 */
@@ -20,9 +22,9 @@ char* intToCharPtr(int x);
 
 typedef struct mensaje
 {
-	int16_t comandoSize;
+	uint16_t comandoSize;
 	char* comando;
-	int32_t dataSize; 	//Pongo long xq en un int no entraria el valor
+	uint32_t dataSize; 	//Pongo long xq en un int no entraria el valor
 	char* data;		//correspondiente a 20mb
 }mensaje_t;
 
@@ -85,6 +87,7 @@ typedef enum
 #define K_FS_PUERTO -1 //DEFINIR
 
 //Simulacion
+//#define K_SIMULACION
 #define K_Simulacion_ScktJob 	5
 #define K_Simulacion_ScktFS 	3
 

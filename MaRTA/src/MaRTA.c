@@ -54,26 +54,33 @@ int main(void) {
 	puts("MaRTA al ataque !!!");
 	initMaRTA();
 
-	int i=0;
-	while((i<30))//fileSystemDisponible
-	{
-		//***********
-		recvMessage = listenConnections();
+#ifdef K_SIMULACION
 
-		//recvMessage = simular();
-		//sleep(1);
-		//administrarHilos();
+	int i=0;
+	while(i<30)
+	{
+		recvMessage = simular();
+		administrarHilos();
 		i++;
-		//***********
-		//
-		//processMessage(recvMessage);
-		//
-		//***********
 	}
 
 	log_trace(logFile,"MaRTA FINALIZO !!!");
 	closeServidores();
 	return EXIT_SUCCESS;
+
+#else
+
+		int i=0;
+		while(1)//fileSystemDisponible)
+		{
+			recvMessage = newListenConnections();
+			//administrarHilos();
+		}
+		log_trace(logFile,"MaRTA FINALIZO !!!");
+		closeServidores();
+		return EXIT_SUCCESS;
+
+#endif
 }
 
 void planificarHilo(void* args){
@@ -121,12 +128,21 @@ void initMaRTA(){
 	sem_init(&semNodoState, 0, 1);
 	sem_init(&semFullDataTables, 0, 1);
 
+#ifdef K_SIMULACION
+
 	initFilesStatusCenter();
-	initConexiones();
+
+#else
+
+	initFilesStatusCenter();
+	newInitConexiones();
 
 	//CONEXION A FILE SYSTEM !!!
 	//connectToFileSystem();
 	//fileSystemDisponible = true;
+
+
+#endif
 
 }
 

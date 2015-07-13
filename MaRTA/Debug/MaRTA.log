@@ -37,3 +37,27 @@
 [DEBUG] 15:51:54:859 MaRTA/(5079:5079): reduceFileConCombiner-Pedido1
 [DEBUG] 15:51:54:861 MaRTA/(5079:5079): reduceFileConCombiner-Pedido2
 [DEBUG] 15:51:54:862 MaRTA/(5079:5079): marta finalizo el reduce con exito !!
+[DEBUG] 11:55:32:754 MaRTA/(3281:3281): newConnection
+[DEBUG] 11:55:32:773 MaRTA/(3281:3281): archivoAProcesar
+[DEBUG] 11:55:32:774 MaRTA/(3281:3281): DataFileResponse
+[DEBUG] 11:55:32:775 MaRTA/(3281:3281): mapFileResponse
+[DEBUG] 11:55:32:776 MaRTA/(3281:3281): mapFileResponse
+[DEBUG] 11:55:32:777 MaRTA/(3281:3281): mapFileResponse
+[DEBUG] 11:55:32:777 MaRTA/(3281:3281): mapFileResponse
+[DEBUG] 11:55:32:778 MaRTA/(3281:3281): DataFileResponse
+[DEBUG] 11:55:32:779 MaRTA/(3281:3281): mapFileResponse
+[DEBUG] 11:55:32:780 MaRTA/(3281:3281): mapFileResponse
+[DEBUG] 11:55:32:784 MaRTA/(3281:3281): reduceFileConCombiner-Pedido1
+[DEBUG] 11:55:32:785 MaRTA/(3281:3281): reduceFileConCombiner-Pedido2
+[DEBUG] 11:55:32:785 MaRTA/(3281:3281): mapFileResponse
+[DEBUG] 11:55:32:790 MaRTA/(3281:3281): reduceFileConCombiner-Pedido1
+[DEBUG] 11:55:32:791 MaRTA/(3281:3281): reduceFileConCombiner-Pedido2
+[DEBUG] 11:55:32:791 MaRTA/(3281:3281): DataFileResponse
+[DEBUG] 11:55:32:793 MaRTA/(3281:3282): archivoAProcesar
+[DEBUG] 11:55:32:794 MaRTA/(3281:3281): mapFileResponse
+[DEBUG] 11:55:32:795 MaRTA/(3281:3281): reduceFileConCombiner-Pedido1
+[DEBUG] 11:55:32:796 MaRTA/(3281:3281): reduceFileConCombiner-Pedido2
+[DEBUG] 11:55:32:797 MaRTA/(3281:3281): mapFileResponse
+[DEBUG] 11:55:32:797 MaRTA/(3281:3281): reduceFileConCombiner-Pedido1
+[DEBUG] 11:55:32:798 MaRTA/(3281:3281): reduceFileConCombiner-Pedido2
+[DEBUG] 11:55:32:799 MaRTA/(3281:3281): marta finalizo el reduce con exito !!
