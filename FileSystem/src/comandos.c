@@ -536,6 +536,7 @@ int nomb(char* argumentos, Conexion_t* conexion)
 	for (int i=0;i<conexiones->elements_count;i++)
 	{
 		Conexion_t* nodo = list_get(conexiones,i);
+		if (nodo==conexion) continue;
 		if (strcmp(args[0], nodo->nombre) == 0)
 		{
 			nodo->sockfd = conexion->sockfd;
@@ -906,6 +907,7 @@ int espacioTotal()
 	for (int i=0;i<nodos->elements_count;i++)
 	{
 		Conexion_t* nodo = list_get(nodos,i);
+		if (nodo->estado == NO_DISPONIBLE) continue;
 
 		espacioTotal += nodo->totalBloques * TAMANIO_BLOQUE/1024/1024;
 		pthread_mutex_lock(&(nodo->mEstadoBloques));

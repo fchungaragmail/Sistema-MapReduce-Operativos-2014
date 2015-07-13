@@ -26,7 +26,7 @@ int main(void) {
 
 	initFileSystem();
 
-	pthread_create(&tPrueba, NULL, probarConexiones, NULL);
+	//pthread_create(&tPrueba, NULL, probarConexiones, NULL);
 	pthread_create(&tPersistencia, NULL, persistirEstructuras, NULL);
 
 	pthread_create(&tConsola, NULL, execConsola, NULL);
