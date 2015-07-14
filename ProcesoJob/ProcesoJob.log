@@ -644,3 +644,159 @@ Data: (null)
 Comando: 
 Data: (null)
 
+[INFO] 16:03:12:257 ProcesoJob/(6870:6870): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9008
+
+[INFO] 16:04:45:973 ProcesoJob/(6964:6964): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9008
+
+[INFO] 16:06:09:457 ProcesoJob/(7047:7047): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9008
+
+[INFO] 16:07:17:31 ProcesoJob/(7133:7133): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9008
+
+[INFO] 16:08:25:23 ProcesoJob/(7133:7139): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: (null)
+
+[INFO] 16:11:40:626 ProcesoJob/(7255:7255): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9008
+
+[INFO] 16:34:02:372 ProcesoJob/(7637:7637): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9008
+
+[INFO] 16:34:03:777 ProcesoJob/(7637:7643): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: (null)
+
+[INFO] 16:34:03:777 ProcesoJob/(7637:7643): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: (null)
+
+[INFO] 16:34:03:777 ProcesoJob/(7637:7643): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: (null)
+
+[INFO] 16:34:59:847 ProcesoJob/(7682:7682): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9008
+
+[INFO] 16:43:12:996 ProcesoJob/(7948:7948): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9008
+
+[INFO] 16:50:06:233 ProcesoJob/(7948:7955): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: (null)
+
+[INFO] 16:51:50:71 ProcesoJob/(8225:8225): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9008
+
+[INFO] 16:53:33:483 ProcesoJob/(8314:8314): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9008
+
+[INFO] 17:43:21:403 ProcesoJob/(9391:9391): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9009
+
+[INFO] 17:44:58:173 ProcesoJob/(9489:9489): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9009
+
+[INFO] 17:46:08:158 ProcesoJob/(9581:9581): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9009
+
+[INFO] 17:46:29:967 ProcesoJob/(9581:9589): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: (null)
+
+[INFO] 17:47:06:949 ProcesoJob/(9581:9589): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: (null)
+
+[INFO] 17:51:24:307 ProcesoJob/(9814:9814): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9010
+
+[INFO] 17:51:35:958 ProcesoJob/(9814:9820): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: (null)
+
+[INFO] 17:51:50:566 ProcesoJob/(9814:9820): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: (null)
+
+[INFO] 17:53:21:273 ProcesoJob/(9954:9954): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9011
+
+[INFO] 17:55:53:82 ProcesoJob/(10123:10123): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9012
+
+[INFO] 17:55:53:112 ProcesoJob/(10123:10128): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: (null)
+
+[INFO] 17:55:53:115 ProcesoJob/(10123:10128): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: (null)
+
+[INFO] 17:55:53:117 ProcesoJob/(10123:10128): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: (null)
+
+[INFO] 21:28:53:604 ProcesoJob/(10123:10128): Recibido del MaRTA:
+Comando: @융ivoAProcesar todo3.txt 0
+Data: (null)
+
+[INFO] 21:28:53:607 ProcesoJob/(10123:10128): Recibido del MaRTA:
+Comando: 
+Data: (null)
+
+[INFO] 21:30:29:394 ProcesoJob/(10799:10799): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9013
+
+[INFO] 21:30:54:475 ProcesoJob/(10799:10824): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: (null)
+
+[INFO] 21:35:10:953 ProcesoJob/(11026:11026): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9014
+
+[INFO] 21:35:32:93 ProcesoJob/(11026:11032): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: (null)
+
+[INFO] 21:35:33:412 ProcesoJob/(11026:11032): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: (null)
+
+[INFO] 21:35:34:247 ProcesoJob/(11026:11032): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: (null)
+
+[INFO] 23:36:23:821 ProcesoJob/(11160:11160): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9014
+
+[INFO] 23:36:23:847 ProcesoJob/(11160:11164): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: (null)
+
+[INFO] 23:36:23:859 ProcesoJob/(11160:11164): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: (null)
+
+[INFO] 23:36:23:867 ProcesoJob/(11160:11164): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: (null)
+
+[INFO] 23:36:48:29 ProcesoJob/(11160:11164): Recibido del MaRTA:
+Comando: �융ivoAProcesar todo3.txt 0
+Data: (null)
+
+[INFO] 23:36:48:35 ProcesoJob/(11160:11164): Recibido del MaRTA:
+Comando: 
+Data: (null)
+
+[INFO] 23:56:23:139 ProcesoJob/(11699:11699): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 23:56:23:168 ProcesoJob/(11699:11700): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: (null)
+
+[INFO] 23:56:23:177 ProcesoJob/(11699:11700): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: (null)
+
+[INFO] 23:56:23:182 ProcesoJob/(11699:11700): Se envi처 a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: (null)
+
+[INFO] 23:57:09:626 ProcesoJob/(11699:11700): Recibido del MaRTA:
+Comando: �융ivoAProcesar todo3.txt 0
+Data: (null)
+
+[INFO] 23:57:09:631 ProcesoJob/(11699:11700): Recibido del MaRTA:
+Comando: 
+Data: (null)
+
+[ERROR] 00:46:32:94 ProcesoJob/(12542:12542): Error al conectarse con MARTA, con IP: 127.0.0.1 PUERTO: 9015
+
+[INFO] 00:46:32:95 ProcesoJob/(12542:12542): Finalizacion del ProcesoJob con exit_status = -1
+
