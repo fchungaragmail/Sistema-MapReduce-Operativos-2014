@@ -21,9 +21,7 @@ char *deserializeTempFilePath(Message *recvMessage,TypesMessages type);
 t_list *deserializeFailedReduceResponse(Message *recvMessage);
 int deserializeNumeroDeBloque_PedidoDeCopias(Message *recvMessage);
 
-char* createStream();
-void addIntToStream(char *stream, int value,IntTypes type);
-void addStringToStream(char **stream,char *value);
+void addIntToStream(char *stream, int value);
 
 char *deserializeTempFilePath(Message *recvMessage,TypesMessages type)
 {
@@ -211,7 +209,13 @@ t_list *deserializarFullDataResponse(Message *recvMessage)
 	char *_comando = recvMessage->mensaje->comando;
 	char **comando = string_split(_comando," ");
 	char *data = recvMessage->mensaje->data;
-	char **dataArray = string_split(data," ");//---> "\n" poner esto para el simulador!
+
+#ifdef K_SIMULACION
+	char **dataArray = string_split(data," ");
+#else
+	char **dataArray = string_split(data,"\n");
+#endif
+
 	int cantidadDeBloques = fullData_obtenerCantidadDeBloqes(dataArray);
 
 	t_list *listaPadreDeBloques = list_create();
@@ -269,21 +273,9 @@ t_list *deserializeFailedReduceResponse(Message *recvMessage)
 	return listaP;
 }
 
-char* createStream()
-{
-	char *stream = string_new();
-	return stream;
-}
-
-void addIntToStream(char *stream, int value,IntTypes type)
+void addIntToStream(char *stream, int value)
 {
 	char *intValue = intToCharPtr(value);
 	string_append(&stream," ");
 	string_append(&stream,intValue);
-}
-
-void addStringToStream(char **stream, char *str)
-{
-	string_append(stream,str);
-	string_append(stream," ");
 }

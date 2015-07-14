@@ -15,11 +15,6 @@
 #include <commons/collections/dictionary.h>
 #include <commons/collections/list.h>
 
-typedef enum{
-	K_int16_t = 1,
-	K_int32_t = 2,
-}IntTypes;
-
 char *deserializeFilePath(Message *recvMessage,TypesMessages type);
 bool* deserializeSoportaCombiner(Message *recvMessage);
 bool* deserializeRequestResponse(Message *recvMessage,TypesMessages type);
@@ -29,8 +24,6 @@ char *deserializeTempFilePath(Message *recvMessage,TypesMessages type);
 t_list *deserializeFailedReduceResponse(Message *recvMessage);
 int deserializeNumeroDeBloque_PedidoDeCopias(Message *recvMessage);
 
-char* createStream();
-void addIntToStream(char *stream, int value,IntTypes type);
-void addStringToStream(char **stream,char *value);
+void addIntToStream(char *stream, int value);
 
 #endif /* SERIALIZADOR_H_ */

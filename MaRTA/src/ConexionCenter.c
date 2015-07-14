@@ -16,20 +16,7 @@
 #include <semaphore.h>
 #include <sys/ioctl.h>
 #include <inttypes.h>
-//*******************
-//Imple nueva
-#include <errno.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <stdio.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-//*******************
+
 #include <commons/txt.h>
 #include <commons/error.h>
 #include <commons/collections/list.h>
@@ -41,7 +28,7 @@
 // CONSTANTES
 
 #define LOCALHOST "127.0.0.1"
-#define K_PUERTO_LOCAL 9008
+#define K_PUERTO_LOCAL 9015
 #define MAX_CONNECTIONS 100
 
 // ESTRUCTURAS
@@ -85,169 +72,16 @@ Message* listenConnections();
 int createSocket(int puerto,int socketFd);
 void createListener();
 void prepareConnections();
-Message* createErrorMessage();
 void setnonblocking();
 Message *crearMessageWithCommand(char *command,int socket);
 
-//Nueva Implementacion
-//**************
-Message* newListenConnections();
-void newInitConexiones();
-void make_socket (uint16_t port);
-Message* read_from_client (int filedes);
-
-fd_set active_fd_set, read_fd_set;
-int sock;
-struct sockaddr_in clientname;
-#define MAXMSG  512
-
-//**************
-
-void newInitConexiones(){
-
-
-	  /* Create the socket and set it up to accept connections. */
-	  make_socket(K_PUERTO_LOCAL);
-	  if (listen (sock, 1) < 0)
-	    {
-	      perror ("listen");
-	      exit (EXIT_FAILURE);
-	    }
-
-	  /* Initialize the set of active sockets. */
-	  FD_ZERO (&active_fd_set);
-	  FD_SET (sock, &active_fd_set);
-
-	  conexionesProcesadas=-1;
-	  printf("INICIO DEL SERVIDOR-MaRTA CON EXITO - PUERTO %d\n\n",K_PUERTO_LOCAL);
-}
-
-Message* newListenConnections()
-{
-	int i;
-	size_t size;
-
-  /* Block until input arrives on one or more active sockets. */
-  read_fd_set = active_fd_set;
-
-  printf(" SELECT en espera \n");
-  printf("*******************\n");
-  if (select (FD_SETSIZE, &read_fd_set, NULL, NULL, NULL) < 0)
-	{
-	  perror ("select");
-	  exit (EXIT_FAILURE);
-	}
-  printf(" SELECT recibio \n");
-
-  /* Service all the sockets with input pending. */
-  for (i = 0; i < FD_SETSIZE; ++i)
-	if (FD_ISSET (i, &read_fd_set))
-	  {
-		if (i == sock)
-		  {
-			/* Connection request on original socket. */
-			int new;
-			size = sizeof (clientname);
-			new = accept (sock,
-						  (struct sockaddr *) &clientname,
-						  &size);
-			if (new < 0)
-			  {
-				perror ("accept");
-				exit (EXIT_FAILURE);
-			  }
-			fprintf (stderr, "Server: connect from host %s, port %" PRIu16".\n",
-					inet_ntoa (clientname.sin_addr),
-					 ntohs (clientname.sin_port));
-			FD_SET (new, &active_fd_set);
-			return crearMessageWithCommand("newConnection",new);
-
-		  }
-		else
-		  {
-			/* Data arriving on an already-connected socket. */
-			read_from_client (i);
-
-		  }
-	  }
-}
-
-Message* read_from_client (int filedes)
-{
-  char buffer[MAXMSG];
-  int nbytes;
-
-  nbytes = read (filedes, buffer, MAXMSG);
-  if (nbytes < 0)
-    {
-      /* Read error. */
-      perror ("read");
-      exit (EXIT_FAILURE);
-    }
-  else if (nbytes == 0){
-    /* End-of-file. */
-	  close (filedes);
-	  FD_CLR (filedes, &active_fd_set);
-	  return crearMessageWithCommand("ProcesoCaido",filedes);
-  }
-
-  else
-    {
-    /* Data read. */
-    //********************************************************
-	// tenemos datos de algún cliente
-    conexionesProcesadas++;
-	printf("llegaron datos de algun cliente - nroDeMsje %d\n",conexionesProcesadas);
-	Message *_recvMesage = malloc(sizeof(Message));
-	_recvMesage->mensaje = malloc(sizeof(mensaje_t));
-	recibir(filedes,_recvMesage->mensaje);
-
-	printf("se recibio comandoSize %" PRIu16 "\n",_recvMesage->mensaje->comandoSize);
-	printf("se recibio el comando %s \n",_recvMesage->mensaje->comando);
-	printf("se recibio dataSize %" PRIu32 "\n",_recvMesage->mensaje->dataSize);
-	printf("se recibio la data %s \n",_recvMesage->mensaje->data);
-
-	return _recvMesage;
-	//********************************************************
-
-    }
-}
-
-void make_socket (uint16_t port)
-{
-
-  struct sockaddr_in name;
-
-  /* Create the socket. */
-  sock = socket (PF_INET, SOCK_STREAM, 0);
-  if (sock < 0)
-    {
-      perror ("socket");
-      exit (EXIT_FAILURE);
-    }
-
-  /* Give the socket a name. */
-  name.sin_family = AF_INET;
-  name.sin_port = htons (port);
-  name.sin_addr.s_addr = htonl (INADDR_ANY);
-  if (bind (sock, (struct sockaddr *) &name, sizeof (name)) < 0)
-    {
-      perror ("bind");
-      exit (EXIT_FAILURE);
-    }
-
-}
-
-//************************
-//************************
-//************************
 
 void initConexiones()
 {
 	createListener();
 	prepareConnections();
 	conexionesProcesadas=-1;
-	printf("INICIO DEL SERVIDOR-MaRTA CON EXITO\n\n");
+	printf("Inicio del servidor MaRTA con exito\n\n");
 }
 
 void prepareConnections()
@@ -255,8 +89,8 @@ void prepareConnections()
 
 	FD_ZERO(&master);    // borra los conjuntos maestro y temporal
 	FD_ZERO(&read_fds);
-	// escuchar
 
+	// escuchar
 	if (listen(listener, MAX_CONNECTIONS) == -1) {
 
 		perror("listen");
@@ -304,8 +138,6 @@ Message* listenConnections()
 		exit(1);
 	}
 	printf("SELECT recibio algo !!!\n");
-	printf("CONEXION NUMERO : %d \n",conexionesProcesadas);
-	conexionesProcesadas++;
 	int i, j;
 	// explorar conexiones existentes en busca de datos que leer
 	for(i = 0; i <= fdmax; i++) {
@@ -328,53 +160,45 @@ Message* listenConnections()
 					return crearMessageWithCommand("newConnection",newfd);
 				}
 			} else {
-				// gestionar datos de un cliente
-				if ((nbytes = recv(i, buf, sizeof(buf), 0)) <= 0) {
-					// error o conexión cerrada por el cliente
-					if (nbytes == 0) {
-						// conexión cerrada
-						printf("selectserver: socket %d hung up\n", i);
-					} else {
-						perror("recv");
-					}
+
+				//*****************
+				//Tenemos datos de algún cliente
+				conexionesProcesadas++;
+				printf("llegaron datos de un cliente - nroDeMsje %d\n",conexionesProcesadas);
+
+				Message *_recvMesage = malloc(sizeof(Message));
+				_recvMesage->mensaje = malloc(sizeof(mensaje_t));
+				int estado = recibir(i,_recvMesage->mensaje);
+
+				if(estado == DESCONECTADO){
 					close(i); // bye!
 					FD_CLR(i, &master); // eliminar del conjunto maestro
+					char *log = string_from_format("fallo el recv del proceso con socket %d",i);
+					log_trace(logFile,log); free(log);
 					return crearMessageWithCommand("ProcesoCaido",i);
-				} else {
+				}
 
-					//********************************************************
-					// tenemos datos de algún cliente
-					printf("llegaron datos de algun cliente - nroDeMsje %d\n",conexionesProcesadas);
-					Message *_recvMesage = malloc(sizeof(Message));
-					_recvMesage->mensaje = malloc(sizeof(mensaje_t));
-					recibir(i,_recvMesage->mensaje);
-
+				if(estado == CONECTADO){
 					printf("se recibio dataSize %d \n",_recvMesage->mensaje->dataSize);
 					printf("se recibio la data %s \n",_recvMesage->mensaje->data);
 					printf("se recibio comandoSize %d \n",_recvMesage->mensaje->comandoSize);
 					printf("se recibio el comando %s \n",_recvMesage->mensaje->comando);
-
-					//********************************************************
-					//VEO SI QUEDAN DATOS EN EL BUFFER
-					/*int count;
-					ioctl(socket, FIONREAD, &count);
-					while(count>0){
-						ioctl(socket, FIONREAD, &count);
-						if(count >0){
-							_recvMesage->mensaje = recibir(i);
-
-							printf("todabia quedan msjes en el buffer y los mensajes son :\n");
-
-						}
-					}
-					//********************************************************
-					return _recvMesage;*/
 				}
+
+				//*******************
+				//VEO SI QUEDAN DATOS EN EL BUFFER
+				/*int count;
+				ioctl(socket, FIONREAD, &count);
+				while(count>0){
+					ioctl(socket, FIONREAD, &count);
+					if(count >0){
+						_recvMesage->mensaje = recibir(i);
+						printf("todabia quedan msjes en el buffer y los mensajes son :\n");
+					}
+				}*/
 			}
 		}
 	}
-	printf("ConexionCenter: fallo listenConnections");	//nunca deberia llegar aca
-	return createErrorMessage();						//xq el select() es bloqueante
 }
 
 int connectToFS(){
@@ -427,17 +251,6 @@ void setnonblocking()
 	printf("NON-BLOCKING REALIZADO\n");
 }
 
-Message* createErrorMessage()
-{
-	Message *error;
-	error=malloc(sizeof(Message));
-	error->mensaje = malloc(sizeof(mensaje_t));
-	error->mensaje->comando=malloc(strlen("error")+1);
-	error->mensaje->comandoSize=(strlen("error"));
-	strcpy(error->mensaje->comando,"error");
-	return error;
-}
-
 void closeServidores()
 {
 	int j;
@@ -451,7 +264,6 @@ void closeServidores()
 		}
 	}
 }
-
 
 int createSocket(int puerto,int socketFd)
 {
@@ -475,7 +287,6 @@ int createSocket(int puerto,int socketFd)
 
 	printf("createSocket realizado con exito\n");
 	return socketFd;
-
 }
 
 Message *crearMessageWithCommand(char *command,int socket)

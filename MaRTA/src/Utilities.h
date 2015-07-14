@@ -22,10 +22,10 @@ char* intToCharPtr(int x);
 
 typedef struct mensaje
 {
-	uint16_t comandoSize;
+	int16_t comandoSize;
 	char* comando;
-	uint32_t dataSize; 	//Pongo long xq en un int no entraria el valor
-	char* data;		//correspondiente a 20mb
+	int32_t dataSize;
+	char* data;
 }mensaje_t;
 
 typedef struct _message {
@@ -42,7 +42,7 @@ typedef enum
 	K_Job_MapResponse = 2,
 	K_Job_ReduceResponse = 3,
 	K_ProcesoCaido = 4,
-	K_FS_FileFullData = 5, //FS envia tabla con direccion de archivo en los distintos nodos
+	K_FS_FileFullData = 5,
 }TypesMessages;
 
 typedef enum
@@ -56,11 +56,11 @@ typedef enum
 typedef enum
 {
 	K_UNINITIALIZED = 1, 	//sin estado
-	K_IN_MAPPING =2,//se esta mappeando, se espera respuesta del job
-	K_MAPPED = 3, 		//archivo ya mappeado
+	K_IN_MAPPING =2,		//se esta mappeando, se espera respuesta del job
+	K_MAPPED = 3, 			//archivo ya mappeado
 	K_IN_REDUCING = 4,
 	K_REDUCED = 5,
-	K_TOTAL_ERROR = 6  	// fallo la operacion y el FS no tiene otros bloques disponibles para procesar
+	K_TOTAL_ERROR = 6  		// fallo la operacion y el FS no tiene otros bloques disponibles para procesar
 }StatusBlockState;
 
 /*
@@ -87,7 +87,7 @@ typedef enum
 #define K_FS_PUERTO -1 //DEFINIR
 
 //Simulacion
-//#define K_SIMULACION
+#define K_SIMULACION
 #define K_Simulacion_ScktJob 	5
 #define K_Simulacion_ScktFS 	3
 

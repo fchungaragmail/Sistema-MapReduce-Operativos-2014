@@ -10,6 +10,7 @@
 
 #include <semaphore.h>
 #include <commons/collections/dictionary.h>
+#include <stdio.h>
 
 extern t_dictionary *filesToProcess;
 extern t_dictionary *filesStates;
@@ -22,6 +23,7 @@ extern sem_t semFilesStates;
 extern sem_t semNodosData;
 extern sem_t semNodoState;
 extern sem_t semFullDataTables;
+extern sem_t semEnviar;
 
 extern FILE *logFile;
 

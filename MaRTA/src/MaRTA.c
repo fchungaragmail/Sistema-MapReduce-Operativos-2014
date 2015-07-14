@@ -39,6 +39,7 @@ sem_t semFilesToProcessPerJob;
 sem_t semFilesStates;
 sem_t semNodosData;
 sem_t semNodoState;
+sem_t semEnviar;
 
 t_list *hilosData;
 Message *recvMessage;
@@ -57,10 +58,14 @@ int main(void) {
 #ifdef K_SIMULACION
 
 	int i=0;
-	while(i<30)
+	while(i<22)
 	{
 		recvMessage = simular();
 		administrarHilos();
+
+		if(i== 21){
+			sleep(10000000);
+		}
 		i++;
 	}
 
@@ -73,7 +78,7 @@ int main(void) {
 		int i=0;
 		while(1)//fileSystemDisponible)
 		{
-			recvMessage = newListenConnections();
+			recvMessage = listenConnections();
 			//administrarHilos();
 		}
 		log_trace(logFile,"MaRTA FINALIZO !!!");
@@ -101,10 +106,10 @@ void planificarHilo(void* args){
 	}
 
 	char *path = dictionary_get(hiloDic,K_HiloDic_Path);
-	char *jobSocket = dictionary_get(hiloDic,K_HiloDic_JobSocket);
+	int jobSocket = dictionary_get(hiloDic,K_HiloDic_JobSocket);
 
-	char *log = string_from_format("finalizo el hilo con path %s y numeroDeSocket %s",path,jobSocket);
-	log_trace(logFile,log);
+	char *log = string_from_format("finalizo el hilo con path %s y numeroDeSocket %d",path,jobSocket);
+	log_debug(logFile,log);
 	free(log);
 
 	 pthread_exit(0);
@@ -127,6 +132,7 @@ void initMaRTA(){
 	sem_init(&semFilesToProcessPerJob, 0, 1);
 	sem_init(&semNodoState, 0, 1);
 	sem_init(&semFullDataTables, 0, 1);
+	sem_init(&semEnviar, 0, 1);
 
 #ifdef K_SIMULACION
 
@@ -135,7 +141,7 @@ void initMaRTA(){
 #else
 
 	initFilesStatusCenter();
-	newInitConexiones();
+	initConexiones();
 
 	//CONEXION A FILE SYSTEM !!!
 	//connectToFileSystem();

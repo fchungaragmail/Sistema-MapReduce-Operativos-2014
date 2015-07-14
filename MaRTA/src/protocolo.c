@@ -6,32 +6,26 @@
  */
 
 #include "protocolo.h"
-
+#include <stdlib.h>
+#include "VariablesGlobales.h"
 
 int recibir(int socket, mensaje_t* mensaje);
-void enviar(int socket, mensaje_t* mensaje);
+int enviar(int socket, mensaje_t* mensaje);
+int sendall(int s, void *buf, int32_t len);
 
 int recibir(int socket, mensaje_t* mensaje){
 
 	int estado = 0;
 
-	uint16_t net_comando;
-	uint32_t net_data;
-
-	estado = recv(socket, &net_comando, 0/*sizeof(uint16_t)*/,0);
-	if (estado == 0) return DESCONECTADO;
-
-	mensaje->comandoSize = ntohs(net_comando);
+	estado = recv(socket, &(mensaje->comandoSize), sizeof(int16_t),0);
+	if (estado <= 0) return DESCONECTADO;
 
 	mensaje->comando = malloc(mensaje->comandoSize);
 	if (mensaje->comandoSize != 0)
 		recv(socket, mensaje->comando, mensaje->comandoSize,0);
 
 	mensaje->dataSize = 0;
-	recv(socket, &net_data, sizeof(uint32_t),0);
-
-	mensaje->dataSize = ntohl(net_data);
-
+	recv(socket, &(mensaje->dataSize), sizeof(int32_t),0);
 	mensaje->data = malloc(mensaje->dataSize);
 	if (mensaje->dataSize != 0)
 		recv(socket, mensaje->data, mensaje->dataSize,0);
@@ -39,10 +33,39 @@ int recibir(int socket, mensaje_t* mensaje){
 	return CONECTADO;
 }
 
-void enviar(int socket, mensaje_t* mensaje)
+int enviar(int socket, mensaje_t* mensaje)
 {
-	send(socket, &(mensaje->comandoSize), sizeof(int16_t), 0);
-	send(socket, mensaje->comando, mensaje->comandoSize, 0);
-	send(socket, &(mensaje->dataSize), sizeof(int32_t), 0);
-	send(socket, mensaje->data, mensaje->dataSize, 0);
+	sem_wait(&semEnviar);
+
+	if (sendall(socket, &(mensaje->comandoSize), sizeof(int16_t)) < 0)
+		return -1;
+	if (sendall(socket, mensaje->comando, mensaje->comandoSize) < 0)
+		return -1;
+	if (sendall(socket, &(mensaje->dataSize), sizeof(int32_t)) < 0)
+		return -1;
+	if (sendall(socket, mensaje->data, mensaje->dataSize) < 0)
+		return -1;
+
+	sem_post(&semEnviar);
+
+	return EXIT_SUCCESS;
+}
+
+int sendall(int s, void* buf, int32_t len)
+{
+    int total = 0;        // how many bytes we've sent
+    int bytesleft = len; // how many we have left to send
+    int n;
+
+    while(total < len) {
+        n = send(s, buf+total, bytesleft, 0);
+        if (n == -1) { break; }
+        total += n;
+        bytesleft -= n;
+    }
+
+    //*len = total; Devolveria el total de enviados, no nos interesa y nos rompe
+    // la retrocompatibilidad
+
+    return n==-1?-1:0; // return -1 on failure, 0 on success
 }
