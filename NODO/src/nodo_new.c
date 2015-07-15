@@ -292,13 +292,31 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 		fclose(scriptFD);
 		result = string_split(buffer_recv->comando, " "); //pos 0 = numBloque  , pos 1 = nombreArchivoTemporal
 
-		numBloque = atoi(result[0]); //paso el string "numBloque" a tipo int , pq mapping recibe int NumBloque
+		numBloque = atoi(result[2]); //paso el string "numBloque" a tipo int , pq mapping recibe int NumBloque
 
 		int mapResult = mapping("./tmp/map.sh", numBloque, result[1]);
+
+		buffer_send->dataSize = 1;
+		buffer_send->data = "\0";
+
 		if (mapResult == 0) {
-			//informar a job que termino bien, send normal? o enviar y se pasa por data o comando?
+			buffer_send->comando = "mapFileResponse 0";
 		} else {
-			//informar a job que no termino bien, misma pregunta que arriba
+			buffer_send->comando = "mapFileResponse 1";
+		}
+
+		buffer_send->comandoSize = strlen("mapFileResponse X") + 1;
+
+		//MUTEX ???
+		enviar(sockFD, buffer_send);
+		//MUTEX
+
+
+		if(buffer_recv->comando){
+			free(buffer_recv->comando);
+		}
+		if(buffer_recv->data){
+			free(buffer_recv->data);
 		}
 
 		free(buffer_recv);
