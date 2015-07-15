@@ -382,7 +382,7 @@ int exportar(char* argumentos){
 
 	for (int i=0;i<archivo->bloques->elements_count;i++)
 	{
-		t_list* bloque = list_get(bloques,i);
+		t_list* bloque = list_get(archivo->bloques,i);
 		for (int j=0;j<bloque->elements_count;j++)
 		{
 			t_ubicacion_bloque* ubicacion = list_get(bloque,j);
@@ -432,8 +432,8 @@ int md5(char* argumentos){
 	char* rutaLocal = string_new();
 	string_append_with_format(&rutaLocal,"%d",r);
 
-	char* export = string_new;
-	string_from_format("%s /tmp/%d", argumentos, rutaLocal);
+	char* export = string_from_format("%s /tmp/%d", argumentos, rutaLocal);
+
 	if (exportar(export) != 0)
 	{
 		return -1;
