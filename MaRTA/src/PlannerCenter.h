@@ -12,5 +12,6 @@
 
 bool processMessage(Message *recvMessage);
 void initPlannerCenter();
+void _planificarHilo(void* args);
 
 #endif /* PLANNERCENTER_H_ */

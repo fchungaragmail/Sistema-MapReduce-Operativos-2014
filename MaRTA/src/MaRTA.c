@@ -36,11 +36,10 @@ t_dictionary *fullDataTables;
 sem_t semFullDataTables;
 sem_t semFilesToProcess;
 sem_t semFilesToProcessPerJob;
-sem_t semFilesStates;
 sem_t semNodosData;
 sem_t semNodoState;
 sem_t semEnviar;
-
+sem_t semProdCons;
 t_list *hilosData;
 Message *recvMessage;
 bool fileSystemDisponible;
@@ -58,18 +57,18 @@ int main(void) {
 #ifdef K_SIMULACION
 
 	int i=0;
-	while(i<22)
+	while(i<31)
 	{
 		recvMessage = simular();
+		sem_wait(&semProdCons);
 		administrarHilos();
 
-		if(i== 21){
+		if(i== 29){
 			sleep(10000000);
 		}
 		i++;
 	}
 
-	log_trace(logFile,"MaRTA FINALIZO !!!");
 	closeServidores();
 	return EXIT_SUCCESS;
 
@@ -81,7 +80,7 @@ int main(void) {
 			recvMessage = listenConnections();
 			//administrarHilos();
 		}
-		log_trace(logFile,"MaRTA FINALIZO !!!");
+
 		closeServidores();
 		return EXIT_SUCCESS;
 
@@ -91,28 +90,37 @@ int main(void) {
 void planificarHilo(void* args){
 
 	t_dictionary *hiloDic = (t_dictionary*)args;
-	initPlannerCenter();
 	sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
 	t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
-
+	initPlannerCenter();
 	while(1){
 
 		sem_wait(semHilo);
 		Message *recvMessage = list_get(colaDePedidos,0);
 		bool finalizarHilo = processMessage(recvMessage);
 		list_remove(colaDePedidos,0);
-
-		if(finalizarHilo){ break; }
+		sem_post(&semProdCons);
+		if(finalizarHilo){
+			break;
+		}
+		if(!finalizarHilo){
+			sem_post(&semProdCons);
+		}
 	}
-
 	char *path = dictionary_get(hiloDic,K_HiloDic_Path);
 	int jobSocket = dictionary_get(hiloDic,K_HiloDic_JobSocket);
-
 	char *log = string_from_format("finalizo el hilo con path %s y numeroDeSocket %d",path,jobSocket);
 	log_debug(logFile,log);
-	free(log);
 
-	 pthread_exit(0);
+	free(log);
+	//free(path); --> "administrarHilos" mira los paths
+	sem_destroy(semHilo);
+	list_destroy(colaDePedidos);
+	//dictionary_destroy(hiloDic); --> "administrarHilos" mira el path q esta en eeste dic
+
+	sem_post(&semProdCons);
+
+	pthread_exit(0);
 }
 
 void initMaRTA(){
@@ -121,18 +129,17 @@ void initMaRTA(){
 	logFile = log_create("./MaRTA.log","MaRTA", true, LOG_LEVEL_DEBUG);
 
 	filesToProcess = dictionary_create();
-	filesStates = dictionary_create();
 	nodosData = dictionary_create();
 	fullDataTables = dictionary_create();
 	hilosData = list_create();
 
 	sem_init(&semNodosData, 0, 1);
-	sem_init(&semFilesStates, 0, 1);
 	sem_init(&semFilesToProcess, 0, 1);
 	sem_init(&semFilesToProcessPerJob, 0, 1);
 	sem_init(&semNodoState, 0, 1);
 	sem_init(&semFullDataTables, 0, 1);
 	sem_init(&semEnviar, 0, 1);
+	sem_init(&semProdCons, 0, 1);
 
 #ifdef K_SIMULACION
 
@@ -156,6 +163,7 @@ void administrarHilos(){
 
 	int command = obtenerIdParaComando(recvMessage);
 	if(command == K_NewConnection){
+		sem_post(&semProdCons);
 		return;
 	}
 	char *path = deserializeFilePath(recvMessage,command);
@@ -169,15 +177,16 @@ void administrarHilos(){
 
 			fileSystemDisponible = false;
 			log_trace(logFile,"El FileSystem cayo, MaRTA no puede seguir operando.");
-			//liberar todas las estructuras.
+			//TODO liberar todas las estructuras.
+			return;
 		}
 
 		for(i=0;i<size;i++){
 
 			t_dictionary *hiloDic = list_get(hilosData,i);
 			int jobSocket = dictionary_get(hiloDic,K_HiloDic_JobSocket);
-			if(jobSocket == recvMessage->sockfd){
 
+			if(jobSocket == recvMessage->sockfd){
 				sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
 				sem_t _semHilo = *semHilo;
 				t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
@@ -187,23 +196,21 @@ void administrarHilos(){
 				sem_post(&_semHilo);
 			}
 		}
-		return;
 	}
 
-	//FS
+	//TODO FS - Implementar bien esto, para muchos archivos falla
 	int fsSocket = getFSSocket();
 	if(fsSocket == recvMessage->sockfd){
+
 		for(i=0;i<size;i++){
 			t_dictionary *hiloDic = list_get(hilosData,i);
 			int hiloJobSocket = dictionary_get(hiloDic,K_HiloDic_JobSocket);
 			char *hiloPath = dictionary_get(hiloDic,K_HiloDic_Path);
 
 			if(strcmp(hiloPath,path)==0){
-
 				hiloYaExiste = true;
 				t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
 				sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
-
 				list_add(colaDePedidos,recvMessage);
 				sem_post(semHilo);
 				break;
@@ -224,7 +231,6 @@ void administrarHilos(){
 			hiloYaExiste = true;
 			t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
 			sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
-
 			list_add(colaDePedidos,recvMessage);
 			sem_post(semHilo);
 			break;
@@ -239,18 +245,17 @@ void administrarHilos(){
 		char *_path = deserializeFilePath(recvMessage,command);
 		t_list *colaDePedidos = list_create();
 		list_add(colaDePedidos,recvMessage);
+		int hiloSocket = recvMessage->sockfd;
 
 		t_dictionary *hiloDic = dictionary_create();
 		dictionary_put(hiloDic,K_HiloDic_Sem,semHilo);
 		dictionary_put(hiloDic,K_HiloDic_Path,_path);
-		dictionary_put(hiloDic,K_HiloDic_JobSocket,recvMessage->sockfd);
+		dictionary_put(hiloDic,K_HiloDic_JobSocket,hiloSocket);
 		dictionary_put(hiloDic,K_HiloDic_PedidosQueue,colaDePedidos);
-
 		list_add(hilosData,hiloDic);
 
 		pthread_t tPlanificador;
 		pthread_create(&tPlanificador, NULL, (void*)planificarHilo, hiloDic);
-
 	}
 	free(path);
 }
@@ -259,5 +264,4 @@ void connectToFileSystem()
 {
 	int fileSystemSocket = connectToFS();
 	addFSConnection(fileSystemSocket);
-	pthread_exit(NULL);
 }

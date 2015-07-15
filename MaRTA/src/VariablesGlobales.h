@@ -13,13 +13,11 @@
 #include <stdio.h>
 
 extern t_dictionary *filesToProcess;
-extern t_dictionary *filesStates;
 extern t_dictionary *nodosData;
 extern t_dictionary *fullDataTables;
 
 extern sem_t semFilesToProcess;
 extern sem_t semFilesToProcessPerJob;
-extern sem_t semFilesStates;
 extern sem_t semNodosData;
 extern sem_t semNodoState;
 extern sem_t semFullDataTables;

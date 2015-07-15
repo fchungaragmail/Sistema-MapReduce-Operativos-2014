@@ -56,8 +56,6 @@ fd_set read_fds; // conjunto temporal de descriptores de fichero para select()
 struct sockaddr_in remoteaddr; // dirección del cliente
 int fdmax;        // número máximo de descriptores de fichero
 int newfd;        // descriptor de socket de nueva conexión aceptada
-char buf[256];    // buffer para datos del cliente
-int nbytes;
 int yes=1;        // para setsockopt() SO_REUSEADDR, más abajo
 int addrlen;
 int conexionesProcesadas;
@@ -86,21 +84,17 @@ void initConexiones()
 
 void prepareConnections()
 {
-
 	FD_ZERO(&master);    // borra los conjuntos maestro y temporal
 	FD_ZERO(&read_fds);
 
 	// escuchar
 	if (listen(listener, MAX_CONNECTIONS) == -1) {
-
 		perror("listen");
 		exit(1);
 	}
-	// añadir listener al conjunto maestro
-	FD_SET(listener, &master);
-	// seguir la pista del descriptor de fichero mayor
-	fdmax = listener; // por ahora es éste
 
+	FD_SET(listener, &master);// añadir listener al conjunto maestro
+	fdmax = listener; // seguir la pista del descriptor de fichero mayor// por ahora es éste
 }
 
 void createListener()
@@ -230,7 +224,7 @@ int connectToFS(){
 
 	//HANDSHAKE A FS
 	Message *msj = crearMessageWithCommand("nombre MaRTA",socketFd);
-	//enviar(msj->sockfd,msj->mensaje);
+	enviar(msj->sockfd,msj->mensaje);
 	return socketFd;
 
 }

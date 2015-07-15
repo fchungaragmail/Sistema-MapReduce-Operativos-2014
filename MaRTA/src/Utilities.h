@@ -41,6 +41,7 @@ typedef enum
 	K_Job_NewFileToProcess = 1,
 	K_Job_MapResponse = 2,
 	K_Job_ReduceResponse = 3,
+	K_Job_ReduceFinal = 6,
 	K_ProcesoCaido = 4,
 	K_FS_FileFullData = 5,
 }TypesMessages;

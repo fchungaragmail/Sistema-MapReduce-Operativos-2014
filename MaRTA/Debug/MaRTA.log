@@ -61,3 +61,287 @@
 [DEBUG] 11:55:32:797 MaRTA/(3281:3281): reduceFileConCombiner-Pedido1
 [DEBUG] 11:55:32:798 MaRTA/(3281:3281): reduceFileConCombiner-Pedido2
 [DEBUG] 11:55:32:799 MaRTA/(3281:3281): marta finalizo el reduce con exito !!
+[DEBUG] 23:39:57:138 MaRTA/(2768:2768): newConnection
+[DEBUG] 23:39:57:185 MaRTA/(2768:2768): archivoAProcesar
+[DEBUG] 23:39:57:222 MaRTA/(2768:2768): DataFileResponse
+[DEBUG] 23:39:57:236 MaRTA/(2768:2768): mapFileResponse
+[DEBUG] 23:39:57:229 MaRTA/(2768:2769): archivoAProcesar
+[DEBUG] 23:39:57:247 MaRTA/(2768:2769): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 23:39:57:255 MaRTA/(2768:2769): archivoAProcesar
+[DEBUG] 23:39:57:258 MaRTA/(2768:2768): mapFileResponse
+[DEBUG] 23:39:57:262 MaRTA/(2768:2768): mapFileResponse
+[DEBUG] 23:39:57:267 MaRTA/(2768:2769): DataFileResponse
+[DEBUG] 23:39:57:281 MaRTA/(2768:2768): mapFileResponse
+[DEBUG] 23:39:57:286 MaRTA/(2768:2768): DataFileResponse
+[DEBUG] 23:39:57:292 MaRTA/(2768:2768): mapFileResponse
+[DEBUG] 23:39:57:349 MaRTA/(2768:2769): DataFileResponse
+[DEBUG] 23:39:57:350 MaRTA/(2768:2768): mapFileResponse
+[DEBUG] 23:39:57:352 MaRTA/(2768:2768): reduceFileConCombiner-Pedido1
+[DEBUG] 23:39:57:355 MaRTA/(2768:2768): reduceFileConCombiner-Pedido2
+[DEBUG] 23:39:57:360 MaRTA/(2768:2769): DataFileResponse
+[DEBUG] 23:39:57:369 MaRTA/(2768:2768): mapFileResponse
+[DEBUG] 23:39:57:372 MaRTA/(2768:2768): reduceFileConCombiner-Pedido1
+[DEBUG] 23:39:57:374 MaRTA/(2768:2768): reduceFileConCombiner-Pedido2
+[DEBUG] 23:39:57:387 MaRTA/(2768:2769): DataFileResponse
+[DEBUG] 23:39:57:412 MaRTA/(2768:2769): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura2012.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura2012.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 23:39:57:413 MaRTA/(2768:2768): DataFileResponse
+[DEBUG] 23:39:57:415 MaRTA/(2768:2768): mapFileResponse
+[DEBUG] 23:39:57:428 MaRTA/(2768:2768): reduceFileConCombiner-Pedido1
+[DEBUG] 23:39:57:431 MaRTA/(2768:2768): reduceFileConCombiner-Pedido2
+[DEBUG] 23:39:57:441 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:467 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:468 MaRTA/(2768:2768): mapFileResponse
+[DEBUG] 23:39:57:471 MaRTA/(2768:2768): archivoAProcesar
+[DEBUG] 23:39:57:503 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:505 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:506 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:522 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:524 MaRTA/(2768:2768): DataFileResponse
+[DEBUG] 23:39:57:526 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:536 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:536 MaRTA/(2768:2770): archivoAProcesar
+[DEBUG] 23:39:57:555 MaRTA/(2768:2770): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 23:39:57:557 MaRTA/(2768:2770): archivoAProcesar
+[DEBUG] 23:39:57:560 MaRTA/(2768:2770): DataFileResponse
+[DEBUG] 23:39:57:552 MaRTA/(2768:2768): mapFileResponse
+[DEBUG] 23:39:57:568 MaRTA/(2768:2770): DataFileResponse
+[DEBUG] 23:39:57:569 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:585 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:582 MaRTA/(2768:2768): mapFileResponse
+[DEBUG] 23:39:57:589 MaRTA/(2768:2769): se envia pedido de map, el stream es 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 23:39:57:594 MaRTA/(2768:2768): mapFileResponse
+[DEBUG] 23:39:57:596 MaRTA/(2768:2768): mapFileResponse
+[DEBUG] 23:39:57:598 MaRTA/(2768:2768): reduceFileConCombiner-Pedido1
+[DEBUG] 23:39:57:612 MaRTA/(2768:2770): DataFileResponse
+[DEBUG] 23:39:57:613 MaRTA/(2768:2770): DataFileResponse
+[DEBUG] 23:39:57:616 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:620 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:625 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:626 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:629 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:648 MaRTA/(2768:2770): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura1888.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura1888.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura1888.txt/-2 192.153.7.5 67 82 /user/juan/datos/temperatura1888.txt/-3
+
+[DEBUG] 23:39:57:648 MaRTA/(2768:2768): reduceFileConCombiner-Pedido2
+[DEBUG] 23:39:57:654 MaRTA/(2768:2768): reduceFileConCombiner-Pedido1
+[DEBUG] 23:39:57:656 MaRTA/(2768:2768): reduceFileConCombiner-Pedido2
+[DEBUG] 23:39:57:649 MaRTA/(2768:2769): DataFileResponse
+[DEBUG] 23:39:57:676 MaRTA/(2768:2769): DataFileResponse
+[DEBUG] 23:39:57:680 MaRTA/(2768:2770): mapFileResponse
+[DEBUG] 23:39:57:682 MaRTA/(2768:2770): mapFileResponse
+[DEBUG] 23:39:57:685 MaRTA/(2768:2770): mapFileResponse
+[DEBUG] 23:39:57:686 MaRTA/(2768:2770): mapFileResponse
+[DEBUG] 23:39:57:688 MaRTA/(2768:2769): DataFileResponse
+[DEBUG] 23:39:57:694 MaRTA/(2768:2769): DataFileResponse
+[DEBUG] 23:39:57:708 MaRTA/(2768:2769): se envia pedido de map, el stream es 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 23:39:57:711 MaRTA/(2768:2770): mapFileResponse
+[DEBUG] 23:39:57:713 MaRTA/(2768:2770): mapFileResponse
+[DEBUG] 23:39:57:714 MaRTA/(2768:2770): mapFileResponse
+[DEBUG] 23:39:57:716 MaRTA/(2768:2770): mapFileResponse
+[DEBUG] 23:39:57:717 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:719 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:723 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:724 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:725 MaRTA/(2768:2770): mapFileResponse
+[DEBUG] 23:39:57:725 MaRTA/(2768:2770): mapFileResponse
+[DEBUG] 23:39:57:726 MaRTA/(2768:2770): mapFileResponse
+[DEBUG] 23:39:57:730 MaRTA/(2768:2770): mapFileResponse
+[DEBUG] 23:39:57:732 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:732 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:741 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:744 MaRTA/(2768:2770): mapFileResponse
+[DEBUG] 23:39:57:746 MaRTA/(2768:2770): mapFileResponse
+[DEBUG] 23:39:57:752 MaRTA/(2768:2770): mapFileResponse
+[DEBUG] 23:39:57:754 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:39:57:754 MaRTA/(2768:2769): mapFileResponse
+[DEBUG] 23:40:42:583 MaRTA/(2771:2771): newConnection
+[DEBUG] 23:40:42:602 MaRTA/(2771:2771): archivoAProcesar
+[DEBUG] 23:40:42:706 MaRTA/(2771:2772): archivoAProcesar
+[DEBUG] 23:40:42:709 MaRTA/(2771:2771): DataFileResponse
+[DEBUG] 23:40:42:713 MaRTA/(2771:2772): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 23:40:42:737 MaRTA/(2771:2771): mapFileResponse
+[DEBUG] 23:40:42:772 MaRTA/(2771:2771): mapFileResponse
+[DEBUG] 23:40:42:759 MaRTA/(2771:2772): archivoAProcesar
+[DEBUG] 23:40:42:810 MaRTA/(2771:2772): DataFileResponse
+[DEBUG] 23:40:42:888 MaRTA/(2771:2772): DataFileResponse
+[DEBUG] 23:40:42:829 MaRTA/(2771:2771): mapFileResponse
+[DEBUG] 23:40:42:892 MaRTA/(2771:2771): mapFileResponse
+[DEBUG] 23:40:42:895 MaRTA/(2771:2771): DataFileResponse
+[DEBUG] 23:40:42:900 MaRTA/(2771:2772): DataFileResponse
+[DEBUG] 23:40:42:937 MaRTA/(2771:2772): DataFileResponse
+[DEBUG] 23:40:42:928 MaRTA/(2771:2771): mapFileResponse
+[DEBUG] 23:40:42:976 MaRTA/(2771:2772): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura2012.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura2012.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 23:40:42:988 MaRTA/(2771:2771): mapFileResponse
+[DEBUG] 23:40:43:5 MaRTA/(2771:2772): mapFileResponse
+[DEBUG] 23:40:43:16 MaRTA/(2771:2771): reduceFileConCombiner-Pedido1
+[DEBUG] 23:40:43:21 MaRTA/(2771:2771): reduceFileConCombiner-Pedido2
+[DEBUG] 23:40:43:50 MaRTA/(2771:2772): mapFileResponse
+[DEBUG] 23:40:43:54 MaRTA/(2771:2771): mapFileResponse
+[DEBUG] 23:40:43:70 MaRTA/(2771:2771): reduceFileConCombiner-Pedido1
+[DEBUG] 23:40:43:75 MaRTA/(2771:2771): reduceFileConCombiner-Pedido2
+[DEBUG] 23:40:43:80 MaRTA/(2771:2772): mapFileResponse
+[DEBUG] 23:40:43:84 MaRTA/(2771:2771): DataFileResponse
+[DEBUG] 23:40:43:99 MaRTA/(2771:2772): mapFileResponse
+[DEBUG] 23:40:43:110 MaRTA/(2771:2772): mapFileResponse
+[DEBUG] 23:40:43:115 MaRTA/(2771:2771): mapFileResponse
+[DEBUG] 23:40:43:129 MaRTA/(2771:2771): reduceFileConCombiner-Pedido1
+[DEBUG] 23:40:43:133 MaRTA/(2771:2771): reduceFileConCombiner-Pedido2
+[DEBUG] 23:40:43:136 MaRTA/(2771:2772): mapFileResponse
+[DEBUG] 23:40:43:145 MaRTA/(2771:2772): mapFileResponse
+[DEBUG] 23:40:43:155 MaRTA/(2771:2772): mapFileResponse
+[DEBUG] 23:40:43:166 MaRTA/(2771:2771): mapFileResponse
+[DEBUG] 23:40:43:176 MaRTA/(2771:2771): archivoAProcesar
+[DEBUG] 23:40:43:289 MaRTA/(2771:2772): mapFileResponse
+[DEBUG] 23:40:43:291 MaRTA/(2771:2772): mapFileResponse
+[DEBUG] 23:40:43:295 MaRTA/(2771:2772): se envia pedido de map, el stream es 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 23:40:43:345 MaRTA/(2771:2771): DataFileResponse
+[DEBUG] 23:40:43:346 MaRTA/(2771:2772): mapFileResponse
+[DEBUG] 23:40:54:574 MaRTA/(2775:2775): newConnection
+[DEBUG] 23:40:54:595 MaRTA/(2775:2775): archivoAProcesar
+[DEBUG] 23:40:54:682 MaRTA/(2775:2776): archivoAProcesar
+[DEBUG] 23:40:54:691 MaRTA/(2775:2776): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 23:40:54:688 MaRTA/(2775:2775): DataFileResponse
+[DEBUG] 23:40:54:708 MaRTA/(2775:2776): archivoAProcesar
+[DEBUG] 23:40:54:757 MaRTA/(2775:2776): DataFileResponse
+[DEBUG] 23:40:54:735 MaRTA/(2775:2775): mapFileResponse
+[DEBUG] 23:40:54:791 MaRTA/(2775:2775): mapFileResponse
+[DEBUG] 23:40:54:861 MaRTA/(2775:2775): mapFileResponse
+[DEBUG] 23:40:54:854 MaRTA/(2775:2776): DataFileResponse
+[DEBUG] 23:40:54:876 MaRTA/(2775:2776): DataFileResponse
+[DEBUG] 23:40:54:895 MaRTA/(2775:2776): DataFileResponse
+[DEBUG] 23:40:54:888 MaRTA/(2775:2775): mapFileResponse
+[DEBUG] 23:40:54:902 MaRTA/(2775:2775): DataFileResponse
+[DEBUG] 23:40:54:937 MaRTA/(2775:2776): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura2012.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura2012.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 23:40:54:968 MaRTA/(2775:2776): mapFileResponse
+[DEBUG] 23:40:54:963 MaRTA/(2775:2775): mapFileResponse
+[DEBUG] 23:40:54:973 MaRTA/(2775:2775): mapFileResponse
+[DEBUG] 23:40:54:989 MaRTA/(2775:2775): reduceFileConCombiner-Pedido1
+[DEBUG] 23:40:55:17 MaRTA/(2775:2776): mapFileResponse
+[DEBUG] 23:40:55:24 MaRTA/(2775:2775): reduceFileConCombiner-Pedido2
+[DEBUG] 23:40:55:34 MaRTA/(2775:2775): mapFileResponse
+[DEBUG] 23:40:55:40 MaRTA/(2775:2776): mapFileResponse
+[DEBUG] 23:40:55:47 MaRTA/(2775:2775): reduceFileConCombiner-Pedido1
+[DEBUG] 23:40:55:53 MaRTA/(2775:2776): mapFileResponse
+[DEBUG] 23:40:55:60 MaRTA/(2775:2776): mapFileResponse
+[DEBUG] 23:40:55:62 MaRTA/(2775:2775): reduceFileConCombiner-Pedido2
+[DEBUG] 23:40:55:78 MaRTA/(2775:2775): DataFileResponse
+[DEBUG] 23:40:55:84 MaRTA/(2775:2776): mapFileResponse
+[DEBUG] 23:40:55:91 MaRTA/(2775:2776): mapFileResponse
+[DEBUG] 23:40:55:94 MaRTA/(2775:2775): mapFileResponse
+[DEBUG] 23:40:55:120 MaRTA/(2775:2776): mapFileResponse
+[DEBUG] 23:40:55:126 MaRTA/(2775:2775): reduceFileConCombiner-Pedido1
+[DEBUG] 23:40:55:140 MaRTA/(2775:2775): reduceFileConCombiner-Pedido2
+[DEBUG] 23:40:55:148 MaRTA/(2775:2776): mapFileResponse
+[DEBUG] 23:40:55:152 MaRTA/(2775:2776): mapFileResponse
+[DEBUG] 23:40:55:157 MaRTA/(2775:2775): mapFileResponse
+[DEBUG] 23:40:55:183 MaRTA/(2775:2775): archivoAProcesar
+[DEBUG] 23:40:55:174 MaRTA/(2775:2776): se envia pedido de map, el stream es 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 23:40:55:254 MaRTA/(2775:2776): mapFileResponse
+[DEBUG] 23:40:55:259 MaRTA/(2775:2776): mapFileResponse
+[DEBUG] 23:40:55:304 MaRTA/(2775:2775): DataFileResponse
+[DEBUG] 02:02:00:969 MaRTA/(6379:6379): newConnection
+[DEBUG] 02:02:00:989 MaRTA/(6379:6379): archivoAProcesar
+[DEBUG] 02:02:01:81 MaRTA/(6379:6380): archivoAProcesar
+[DEBUG] 02:02:01:84 MaRTA/(6379:6379): DataFileResponse
+[DEBUG] 02:02:01:89 MaRTA/(6379:6380): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 02:02:01:126 MaRTA/(6379:6379): mapFileResponse
+[DEBUG] 02:02:01:156 MaRTA/(6379:6379): mapFileResponse
+[DEBUG] 02:02:01:130 MaRTA/(6379:6380): archivoAProcesar
+[DEBUG] 02:02:01:192 MaRTA/(6379:6380): DataFileResponse
+[DEBUG] 02:02:01:273 MaRTA/(6379:6380): DataFileResponse
+[DEBUG] 02:02:01:207 MaRTA/(6379:6379): mapFileResponse
+[DEBUG] 02:02:01:280 MaRTA/(6379:6379): mapFileResponse
+[DEBUG] 02:02:01:288 MaRTA/(6379:6379): DataFileResponse
+[DEBUG] 02:02:01:290 MaRTA/(6379:6380): DataFileResponse
+[DEBUG] 02:02:01:318 MaRTA/(6379:6379): mapFileResponse
+[DEBUG] 02:02:01:325 MaRTA/(6379:6380): DataFileResponse
+[DEBUG] 02:02:01:362 MaRTA/(6379:6380): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura2012.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura2012.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 02:02:01:372 MaRTA/(6379:6379): mapFileResponse
+[DEBUG] 02:02:01:376 MaRTA/(6379:6379): reduceFileConCombiner-Pedido1
+[DEBUG] 02:02:01:391 MaRTA/(6379:6380): mapFileResponse
+[DEBUG] 02:02:01:416 MaRTA/(6379:6380): mapFileResponse
+[DEBUG] 02:02:01:425 MaRTA/(6379:6379): reduceFileConCombiner-Pedido2
+[DEBUG] 02:02:01:440 MaRTA/(6379:6380): mapFileResponse
+[DEBUG] 02:02:01:446 MaRTA/(6379:6379): mapFileResponse
+[DEBUG] 02:02:01:453 MaRTA/(6379:6379): reduceFileConCombiner-Pedido1
+[DEBUG] 02:02:01:455 MaRTA/(6379:6380): mapFileResponse
+[DEBUG] 02:02:01:462 MaRTA/(6379:6380): mapFileResponse
+[DEBUG] 02:02:01:464 MaRTA/(6379:6379): reduceFileConCombiner-Pedido2
+[DEBUG] 02:02:01:481 MaRTA/(6379:6379): DataFileResponse
+[DEBUG] 02:02:01:485 MaRTA/(6379:6380): mapFileResponse
+[DEBUG] 02:02:01:486 MaRTA/(6379:6380): mapFileResponse
+[DEBUG] 02:02:01:504 MaRTA/(6379:6380): mapFileResponse
+[DEBUG] 02:02:01:505 MaRTA/(6379:6379): mapFileResponse
+[DEBUG] 02:02:01:511 MaRTA/(6379:6379): reduceFileConCombiner-Pedido1
+[DEBUG] 02:02:01:520 MaRTA/(6379:6379): reduceFileConCombiner-Pedido2
+[DEBUG] 02:02:01:521 MaRTA/(6379:6380): mapFileResponse
+[DEBUG] 02:02:01:523 MaRTA/(6379:6380): mapFileResponse
+[DEBUG] 02:02:01:533 MaRTA/(6379:6380): se envia pedido de map, el stream es 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 02:02:01:548 MaRTA/(6379:6379): mapFileResponse
+[DEBUG] 02:02:01:553 MaRTA/(6379:6379): archivoAProcesar
+[DEBUG] 02:02:01:694 MaRTA/(6379:6380): mapFileResponse
+[DEBUG] 02:02:01:697 MaRTA/(6379:6380): mapFileResponse
+[DEBUG] 02:02:01:699 MaRTA/(6379:6380): mapFileResponse
+[DEBUG] 02:02:01:702 MaRTA/(6379:6380): mapFileResponse
+[DEBUG] 02:02:01:739 MaRTA/(6379:6381): archivoAProcesar
+[DEBUG] 02:02:01:741 MaRTA/(6379:6379): DataFileResponse
+[DEBUG] 02:02:01:764 MaRTA/(6379:6379): mapFileResponse
+[DEBUG] 02:02:01:785 MaRTA/(6379:6379): mapFileResponse
+[DEBUG] 02:02:01:781 MaRTA/(6379:6381): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 02:02:01:761 MaRTA/(6379:6380): mapFileResponse
+[DEBUG] 02:02:01:793 MaRTA/(6379:6379): mapFileResponse
+[DEBUG] 02:02:01:819 MaRTA/(6379:6380): DataFileResponse
+[DEBUG] 02:41:41:868 MaRTA/(6999:7000): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 02:41:41:869 MaRTA/(6999:7001): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 02:41:41:872 MaRTA/(6999:7000): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura2012.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura2012.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 02:42:02:297 MaRTA/(7004:7006): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 02:42:02:299 MaRTA/(7004:7005): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 02:42:02:300 MaRTA/(7004:7006): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura1888.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura1888.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura1888.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura1888.txt/-3
+
+[DEBUG] 02:42:02:301 MaRTA/(7004:7006): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 02:42:02:302 MaRTA/(7004:7006): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 11:00:07:919 MaRTA/(2640:2641): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 11:00:07:983 MaRTA/(2640:2642): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 11:00:08:10 MaRTA/(2640:2641): el archivo /user/juan/datos/temperatura2012.txt/ de socket 33 se va a asignar
+[DEBUG] 11:00:08:12 MaRTA/(2640:2642): el archivo /user/juan/datos/temperatura1888.txt/ de socket 33 se va a asignar
+[DEBUG] 11:00:08:34 MaRTA/(2640:2642): el archivo /user/juan/datos/temperatura1888.txt/ de socket 5 ya asigno
+[DEBUG] 11:00:08:168 MaRTA/(2640:2642): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura1888.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura1888.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura1888.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura1888.txt/-3
+
+[DEBUG] 11:00:08:45 MaRTA/(2640:2641): el archivo /user/juan/datos/temperatura2012.txt/ de socket 5 ya asigno
+[DEBUG] 11:05:41:899 MaRTA/(2741:2742): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 11:05:41:916 MaRTA/(2741:2742): el archivo /user/juan/datos/temperatura2012.txt/ de socket 33 se va a asignar
+[DEBUG] 11:05:41:918 MaRTA/(2741:2742): el archivo /user/juan/datos/temperatura2012.txt/ de socket 5 ya asigno
+[DEBUG] 11:05:42:33 MaRTA/(2741:2742): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura2012.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura2012.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 11:05:42:43 MaRTA/(2741:2742): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 11:05:42:59 MaRTA/(2741:2742): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 11:05:42:90 MaRTA/(2741:2742): se envia pedido de map, el stream es 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 11:05:42:114 MaRTA/(2741:2742): se envia pedido de map, el stream es 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 11:05:42:124 MaRTA/(2741:2742): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 11:05:42:128 MaRTA/(2741:2742): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 11:05:42:135 MaRTA/(2741:2742): el archivo /user/juan/datos/temperatura2012.txt/ con socket 5 esta mappeado!
+[DEBUG] 11:06:07:552 MaRTA/(2751:2752): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 11:06:07:572 MaRTA/(2751:2752): el archivo /user/juan/datos/temperatura2012.txt/ de socket 33 se va a asignar
+[DEBUG] 11:06:07:575 MaRTA/(2751:2752): el archivo /user/juan/datos/temperatura2012.txt/ de socket 5 ya asigno
+[DEBUG] 11:06:07:688 MaRTA/(2751:2752): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura2012.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura2012.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 11:06:07:698 MaRTA/(2751:2752): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 11:06:07:711 MaRTA/(2751:2752): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 11:06:07:738 MaRTA/(2751:2752): se envia pedido de map, el stream es 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 11:06:07:754 MaRTA/(2751:2752): se envia pedido de map, el stream es 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 11:06:07:758 MaRTA/(2751:2752): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 11:06:07:771 MaRTA/(2751:2752): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 11:06:07:781 MaRTA/(2751:2752): el archivo /user/juan/datos/temperatura2012.txt/ con socket 5 esta mappeado!

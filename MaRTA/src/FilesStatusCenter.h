@@ -51,9 +51,9 @@ void addNewConnection(int socket);
 int getFSSocket();
 
 // Varias
-void addFileFullData(int sckt, char* path, Message *recvMessage);
-void reloadFilaDeFileFullData(int sckt, char* path, t_list *fullData, int nroDeBloqe);
-void informarTareasPendientesDeMapping(char *path,int socket);
+t_dictionary *addFileFullData(int sckt, char* path, Message *recvMessage,t_dictionary *file_StatusData);
+void reloadFilaDeFileFullData(t_list *fullData, int nroDeBloqe,t_dictionary *file_StatusData);
+void informarTareasPendientesDeMapping(char *path,int socket,t_dictionary *fileState);
 //nodosData
 void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
 void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
@@ -63,24 +63,27 @@ void removeTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath);
 t_list *getNodoState_listaTemporales(t_dictionary *nodoState);
 
 //filesToProcess
-void addNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);//crea un fileState
-void darDeBajaCopiaEnBloqueYNodo(char*path,int skct,char *IP_Nodo);
-t_list* obtenerCopiasParaBloqueDeArchivo(int socket,int bloque,char *path);
+t_dictionary *crearNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);//crea un fileState
+void darDeBajaCopiaEnBloqueYNodo(char *IP_Nodo,t_dictionary *file_StatusData);
+t_list* obtenerCopiasParaBloqueDeArchivo(int bloque,t_dictionary *file_StatusData);
 void destruirFile_StatusData(int sckt, char *path);
-bool* soportaCombiner(int sckt, char *path);
+bool* soportaCombiner(t_dictionary *file_StatusData);
+bool todosArchivosDeJobReducidos(int jobSocket);
+void agregarArchivoFinalizado(int jobSocket, char *path, char*ip, char*puerto, char*pathFinal);
+t_list *obtenerListaParaReduceFinal(int jobSocket);
 
 //filesStates
 t_dictionary *getFileStateForPath(char *path,int socket);
 void destruirFileState(char* path);
-t_list* obtenerPathsTemporalesParaArchivo(char *path,char *IPnodoEnBlockState, int socket);
-int obtenerCantidadDePathsTemporalesEnNodo(char *path,char *IPnodoEnBlockState,int socket);
-t_list* obtenerNodosEnBlockStateArray(char *path,int socket);
-int obtenerCantidadDeNodosDiferentesEnBlockState(char *path,int socket);
-t_dictionary* obtenerNodoConMayorCantidadDeArchivosTemporales(char *path,int socket);
-int obtenerPosicionDeBloqueEnBlockStatesList(char *path,char *ipNodo,char *bloque,int socket);
-t_dictionary *obtenerBlockState(char *path,char *tempPath,int socket);
-void setBlockStatesListInReducingState(char *path,int socket);
-void agregarFileState(int jobSocket,char *path, int cantidadDeBloques);
+t_list* obtenerPathsTemporalesParaArchivo(char *IPnodoEnBlockState,t_dictionary *fileState);
+int obtenerCantidadDePathsTemporalesEnNodo(char *IPnodoEnBlockState,t_dictionary *fileState);
+t_list* obtenerNodosEnBlockStateArray(t_dictionary *fileState);
+int obtenerCantidadDeNodosDiferentesEnBlockState(t_dictionary *fileState);
+t_dictionary* obtenerNodoConMayorCantidadDeArchivosTemporales(t_dictionary *fileState);
+int obtenerPosicionDeBloqueEnBlockStatesList(char *ipNodo,char *bloque,t_dictionary *fileState);
+t_dictionary *obtenerBlockState(char *tempPath,t_dictionary *fileState);
+void setBlockStatesListInReducingState(t_dictionary *fileState);
+t_dictionary *crearFileState(int jobSocket,char *path, int cantidadDeBloques);
 
 //fullDataTable
 void agregarFullDataTable(t_list *table,char *path);
