@@ -430,9 +430,9 @@ int md5(char* argumentos){
 	srand(time(NULL));
 	int r = rand();
 	char* rutaLocal = string_new();
-	string_append_with_format(&rutaLocal,"%d",r);
+	string_append_with_format(&rutaLocal,"/tmp/%d",r);
 
-	char* export = string_from_format("%s /tmp/%d", argumentos, rutaLocal);
+	char* export = string_from_format("%s %s", argumentos, rutaLocal);
 
 	if (exportar(export) != 0)
 	{
