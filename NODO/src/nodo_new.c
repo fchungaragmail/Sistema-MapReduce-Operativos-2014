@@ -216,16 +216,17 @@ void *fs_nodo_conection_handler(void* ptr) {
 
 		mensaje_t* buffer_recv = malloc(sizeof(mensaje_t));
 		mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
-		recibir(sockFD, buffer_recv);
+		recibir(sockFD, buffer_recv); //Aca hay que hacer algo si devuelve 0
 		result = string_split(buffer_recv->comando, " ");
 
 		if (strcmp(result[0], "getBloque") == 0) {
 
 			char* bloque = malloc(TAMANIO_BLOQUE);
 			bloque = getBloque(atoi(result[1]));  //getBloque bloque
-			buffer_send->comandoSize = 1;
-			buffer_send->comando = "\0";
-			buffer_send->dataSize = sizeof(int32_t);
+			buffer_send->comando = string_new();
+			strcpy(buffer_send->comando,"respuesta");
+			buffer_send->comandoSize = strlen(buffer_send->comando) + 1;
+			buffer_send->dataSize = 8;
 			buffer_send->data = bloque;
 			enviar(sockFD, buffer_send);
 			free(bloque);
@@ -248,6 +249,13 @@ void *fs_nodo_conection_handler(void* ptr) {
 			buffer_send->dataSize = fileContent->size;
 			buffer_send->data = fileContent->contenido;
 			enviar(sockFD, buffer_send);
+			free(buffer_send);
+			free(buffer_recv);
+		}
+
+		if (strcmp(result[0], "borrarBloque") == 0) {   //setBloque bloque [datos]
+			int numBLoque = atoi(result[1]);
+			borrarBloque(numBLoque);
 			free(buffer_send);
 			free(buffer_recv);
 		}

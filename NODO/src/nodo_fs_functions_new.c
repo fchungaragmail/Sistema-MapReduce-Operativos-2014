@@ -84,3 +84,28 @@ int setBloque(int numeroBloque, char* datos, int32_t tamanio) {
 	return 0;
 }
 
+void borrarBloque(int numeroBloque)
+{
+	if (numeroBloque >= 0)
+	{
+		int archivo = open(ARCHIVO_BIN,O_RDWR);
+		long int offset = numeroBloque * TAMANIO_BLOQUE;
+		void *bloque= mmap(NULL,  TAMANIO_BLOQUE,  PROT_WRITE, MAP_SHARED,  archivo,  offset);
+		close(archivo);
+
+		memset(bloque, 0, TAMANIO_BLOQUE);
+		munmap(bloque, TAMANIO_BLOQUE);
+	} else
+	{
+	    struct stat sb;
+	    stat (ARCHIVO_BIN, & sb);
+	    int32_t tamanio = sb.st_size;
+
+		int archivo = open(ARCHIVO_BIN,O_RDWR);
+		void *bloque= mmap(NULL,  tamanio,  PROT_WRITE, MAP_SHARED,  archivo,  0);
+		close(archivo);
+		memset(bloque, 0, tamanio);
+		munmap(bloque, tamanio);
+	}
+}
+
