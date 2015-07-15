@@ -50,7 +50,7 @@ int sendall(int s, void* buf, int32_t len)
 {
     int total = 0;        // how many bytes we've sent
     int bytesleft = len; // how many we have left to send
-    int n;
+    int n = 0;
 
     while(total < len) {
         n = send(s, buf+total, bytesleft, 0);
