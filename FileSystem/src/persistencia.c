@@ -206,6 +206,7 @@ int leerPersistencia()
 				}
 				i++;
 			}
+			list_add(listaArchivos,archivo);
 			ret = fgets(linea,MAX_BUFF_SIZE,persistFile);
 		}
 	}
