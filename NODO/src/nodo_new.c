@@ -36,7 +36,7 @@ int main() {
 
 	connectToFileSistem(sockFS);
 	pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockFS);
-	pthread_join(fs_handler, NULL);
+	//pthread_join(fs_handler, NULL);
 
 	int value = initServer(&sockFD);
 	if (value == -1) {
@@ -273,7 +273,7 @@ void *fs_nodo_conection_handler(void* ptr) {
 //	}
 //	free(result);
 //}
-
+#include "commons/temporal.h"
 void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 
 	int sockFD = *((int*) ptr);
@@ -292,13 +292,33 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 		fclose(scriptFD);
 		result = string_split(buffer_recv->comando, " "); //pos 0 = numBloque  , pos 1 = nombreArchivoTemporal
 
-		numBloque = atoi(result[0]); //paso el string "numBloque" a tipo int , pq mapping recibe int NumBloque
+		numBloque = atoi(result[2]); //paso el string "numBloque" a tipo int , pq mapping recibe int NumBloque
 
-		int mapResult = mapping("./tmp/map.sh", numBloque, result[1]);
+		int mapResult = mapping("./tmp/map.sh", numBloque, 	temporal_get_string_time(), result[1]);
+
+
+		buffer_send->dataSize = 1;
+		buffer_send->data = "\0";
+
+
 		if (mapResult == 0) {
-			//informar a job que termino bien, send normal? o enviar y se pasa por data o comando?
+			buffer_send->comando = "mapFileResponse 0";
 		} else {
-			//informar a job que no termino bien, misma pregunta que arriba
+			buffer_send->comando = "mapFileResponse 1";
+		}
+
+		buffer_send->comandoSize = strlen("mapFileResponse X") + 1;
+
+		//MUTEX ???
+		enviar(sockFD, buffer_send);
+		//MUTEX
+
+
+		if(buffer_recv->comando){
+			free(buffer_recv->comando);
+		}
+		if(buffer_recv->data){
+			free(buffer_recv->data);
 		}
 
 		free(buffer_recv);
@@ -322,16 +342,19 @@ void *reduce_conection_handler(void* ptr) {
 
 		recibir(sockFD, buffer_recv);
 
-		//execReduce archiTemp cantArchNodoLocal a1 a2 aN ipNodoRemoto puertoNodoRemoto a1 a2 aN
+		//execReduce archiTemp cantArchNodoLocal a1 a2 aN cantNodosRemotos {ipNodoRemoto puertoNodoRemoto cantArchivosNodoRemoto a1 a2 aN}
 		result = string_split(buffer_recv->comando, " ");
-
+		/*
 		archivosParaReduce = malloc(sizeof(result));
 		for (; i < sizeof(result); i++) {
 			archivosParaReduce = strcat(archivosParaReduce, result[i]);
 		}
+		*/
+		int espacio = 1;
+		int cantCaracteresDemas = strlen(result[0]) + strlen(result[1]) + espacio * 2;
+		archivosParaReduce = string_substring_from(buffer_recv->comando, cantCaracteresDemas);
 
-		int reduceResult = reducing(buffer_recv->data, archivosParaReduce,
-				result[1]);
+		int reduceResult = reduce(buffer_recv->data, archivosParaReduce,result[1]);
 		if (reduceResult == 0) {
 			buffer_send->comandoSize = sizeof(reduceResult);
 			buffer_send->comando = reduceResult;

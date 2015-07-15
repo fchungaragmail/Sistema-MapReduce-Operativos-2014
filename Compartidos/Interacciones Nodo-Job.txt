@@ -32,7 +32,7 @@ Interacciones Nodo-Job
 ************************************************************************************************************************************************************************************************
 -->Job le indica al Nodo en que archivos aplicar Reduce // Para que sea mas legible usos los sinonimos:  "RutaArchivoTemporal" == "RAT" ; "NroDeNodo(Remoto/Local)" == " #Nodo(Remoto/Local)" ;
 
-*comando: "reduceFile NombreArchTempFinal CantDeArchEnNodoLocalAProcesar RAT1 RAT2-...etc...-"
+*comando: "reduceFile NombreArchTempFinal CantDeArchEnNodoLocalAProcesar RAT1 RAT2-...etc...- CantDeNodosRemotos"
 		  "...IpRemoto1 PuertoRemoto1 CantDeArchEnNodoRemotoAProcesar RTA1 RAT2 RAT3 -etc... "
 		  "...IpRemoto2 PuertoRemoto2 CantDeArchEnNodoRemotoAProcesar RTA1 RAT2 RAT3 -etc... "		  
 *data:	 todo el script a aplicar

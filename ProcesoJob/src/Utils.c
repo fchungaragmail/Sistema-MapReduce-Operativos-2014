@@ -20,16 +20,16 @@ mensaje_t* CreateMensaje(char* comandoStr, char* dataStr) {
 		mensaje->comando = strdup(comandoStr);
 		mensaje->comandoSize = strlen(comandoStr) + 1;
 	} else {
-		mensaje->comando = NULL;
-		mensaje->comandoSize = NULL;
+		mensaje->comando = strdup("\0");
+		mensaje->comandoSize = 1;
 	}
 
 	if (dataStr != NULL) {
 		mensaje->data = strdup(dataStr);
 		mensaje->dataSize = strlen(dataStr) + 1;
 	} else {
-		mensaje->data = NULL;
-		mensaje->dataSize = NULL;
+		mensaje->data = strdup("\0");
+		mensaje->dataSize = 1;
 	}
 
 	return mensaje;
