@@ -181,7 +181,7 @@ void* hiloJobHandler(void* arg) {
 		if (atoi(comandoStr[1]) == 1) {
 			ReportarResultadoHilo(hiloJobInfo, ESTADO_HILO_FINALIZO_OK);
 		} else {
-			if (mensajeDeNodo->data != NULL) {
+			if (strlen(mensajeDeNodo->data) > 0) {
 				hiloJobInfo->parametrosError = strdup(mensajeDeNodo->data);
 			}
 			ReportarResultadoHilo(hiloJobInfo,
