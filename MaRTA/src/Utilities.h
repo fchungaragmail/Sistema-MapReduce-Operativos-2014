@@ -101,6 +101,7 @@ typedef enum
 #define K_HiloDic_Path "HiloDic_Path"
 #define K_HiloDic_JobSocket "HiloDic_JobSocket"
 #define K_HiloDic_PedidosQueue "PedidosQueue"
+#define K_HiloDic_Mutex "HiloDic_Mutex"
 
 //Varias
 #define K_FS_IP -1 //DEFINIR

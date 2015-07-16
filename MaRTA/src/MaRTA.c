@@ -89,8 +89,7 @@ void planificarHilo(void* args){
 	t_dictionary *hiloDic = (t_dictionary*)args;
 	sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
 	t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
-
-	//initPlannerCenter();
+	pthread_mutex_t *mutex = dictionary_get(hiloDic,K_HiloDic_Mutex);
 
 	int *mJobSocket = malloc(sizeof(int));
 	*mJobSocket = -1;
@@ -110,7 +109,9 @@ void planificarHilo(void* args){
 	while(1){
 
 		sem_wait(semHilo);
+		pthread_mutex_lock(mutex);
 		Message *recvMessage = list_get(colaDePedidos,0);
+		pthread_mutex_unlock(mutex);
 
 		char *log = string_from_format("archivo %s recibe pedido nro %d",path,i);
 		log_debug(logFile,log);free(log); i++;
@@ -202,12 +203,16 @@ void administrarHilos(){
 
 			if(jobSocket == recvMessage->sockfd){
 				sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
-				sem_t _semHilo = *semHilo;
 				t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
 				//TODO liberar elementos de colaDePedidos
+
+				pthread_mutex_t *mutex = dictionary_get(hiloDic,K_HiloDic_Mutex);
+				pthread_mutex_lock(mutex);
 				list_clean(colaDePedidos);
 				list_add(colaDePedidos,recvMessage);
-				sem_post(&_semHilo);
+				pthread_mutex_unlock(mutex);
+
+				sem_post(semHilo);
 			}
 		}
 	}
@@ -225,8 +230,14 @@ void administrarHilos(){
 				hiloYaExiste = true;
 				t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
 				sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
+				pthread_mutex_t *mutex = dictionary_get(hiloDic,K_HiloDic_Mutex);
+
+				pthread_mutex_lock(mutex);
 				list_add(colaDePedidos,recvMessage);
+				pthread_mutex_unlock(mutex);
+
 				sem_post(semHilo);
+
 				break;
 			}
 		}
@@ -245,7 +256,12 @@ void administrarHilos(){
 			hiloYaExiste = true;
 			t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
 			sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
+			pthread_mutex_t *mutex = dictionary_get(hiloDic,K_HiloDic_Mutex);
+
+			pthread_mutex_lock(mutex);
 			list_add(colaDePedidos,recvMessage);
+			pthread_mutex_unlock(mutex);
+
 			sem_post(semHilo);
 			break;
 		}
@@ -261,11 +277,15 @@ void administrarHilos(){
 		list_add(colaDePedidos,recvMessage);
 		int hiloSocket = recvMessage->sockfd;
 
+		pthread_mutex_t *mutex = malloc(sizeof(pthread_mutex_t));
+		pthread_mutex_init(mutex,NULL);
+
 		t_dictionary *hiloDic = dictionary_create();
 		dictionary_put(hiloDic,K_HiloDic_Sem,semHilo);
 		dictionary_put(hiloDic,K_HiloDic_Path,_path);
 		dictionary_put(hiloDic,K_HiloDic_JobSocket,hiloSocket);
 		dictionary_put(hiloDic,K_HiloDic_PedidosQueue,colaDePedidos);
+		dictionary_put(hiloDic,K_HiloDic_Mutex,mutex);
 		list_add(hilosData,hiloDic);
 
 		pthread_t tPlanificador;

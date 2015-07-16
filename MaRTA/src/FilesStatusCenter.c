@@ -349,7 +349,7 @@ void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo)
 			int *operacionesEnProceso = getNodoState_OperacionesEnProceso(nodoState);
 			*operacionesEnProceso = *operacionesEnProceso + 1;
 
-			char *log = string_from_format("el nodo %s esta procesando %d pedidos",IPnroNodo,operacionesEnProceso);
+			char *log = string_from_format("el nodo %s esta procesando %d pedidos",IPnroNodo,*operacionesEnProceso);
 			log_debug(logFile,log);free(log);
 
 		}else{
