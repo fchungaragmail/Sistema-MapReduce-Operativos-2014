@@ -38,6 +38,7 @@ int getCantidadBloquesDisponibles(Conexion_t* conexion);
 int elegirNodos(int bloques, t_list* ubicaciones);
 bool tieneMasEspacio(Conexion_t* nodo1,Conexion_t* nodo2);
 bool esNodo(Conexion_t* conexion);
+bool estaDisponible(Conexion_t* conexion);
 void formatNodo(Conexion_t* nodo);
 pthread_mutex_t mListaArchivos;
 pthread_mutex_t mListaDirs;
@@ -837,6 +838,7 @@ int elegirNodos(int bloques, t_list* ubicaciones)
 	{
 		pthread_mutex_lock(&mConexiones);
 		t_list* nodos = list_filter(conexiones, esNodo);
+		nodos = list_filter(nodos, estaDisponible);
 		pthread_mutex_unlock(&mConexiones);
 		if (nodos->elements_count < LISTA_NODOS)
 		{
@@ -899,6 +901,15 @@ bool esNodo(Conexion_t* conexion)
 	if (strcmp(conexion->nombre,"MaRTA") == 0)
 		return false;
 	return true;
+}
+
+bool estaDisponible(Conexion_t* conexion)
+{
+	if (conexion->estado == DISPONIBLE)
+	{
+		return true;
+	}
+	return false;
 }
 
 int espacioTotal()
