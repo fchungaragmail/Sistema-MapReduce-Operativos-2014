@@ -31,7 +31,7 @@ typedef struct{
 
 
 //Retorna el contenido(20Mb) del numeroBloque del espacioDatos
-char* getBloque(int numeroBloque);
+char* getBloque(int numeroBloque, int32_t* length);
 
 
 //Retorna el fileContent del archivoTemporal

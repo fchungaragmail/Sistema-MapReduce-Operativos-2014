@@ -11,7 +11,7 @@
 
 
 
-char* getBloque(int numeroBloque) {
+char* getBloque(int numeroBloque, int32_t* length) {
 
 	//abro el espacio de datos para lectura
 	int archivo = open(ARCHIVO_BIN,O_RDONLY);
@@ -22,7 +22,11 @@ char* getBloque(int numeroBloque) {
 	//leo el contenido del bloque
 	lseek(archivo, offset, SEEK_SET);
 	char *contenido = malloc(TAMANIO_BLOQUE);
+
 	read(archivo, contenido, TAMANIO_BLOQUE);
+	close(archivo);
+
+	*length = strnlen(contenido, TAMANIO_BLOQUE) + 1;
 
 	return contenido;
 }
@@ -70,6 +74,8 @@ int setBloque(int numeroBloque, char* datos, int32_t tamanio) {
 
 	//se va actualizar el archivo
 	munmap(bloque, tamanio);
+
+	free(bloque);
 
 
 	//muestro la parte del bloque que se escribio

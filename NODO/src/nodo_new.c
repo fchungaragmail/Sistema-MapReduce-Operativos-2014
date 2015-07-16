@@ -222,11 +222,12 @@ void *fs_nodo_conection_handler(void* ptr) {
 		if (strcmp(result[0], "getBloque") == 0) {
 
 			char* bloque = malloc(TAMANIO_BLOQUE);
-			bloque = getBloque(atoi(result[1]));  //getBloque bloque
+			int32_t length;
+			bloque = getBloque(atoi(result[1]), &length);  //getBloque bloque
 			buffer_send->comando = string_new();
 			strcpy(buffer_send->comando,"respuesta");
 			buffer_send->comandoSize = strlen(buffer_send->comando) + 1;
-			buffer_send->dataSize = 8;
+			buffer_send->dataSize = length;
 			buffer_send->data = bloque;
 			enviar(sockFD, buffer_send);
 			free(bloque);

@@ -22,8 +22,9 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1, char* archiv
 	if(fork()==0)
 	{
 		close(p[0]);
-		char *bloque = getBloque(numeroBloque);
-		write(p[1], bloque, TAMANIO_BLOQUE);
+		int32_t length;
+		char *bloque = getBloque(numeroBloque, &length);
+		write(p[1], bloque, length);
 		exit (0);
 	}
 
