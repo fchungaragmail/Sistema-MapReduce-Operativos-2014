@@ -103,6 +103,9 @@ void procesarComandoRemoto(argumentos_t* args)
 			memcpy(args->conexion->respuestaBuffer,
 					args->mensaje->data,
 					args->mensaje->dataSize);
+			free(args->mensaje->data);
+			free(args->mensaje->comando);
+			free(args->mensaje);
 			sem_post(&(args->conexion->respuestasP));
 			//TODO: Destruir mensaje
 			break;
