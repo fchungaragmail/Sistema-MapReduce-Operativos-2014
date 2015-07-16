@@ -26,7 +26,7 @@ char* getBloque(int numeroBloque, int32_t* length) {
 	read(archivo, contenido, TAMANIO_BLOQUE);
 	close(archivo);
 
-	*length = strnlen(contenido, TAMANIO_BLOQUE) + 1;
+	*length = strnlen(contenido, TAMANIO_BLOQUE);
 
 	return contenido;
 }
