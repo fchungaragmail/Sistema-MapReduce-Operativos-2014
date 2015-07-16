@@ -373,12 +373,13 @@ int exportar(char* argumentos){
 		return -1;
 	}
 
-	FILE* fp = fopen(tmp[1], "ab+");
+	FILE* fp = fopen(tmp[1], "ab");
 	if (fp==NULL)
 	{
 		log_error(logFile,"No se pudo abrir el archivo %s", tmp[1]);
 		return -1;
 	}
+	fclose(fp);
 
 	for (int i=0;i<archivo->bloques->elements_count;i++)
 	{
@@ -402,8 +403,11 @@ int exportar(char* argumentos){
 
 				sem_wait(&(ubicacion->nodo->respuestasP));
 
+				fp = fopen(tmp[1], "ab");
 				fwrite(ubicacion->nodo->respuestaBuffer, 1,
 						ubicacion->nodo->respuestaSize, fp);
+
+				fclose(fp);
 				free(ubicacion->nodo->respuestaBuffer);
 				ubicacion->nodo->respuestaSize = 0;
 
@@ -413,7 +417,6 @@ int exportar(char* argumentos){
 		}
 	}
 
-	fclose(fp);
 
 	log_info(logFile,"Archivo exportado con exito");
 	return 0;
