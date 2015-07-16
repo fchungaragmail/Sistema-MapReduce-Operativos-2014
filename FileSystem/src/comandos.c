@@ -921,7 +921,9 @@ int espacioTotal()
 		pthread_mutex_unlock(&(nodo->mEstadoBloques));
 	}
 
+	pthread_mutex_lock(&mConexiones);
 	list_destroy(nodos);
+	pthread_mutex_unlock(&mConexiones);
 
 	espacioTotal = (espacioTotal/1024); //Lo paso a GB
 	espacioDisponible = (espacioDisponible/1024); //Lo paso a GB
