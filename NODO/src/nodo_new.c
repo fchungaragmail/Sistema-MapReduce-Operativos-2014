@@ -311,9 +311,9 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 
 
 		if (mapResult == 0) {
-			buffer_send->comando = "mapFileResponse 0";
+			buffer_send->comando = strdup("mapFileResponse 1");
 		} else {
-			buffer_send->comando = "mapFileResponse 1";
+			buffer_send->comando = strdup("mapFileResponse 1");
 		}
 
 		buffer_send->comandoSize = strlen("mapFileResponse X") + 1;
@@ -323,6 +323,7 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 		//MUTEX
 
 
+		free(buffer_send->comando);
 		if(buffer_recv->comando){
 			free(buffer_recv->comando);
 		}
@@ -364,12 +365,37 @@ void *reduce_conection_handler(void* ptr) {
 		archivosParaReduce = string_substring_from(buffer_recv->comando, cantCaracteresDemas);
 
 		int reduceResult = reduce(buffer_recv->data, archivosParaReduce,result[1]);
+
+
+
 		if (reduceResult == 0) {
-			buffer_send->comandoSize = sizeof(reduceResult);
-			buffer_send->comando = reduceResult;
+			buffer_send->comando = strdup("reduceFileResponse 1");
+			buffer_send->dataSize = 1;
+			buffer_send->data = "\0";
+		} else {
+			buffer_send->comando = strdup("reduceFileResponse 0");
+			//TODO Obtener IPs de Nodos que fallaron
 			buffer_send->dataSize = 1;
 			buffer_send->data = "\0";
 		}
+
+		buffer_send->comandoSize = strlen("reduceFileResponse X") + 1;
+
+		//MUTEX ???
+		enviar(sockFD, buffer_send);
+		//MUTEX
+
+
+		free(buffer_send->comando);
+		if(buffer_recv->comando){
+			free(buffer_recv->comando);
+		}
+		if(buffer_recv->data){
+			free(buffer_recv->data);
+		}
+
+		free(buffer_recv);
+		free(buffer_send);
 	}
 
 }
