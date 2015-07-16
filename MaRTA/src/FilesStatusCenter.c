@@ -53,21 +53,15 @@ void informarTareasPendientesDeMapping(char *path,int socket,t_dictionary *fileS
 void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
 void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo);
 int getCantidadDeOperacionesEnProcesoEnNodo(char *IPnroNodo);
-void addTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath);
-void removeTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath);
 //filesToProcess
 t_dictionary *crearNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket);//crea un fileState
 void darDeBajaCopiaEnBloqueYNodo(char *IP_Nodo,t_dictionary *file_StatusData);
 t_list* obtenerCopiasParaBloqueDeArchivo(int bloque,t_dictionary *file_StatusData);
-void destruirFile_StatusData(int sckt, char *path);
 bool* soportaCombiner(t_dictionary *file_StatusData);
 bool todosArchivosDeJobReducidos(int jobSocket);
 void agregarArchivoFinalizado(int jobSocket, char *path, char*ip, char*puerto, char*pathFinal);
 t_list *obtenerListaParaReduceFinal(int jobSocket);
 //filesStates
-t_dictionary *getFileStateForPath(char *path,int socket);
-t_dictionary *getFileState(char *path,int socket);
-void destruirFileState(char* path);
 t_list* obtenerPathsTemporalesParaArchivo(char *IPnodoEnBlockState,t_dictionary *fileState);
 int obtenerCantidadDePathsTemporalesEnNodo(char *IPnodoEnBlockState,t_dictionary *fileState);
 t_list* obtenerNodosEnBlockStateArray(t_dictionary *fileState);
@@ -82,8 +76,6 @@ t_dictionary *crearFileState(int jobSocket,char *path, int cantidadDeBloques);
 //fullDataTable
 void agregarFullDataTable(t_list *table,char *path);
 t_list *getCopyFullDataTable(char *path);
-//FUNCIONES AUXILIARES
-char *crearKeyParaFileState(char*path,int socket);
 
 void initFilesStatusCenter()
 {
@@ -129,40 +121,42 @@ t_dictionary* getFilesToProcessPerJob(int jobSocket)
 
 t_dictionary *crearNewFileForProcess(char *file_Path,_Bool *soportaCombiner,int jobSocket)
 {
+	char *filePathDup = strdup(file_Path);
 	t_dictionary *filesToProcessPerJob = getFilesToProcessPerJob(jobSocket);
 
 	t_dictionary *file_StatusData = dictionary_create();
 	dictionary_put(file_StatusData,K_file_StatusData_combinerMode,soportaCombiner);
 
 	sem_wait(&semFilesToProcessPerJob);
-	bool existeLista = dictionary_has_key(filesToProcessPerJob,"K_listaEstados");
-	sem_post(&semFilesToProcessPerJob);
+	bool existeLista = dictionary_has_key(filesToProcessPerJob,"K_pathsEstados");
 
 	if(!existeLista){
 		t_list *pathsEstadosList = list_create();
 		t_dictionary *estadoPath = dictionary_create();
-		dictionary_put(estadoPath,"K_path",file_Path);
+		dictionary_put(estadoPath,"K_path",filePathDup);
 		bool *finalizo = malloc(sizeof(bool));
 		*finalizo = false;
 		dictionary_put(estadoPath,"K_estado",finalizo);
 		list_add(pathsEstadosList,estadoPath);
 
-		sem_wait(&semFilesToProcessPerJob);
+		//sem_wait(&semFilesToProcessPerJob);
 		dictionary_put(filesToProcessPerJob,"K_pathsEstados",pathsEstadosList);
-		sem_post(&semFilesToProcessPerJob);
+		//sem_post(&semFilesToProcessPerJob);
 
 	}else{
-		sem_wait(&semFilesToProcessPerJob);
+		//sem_wait(&semFilesToProcessPerJob);
 		t_list *pathsEstadosList =  dictionary_get(filesToProcessPerJob,"K_pathsEstados");
-		sem_post(&semFilesToProcessPerJob);
+		//sem_post(&semFilesToProcessPerJob);
 
 		t_dictionary *estadoPath = dictionary_create();
-		dictionary_put(estadoPath,"K_path",file_Path);
+		dictionary_put(estadoPath,"K_path",filePathDup);
 		bool *finalizo = malloc(sizeof(bool));
 		*finalizo = false;
 		dictionary_put(estadoPath,"K_estado",finalizo);
 		list_add(pathsEstadosList,estadoPath);
 	}
+
+	sem_post(&semFilesToProcessPerJob);
 
 	return file_StatusData;
 }
@@ -173,7 +167,6 @@ void agregarArchivoFinalizado(int jobSocket, char *path, char*ip, char*puerto, c
 	t_list *pathsEstados = dictionary_get(filesToProcessPerJob,"K_pathsEstados");
 	int size = list_size(pathsEstados);
 	int i;
-
 
 	t_dictionary *ubicacionFinal = dictionary_create();
 	char *_ip = malloc(strlen(ip)+1);
@@ -327,62 +320,51 @@ int getCantidadDeOperacionesEnProcesoEnNodo(char *IPnroNodo)
 {
 	sem_wait(&semNodosData);
 	bool hasKey = dictionary_has_key(nodosData,IPnroNodo);
-	sem_post(&semNodosData);
+
 
 	if(hasKey){
 		//el nodo existe
 		t_dictionary *nodoState = getNodoState(IPnroNodo);
-		int operacionesEnProceso = getNodoState_OperacionesEnProceso(nodoState);
-		return operacionesEnProceso;
+		int *operacionesEnProceso = getNodoState_OperacionesEnProceso(nodoState);
+		int valor = *operacionesEnProceso;
+		sem_post(&semNodosData);
+		return valor;
 	}
 	//else --> al nodo no se le asigno nada aun, entonces no tiene operacionesEnProceso
+	sem_post(&semNodosData);
 	return 0;
 }
 
 void incrementarOperacionesEnProcesoEnNodo(char *IPnroNodo)
 {
+	char *_ipDup = strdup(IPnroNodo);
+
 	//se llama cuando envio un pedido de map o reduce al Job
 	sem_wait(&semNodosData);
 	bool hasKey = dictionary_has_key(nodosData,IPnroNodo);
-	sem_post(&semNodosData);
 
 		if(hasKey){
 			//busco el dic y le sumo una operacionProcesando
 			t_dictionary *nodoState = getNodoState(IPnroNodo);
-
-			int operacionesEnProceso = getNodoState_OperacionesEnProceso(nodoState);
-			t_list *tempPathsList = getNodoState_listaTemporales(nodoState);
-			operacionesEnProceso = operacionesEnProceso + 1;
+			int *operacionesEnProceso = getNodoState_OperacionesEnProceso(nodoState);
+			*operacionesEnProceso = *operacionesEnProceso + 1;
 
 			char *log = string_from_format("el nodo %s esta procesando %d pedidos",IPnroNodo,operacionesEnProceso);
-			log_trace(logFile,log);free(log);
-
-			sem_wait(&semNodoState);
-			dictionary_clean(nodoState);
-			dictionary_put(nodoState,K_Nodo_ArchivosTemporales,tempPathsList);
-			dictionary_put(nodoState,K_Nodo_OperacionesEnProceso,operacionesEnProceso);
-			sem_post(&semNodoState);
+			log_debug(logFile,log);free(log);
 
 		}else{
+			char *_ipDup = strdup(IPnroNodo);
 			//creo un nuevo dic y le sumo una operacionProcesando
 			t_dictionary *nodoState = dictionary_create();
-			int operacionesEnProceso = 1;
-
-			char *log = string_from_format("el nodo %s esta procesando %d pedidos",IPnroNodo,operacionesEnProceso);
-			log_trace(logFile,log);free(log);
-
-			sem_wait(&semNodoState);
+			int *operacionesEnProceso = malloc(sizeof(int));
+			*operacionesEnProceso = 1;
 			dictionary_put(nodoState,K_Nodo_OperacionesEnProceso,operacionesEnProceso);
-			//creo una lista de archivosTemporales
-			t_list *archivosTemporales = list_create();
-			dictionary_put(nodoState,K_Nodo_ArchivosTemporales,archivosTemporales);
-			sem_post(&semNodoState);
+			dictionary_put(nodosData,_ipDup,nodoState);
 
-			//agrego a nodosData
-			sem_wait(&semNodosData);
-			dictionary_put(nodosData,IPnroNodo,nodoState);
-			sem_post(&semNodosData);
+			char *log = string_from_format("el nodo %s esta procesando %d pedidos",_ipDup,*operacionesEnProceso);
+			log_debug(logFile,log);free(log);
 		}
+	sem_post(&semNodosData);
 }
 
 void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo)
@@ -390,52 +372,18 @@ void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo)
 	//se llama cuando envio un pedido de map o reduce al Job
 	sem_wait(&semNodosData);
 	bool hasKey = dictionary_has_key(nodosData,IPnroNodo);
-	sem_post(&semNodosData);
 
 	if(hasKey){
 		//busco el dic y le resto una operacionProcesando
 		t_dictionary *nodoState = getNodoState(IPnroNodo);
+		int *operacionesEnProceso = getNodoState_OperacionesEnProceso(nodoState);
+		//t_list *tempPathsList = getNodoState_listaTemporales(nodoState);
+		*operacionesEnProceso = *operacionesEnProceso - 1;
 
-		int operacionesEnProceso = getNodoState_OperacionesEnProceso(nodoState);
-		t_list *tempPathsList = getNodoState_listaTemporales(nodoState);
-		operacionesEnProceso = operacionesEnProceso - 1;
-
-		char *log = string_from_format("el nodo %s esta procesando %d pedidos",IPnroNodo,operacionesEnProceso);
-		log_trace(logFile,log);free(log);
-
-
-		sem_wait(&semNodoState);
-		dictionary_clean(nodoState);
-		dictionary_put(nodoState,K_Nodo_OperacionesEnProceso,operacionesEnProceso);
-		dictionary_put(nodoState,K_Nodo_ArchivosTemporales,tempPathsList);
-		sem_post(&semNodoState);
+		char *log = string_from_format("el nodo %s esta procesando %d pedidos",IPnroNodo,*operacionesEnProceso);
+		log_debug(logFile,log);free(log);
 	}
-}
-void removeTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath){
-	t_dictionary *nodoState = getNodoState(IPnroNodo);
-	t_list *listaTemporales = getNodoState_listaTemporales(nodoState);
-	int size = list_size(listaTemporales);
-	int i;
-
-	for(i=0;i<size;i++){
-		char *tempPath = list_get(listaTemporales,i);
-
-		if(strcmp(tempPath,filePath)==0){
-			list_remove(listaTemporales,i);
-		}
-	}
-}
-void addTemporaryFilePathToNodoData(char *IPnroNodo,char* filePath)
-{//el NodoState tiene que estar si o si creado, pues tiene que haber pasado por
- //"incrementarOperacionesEnProcesoEnNodo"
-
-	t_dictionary *nodoState = getNodoState(IPnroNodo);
-	t_list *listaTemporales = getNodoState_listaTemporales(nodoState);
-
-	sem_wait(&semNodoState);
-	list_add(listaTemporales,filePath);
-	sem_post(&semNodoState);
-
+	sem_post(&semNodosData);
 }
 
 void darDeBajaCopiaEnBloqueYNodo(char *IP_Nodo,t_dictionary *file_StatusData)
@@ -601,28 +549,20 @@ bool* isNodoInList(t_list *lista,char *IPnroDeNodo)
 
 t_dictionary *getNodoState(char *ipNroNodo)
 {
-	sem_wait(&semNodosData);
 	t_dictionary *nodoState = dictionary_get(nodosData,ipNroNodo);
-	sem_post(&semNodosData);
-
 	return nodoState;
 }
 
 int getNodoState_OperacionesEnProceso(t_dictionary *nodoState)
 {
-	sem_wait(&semNodoState);
 	int operacionesEnProceso = dictionary_get(nodoState,K_Nodo_OperacionesEnProceso);
-	sem_post(&semNodoState);
-
 	return operacionesEnProceso;
 }
 
 t_list *getNodoState_listaTemporales(t_dictionary *nodoState)
 {
-	sem_wait(&semNodoState);
+	//TODO ya no la uso
 	t_list *listaTemporales = dictionary_get(nodoState,K_Nodo_ArchivosTemporales);
-	sem_post(&semNodoState);
-
 	return listaTemporales;
 }
 
@@ -684,7 +624,7 @@ void informarTareasPendientesDeMapping(char *path,int socket,t_dictionary *fileS
 	}
 
 	char *log = string_from_format("el job %d para el archivo %s debe mappear %d bloques",socket,path,count);
-	log_trace(logFile,log); free(log);
+	log_debug(logFile,log); free(log);
 }
 
 //fullDataTable
@@ -709,7 +649,7 @@ t_list *getCopyFullDataTable(char *path){
 			t_list *listaHijaDeCopias = list_create();
 			t_list *listaDeCopias = list_get(fullDataTable,i);
 			int nroDeCopias= list_size(listaDeCopias);
-			int k = 1;
+
 			for(j=0;j<nroDeCopias;j++){
 
 				t_dictionary *dicPivot = list_get(listaDeCopias,j);
@@ -731,7 +671,6 @@ t_list *getCopyFullDataTable(char *path){
 				dictionary_put(dic,K_Copia_PuertoNodo,puertoNodo);
 				dictionary_put(dic,K_Copia_NroDeBloque,nroDeBloque);
 				dictionary_put(dic,K_Copia_Estado,estado);
-				k=k+3;
 				list_add(listaHijaDeCopias,dic);
 			}
 			list_add(listaPadreDeBloques,listaHijaDeCopias);

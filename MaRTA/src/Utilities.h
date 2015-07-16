@@ -9,6 +9,8 @@
 #define UTILITIES_H_
 
 #include "stdint.h"
+#include <commons/collections/dictionary.h>
+#include <commons/collections/list.h>
 
 /*
 //Funciones auxiliares
@@ -27,6 +29,23 @@ typedef struct mensaje
 	int32_t dataSize;
 	char* data;
 }mensaje_t;
+
+typedef struct infoHilo
+{
+	int *jobSocket;
+	char *filePathAProcesar;
+	t_list *nodosReduceList_Pedido1;
+	t_list *listaDeNodos_EnCasoDeFalloDeJob;
+	bool *yaPediFullDataTable;
+	t_dictionary *fileState;
+	t_dictionary *file_StatusData;
+
+	//-->PedidoRealizado
+	char *ipNodoLocalDePedidoDeReduce;
+	char *puertoNodoLocalDePedidoDeReduce;
+	char *pathNodoLocalDePedidoDeReduce;
+
+}infoHilo_t;
 
 typedef struct _message {
 	int sockfd;

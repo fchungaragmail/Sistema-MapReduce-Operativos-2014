@@ -37,9 +37,7 @@ sem_t semFullDataTables;
 sem_t semFilesToProcess;
 sem_t semFilesToProcessPerJob;
 sem_t semNodosData;
-sem_t semNodoState;
 sem_t semEnviar;
-sem_t semProdCons;
 t_list *hilosData;
 Message *recvMessage;
 bool fileSystemDisponible;
@@ -60,7 +58,6 @@ int main(void) {
 	while(i<31)
 	{
 		recvMessage = simular();
-		sem_wait(&semProdCons);
 		administrarHilos();
 
 		if(i== 29){
@@ -92,22 +89,43 @@ void planificarHilo(void* args){
 	t_dictionary *hiloDic = (t_dictionary*)args;
 	sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
 	t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
-	initPlannerCenter();
+
+	//initPlannerCenter();
+
+	int *mJobSocket = malloc(sizeof(int));
+	*mJobSocket = -1;
+	t_list *nodosReduceList_Pedido1= list_create();;
+	t_list *listaDeNodos_EnCasoDeFalloDeJob= list_create();;
+	bool *yaPediFullDataTable = malloc(sizeof(bool));
+	*yaPediFullDataTable = false;
+
+	infoHilo_t *infoThread = malloc(sizeof(infoHilo_t));
+
+	infoThread->jobSocket = mJobSocket;
+	infoThread->nodosReduceList_Pedido1 = nodosReduceList_Pedido1;
+	infoThread->listaDeNodos_EnCasoDeFalloDeJob = listaDeNodos_EnCasoDeFalloDeJob;
+	infoThread->yaPediFullDataTable = yaPediFullDataTable;
+	//TODO liberar infoThread
+	char *path = dictionary_get(hiloDic,K_HiloDic_Path);int i=1;
 	while(1){
 
 		sem_wait(semHilo);
 		Message *recvMessage = list_get(colaDePedidos,0);
-		bool finalizarHilo = processMessage(recvMessage);
+
+		char *log = string_from_format("archivo %s recibe pedido nro %d",path,i);
+		log_debug(logFile,log);free(log); i++;
+
+		if(i==11){
+			int a = 1;
+		}
+		bool finalizarHilo = processMessage(recvMessage,infoThread);
 		list_remove(colaDePedidos,0);
-		sem_post(&semProdCons);
 		if(finalizarHilo){
 			break;
 		}
-		if(!finalizarHilo){
-			sem_post(&semProdCons);
-		}
 	}
-	char *path = dictionary_get(hiloDic,K_HiloDic_Path);
+
+	//char *path = dictionary_get(hiloDic,K_HiloDic_Path);
 	int jobSocket = dictionary_get(hiloDic,K_HiloDic_JobSocket);
 	char *log = string_from_format("finalizo el hilo con path %s y numeroDeSocket %d",path,jobSocket);
 	log_debug(logFile,log);
@@ -117,8 +135,6 @@ void planificarHilo(void* args){
 	sem_destroy(semHilo);
 	list_destroy(colaDePedidos);
 	//dictionary_destroy(hiloDic); --> "administrarHilos" mira el path q esta en eeste dic
-
-	sem_post(&semProdCons);
 
 	pthread_exit(0);
 }
@@ -136,10 +152,8 @@ void initMaRTA(){
 	sem_init(&semNodosData, 0, 1);
 	sem_init(&semFilesToProcess, 0, 1);
 	sem_init(&semFilesToProcessPerJob, 0, 1);
-	sem_init(&semNodoState, 0, 1);
 	sem_init(&semFullDataTables, 0, 1);
 	sem_init(&semEnviar, 0, 1);
-	sem_init(&semProdCons, 0, 1);
 
 #ifdef K_SIMULACION
 
@@ -163,7 +177,7 @@ void administrarHilos(){
 
 	int command = obtenerIdParaComando(recvMessage);
 	if(command == K_NewConnection){
-		sem_post(&semProdCons);
+
 		return;
 	}
 	char *path = deserializeFilePath(recvMessage,command);

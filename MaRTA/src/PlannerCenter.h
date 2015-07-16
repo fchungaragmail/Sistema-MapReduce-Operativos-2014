@@ -10,8 +10,6 @@
 
 #include "Utilities.h"
 
-bool processMessage(Message *recvMessage);
-void initPlannerCenter();
-void _planificarHilo(void* args);
+bool processMessage(Message *recvMessage,infoHilo_t *infoThread);
 
 #endif /* PLANNERCENTER_H_ */
