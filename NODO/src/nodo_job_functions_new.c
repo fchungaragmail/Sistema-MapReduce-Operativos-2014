@@ -22,8 +22,9 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1, char* archiv
 	if(fork()==0)
 	{
 		close(p[0]);
-		char *bloque = getBloque(numeroBloque);
-		write(p[1], bloque, TAMANIO_BLOQUE);
+		int32_t length;
+		char *bloque = getBloque(numeroBloque, &length);
+		write(p[1], bloque, length);
 		exit (0);
 	}
 
@@ -106,7 +107,7 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1, char* archiv
 #include "aparearArchivos_new.h"
 void aplicarScriptReduce(char *script, char *archivoTemporal1, char* archivoTemporal2);
 void procesarArchivoRemoto(int conexionNodoRemoto, char* nombreArchivoRemoto);
-int conectarseANodoRemoto(char *ip, int puerto);
+int32_t conectarseANodoRemoto(char *ip, int puerto);
 
 int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal) {
 
@@ -196,7 +197,7 @@ void aplicarScriptReduce(char *script, char *archivoTemporal1, char* archivoTemp
 
 
 #include "socketsFunciones/sockets.h"
-int conectarseANodoRemoto(char *ip, int puerto){
+int32_t conectarseANodoRemoto(char *ip, int puerto){
 	return new_connection(ip, puerto);
 }
 

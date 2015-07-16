@@ -103,6 +103,9 @@ void procesarComandoRemoto(argumentos_t* args)
 			memcpy(args->conexion->respuestaBuffer,
 					args->mensaje->data,
 					args->mensaje->dataSize);
+			free(args->mensaje->data);
+			free(args->mensaje->comando);
+			free(args->mensaje);
 			sem_post(&(args->conexion->respuestasP));
 			//TODO: Destruir mensaje
 			break;
@@ -373,16 +376,17 @@ int exportar(char* argumentos){
 		return -1;
 	}
 
-	FILE* fp = fopen(tmp[1], "ab+");
+	FILE* fp = fopen(tmp[1], "ab");
 	if (fp==NULL)
 	{
 		log_error(logFile,"No se pudo abrir el archivo %s", tmp[1]);
 		return -1;
 	}
+	fclose(fp);
 
 	for (int i=0;i<archivo->bloques->elements_count;i++)
 	{
-		t_list* bloque = list_get(bloques,i);
+		t_list* bloque = list_get(archivo->bloques,i);
 		for (int j=0;j<bloque->elements_count;j++)
 		{
 			t_ubicacion_bloque* ubicacion = list_get(bloque,j);
@@ -402,8 +406,11 @@ int exportar(char* argumentos){
 
 				sem_wait(&(ubicacion->nodo->respuestasP));
 
+				fp = fopen(tmp[1], "ab");
 				fwrite(ubicacion->nodo->respuestaBuffer, 1,
 						ubicacion->nodo->respuestaSize, fp);
+
+				fclose(fp);
 				free(ubicacion->nodo->respuestaBuffer);
 				ubicacion->nodo->respuestaSize = 0;
 
@@ -413,7 +420,6 @@ int exportar(char* argumentos){
 		}
 	}
 
-	fclose(fp);
 
 	log_info(logFile,"Archivo exportado con exito");
 	return 0;
@@ -430,10 +436,10 @@ int md5(char* argumentos){
 	srand(time(NULL));
 	int r = rand();
 	char* rutaLocal = string_new();
-	string_append_with_format(&rutaLocal,"%d",r);
+	string_append_with_format(&rutaLocal,"/tmp/%d",r);
 
-	char* export = string_new;
-	string_from_format("%s /tmp/%d", argumentos, rutaLocal);
+	char* export = string_from_format("%s %s", argumentos, rutaLocal);
+
 	if (exportar(export) != 0)
 	{
 		return -1;

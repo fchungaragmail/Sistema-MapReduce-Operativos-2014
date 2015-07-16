@@ -216,16 +216,18 @@ void *fs_nodo_conection_handler(void* ptr) {
 
 		mensaje_t* buffer_recv = malloc(sizeof(mensaje_t));
 		mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
-		recibir(sockFD, buffer_recv);
+		recibir(sockFD, buffer_recv); //Aca hay que hacer algo si devuelve 0
 		result = string_split(buffer_recv->comando, " ");
 
 		if (strcmp(result[0], "getBloque") == 0) {
 
 			char* bloque = malloc(TAMANIO_BLOQUE);
-			bloque = getBloque(atoi(result[1]));  //getBloque bloque
-			buffer_send->comandoSize = 1;
-			buffer_send->comando = "\0";
-			buffer_send->dataSize = sizeof(int32_t);
+			int32_t length;
+			bloque = getBloque(atoi(result[1]), &length);  //getBloque bloque
+			buffer_send->comando = string_new();
+			strcpy(buffer_send->comando,"respuesta");
+			buffer_send->comandoSize = strlen(buffer_send->comando) + 1;
+			buffer_send->dataSize = length;
 			buffer_send->data = bloque;
 			enviar(sockFD, buffer_send);
 			free(bloque);
@@ -248,6 +250,13 @@ void *fs_nodo_conection_handler(void* ptr) {
 			buffer_send->dataSize = fileContent->size;
 			buffer_send->data = fileContent->contenido;
 			enviar(sockFD, buffer_send);
+			free(buffer_send);
+			free(buffer_recv);
+		}
+
+		if (strcmp(result[0], "borrarBloque") == 0) {   //setBloque bloque [datos]
+			int numBLoque = atoi(result[1]);
+			borrarBloque(numBLoque);
 			free(buffer_send);
 			free(buffer_recv);
 		}
@@ -302,9 +311,9 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 
 
 		if (mapResult == 0) {
-			buffer_send->comando = "mapFileResponse 0";
+			buffer_send->comando = strdup("mapFileResponse 1");
 		} else {
-			buffer_send->comando = "mapFileResponse 1";
+			buffer_send->comando = strdup("mapFileResponse 1");
 		}
 
 		buffer_send->comandoSize = strlen("mapFileResponse X") + 1;
@@ -314,6 +323,7 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 		//MUTEX
 
 
+		free(buffer_send->comando);
 		if(buffer_recv->comando){
 			free(buffer_recv->comando);
 		}
@@ -355,12 +365,37 @@ void *reduce_conection_handler(void* ptr) {
 		archivosParaReduce = string_substring_from(buffer_recv->comando, cantCaracteresDemas);
 
 		int reduceResult = reduce(buffer_recv->data, archivosParaReduce,result[1]);
+
+
+
 		if (reduceResult == 0) {
-			buffer_send->comandoSize = sizeof(reduceResult);
-			buffer_send->comando = reduceResult;
+			buffer_send->comando = strdup("reduceFileResponse 1");
+			buffer_send->dataSize = 1;
+			buffer_send->data = "\0";
+		} else {
+			buffer_send->comando = strdup("reduceFileResponse 0");
+			//TODO Obtener IPs de Nodos que fallaron
 			buffer_send->dataSize = 1;
 			buffer_send->data = "\0";
 		}
+
+		buffer_send->comandoSize = strlen("reduceFileResponse X") + 1;
+
+		//MUTEX ???
+		enviar(sockFD, buffer_send);
+		//MUTEX
+
+
+		free(buffer_send->comando);
+		if(buffer_recv->comando){
+			free(buffer_recv->comando);
+		}
+		if(buffer_recv->data){
+			free(buffer_recv->data);
+		}
+
+		free(buffer_recv);
+		free(buffer_send);
 	}
 
 }

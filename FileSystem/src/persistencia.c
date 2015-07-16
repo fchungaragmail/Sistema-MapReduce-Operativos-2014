@@ -173,6 +173,7 @@ int leerPersistencia()
 			char** lArchivo = string_n_split(linea,5,";");
 			char** lBloques = string_split(lArchivo[4],"//");
 			t_reg_archivo* archivo = malloc(sizeof(t_reg_archivo));
+			list_add(listaArchivos,archivo);
 
 			strcpy(archivo->nombre,lArchivo[0]);
 			archivo->dirPadre = atoi(lArchivo[1]);
@@ -209,8 +210,6 @@ int leerPersistencia()
 			ret = fgets(linea,MAX_BUFF_SIZE,persistFile);
 		}
 	}
-
-
 	return EXIT_SUCCESS;
 }
 

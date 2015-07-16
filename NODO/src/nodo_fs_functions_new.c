@@ -11,7 +11,7 @@
 
 
 
-char* getBloque(int numeroBloque) {
+char* getBloque(int numeroBloque, int32_t* length) {
 
 	//abro el espacio de datos para lectura
 	int archivo = open(ARCHIVO_BIN,O_RDONLY);
@@ -22,7 +22,11 @@ char* getBloque(int numeroBloque) {
 	//leo el contenido del bloque
 	lseek(archivo, offset, SEEK_SET);
 	char *contenido = malloc(TAMANIO_BLOQUE);
+
 	read(archivo, contenido, TAMANIO_BLOQUE);
+	close(archivo);
+
+	*length = strnlen(contenido, TAMANIO_BLOQUE);
 
 	return contenido;
 }
@@ -71,6 +75,8 @@ int setBloque(int numeroBloque, char* datos, int32_t tamanio) {
 	//se va actualizar el archivo
 	munmap(bloque, tamanio);
 
+	free(bloque);
+
 
 	//muestro la parte del bloque que se escribio
 	/*
@@ -82,5 +88,30 @@ int setBloque(int numeroBloque, char* datos, int32_t tamanio) {
 	close(archivo);
 	*/
 	return 0;
+}
+
+void borrarBloque(int numeroBloque)
+{
+	if (numeroBloque >= 0)
+	{
+		int archivo = open(ARCHIVO_BIN,O_RDWR);
+		long int offset = numeroBloque * TAMANIO_BLOQUE;
+		void *bloque= mmap(NULL,  TAMANIO_BLOQUE,  PROT_WRITE, MAP_SHARED,  archivo,  offset);
+		close(archivo);
+
+		memset(bloque, 0, TAMANIO_BLOQUE);
+		munmap(bloque, TAMANIO_BLOQUE);
+	} else
+	{
+	    struct stat sb;
+	    stat (ARCHIVO_BIN, & sb);
+	    int32_t tamanio = sb.st_size;
+
+		int archivo = open(ARCHIVO_BIN,O_RDWR);
+		void *bloque= mmap(NULL,  tamanio,  PROT_WRITE, MAP_SHARED,  archivo,  0);
+		close(archivo);
+		memset(bloque, 0, tamanio);
+		munmap(bloque, tamanio);
+	}
 }
 
