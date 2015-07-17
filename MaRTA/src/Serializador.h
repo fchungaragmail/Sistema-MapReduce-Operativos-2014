@@ -23,6 +23,7 @@ t_list* deserializarFullDataResponse(Message *recvMessage);
 char *deserializeTempFilePath(Message *recvMessage,TypesMessages type);
 t_list *deserializeFailedReduceResponse(Message *recvMessage);
 int deserializeNumeroDeBloque_PedidoDeCopias(Message *recvMessage);
+int deserializeNroDeSocket(Message *recvMessage);
 
 void addIntToStream(char *stream, int value);
 
