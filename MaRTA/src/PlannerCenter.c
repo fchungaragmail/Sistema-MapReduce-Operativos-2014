@@ -1011,12 +1011,10 @@ Message *createFSrequest(Message *msj,int nroDeBloqe){
 
 	}
 	fsRequest->sockfd = getFSSocket();
-	fsRequest->mensaje->comandoSize = (int16_t)strlen(stream);
+	fsRequest->mensaje->comandoSize = (int16_t)(strlen(stream)+1);
 	fsRequest->mensaje->comando = stream;
-	fsRequest->mensaje->dataSize = 0;
-	fsRequest->mensaje->data = malloc(strlen("")+1);
-	strcpy(fsRequest->mensaje->data,"");
-
+	fsRequest->mensaje->dataSize = 1;
+	fsRequest->mensaje->data = strdup("\0");
 	return fsRequest;
 }
 
@@ -1033,12 +1031,10 @@ Message *crearMensajeAJobDeFinalizado(Message *msj,infoHilo_t *infoThread){
 	string_append(&stream,path);
 
 	fsRequest->sockfd = *(infoThread->jobSocket);
-	fsRequest->mensaje->comandoSize = (int16_t)strlen(stream);
+	fsRequest->mensaje->comandoSize = (int16_t)(strlen(stream)+1);
 	fsRequest->mensaje->comando = stream;
-	fsRequest->mensaje->dataSize = 0;
-	fsRequest->mensaje->data = malloc(strlen(""));
-	strcpy(fsRequest->mensaje->data,"");
-
+	fsRequest->mensaje->dataSize = 1;
+	fsRequest->mensaje->data = strdup("\0");
 	return fsRequest;
 }
 
@@ -1048,9 +1044,9 @@ Message* armarMensajeParaEnvio(Message *recvMessage,char *stream,char *comando)
 	msjParaEnvio->mensaje = malloc(sizeof(mensaje_t));
 
 	msjParaEnvio->sockfd = recvMessage->sockfd;
-	msjParaEnvio->mensaje->comandoSize = (int16_t)strlen(comando);
+	msjParaEnvio->mensaje->comandoSize = (int16_t)(strlen(comando)+1);
 	msjParaEnvio->mensaje->comando = comando;
-	msjParaEnvio->mensaje->dataSize = (int32_t)strlen(stream);
+	msjParaEnvio->mensaje->dataSize = (int32_t)(strlen(stream)+1);
 	msjParaEnvio->mensaje->data = stream;
 
 	return msjParaEnvio;

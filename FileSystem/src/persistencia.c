@@ -96,6 +96,7 @@ int persistirEstructuras()
 		fprintf(persistFile,estructuras);
 		fclose(persistFile);
 		pthread_mutex_unlock(&mPersistFile);
+		free(estructuras);
 	}
 
 	return EXIT_SUCCESS;
@@ -110,7 +111,7 @@ int leerPersistencia()
 	persistFile = fopen("./FileSystem.persist", "r");
 	if (persistFile == NULL) return EXIT_SUCCESS;
 
-	char linea[MAX_BUFF_SIZE];
+	char* linea = malloc(MAX_BUFF_SIZE);
 	int ret = 0;
 	int index = 1; //El 0 es el directorio raiz que esta por default
 
@@ -215,7 +216,7 @@ int leerPersistencia()
 
 int buscarSeccion(char* seccion)
 {
-	char linea[MAX_BUFF_SIZE];
+	char* linea = malloc(MAX_BUFF_SIZE);
 	bool encontrado = false;
 	fseek(persistFile,0,SEEK_SET);
 	while (!encontrado)

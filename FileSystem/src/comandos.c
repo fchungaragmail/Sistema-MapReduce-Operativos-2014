@@ -38,6 +38,7 @@ int getCantidadBloquesDisponibles(Conexion_t* conexion);
 int elegirNodos(int bloques, t_list* ubicaciones);
 bool tieneMasEspacio(Conexion_t* nodo1,Conexion_t* nodo2);
 bool esNodo(Conexion_t* conexion);
+bool estaDisponible(Conexion_t* conexion);
 void formatNodo(Conexion_t* nodo);
 pthread_mutex_t mListaArchivos;
 pthread_mutex_t mListaDirs;
@@ -120,13 +121,24 @@ void procesarComandoRemoto(argumentos_t* args)
 
 int format(char* argumentos)
 {
+	pthread_mutex_lock(&mConexiones);
 	t_list* nodos = list_filter(conexiones, esNodo);
+	pthread_mutex_unlock(&mConexiones);
 
 	for(int i=0;i<nodos->elements_count;i++)
 	{
 		Conexion_t* nodo = list_get(nodos,i);
 		formatNodo(nodo);
 	}
+
+	pthread_mutex_lock(&mListaArchivos);
+	for(int i=0;i<listaArchivos->elements_count;i++)
+	{
+		t_reg_archivo* archivo = list_get(listaArchivos,i);
+		free(archivo);
+	}
+	list_clean(listaArchivos);
+	pthread_mutex_unlock(&mListaArchivos);
 
 	return EXIT_SUCCESS;
 }
@@ -837,6 +849,7 @@ int elegirNodos(int bloques, t_list* ubicaciones)
 	{
 		pthread_mutex_lock(&mConexiones);
 		t_list* nodos = list_filter(conexiones, esNodo);
+		nodos = list_filter(nodos, estaDisponible);
 		pthread_mutex_unlock(&mConexiones);
 		if (nodos->elements_count < LISTA_NODOS)
 		{
@@ -901,6 +914,15 @@ bool esNodo(Conexion_t* conexion)
 	return true;
 }
 
+bool estaDisponible(Conexion_t* conexion)
+{
+	if (conexion->estado == DISPONIBLE)
+	{
+		return true;
+	}
+	return false;
+}
+
 int espacioTotal()
 {
 	float espacioTotal = 0;
@@ -921,7 +943,9 @@ int espacioTotal()
 		pthread_mutex_unlock(&(nodo->mEstadoBloques));
 	}
 
+	pthread_mutex_lock(&mConexiones);
 	list_destroy(nodos);
+	pthread_mutex_unlock(&mConexiones);
 
 	espacioTotal = (espacioTotal/1024); //Lo paso a GB
 	espacioDisponible = (espacioDisponible/1024); //Lo paso a GB

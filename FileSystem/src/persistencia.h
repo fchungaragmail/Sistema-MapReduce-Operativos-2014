@@ -16,7 +16,7 @@
 #define SECCION_LISTA_ARCHIVOS "#LISTA_ARCHIVOS"
 #define SECCION_LISTA_DIRS "#LISTA_DIRS"
 #define SECCION_LISTA_CONEXIONES "#LISTA_CONEXIONES"
-#define MAX_BUFF_SIZE 1024
+#define MAX_BUFF_SIZE 4096
 
 int persistirEstructuras();
 int leerPersistencia();

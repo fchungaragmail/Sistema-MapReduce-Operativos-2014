@@ -75,7 +75,7 @@ int setBloque(int numeroBloque, char* datos, int32_t tamanio) {
 	//se va actualizar el archivo
 	munmap(bloque, tamanio);
 
-	free(bloque);
+	free(datos);
 
 
 	//muestro la parte del bloque que se escribio
