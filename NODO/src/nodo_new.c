@@ -364,7 +364,9 @@ void *reduce_conection_handler(void* ptr) {
 		int cantCaracteresDemas = strlen(result[0]) + strlen(result[1]) + espacio * 2;
 		archivosParaReduce = string_substring_from(buffer_recv->comando, cantCaracteresDemas);
 
-		int reduceResult = reduce(buffer_recv->data, archivosParaReduce,result[1]);
+
+		char* ipNodoFallido = string_new();
+		int reduceResult = reduce(buffer_recv->data, archivosParaReduce,result[1], ipNodoFallido);
 
 
 
@@ -375,17 +377,15 @@ void *reduce_conection_handler(void* ptr) {
 		} else {
 			buffer_send->comando = strdup("reduceFileResponse 0");
 			//TODO Obtener IPs de Nodos que fallaron
-			buffer_send->dataSize = 1;
-			buffer_send->data = "\0";
+			buffer_send->dataSize = strlen(ipNodoFallido) + 1;
+			buffer_send->data = ipNodoFallido;
 		}
 
 		buffer_send->comandoSize = strlen("reduceFileResponse X") + 1;
 
-		//MUTEX ???
 		enviar(sockFD, buffer_send);
-		//MUTEX
 
-
+		free(ipNodoFallido);
 		free(buffer_send->comando);
 		if(buffer_recv->comando){
 			free(buffer_recv->comando);
@@ -399,3 +399,4 @@ void *reduce_conection_handler(void* ptr) {
 	}
 
 }
+
