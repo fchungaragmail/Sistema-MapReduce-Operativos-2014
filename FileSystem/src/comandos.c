@@ -121,13 +121,24 @@ void procesarComandoRemoto(argumentos_t* args)
 
 int format(char* argumentos)
 {
+	pthread_mutex_lock(&mConexiones);
 	t_list* nodos = list_filter(conexiones, esNodo);
+	pthread_mutex_unlock(&mConexiones);
 
 	for(int i=0;i<nodos->elements_count;i++)
 	{
 		Conexion_t* nodo = list_get(nodos,i);
 		formatNodo(nodo);
 	}
+
+	pthread_mutex_lock(&mListaArchivos);
+	for(int i=0;i<listaArchivos->elements_count;i++)
+	{
+		t_reg_archivo* archivo = list_get(listaArchivos,i);
+		free(archivo);
+	}
+	list_clean(listaArchivos);
+	pthread_mutex_unlock(&mListaArchivos);
 
 	return EXIT_SUCCESS;
 }
