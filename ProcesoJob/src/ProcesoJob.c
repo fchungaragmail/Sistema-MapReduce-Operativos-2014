@@ -68,10 +68,13 @@ void* pedidosMartaHandler(void* arg) {
 				== 0
 				|| strcmp(comandoStr[MENSAJE_COMANDO],
 						"reduceFileConCombiner-Pedido2") == 0) {
-			PlanificarHilosReduce(mensajeMarta, FALSE);
+			PlanificarHilosReduce(mensajeMarta, FALSE, NULL);
 		} else if (strcmp(comandoStr[MENSAJE_COMANDO],
 				"reduceFileConCombiner-Pedido1") == 0) {
-			PlanificarHilosReduce(mensajeMarta, TRUE);
+			PlanificarHilosReduce(mensajeMarta, TRUE, NULL);
+		} else if (strcmp(comandoStr[MENSAJE_COMANDO],
+				"reduceFinal") == 0) {
+			PlanificarHilosReduce(mensajeMarta, TRUE, config_get_string_value(configuracion, "RESULTADO"));
 		} else if (strcmp(comandoStr[MENSAJE_COMANDO], "FileSuccess") == 0) {
 			char* dataDiccionario = dictionary_remove(diccArchivos,
 					comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO]);
@@ -307,7 +310,7 @@ void PlanificarHilosMapper(mensaje_t* mensaje) {
 	FreeStringArray(&dataStr);
 }
 
-void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner) {
+void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner, char* nombreArchivo) {
 
 	char** comandoStr = string_split(mensaje->comando, " ");
 	char** dataStr = string_split(mensaje->data, " ");
@@ -335,7 +338,13 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner) {
 			hiloJobInfo->socketFd = -1;
 			hiloJobInfo->parametros = NULL;
 			hiloJobInfo->parametrosError = NULL;
-			hiloJobInfo->nombreArchivo = string_duplicate(dataStr[i++]);
+
+			if(nombreArchivo){
+				hiloJobInfo->nombreArchivo = string_duplicate(nombreArchivo);
+				i++;
+			} else{
+				hiloJobInfo->nombreArchivo = string_duplicate(dataStr[i++]);
+			}
 
 			int archivosTotalesAProcesar = atoi(dataStr[i++]);
 			int leerHasta = i + archivosTotalesAProcesar;
@@ -379,6 +388,12 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner) {
 		hiloJobInfo->parametrosError = NULL;
 		hiloJobInfo->nombreArchivo = string_duplicate(
 				comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO]);
+
+		if(nombreArchivo){
+			hiloJobInfo->nombreArchivo = string_duplicate(nombreArchivo);
+		} else{
+			hiloJobInfo->nombreArchivo = string_duplicate(comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO]);
+		}
 
 		char* parametrosBuffer = string_new();
 

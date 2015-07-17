@@ -30,6 +30,9 @@ int recibir(int socket, mensaje_t* mensaje){
 	if (mensaje->dataSize != 0){
 		while(!(recibido == mensaje->dataSize)){
 		   recibido += recv(socket, mensaje->data + recibido, mensaje->dataSize - recibido, 0);
+		   if ( recibido == -1){
+			   return DESCONECTADO;
+		   }
 		}
 		//printf("data recibido %d\n", recibido);
 		//printf("datos: %s\n", mensaje->data);
