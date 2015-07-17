@@ -46,7 +46,7 @@ int getFSSocket();
 t_dictionary *addFileFullData(int sckt, char* path, Message *recvMessage,t_dictionary *file_StatusData);
 void reloadFilaDeFileFullData(t_list *fullData,int nroDeBloqe,t_dictionary *file_StatusData);
 t_dictionary *getNodoState(char *ipNroNodo);
-int getNodoState_OperacionesEnProceso(t_dictionary *nodoState);
+int *getNodoState_OperacionesEnProceso(t_dictionary *nodoState);
 t_list *getNodoState_listaTemporales(t_dictionary *nodoState);
 void informarTareasPendientesDeMapping(char *path,int socket,t_dictionary *fileState);
 //nodosData
@@ -283,7 +283,7 @@ t_dictionary* crearFileState(int jobSocket,char *path, int cantidadDeBloques){
 void reloadFilaDeFileFullData(t_list *CopiasfullData,int nroDeBloqe,t_dictionary *file_StatusData)
 {
 	//--> FS responde con bloque de archivo pedido
-	//-Comando: "DataFileResponse rutaDelArchivo Disponible"
+	//-Comando: "DataFileResponse rutaDelArchivo nroDeSocket Disponible"
 	//-Data: Bloque
 	// Ej: "0;Nodo1;3;Nodo8;2;Nodo2;45;"
 
@@ -553,9 +553,9 @@ t_dictionary *getNodoState(char *ipNroNodo)
 	return nodoState;
 }
 
-int getNodoState_OperacionesEnProceso(t_dictionary *nodoState)
+int *getNodoState_OperacionesEnProceso(t_dictionary *nodoState)
 {
-	int operacionesEnProceso = dictionary_get(nodoState,K_Nodo_OperacionesEnProceso);
+	int *operacionesEnProceso = dictionary_get(nodoState,K_Nodo_OperacionesEnProceso);
 	return operacionesEnProceso;
 }
 

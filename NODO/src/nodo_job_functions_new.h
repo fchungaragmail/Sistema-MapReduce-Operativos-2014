@@ -24,7 +24,7 @@ typedef struct {
 
 
 int mapping(char *script, int numeroBloque, char *archivoTemporal1, char* archivoTemporal2);
-int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal);
+int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal, char* ipNodoFallido);
 
 
 #endif /* NODO_JOB_FUNCTIONS_NEW_H_ */

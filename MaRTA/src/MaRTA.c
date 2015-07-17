@@ -120,7 +120,9 @@ void planificarHilo(void* args){
 			int a = 1;
 		}
 		bool finalizarHilo = processMessage(recvMessage,infoThread);
+		pthread_mutex_lock(mutex);
 		list_remove(colaDePedidos,0);
+		pthread_mutex_unlock(mutex);
 		if(finalizarHilo){
 			break;
 		}
