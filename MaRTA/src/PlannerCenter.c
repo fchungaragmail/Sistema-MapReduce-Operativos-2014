@@ -985,9 +985,12 @@ void decrementarOperacionesEnReduceList(infoHilo_t *infoThread)
 
 void liberarMensaje(Message *msj)
 {
-	//return;
-	//free(msj->mensaje->comando);
-	//free(msj->mensaje->data);
+
+	if(msj->mensaje->dataSize > 1){
+		//TODO aca pincha
+		//free(msj->mensaje->data);
+	}
+	free(msj->mensaje->comando);
 	free(msj->mensaje);
 	free(msj);
 }

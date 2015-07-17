@@ -104,11 +104,11 @@ typedef enum
 #define K_HiloDic_Mutex "HiloDic_Mutex"
 
 //Varias
-#define K_FS_IP -1 //DEFINIR
-#define K_FS_PUERTO -1 //DEFINIR
+#define K_FS_IP "192.168.3.77" //DEFINIR
+#define K_FS_PUERTO "3000" //DEFINIR
 
 //Simulacion
-#define K_SIMULACION
+//#define K_SIMULACION
 #define K_Simulacion_ScktJob 	5
 #define K_Simulacion_ScktFS 	3
 

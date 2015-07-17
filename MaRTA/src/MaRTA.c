@@ -72,10 +72,10 @@ int main(void) {
 #else
 
 		int i=0;
-		while(1)//fileSystemDisponible)
+		while(fileSystemDisponible)
 		{
 			recvMessage = listenConnections();
-			//administrarHilos();
+			administrarHilos();
 		}
 
 		closeServidores();
@@ -168,8 +168,8 @@ void initMaRTA(){
 	initConexiones();
 
 	//CONEXION A FILE SYSTEM !!!
-	//connectToFileSystem();
-	//fileSystemDisponible = true;
+	connectToFileSystem();
+	fileSystemDisponible = true;
 
 
 #endif
@@ -299,5 +299,5 @@ void administrarHilos(){
 void connectToFileSystem()
 {
 	int fileSystemSocket = connectToFS();
-	addFSConnection(fileSystemSocket);
+	//addFSConnection(fileSystemSocket);
 }

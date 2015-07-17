@@ -28,7 +28,7 @@
 // CONSTANTES
 
 #define LOCALHOST "127.0.0.1"
-#define K_PUERTO_LOCAL 9015
+#define K_PUERTO_LOCAL 9001
 #define MAX_CONNECTIONS 100
 
 // ESTRUCTURAS
@@ -205,8 +205,8 @@ int connectToFS(){
 		exit(-1);
 	}
 	their_addr.sin_family = AF_INET;
-	their_addr.sin_port = htons(K_FS_IP);
-	inet_aton(K_FS_PUERTO, &(their_addr.sin_addr));
+	their_addr.sin_port = htons(atoi(K_FS_PUERTO));
+	inet_aton(K_FS_IP, &(their_addr.sin_addr));
 	memset(&(their_addr.sin_zero), '\o', 8);
 
 	if (connect(socketFd, (Sockaddr_in*) &their_addr, sizeof(Sockaddr_in))
@@ -289,7 +289,7 @@ Message *crearMessageWithCommand(char *command,int socket)
 	newConnection=malloc(sizeof(Message));
 	newConnection->mensaje=malloc(sizeof(mensaje_t));
 
-	newConnection->mensaje->comandoSize=(strlen(command));
+	newConnection->mensaje->comandoSize=(strlen(command)+1);
 	newConnection->mensaje->comando=malloc(strlen(command)+1);
 	strcpy(newConnection->mensaje->comando,command);
 	newConnection->sockfd=socket;
