@@ -720,6 +720,11 @@ int dataFile(char* argumentos, Conexion_t* conexion)
 	enviar(conexion->sockfd,respuesta);
 	pthread_mutex_unlock(&(conexion->mSocket));
 
+	pthread_mutex_lock(&mLogFile);
+	log_info(logFile,"Enviada la tabla de bloques a MaRTA del archivo: %s",
+			archivo->nombre);
+	pthread_mutex_unlock(&mLogFile);
+
 	return EXIT_SUCCESS;
 }
 
@@ -770,6 +775,7 @@ void actualizarEstadoArchivos()
 		log_info(logFile, actualizaciones);
 		pthread_mutex_unlock(&mLogFile);
 	}
+	free(actualizaciones);
 }
 
 
