@@ -26,6 +26,7 @@ int main() {
 	mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
 	log_nodo = log_create("./log_nodo", "NODO", true, LOG_LEVEL_TRACE);
 	getConfig();
+	sem_init(&sMaps,0,10);
 
 	connectToFileSistem(sockFS);
 	pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockFS);
@@ -335,7 +336,9 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 		char *archivoTemporal2 = string_new();
 		string_append_with_format(&archivoTemporal2, "%s%s", DIR_TEMP, result[1]);
 
+		sem_wait(&sMaps);
 		int mapResult = mapping(nombreScript, numBloque, 	archivoTemporal1, archivoTemporal2);
+		sem_post(&sMaps);
 
 		buffer_send->dataSize = 1;
 		buffer_send->data = "\0";

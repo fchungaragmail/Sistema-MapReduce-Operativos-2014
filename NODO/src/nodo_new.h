@@ -26,6 +26,7 @@
 #include "nodo_fs_functions_new.h"
 #include "nodo_job_functions_new.h"
 #include "sockets_struct_new.h"
+#include <semaphore.h>
 
 //Global Variables
 int PUERTO_FS;
@@ -45,6 +46,7 @@ void setValuesToSockaddr(Sockaddr_in*, int, char*);
 void *fs_nodo_conection_handler(void*);
 void *map_conection_handler(void*);
 void *reduce_conection_handler(void*);
+sem_t sMaps;
 
 
 #endif /* NODO_NEW_H_ */
