@@ -300,6 +300,12 @@ void PlanificarHilosMapper(mensaje_t* mensaje) {
 		hiloJobInfo->nroBloque = atoi(dataStr[i++]);
 		hiloJobInfo->nombreArchivo = string_duplicate(dataStr[i++]);
 
+		char* parametrosBuffer = string_new();
+		string_append_with_format(&parametrosBuffer, "%s", config_get_string_value(configuracion, "MAPPER"));
+
+		hiloJobInfo->parametros = strdup(parametrosBuffer);
+
+		free(parametrosBuffer);
 		CrearHiloJob(hiloJobInfo, TIPO_HILO_MAPPER);
 		log_info(logProcesoJob,
 				"Se creó un Hilo Mapper con los siguientes parametros\nNombre del Archivo temporal: %s\nNumero de bloque :%d\n",
@@ -350,7 +356,8 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner, char* nombreArch
 			int leerHasta = i + archivosTotalesAProcesar;
 
 			char* parametrosBuffer = string_new();
-			string_append_with_format(&parametrosBuffer, "%d %s",
+
+			string_append_with_format(&parametrosBuffer, "%s %d %s", config_get_string_value(configuracion, "REDUCE"),
 					archivosTotalesAProcesar, dataStr[i++]);
 
 			while (i < leerHasta) {
@@ -360,6 +367,8 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner, char* nombreArch
 			hiloJobInfo->parametros = strdup(parametrosBuffer);
 
 			CrearHiloJob(hiloJobInfo, TIPO_HILO_REDUCE);
+
+			free(parametrosBuffer);
 			log_info(logProcesoJob,
 					"Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros\nNombre del Archivo temporal: %s\nParametros: %s\n",
 					hiloJobInfo->nombreArchivo, hiloJobInfo->parametros);
@@ -397,13 +406,15 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner, char* nombreArch
 
 		char* parametrosBuffer = string_new();
 
-		string_append_with_format(&parametrosBuffer, "%s", dataStr[i++]);
+		string_append_with_format(&parametrosBuffer, "%s %s",config_get_string_value(configuracion, "REDUCE"), dataStr[i++]);
 		while (dataStr[i] != NULL) {
 			string_append_with_format(&parametrosBuffer, " %s", dataStr[i++]);
 		}
 
 		hiloJobInfo->parametros = strdup(parametrosBuffer);
 		CrearHiloJob(hiloJobInfo, TIPO_HILO_REDUCE);
+
+		free(parametrosBuffer);
 		log_info(logProcesoJob,
 				"Se creó un Hilo Reduce sin combiner con los siguientes parametros\nNombre del Archivo temporal: %s\nParametros: %s\n",
 				hiloJobInfo->nombreArchivo, hiloJobInfo->parametros);
