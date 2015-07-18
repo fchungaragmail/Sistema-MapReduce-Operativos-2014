@@ -498,6 +498,8 @@ Message* obtenerProximoPedido(Message *recvMessage,infoHilo_t *infoThread)
 	bool *nodosTodosDisp = obtenerEstanTodosDisponibles(recvMessage,infoThread);
 	Message *mensajeAEnviar;
 
+	char *comandoResponse = deserializeComando(recvMessage);
+	bool *_response = deserializeRequestResponse(recvMessage,K_Job_ReduceResponse);
 	if(*todosMappeados && *nodosTodosDisp){
 		mensajeAEnviar = armarPedidoDeReduce(recvMessage,infoThread);
 	}
@@ -518,10 +520,8 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 	int tipoComando = obtenerIdParaComando(recvMessage);
 	char *path = deserializeFilePath(recvMessage,tipoComando);
 	informarTareasPendientesDeMapping(path,*(infoThread->jobSocket),infoThread->fileState);
-
 	t_list *blockStateArray = dictionary_get(infoThread->fileState,K_FileState_arrayOfBlocksStates);
 	int size_fileState= list_size(blockStateArray);
-
 	char *log = string_from_format("el archivo %s con socket %d esta mappeado!",infoThread->filePathAProcesar,*(infoThread->jobSocket));
 	log_trace(logFile,log);
 	free(log);
@@ -531,8 +531,8 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 	t_list *nodosEnBlockState = obtenerNodosEnBlockStateArray(infoThread->fileState);
 	char *finalStream;
 
-	if(*tieneCombinerMode){
 
+	if(*tieneCombinerMode){
 		//planificar con combiner
 		char *comandoResponse = deserializeComando(recvMessage);
 
@@ -543,7 +543,6 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 		//*data:      Nodo1 nombreArchTemp1 CantDeArchEnNodoAProcesar RAT1 RAT2 -etc...-
 		//         ...Nodo2 nombreArchTemp2 CantDeArchEnNodoAProcesar RTA1 RAT2 -etc...
 		//		   ...Nodo3 ....
-
 			char *_path = deserializeFilePath(recvMessage,K_Job_MapResponse);
 			char *command= string_new();
 			char *stream = string_new();
@@ -752,9 +751,9 @@ Message *armarPedidoDeMap(Message *recvMessage,infoHilo_t *infoThread)
 	char *path = deserializeFilePath(recvMessage,tipoComando);
 	t_list *blockStateArray = dictionary_get(infoThread->fileState,K_FileState_arrayOfBlocksStates);
 	int size_fileState= list_size(blockStateArray);
-
+	printf("ssssss");
 	informarTareasPendientesDeMapping(path,*(infoThread->jobSocket),infoThread->fileState);
-
+	printf("ssssss");
 	char *stream = string_new();
 	int i;
 	bool firstTime = true;
@@ -949,8 +948,9 @@ void actualizarTablas_RtaDeMapExitosa(Message *recvMessage,infoHilo_t *infoThrea
 	*status = K_MAPPED;
 	//Actualizo nodoState
 	decrementarOperacionesEnProcesoEnNodo(IPnroNodo);
-
+	printf("1111");
 	informarTareasPendientesDeMapping(path,*(infoThread->jobSocket),infoThread->fileState);
+	printf("1111");
 	free(path);
 	free(temporaryPath);
 }
@@ -970,8 +970,9 @@ void actualizarTablas_RtaDeMapFallo(Message *recvMessage,infoHilo_t *infoThread)
 	decrementarOperacionesEnProcesoEnNodo(ipNodo);
 	//actualizo blockState
 	*status = K_UNINITIALIZED;
-
+	printf("2222");
 	informarTareasPendientesDeMapping(path,*(infoThread->jobSocket),infoThread->fileState);
+	printf("222");
 	free(path);
 	free(tempPath);
 }
@@ -1065,11 +1066,12 @@ void actualizarTablas_ReduceFallo(char *path,Message *recvMessage,infoHilo_t *in
 	t_list *nodosCaidos =deserializeFailedReduceResponse(recvMessage);
 	int sizeNodosCaidos = list_size(nodosCaidos);
 	int i;
+	printf("el list size es %d\n",sizeNodosCaidos);
 	for(i=0;i<sizeNodosCaidos;i++){
 
 		char *ipNodoCaido = list_get(nodosCaidos,i);
 		char *log = string_from_format("el pedido de reduce al nodo %s fallo, debe estar caido\n",ipNodoCaido);
-		log_trace(logFile,log);	free(log);
+		log_debug(logFile,log);	free(log);
 
 		resetBlockStateConNodo(path,ipNodoCaido,infoThread);
 		darDeBajaCopiaEnBloqueYNodo(ipNodoCaido,infoThread->file_StatusData);
@@ -1145,7 +1147,9 @@ void sacarCargasDeNodos_FalloDeJob(infoHilo_t *infoThread){
 	for(i=0;i<size;i++){
 		char *ip = list_get(infoThread->listaDeNodos_EnCasoDeFalloDeJob,i);
 		decrementarOperacionesEnProcesoEnNodo(ip);
+		printf("3333");
 		informarTareasPendientesDeMapping(infoThread->filePathAProcesar,*(infoThread->jobSocket),infoThread->fileState);
+		printf("333");
 	}
 	list_destroy(infoThread->listaDeNodos_EnCasoDeFalloDeJob);
 }

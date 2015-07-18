@@ -72,8 +72,7 @@ int main(void) {
 
 #else
 
-		int i=0;
-		while(fileSystemDisponible)
+		while(1)//fileSystemDisponible
 		{
 			recvMessage = listenConnections();
 			administrarHilos();
@@ -95,7 +94,7 @@ void planificarHilo(void* args){
 	int *mJobSocket = malloc(sizeof(int));
 	*mJobSocket = -1;
 	t_list *nodosReduceList_Pedido1= list_create();;
-	t_list *listaDeNodos_EnCasoDeFalloDeJob= list_create();;
+	t_list *listaDeNodos_EnCasoDeFalloDeJob= list_create();
 	bool *yaPediFullDataTable = malloc(sizeof(bool));
 	*yaPediFullDataTable = false;
 
@@ -193,7 +192,7 @@ void administrarHilos(){
 
 			fileSystemDisponible = false;
 			pthread_mutex_lock(&mutexLog);
-			log_trace(logFile,"El FileSystem cayo, MaRTA no puede seguir operando.");
+			log_debug(logFile,"El FileSystem cayo, MaRTA no puede seguir operando.");
 			pthread_mutex_unlock(&mutexLog);
 			//TODO liberar todas las estructuras.
 			return;
@@ -220,7 +219,7 @@ void administrarHilos(){
 		}
 	}
 
-	//TODO FS - Implementar bien esto, para muchos archivos falla
+	//TODO FS - Implementar bien esto, para iguales archivos con distinto job falla
 	int fsSocket = getFSSocket();
 	if(fsSocket == recvMessage->sockfd){
 
