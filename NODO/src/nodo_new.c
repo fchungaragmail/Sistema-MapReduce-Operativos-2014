@@ -27,8 +27,8 @@ int main() {
 	log_nodo = log_create("./log_nodo", "NODO", true, LOG_LEVEL_TRACE);
 	getConfig();
 
-	//connectToFileSistem(sockFS);
-	//pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockFS);
+	connectToFileSistem(sockFS);
+	pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockFS);
 	//pthread_join(fs_handler, NULL);
 
 	int value = initServer(&sockFD);
@@ -310,11 +310,23 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 		log_info(log_nodo,"RECIBIDA SOLICITUD MAPPING");
 
 		/*****modificar la ruta, no siempre es map.sh, AÑADIR EN EL COMANDO EL NOMBRE DEL SCRIPT***********/
-		FILE* scriptFD = fopen("/tmp/map.sh", "w+");
-		fwrite( buffer_recv->data, buffer_recv->dataSize, 1,scriptFD);
-		fclose(scriptFD);
+
 
 		result = string_split(buffer_recv->comando, " "); //pos 0 = numBloque  , pos 1 = nombreArchivoTemporal
+
+		char *nombreScript = string_new();
+		string_append_with_format(&nombreScript, "%s%s", DIR_TEMP, result[2]);
+
+		if (access(nombreScript, F_OK) == -1)
+		{
+			FILE* scriptFD = fopen(nombreScript, "w+");
+			fwrite( buffer_recv->data, buffer_recv->dataSize, 1,scriptFD);
+			fclose(scriptFD);
+		}
+
+		char *permisoEjecucionScript = string_new();
+		string_append_with_format(&permisoEjecucionScript, "chmod +x %s", nombreScript);
+		system(permisoEjecucionScript);
 
 		numBloque = atoi(result[3]); //paso el string "numBloque" a tipo int , pq mapping recibe int NumBloque
 
@@ -324,7 +336,7 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 		char *archivoTemporal2 = string_new();
 		string_append_with_format(&archivoTemporal2, "%s%s", DIR_TEMP, result[1]);
 
-		int mapResult = mapping("/tmp/map.sh", numBloque, 	archivoTemporal1, archivoTemporal2);
+		int mapResult = mapping(nombreScript, numBloque, 	archivoTemporal1, archivoTemporal2);
 
 		buffer_send->dataSize = 1;
 		buffer_send->data = "\0";

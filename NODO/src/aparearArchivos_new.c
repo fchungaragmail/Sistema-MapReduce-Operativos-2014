@@ -6,7 +6,7 @@
  */
 
 #include "aparearArchivos_new.h"
-
+#include "nodo_new.h"
 char* aparearArchivos(char* listaArchivos) {
 
 	int p[2];
@@ -39,14 +39,19 @@ char* aparearArchivos(char* listaArchivos) {
 		char *streamApareo = string_new();
 		int i = 0;
 		while(archivo[i] != NULL){
+			char *archivoTemporal1 = string_new();
+			string_append_with_format(&archivoTemporal1, "%s%s", DIR_TEMP, archivo[i]);
 
 			struct stat infoArchivo;
-			stat(archivo[i], &infoArchivo);
+			stat(archivoTemporal1, &infoArchivo);
 			char *contenido = malloc(infoArchivo.st_size);
-			int fdArchivo = open(archivo[i], O_RDONLY);
+
+
+			int fdArchivo = open(archivoTemporal1, O_RDONLY);
 			read(fdArchivo, contenido, infoArchivo.st_size);
 			close(fdArchivo);
-
+			realloc(contenido, infoArchivo.st_size + 1);
+			contenido[infoArchivo.st_size] = '\0';
 			string_append(&streamApareo, contenido);
 			//write(apareoArchivo, contenido, infoArchivo.st_size);
 
@@ -69,8 +74,12 @@ char* aparearArchivos(char* listaArchivos) {
 
 		//open(path, O_RDONLY); //proximo fd, se asocia a la entrada estandar
 
-		close(1); //cierro salida estandar, el fd queda libre, proximo fd se asociara a stdout
-		open(apareoOrdenado, O_RDWR | O_CREAT); //fd que se asocia a salida standard
+		close(1);
+		creat(apareoOrdenado, 0777);
+
+		//close(1); //cierro salida estandar, el fd queda libre, proximo fd se asociara a stdout
+		//open(apareoOrdenado, O_RDWR | O_CREAT); //fd que se asocia a salida standard
+
 		system("sort"); //se aplica sort a lo que hay en stdin (fd del archivo) y sale por stdout (fd archivo ordenado)
 	}
 
