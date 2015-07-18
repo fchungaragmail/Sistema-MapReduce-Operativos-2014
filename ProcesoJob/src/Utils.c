@@ -35,6 +35,31 @@ mensaje_t* CreateMensaje(char* comandoStr, char* dataStr) {
 	return mensaje;
 }
 
+mensaje_t* CreateMensajeParaHilo(char* comandoStr, char* dataStr) {
+
+	printf(dataStr);
+
+	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
+
+	if (comandoStr != NULL) {
+		mensaje->comando = strdup(comandoStr);
+		mensaje->comandoSize = strlen(comandoStr) + 1;
+	} else {
+		mensaje->comando = strdup("\0");
+		mensaje->comandoSize = 1;
+	}
+
+	if (dataStr != NULL) {
+		mensaje->data = strdup(dataStr);
+		mensaje->dataSize = strlen(dataStr);
+	} else {
+		mensaje->data = strdup("\0");
+		mensaje->dataSize = 1;
+	}
+
+	return mensaje;
+}
+
 void FreeStringArray(char*** stringArray) {
 	char** array = *stringArray;
 

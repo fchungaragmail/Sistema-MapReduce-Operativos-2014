@@ -9,6 +9,7 @@
 #include <commons/config.h>
 #include <commons/string.h>
 #include <commons/log.h>
+#include <fcntl.h>
 
 int socketMartaFd = -1;
 char* scriptMapperStr = NULL;
@@ -17,6 +18,7 @@ pthread_t threadPedidosMartaHandler;
 pthread_t threadProcesarHilos;
 t_config* configuracion;
 pthread_mutex_t mMarta;
+pthread_mutex_t mLog;
 t_log* logProcesoJob;
 t_dictionary* diccArchivos = NULL;
 
@@ -31,16 +33,16 @@ void* pedidosMartaHandler(void* arg) {
 		mensajeMarta = malloc(sizeof(mensaje_t));
 		recibir(socketMartaFd, mensajeMarta);
 #else
-		static int alternar = 0;
+		static int alternar = 1;
 		if (alternar == 0) {
 			mensajeMarta =
 					CreateMensaje("mapFile todo1.txt",
-							"255.0.0.1 250 11 /ruta_temp1 244.0.1.7 250 12 /ruta_temp2 128.3.1.3 250 999 /ruta_temp3");
+							"192.168.0.103 6000 0 prueba.txt");
 			alternar = 1;
 		} else if (alternar == 1) {
 			mensajeMarta =
-					CreateMensaje("reduceFileSinCombiner todoSC1.txt",
-							"227.4.6.1 999 2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 1 ruta_temp5");
+					CreateMensaje("reduceFileSinCombiner prueba-final.txt",
+							"192.168.0.103 6000 1 prueba.txt");
 			alternar = 2;
 		} else if (alternar == 2) {
 			mensajeMarta =
@@ -57,8 +59,10 @@ void* pedidosMartaHandler(void* arg) {
 			alternar = 0;
 		}
 #endif
+		pthread_mutex_lock(&mLog);
 		log_info(logProcesoJob, "Recibido del MaRTA:\nComando: %s\nData: %s\n",
 				mensajeMarta->comando, mensajeMarta->data);
+		pthread_mutex_unlock(&mLog);
 
 		char** comandoStr = string_split(mensajeMarta->comando, " ");
 
@@ -99,7 +103,7 @@ void* pedidosMartaHandler(void* arg) {
 		FreeMensaje(mensajeMarta);
 
 #ifdef BUILD_CON_MOCK_MARTA
-		sleep(15);
+		sleep(500);
 #endif
 
 	}
@@ -127,23 +131,19 @@ void IniciarConfiguracion() {
 
 char* LeerArchivo(char* nombreArchivo) {
 
-	FILE* archivoScript = fopen(nombreArchivo, "rb");
-	int sizeScript;
-	if (!archivoScript) {
+	int archivo = open(nombreArchivo,O_RDONLY);
+	if (archivo == -1 ) {
 		log_error(logProcesoJob, "Error leyendo archivo %s!\n", nombreArchivo);
 		Terminar(EXIT_ERROR);
 	}
 
-	fseek(archivoScript, 0, SEEK_END);
-	sizeScript = ftell(archivoScript);
-	rewind(archivoScript);
+	//leer todo el archivo
+	struct stat infoArchivo;
+	stat(nombreArchivo, &infoArchivo);
+	char *contenido = malloc(infoArchivo.st_size);
+	read(archivo, contenido, infoArchivo.st_size);
 
-	char* archivoStr = malloc(sizeScript);
-	fread(archivoStr, sizeof(char), sizeScript, archivoScript);
-
-	fclose(archivoScript);
-
-	return archivoStr;
+	return contenido;
 }
 
 void Terminar(int exitStatus) {
@@ -190,6 +190,7 @@ void IniciarConexionMarta() {
 
 	pthread_create(&threadPedidosMartaHandler, NULL, pedidosMartaHandler, NULL);
 	pthread_mutex_init(&mMarta, NULL);
+	pthread_mutex_init(&mLog, NULL);
 
 }
 
