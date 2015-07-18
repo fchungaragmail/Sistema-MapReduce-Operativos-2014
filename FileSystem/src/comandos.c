@@ -56,7 +56,7 @@ void initComandos()
 	pthread_mutex_init(&mNodosOnline, NULL);
 	comandosRemotos = dictionary_create();
 	dictionary_put(comandosRemotos,"nombre",1);
-	dictionary_put(comandosRemotos,"dataFile",2);
+	dictionary_put(comandosRemotos,"DataFile",2);
 	dictionary_put(comandosRemotos,"respuesta",3);
 	dictionary_put(comandosRemotos,"archivoResultado",4);
 }
