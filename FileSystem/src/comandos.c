@@ -757,14 +757,16 @@ void actualizarEstadoArchivos()
 							"El archivo %s ya no se encuentra disponible.\n",
 							archivo->nombre);
 					archivo->estado = NO_DISPONIBLE;
+					break;
 				}
 		if ((archivo->estado == NO_DISPONIBLE) &&
-				(bloquesDisponibles = archivo->bloques->elements_count))
+				(bloquesDisponibles == archivo->bloques->elements_count))
 				{
 					string_append_with_format(&actualizaciones,
 							"El archivo %s se encuentra disponible nuevamente.\n",
 							archivo->nombre);
 					archivo->estado = DISPONIBLE;
+					break;
 				}
 	}
 	pthread_mutex_unlock(&mListaArchivos);
