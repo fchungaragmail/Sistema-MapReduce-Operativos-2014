@@ -610,7 +610,7 @@ int nomb(char* argumentos, Conexion_t* conexion)
 			pthread_mutex_unlock(&mConexiones);
 
 			pthread_mutex_lock(&mLogFile);
-			log_info(logFile, "Reconectado con el nodo %s", nodo->nombre);
+			log_info(logFile, "Reconectado con %s", nodo->nombre);
 			pthread_mutex_unlock(&mLogFile);
 
 			actualizarEstadoArchivos();
@@ -757,7 +757,7 @@ void actualizarEstadoArchivos()
 							"El archivo %s ya no se encuentra disponible.\n",
 							archivo->nombre);
 					archivo->estado = NO_DISPONIBLE;
-					break;
+					continue;
 				}
 		if ((archivo->estado == NO_DISPONIBLE) &&
 				(bloquesDisponibles == archivo->bloques->elements_count))
@@ -766,7 +766,7 @@ void actualizarEstadoArchivos()
 							"El archivo %s se encuentra disponible nuevamente.\n",
 							archivo->nombre);
 					archivo->estado = DISPONIBLE;
-					break;
+					continue;
 				}
 	}
 	pthread_mutex_unlock(&mListaArchivos);
