@@ -336,7 +336,7 @@ int importar(char* argumentos){
 				pthread_t* tEnvio = malloc(sizeof(pthread_t));
 				list_add(listaThreads, tEnvio);
 				sends++;
-				pthread_create(&tEnvio, NULL, enviarBloque, envio);
+				pthread_create(tEnvio, NULL, enviarBloque, envio);
 			}
 			list_add_in_index(listaBloques,j,ubicaciones);
 			bytesEnviados += TAMANIO_BLOQUE;
