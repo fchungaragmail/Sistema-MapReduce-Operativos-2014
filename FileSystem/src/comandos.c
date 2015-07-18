@@ -610,7 +610,7 @@ int nomb(char* argumentos, Conexion_t* conexion)
 			pthread_mutex_unlock(&mConexiones);
 
 			pthread_mutex_lock(&mLogFile);
-			log_info(logFile, "Reconectado con el nodo %s", nodo->nombre);
+			log_info(logFile, "Reconectado con %s", nodo->nombre);
 			pthread_mutex_unlock(&mLogFile);
 
 			actualizarEstadoArchivos();
@@ -720,6 +720,11 @@ int dataFile(char* argumentos, Conexion_t* conexion)
 	enviar(conexion->sockfd,respuesta);
 	pthread_mutex_unlock(&(conexion->mSocket));
 
+	pthread_mutex_lock(&mLogFile);
+	log_info(logFile,"Enviada la tabla de bloques a MaRTA del archivo: %s",
+			archivo->nombre);
+	pthread_mutex_unlock(&mLogFile);
+
 	return EXIT_SUCCESS;
 }
 
@@ -752,14 +757,16 @@ void actualizarEstadoArchivos()
 							"El archivo %s ya no se encuentra disponible.\n",
 							archivo->nombre);
 					archivo->estado = NO_DISPONIBLE;
+					continue;
 				}
 		if ((archivo->estado == NO_DISPONIBLE) &&
-				(bloquesDisponibles = archivo->bloques->elements_count))
+				(bloquesDisponibles == archivo->bloques->elements_count))
 				{
 					string_append_with_format(&actualizaciones,
 							"El archivo %s se encuentra disponible nuevamente.\n",
 							archivo->nombre);
 					archivo->estado = DISPONIBLE;
+					continue;
 				}
 	}
 	pthread_mutex_unlock(&mListaArchivos);
@@ -770,6 +777,7 @@ void actualizarEstadoArchivos()
 		log_info(logFile, actualizaciones);
 		pthread_mutex_unlock(&mLogFile);
 	}
+	free(actualizaciones);
 }
 
 
