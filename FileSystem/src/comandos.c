@@ -622,7 +622,7 @@ int nomb(char* argumentos, Conexion_t* conexion)
 
 	strcpy(conexion->nombre, args[0]);
 	pthread_mutex_lock(&mLogFile);
-	log_info(logFile, "Identificado el nodo %s", conexion->nombre);
+	log_info(logFile, "Identificado %s", conexion->nombre);
 	pthread_mutex_unlock(&mLogFile);
 	if (strcmp(conexion->nombre, "MaRTA") != 0)
 	{
