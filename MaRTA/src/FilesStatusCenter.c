@@ -622,9 +622,10 @@ void informarTareasPendientesDeMapping(char *path,int socket,t_dictionary *fileS
 		StatusBlockState *state = dictionary_get(blockState,K_BlockState_state);
 		if((*state)==K_MAPPED){count--;}
 	}
-
+	pthread_mutex_lock(&mutexLog);
 	char *log = string_from_format("el job %d para el archivo %s debe mappear %d bloques",socket,path,count);
 	log_debug(logFile,log); free(log);
+	pthread_mutex_unlock(&mutexLog);
 }
 
 //fullDataTable

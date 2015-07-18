@@ -108,7 +108,7 @@ typedef enum
 #define K_FS_PUERTO "3000" //DEFINIR
 
 //Simulacion
-//#define K_SIMULACION
+#define K_SIMULACION
 #define K_Simulacion_ScktJob 	5
 #define K_Simulacion_ScktFS 	3
 

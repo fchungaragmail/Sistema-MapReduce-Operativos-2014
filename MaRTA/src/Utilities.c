@@ -11,6 +11,7 @@
 
 char* intToCharPtr(int x)
 {
+
 	char *ptr;
 	ptr=malloc(2*sizeof(char));
 	sprintf(ptr,"%d",x);

@@ -177,6 +177,10 @@ Message* listenConnections()
 					printf("se recibio la data %s \n",_recvMesage->mensaje->data);
 					printf("se recibio comandoSize %d \n",_recvMesage->mensaje->comandoSize);
 					printf("se recibio el comando %s \n",_recvMesage->mensaje->comando);
+					int _s = i;
+					_recvMesage->sockfd = _s;
+					return _recvMesage;
+
 				}
 
 				//*******************
@@ -220,10 +224,11 @@ int connectToFS(){
 	FD_SET(socketFd, &master); // añadir al conjunto maestro
 	if (socketFd > fdmax) {fdmax = socketFd;} // actualizar el máximo
 
-	addFSConnection(socketFd);
+	int _socket = socketFd;
+	addFSConnection(_socket);
 
 	//HANDSHAKE A FS
-	Message *msj = crearMessageWithCommand("nombre MaRTA",socketFd);
+	Message *msj = crearMessageWithCommand("nombre MaRTA",_socket);
 	enviar(msj->sockfd,msj->mensaje);
 	return socketFd;
 
@@ -292,7 +297,8 @@ Message *crearMessageWithCommand(char *command,int socket)
 	newConnection->mensaje->comandoSize=(strlen(command)+1);
 	newConnection->mensaje->comando=malloc(strlen(command)+1);
 	strcpy(newConnection->mensaje->comando,command);
-	newConnection->sockfd=socket;
+	int _s = socket;
+	newConnection->sockfd= _s;
 
 	return newConnection;
 }

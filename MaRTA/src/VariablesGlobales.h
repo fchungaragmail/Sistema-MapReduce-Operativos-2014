@@ -22,6 +22,7 @@ extern sem_t semNodosData;
 extern sem_t semNodoState;
 extern sem_t semFullDataTables;
 extern sem_t semEnviar;
+extern pthread_mutex_t mutexLog;
 
 extern FILE *logFile;
 

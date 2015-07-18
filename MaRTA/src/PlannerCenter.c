@@ -63,7 +63,10 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 
 		case K_Job_NewFileToProcess:
 
+			pthread_mutex_lock(&mutexLog);
 			log_debug(logFile,"PlannerCenter : planificar Job_NewFileToProcess");
+			pthread_mutex_unlock(&mutexLog);
+
 			addNewConnection(recvMessage->sockfd);
 			char* filePath = deserializeFilePath(recvMessage,K_Job_NewFileToProcess);
 			bool *soportaCombiner = deserializeSoportaCombiner(recvMessage);
@@ -552,25 +555,25 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 			for(i=0;i<cantidadDeNodos;i++){
 
 				t_dictionary *nodo= list_get(nodosEnBlockState,i);
-				char *IPnodoEnBlockState  = dictionary_get(nodo,"ip");
+				char *ipNodoEnBlockState  = dictionary_get(nodo,"ip");
 				char *puertonodoEnBlockState  = dictionary_get(nodo,"puerto");
-				t_list *pathsTemporalesParaNodo = obtenerPathsTemporalesParaArchivo(IPnodoEnBlockState,infoThread->fileState);
+				t_list *pathsTemporalesParaNodo = obtenerPathsTemporalesParaArchivo(ipNodoEnBlockState,infoThread->fileState);
 				int cantidadDePathsTempEnNodo = list_size(pathsTemporalesParaNodo);
 				char *_pathTempo = crearPathTemporal(_path);
 
 				//actualizar a tablas
 				t_dictionary *reduceBlock = dictionary_create();
 				dictionary_put(reduceBlock,"reduceBlock_tempPath",_pathTempo);
-				dictionary_put(reduceBlock,"reduceBlock_ip",IPnodoEnBlockState);
+				dictionary_put(reduceBlock,"reduceBlock_ip",ipNodoEnBlockState);
 				dictionary_put(reduceBlock,"reduceBlock_puerto",puertonodoEnBlockState);
 				list_add(infoThread->nodosReduceList_Pedido1,reduceBlock);
-				list_add(infoThread->listaDeNodos_EnCasoDeFalloDeJob,IPnodoEnBlockState);
-				incrementarOperacionesEnProcesoEnNodo(IPnodoEnBlockState);
+				list_add(infoThread->listaDeNodos_EnCasoDeFalloDeJob,ipNodoEnBlockState);
+				incrementarOperacionesEnProcesoEnNodo(ipNodoEnBlockState);
 
 				if(!firstTime){ string_append(&stream," "); }
 				if(firstTime){ firstTime = false; }
 				//agregar a el serializado --> "Nodo1 nombreArchTemp1 CantDeArchEnNodoAProcesar"
-				string_append(&stream,IPnodoEnBlockState);
+				string_append(&stream,ipNodoEnBlockState);
 				string_append(&stream," "); string_append(&stream,puertonodoEnBlockState);
 				string_append(&stream," "); string_append(&stream,_pathTempo);
 				addIntToStream(stream,cantidadDePathsTempEnNodo);
@@ -580,7 +583,8 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 
 					char *tempPath = list_get(pathsTemporalesParaNodo,j);
 					//agregar a el serializado "tempPath"
-					string_append(&stream," "); string_append(&stream,tempPath);
+					string_append(&stream," ");
+					string_append(&stream,tempPath);
 				}
 				list_destroy(pathsTemporalesParaNodo);
 

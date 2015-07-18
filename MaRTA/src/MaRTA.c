@@ -38,6 +38,7 @@ sem_t semFilesToProcess;
 sem_t semFilesToProcessPerJob;
 sem_t semNodosData;
 sem_t semEnviar;
+pthread_mutex_t mutexLog;
 t_list *hilosData;
 Message *recvMessage;
 bool fileSystemDisponible;
@@ -105,7 +106,7 @@ void planificarHilo(void* args){
 	infoThread->listaDeNodos_EnCasoDeFalloDeJob = listaDeNodos_EnCasoDeFalloDeJob;
 	infoThread->yaPediFullDataTable = yaPediFullDataTable;
 	//TODO liberar infoThread
-	char *path = dictionary_get(hiloDic,K_HiloDic_Path);int i=1;
+
 	while(1){
 
 		sem_wait(semHilo);
@@ -113,12 +114,6 @@ void planificarHilo(void* args){
 		Message *recvMessage = list_get(colaDePedidos,0);
 		pthread_mutex_unlock(mutex);
 
-		char *log = string_from_format("archivo %s recibe pedido nro %d",path,i);
-		log_debug(logFile,log);free(log); i++;
-
-		if(i==11){
-			int a = 1;
-		}
 		bool finalizarHilo = processMessage(recvMessage,infoThread);
 		pthread_mutex_lock(mutex);
 		list_remove(colaDePedidos,0);
@@ -128,10 +123,13 @@ void planificarHilo(void* args){
 		}
 	}
 
-	//char *path = dictionary_get(hiloDic,K_HiloDic_Path);
+	char *path = dictionary_get(hiloDic,K_HiloDic_Path);
 	int jobSocket = dictionary_get(hiloDic,K_HiloDic_JobSocket);
+
+	pthread_mutex_lock(&mutexLog);
 	char *log = string_from_format("finalizo el hilo con path %s y numeroDeSocket %d",path,jobSocket);
 	log_debug(logFile,log);
+	pthread_mutex_unlock(&mutexLog);
 
 	free(log);
 	//free(path); --> "administrarHilos" mira los paths
@@ -157,6 +155,7 @@ void initMaRTA(){
 	sem_init(&semFilesToProcessPerJob, 0, 1);
 	sem_init(&semFullDataTables, 0, 1);
 	sem_init(&semEnviar, 0, 1);
+	pthread_mutex_init(&mutexLog,NULL);
 
 #ifdef K_SIMULACION
 
@@ -193,7 +192,9 @@ void administrarHilos(){
 		if(recvMessage->sockfd == getFSSocket()){
 
 			fileSystemDisponible = false;
+			pthread_mutex_lock(&mutexLog);
 			log_trace(logFile,"El FileSystem cayo, MaRTA no puede seguir operando.");
+			pthread_mutex_unlock(&mutexLog);
 			//TODO liberar todas las estructuras.
 			return;
 		}
@@ -275,6 +276,7 @@ void administrarHilos(){
 		sem_t *semHilo = malloc(sizeof(sem_t));
 		sem_init(semHilo, 0, 1);
 		char *_path = deserializeFilePath(recvMessage,command);
+
 		t_list *colaDePedidos = list_create();
 		list_add(colaDePedidos,recvMessage);
 		int hiloSocket = recvMessage->sockfd;

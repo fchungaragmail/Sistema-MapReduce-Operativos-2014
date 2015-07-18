@@ -3541,3 +3541,585 @@
 [DEBUG] 21:15:58:261 MaRTA/(6429:6430): el nodo 195.333.2.5 esta procesando 0 pedidos
 [DEBUG] 21:15:58:261 MaRTA/(6429:6430): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 1 bloques
 [DEBUG] 21:15:58:263 MaRTA/(6429:6431): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 12:09:28:679 MaRTA/(2773:2774): archivo /user/juan/datos/temperatura2012.txt/ recibe pedido nro 1
+[DEBUG] 12:09:28:703 MaRTA/(2773:2775): archivo /user/juan/datos/temperatura1888.txt/ recibe pedido nro 1
+[DEBUG] 12:09:28:710 MaRTA/(2773:2775): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 12:09:28:729 MaRTA/(2773:2774): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 12:09:28:741 MaRTA/(2773:2774): archivo /user/juan/datos/temperatura2012.txt/ recibe pedido nro 2
+[DEBUG] 12:09:28:751 MaRTA/(2773:2775): archivo /user/juan/datos/temperatura1888.txt/ recibe pedido nro 2
+[DEBUG] 12:09:28:806 MaRTA/(2773:2774): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 4 bloques
+[DEBUG] 12:09:28:850 MaRTA/(2773:2774): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 12:09:28:815 MaRTA/(2773:2775): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 4 bloques
+[DEBUG] 12:09:28:855 MaRTA/(2773:2775): el nodo 196.422.1.1 esta procesando 1 pedidos
+[DEBUG] 12:09:28:860 MaRTA/(2773:2775): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 12:09:28:862 MaRTA/(2773:2775): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 12:09:28:864 MaRTA/(2773:2774): el nodo 192.456.3.3 esta procesando 1 pedidos
+[DEBUG] 12:09:28:866 MaRTA/(2773:2774): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 12:09:28:889 MaRTA/(2773:2775): el nodo 192.456.8.9 esta procesando 1 pedidos
+[DEBUG] 12:09:28:891 MaRTA/(2773:2775): se envia pedido de map, el stream es 196.422.1.1 11 76 /user/juan/datos/temperatura1888.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura1888.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura1888.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura1888.txt/-3
+
+[DEBUG] 12:09:28:896 MaRTA/(2773:2775): archivo /user/juan/datos/temperatura1888.txt/ recibe pedido nro 3
+[DEBUG] 12:09:28:893 MaRTA/(2773:2774): el nodo 192.153.7.5 esta procesando 1 pedidos
+[DEBUG] 12:09:28:911 MaRTA/(2773:2774): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura2012.txt/-0 192.456.3.3 62 54 /user/juan/datos/temperatura2012.txt/-1 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2 192.153.7.5 67 82 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 12:09:28:918 MaRTA/(2773:2774): archivo /user/juan/datos/temperatura2012.txt/ recibe pedido nro 3
+[DEBUG] 12:09:28:934 MaRTA/(2773:2775): el nodo 196.422.1.1 esta procesando 0 pedidos
+[DEBUG] 12:09:28:952 MaRTA/(2773:2774): el nodo 195.456.2.5 esta procesando 0 pedidos
+[DEBUG] 12:09:28:954 MaRTA/(2773:2774): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 3 bloques
+[DEBUG] 12:09:28:955 MaRTA/(2773:2774): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 12:09:28:956 MaRTA/(2773:2775): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 3 bloques
+[DEBUG] 12:09:28:958 MaRTA/(2773:2774): archivo /user/juan/datos/temperatura2012.txt/ recibe pedido nro 4
+[DEBUG] 12:09:28:975 MaRTA/(2773:2775): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 12:09:28:981 MaRTA/(2773:2775): archivo /user/juan/datos/temperatura1888.txt/ recibe pedido nro 4
+[DEBUG] 12:09:28:984 MaRTA/(2773:2774): el nodo 192.456.3.3 esta procesando 0 pedidos
+[DEBUG] 12:09:28:991 MaRTA/(2773:2774): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 12:09:28:994 MaRTA/(2773:2775): el nodo 192.163.2.8 esta procesando 0 pedidos
+[DEBUG] 12:09:28:995 MaRTA/(2773:2774): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 12:09:29:5 MaRTA/(2773:2774): archivo /user/juan/datos/temperatura2012.txt/ recibe pedido nro 5
+[DEBUG] 12:09:29:17 MaRTA/(2773:2775): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 2 bloques
+[DEBUG] 12:09:29:20 MaRTA/(2773:2775): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 12:09:29:21 MaRTA/(2773:2775): archivo /user/juan/datos/temperatura1888.txt/ recibe pedido nro 5
+[DEBUG] 12:09:29:32 MaRTA/(2773:2774): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 192.163.2.5 bloque 85 en posicion 2
+[DEBUG] 12:09:29:33 MaRTA/(2773:2775): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 12:09:29:57 MaRTA/(2773:2775): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 1 bloques
+[DEBUG] 12:09:29:59 MaRTA/(2773:2775): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 12:09:29:59 MaRTA/(2773:2774): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 12:09:29:61 MaRTA/(2773:2775): archivo /user/juan/datos/temperatura1888.txt/ recibe pedido nro 6
+[DEBUG] 12:09:29:70 MaRTA/(2773:2774): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 12:09:29:83 MaRTA/(2773:2774): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 12:09:29:86 MaRTA/(2773:2775): el nodo 192.456.8.9 esta procesando 0 pedidos
+[DEBUG] 12:09:29:93 MaRTA/(2773:2775): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 12:09:29:95 MaRTA/(2773:2774): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 12:09:29:97 MaRTA/(2773:2774): se envia pedido de map, el stream es 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 12:09:29:100 MaRTA/(2773:2775): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 12:09:29:118 MaRTA/(2773:2775): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 12:09:29:125 MaRTA/(2773:2774): archivo /user/juan/datos/temperatura2012.txt/ recibe pedido nro 6
+[DEBUG] 12:09:29:129 MaRTA/(2773:2774): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 195.333.2.5 bloque 99 en posicion 2
+[DEBUG] 12:09:29:137 MaRTA/(2773:2774): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 12:09:29:162 MaRTA/(2773:2774): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 12:09:29:173 MaRTA/(2773:2774): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 12:09:29:175 MaRTA/(2773:2774): archivo /user/juan/datos/temperatura2012.txt/ recibe pedido nro 7
+[DEBUG] 12:09:29:187 MaRTA/(2773:2775): el nodo 196.422.1.1 esta procesando 1 pedidos
+[DEBUG] 12:09:29:210 MaRTA/(2773:2774): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 12:09:29:229 MaRTA/(2773:2775): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 13:08:52:227 MaRTA/(3118:3119): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 13:08:52:250 MaRTA/(3118:3120): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 13:08:52:310 MaRTA/(3118:3120): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 4 bloques
+[DEBUG] 13:08:52:351 MaRTA/(3118:3120): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 13:08:52:330 MaRTA/(3118:3119): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 4 bloques
+[DEBUG] 13:08:52:360 MaRTA/(3118:3119): el nodo 196.422.1.1 esta procesando 1 pedidos
+[DEBUG] 13:08:52:378 MaRTA/(3118:3119): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 13:08:52:383 MaRTA/(3118:3119): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 13:08:52:387 MaRTA/(3118:3120): el nodo 192.456.3.3 esta procesando 1 pedidos
+[DEBUG] 13:08:52:390 MaRTA/(3118:3120): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 13:08:52:408 MaRTA/(3118:3119): el nodo 192.456.8.9 esta procesando 1 pedidos
+[DEBUG] 13:08:52:411 MaRTA/(3118:3119): se envia pedido de map, el stream es 196.422.1.1 11 76 /user/juan/datos/temperatura2012.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura2012.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 13:08:52:418 MaRTA/(3118:3120): el nodo 192.153.7.5 esta procesando 1 pedidos
+[DEBUG] 13:08:52:440 MaRTA/(3118:3120): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura1888.txt/-0 192.456.3.3 62 54 /user/juan/datos/temperatura1888.txt/-1 192.163.2.5 65 85 /user/juan/datos/temperatura1888.txt/-2 192.153.7.5 67 82 /user/juan/datos/temperatura1888.txt/-3
+
+[DEBUG] 13:08:52:450 MaRTA/(3118:3120): el nodo 195.456.2.5 esta procesando 0 pedidos
+[DEBUG] 13:08:52:457 MaRTA/(3118:3119): el nodo 196.422.1.1 esta procesando 0 pedidos
+[DEBUG] 13:08:52:459 MaRTA/(3118:3119): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 3 bloques
+[DEBUG] 13:08:52:468 MaRTA/(3118:3119): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 13:08:52:473 MaRTA/(3118:3120): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 3 bloques
+[DEBUG] 13:08:52:477 MaRTA/(3118:3119): el nodo 192.163.2.8 esta procesando 0 pedidos
+[DEBUG] 13:08:52:486 MaRTA/(3118:3120): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 13:08:52:491 MaRTA/(3118:3119): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 13:08:52:503 MaRTA/(3118:3120): el nodo 192.456.3.3 esta procesando 0 pedidos
+[DEBUG] 13:08:52:513 MaRTA/(3118:3120): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 2 bloques
+[DEBUG] 13:08:52:520 MaRTA/(3118:3120): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 13:08:52:522 MaRTA/(3118:3119): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 13:08:52:529 MaRTA/(3118:3119): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 195.333.2.5 bloque 99 en posicion 2
+[DEBUG] 13:08:52:531 MaRTA/(3118:3120): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 13:08:52:548 MaRTA/(3118:3120): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 1 bloques
+[DEBUG] 13:08:52:560 MaRTA/(3118:3119): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 13:08:52:561 MaRTA/(3118:3120): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 13:08:52:573 MaRTA/(3118:3120): el nodo 192.153.7.5 esta procesando 0 pedidos
+[DEBUG] 13:08:52:582 MaRTA/(3118:3120): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 13:08:52:584 MaRTA/(3118:3119): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 13:08:52:586 MaRTA/(3118:3120): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 13:08:52:593 MaRTA/(3118:3120): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 13:08:52:596 MaRTA/(3118:3119): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 13:08:52:610 MaRTA/(3118:3119): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 13:08:52:628 MaRTA/(3118:3119): se envia pedido de map, el stream es 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 13:08:52:633 MaRTA/(3118:3119): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 192.163.2.5 bloque 85 en posicion 2
+[DEBUG] 13:08:52:645 MaRTA/(3118:3119): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 13:08:52:653 MaRTA/(3118:3119): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 13:08:52:655 MaRTA/(3118:3119): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 13:08:52:687 MaRTA/(3118:3120): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 13:08:52:733 MaRTA/(3118:3119): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 13:08:52:737 MaRTA/(3118:3119): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 13:08:52:739 MaRTA/(3118:3119): se envia pedido de map, el stream es 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 13:08:52:751 MaRTA/(3118:3120): el nodo 192.456.3.3 esta procesando 1 pedidos
+[DEBUG] 13:10:54:9 MaRTA/(3144:3145): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 13:10:54:31 MaRTA/(3144:3146): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 13:10:55:95 MaRTA/(3144:3146): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 4 bloques
+[DEBUG] 13:10:55:142 MaRTA/(3144:3146): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 13:10:55:130 MaRTA/(3144:3145): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 4 bloques
+[DEBUG] 13:10:55:148 MaRTA/(3144:3145): el nodo 196.422.1.1 esta procesando 1 pedidos
+[DEBUG] 13:10:55:152 MaRTA/(3144:3145): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 13:10:55:155 MaRTA/(3144:3145): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 13:10:55:170 MaRTA/(3144:3146): el nodo 192.456.3.3 esta procesando 1 pedidos
+[DEBUG] 13:10:55:174 MaRTA/(3144:3146): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 13:10:55:179 MaRTA/(3144:3145): el nodo 192.456.8.9 esta procesando 1 pedidos
+[DEBUG] 13:10:55:182 MaRTA/(3144:3145): se envia pedido de map, el stream es 196.422.1.1 11 76 /user/juan/datos/temperatura2012.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura2012.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 13:10:55:185 MaRTA/(3144:3146): el nodo 192.153.7.5 esta procesando 1 pedidos
+[DEBUG] 13:10:55:211 MaRTA/(3144:3146): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura1888.txt/-0 192.456.3.3 62 54 /user/juan/datos/temperatura1888.txt/-1 192.163.2.5 65 85 /user/juan/datos/temperatura1888.txt/-2 192.153.7.5 67 82 /user/juan/datos/temperatura1888.txt/-3
+
+[DEBUG] 13:10:55:214 MaRTA/(3144:3145): el nodo 196.422.1.1 esta procesando 0 pedidos
+[DEBUG] 13:10:55:235 MaRTA/(3144:3145): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 3 bloques
+[DEBUG] 13:10:55:236 MaRTA/(3144:3146): el nodo 195.456.2.5 esta procesando 0 pedidos
+[DEBUG] 13:10:55:239 MaRTA/(3144:3146): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 3 bloques
+[DEBUG] 13:10:55:241 MaRTA/(3144:3146): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 13:10:55:244 MaRTA/(3144:3145): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 13:10:55:259 MaRTA/(3144:3145): el nodo 192.163.2.8 esta procesando 0 pedidos
+[DEBUG] 13:10:55:268 MaRTA/(3144:3146): el nodo 192.456.3.3 esta procesando 0 pedidos
+[DEBUG] 13:10:55:270 MaRTA/(3144:3146): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 2 bloques
+[DEBUG] 13:10:55:271 MaRTA/(3144:3145): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 13:10:55:272 MaRTA/(3144:3146): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 13:10:55:275 MaRTA/(3144:3146): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 13:10:55:290 MaRTA/(3144:3145): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 13:10:55:299 MaRTA/(3144:3145): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 195.333.2.5 bloque 99 en posicion 2
+[DEBUG] 13:10:55:300 MaRTA/(3144:3146): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 1 bloques
+[DEBUG] 13:10:55:302 MaRTA/(3144:3146): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 13:10:55:305 MaRTA/(3144:3146): el nodo 192.153.7.5 esta procesando 0 pedidos
+[DEBUG] 13:10:55:325 MaRTA/(3144:3146): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 13:10:55:329 MaRTA/(3144:3146): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 13:10:55:330 MaRTA/(3144:3145): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 13:10:55:333 MaRTA/(3144:3146): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 13:10:55:337 MaRTA/(3144:3145): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 13:10:55:355 MaRTA/(3144:3145): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 13:10:55:366 MaRTA/(3144:3145): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 13:10:55:369 MaRTA/(3144:3145): se envia pedido de map, el stream es 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 13:10:55:387 MaRTA/(3144:3145): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 192.163.2.5 bloque 85 en posicion 2
+[DEBUG] 13:10:55:394 MaRTA/(3144:3146): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 13:10:55:402 MaRTA/(3144:3145): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 13:10:55:415 MaRTA/(3144:3145): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 13:10:55:420 MaRTA/(3144:3146): el nodo 192.456.3.3 esta procesando 1 pedidos
+[DEBUG] 13:10:55:422 MaRTA/(3144:3145): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 13:10:55:455 MaRTA/(3144:3145): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 13:10:55:458 MaRTA/(3144:3145): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 13:10:55:463 MaRTA/(3144:3145): se envia pedido de map, el stream es 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 13:10:55:467 MaRTA/(3144:3146): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 15:54:01:19 MaRTA/(2087:2088): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 15:54:01:43 MaRTA/(2087:2089): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 15:54:02:284 MaRTA/(2087:2089): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 4 bloques
+[DEBUG] 15:54:02:316 MaRTA/(2087:2089): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 15:54:02:305 MaRTA/(2087:2088): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 4 bloques
+[DEBUG] 15:54:02:322 MaRTA/(2087:2088): el nodo 196.422.1.1 esta procesando 1 pedidos
+[DEBUG] 15:54:02:340 MaRTA/(2087:2088): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 15:54:02:345 MaRTA/(2087:2088): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 15:54:02:348 MaRTA/(2087:2089): el nodo 192.456.3.3 esta procesando 1 pedidos
+[DEBUG] 15:54:02:351 MaRTA/(2087:2089): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 15:54:02:356 MaRTA/(2087:2088): el nodo 192.456.8.9 esta procesando 1 pedidos
+[DEBUG] 15:54:02:369 MaRTA/(2087:2088): se envia pedido de map, el stream es 196.422.1.1 11 76 /user/juan/datos/temperatura2012.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura2012.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 15:54:02:377 MaRTA/(2087:2089): el nodo 192.153.7.5 esta procesando 1 pedidos
+[DEBUG] 15:54:02:403 MaRTA/(2087:2089): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura1888.txt/-0 192.456.3.3 62 54 /user/juan/datos/temperatura1888.txt/-1 192.163.2.5 65 85 /user/juan/datos/temperatura1888.txt/-2 192.153.7.5 67 82 /user/juan/datos/temperatura1888.txt/-3
+
+[DEBUG] 15:54:02:413 MaRTA/(2087:2089): el nodo 195.456.2.5 esta procesando 0 pedidos
+[DEBUG] 15:54:02:419 MaRTA/(2087:2088): el nodo 196.422.1.1 esta procesando 0 pedidos
+[DEBUG] 15:54:02:429 MaRTA/(2087:2088): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 3 bloques
+[DEBUG] 15:54:02:435 MaRTA/(2087:2088): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 15:54:02:436 MaRTA/(2087:2089): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 3 bloques
+[DEBUG] 15:54:02:444 MaRTA/(2087:2088): el nodo 192.163.2.8 esta procesando 0 pedidos
+[DEBUG] 15:54:02:449 MaRTA/(2087:2089): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 15:54:02:452 MaRTA/(2087:2089): el nodo 192.456.3.3 esta procesando 0 pedidos
+[DEBUG] 15:54:02:463 MaRTA/(2087:2089): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 2 bloques
+[DEBUG] 15:54:02:470 MaRTA/(2087:2088): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 15:54:02:472 MaRTA/(2087:2089): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 15:54:02:475 MaRTA/(2087:2089): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 15:54:02:480 MaRTA/(2087:2088): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 15:54:02:484 MaRTA/(2087:2088): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 195.333.2.5 bloque 99 en posicion 2
+[DEBUG] 15:54:02:498 MaRTA/(2087:2089): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 1 bloques
+[DEBUG] 15:54:02:507 MaRTA/(2087:2089): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 15:54:02:511 MaRTA/(2087:2089): el nodo 192.153.7.5 esta procesando 0 pedidos
+[DEBUG] 15:54:02:519 MaRTA/(2087:2088): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 15:54:02:528 MaRTA/(2087:2088): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 15:54:02:535 MaRTA/(2087:2089): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 15:54:02:539 MaRTA/(2087:2088): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 15:54:02:542 MaRTA/(2087:2089): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 15:54:02:551 MaRTA/(2087:2089): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 15:54:02:554 MaRTA/(2087:2088): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 15:54:02:571 MaRTA/(2087:2088): se envia pedido de map, el stream es 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 15:54:02:593 MaRTA/(2087:2088): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 192.163.2.5 bloque 85 en posicion 2
+[DEBUG] 15:54:02:598 MaRTA/(2087:2088): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 15:54:02:600 MaRTA/(2087:2088): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 15:54:02:601 MaRTA/(2087:2088): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 15:54:02:635 MaRTA/(2087:2089): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 15:54:02:637 MaRTA/(2087:2088): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 15:54:02:655 MaRTA/(2087:2088): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 15:54:02:658 MaRTA/(2087:2088): se envia pedido de map, el stream es 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 15:54:02:661 MaRTA/(2087:2089): el nodo 192.456.3.3 esta procesando 1 pedidos
+[DEBUG] 16:51:35:132 MaRTA/(2665:2666): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 16:51:35:150 MaRTA/(2665:2667): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 16:51:35:185 MaRTA/(2665:2667): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 4 bloques
+[DEBUG] 16:51:35:200 MaRTA/(2665:2667): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 16:51:35:203 MaRTA/(2665:2666): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 4 bloques
+[DEBUG] 16:51:35:216 MaRTA/(2665:2667): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 16:51:35:223 MaRTA/(2665:2666): el nodo 196.422.1.1 esta procesando 1 pedidos
+[DEBUG] 16:51:35:226 MaRTA/(2665:2666): el nodo 192.456.3.3 esta procesando 1 pedidos
+[DEBUG] 16:51:35:229 MaRTA/(2665:2667): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 16:51:35:234 MaRTA/(2665:2667): el nodo 192.456.8.9 esta procesando 1 pedidos
+[DEBUG] 16:51:35:266 MaRTA/(2665:2666): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 16:51:35:268 MaRTA/(2665:2667): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura1888.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura1888.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura1888.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura1888.txt/-3
+
+[DEBUG] 16:51:35:303 MaRTA/(2665:2666): el nodo 192.153.7.5 esta procesando 1 pedidos
+[DEBUG] 16:51:35:305 MaRTA/(2665:2666): se envia pedido de map, el stream es 196.422.1.1 11 76 /user/juan/datos/temperatura2012.txt/-0 192.456.3.3 62 54 /user/juan/datos/temperatura2012.txt/-1 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2 192.153.7.5 67 82 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 16:51:35:310 MaRTA/(2665:2667): el nodo 195.456.2.5 esta procesando 0 pedidos
+[DEBUG] 16:51:35:320 MaRTA/(2665:2667): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 3 bloques
+[DEBUG] 16:51:35:330 MaRTA/(2665:2667): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 16:51:35:337 MaRTA/(2665:2666): el nodo 196.422.1.1 esta procesando 0 pedidos
+[DEBUG] 16:51:35:347 MaRTA/(2665:2666): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 3 bloques
+[DEBUG] 16:51:35:349 MaRTA/(2665:2666): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 16:51:35:350 MaRTA/(2665:2667): el nodo 192.163.2.8 esta procesando 0 pedidos
+[DEBUG] 16:51:35:358 MaRTA/(2665:2667): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 2 bloques
+[DEBUG] 16:51:35:359 MaRTA/(2665:2666): el nodo 192.456.3.3 esta procesando 0 pedidos
+[DEBUG] 16:51:35:360 MaRTA/(2665:2667): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 16:51:35:361 MaRTA/(2665:2666): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 16:51:35:365 MaRTA/(2665:2666): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 16:51:35:380 MaRTA/(2665:2666): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 192.163.2.5 bloque 85 en posicion 2
+[DEBUG] 16:51:35:390 MaRTA/(2665:2667): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 16:51:35:401 MaRTA/(2665:2667): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 1 bloques
+[DEBUG] 16:51:35:408 MaRTA/(2665:2666): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 16:51:35:410 MaRTA/(2665:2667): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 16:51:35:412 MaRTA/(2665:2666): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 16:51:35:416 MaRTA/(2665:2667): el nodo 192.456.8.9 esta procesando 0 pedidos
+[DEBUG] 16:51:35:431 MaRTA/(2665:2666): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 16:51:35:434 MaRTA/(2665:2667): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 16:51:35:437 MaRTA/(2665:2667): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 16:51:35:443 MaRTA/(2665:2667): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 16:51:35:453 MaRTA/(2665:2666): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 16:51:35:478 MaRTA/(2665:2666): se envia pedido de map, el stream es 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 16:51:35:480 MaRTA/(2665:2666): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 195.333.2.5 bloque 99 en posicion 2
+[DEBUG] 16:51:35:482 MaRTA/(2665:2666): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 16:51:35:490 MaRTA/(2665:2666): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 16:51:35:492 MaRTA/(2665:2666): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 16:51:35:495 MaRTA/(2665:2667): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 16:51:35:527 MaRTA/(2665:2666): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 16:51:35:533 MaRTA/(2665:2666): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 16:51:35:534 MaRTA/(2665:2666): se envia pedido de map, el stream es 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 16:51:35:544 MaRTA/(2665:2667): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 16:59:37:217 MaRTA/(2798:2799): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 16:59:37:238 MaRTA/(2798:2800): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 16:59:37:275 MaRTA/(2798:2800): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 4 bloques
+[DEBUG] 16:59:37:291 MaRTA/(2798:2800): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 16:59:37:293 MaRTA/(2798:2799): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 4 bloques
+[DEBUG] 16:59:37:312 MaRTA/(2798:2799): el nodo 196.422.1.1 esta procesando 1 pedidos
+[DEBUG] 16:59:37:315 MaRTA/(2798:2799): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 16:59:37:318 MaRTA/(2798:2800): el nodo 192.456.3.3 esta procesando 1 pedidos
+[DEBUG] 16:59:37:323 MaRTA/(2798:2800): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 16:59:37:326 MaRTA/(2798:2799): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 16:59:37:362 MaRTA/(2798:2799): el nodo 192.456.8.9 esta procesando 1 pedidos
+[DEBUG] 16:59:37:367 MaRTA/(2798:2800): el nodo 192.153.7.5 esta procesando 1 pedidos
+[DEBUG] 16:59:37:386 MaRTA/(2798:2800): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura1888.txt/-0 192.456.3.3 62 54 /user/juan/datos/temperatura1888.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura1888.txt/-2 192.153.7.5 67 82 /user/juan/datos/temperatura1888.txt/-3
+
+[DEBUG] 16:59:37:388 MaRTA/(2798:2799): se envia pedido de map, el stream es 196.422.1.1 11 76 /user/juan/datos/temperatura2012.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura2012.txt/-1 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 16:59:37:400 MaRTA/(2798:2799): el nodo 196.422.1.1 esta procesando 0 pedidos
+[DEBUG] 16:59:37:413 MaRTA/(2798:2800): el nodo 195.456.2.5 esta procesando 0 pedidos
+[DEBUG] 16:59:37:415 MaRTA/(2798:2800): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 3 bloques
+[DEBUG] 16:59:37:424 MaRTA/(2798:2800): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 16:59:37:434 MaRTA/(2798:2800): el nodo 192.456.3.3 esta procesando 0 pedidos
+[DEBUG] 16:59:37:431 MaRTA/(2798:2799): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 3 bloques
+[DEBUG] 16:59:37:443 MaRTA/(2798:2799): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 16:59:37:452 MaRTA/(2798:2800): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 2 bloques
+[DEBUG] 16:59:37:461 MaRTA/(2798:2799): el nodo 192.163.2.8 esta procesando 0 pedidos
+[DEBUG] 16:59:37:462 MaRTA/(2798:2800): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 16:59:37:467 MaRTA/(2798:2799): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 16:59:37:475 MaRTA/(2798:2800): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 16:59:37:476 MaRTA/(2798:2799): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 16:59:37:491 MaRTA/(2798:2799): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 192.163.2.5 bloque 85 en posicion 2
+[DEBUG] 16:59:37:481 MaRTA/(2798:2800): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 1 bloques
+[DEBUG] 16:59:37:501 MaRTA/(2798:2800): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 16:59:37:508 MaRTA/(2798:2800): el nodo 192.153.7.5 esta procesando 0 pedidos
+[DEBUG] 16:59:37:519 MaRTA/(2798:2800): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 16:59:37:524 MaRTA/(2798:2800): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 16:59:37:525 MaRTA/(2798:2799): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 16:59:37:533 MaRTA/(2798:2800): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 16:59:37:543 MaRTA/(2798:2799): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 16:59:37:552 MaRTA/(2798:2799): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 16:59:37:572 MaRTA/(2798:2799): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 16:59:37:574 MaRTA/(2798:2799): se envia pedido de map, el stream es 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 16:59:37:584 MaRTA/(2798:2799): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 195.333.2.5 bloque 99 en posicion 2
+[DEBUG] 16:59:37:590 MaRTA/(2798:2799): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 16:59:37:593 MaRTA/(2798:2799): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 16:59:37:599 MaRTA/(2798:2800): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 16:59:37:608 MaRTA/(2798:2799): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 16:59:37:638 MaRTA/(2798:2800): el nodo 192.456.3.3 esta procesando 1 pedidos
+[DEBUG] 16:59:37:640 MaRTA/(2798:2799): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 16:59:37:650 MaRTA/(2798:2799): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 16:59:37:652 MaRTA/(2798:2800): el nodo 195.333.2.5 esta procesando 2 pedidos
+[DEBUG] 16:59:37:653 MaRTA/(2798:2799): se envia pedido de map, el stream es 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 16:59:37:655 MaRTA/(2798:2799): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 16:59:37:665 MaRTA/(2798:2800): el nodo 192.153.7.5 esta procesando 1 pedidos
+[DEBUG] 17:00:20:471 MaRTA/(2839:2840): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 17:00:20:490 MaRTA/(2839:2841): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 17:00:20:527 MaRTA/(2839:2841): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 4 bloques
+[DEBUG] 17:00:20:542 MaRTA/(2839:2841): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 17:00:20:544 MaRTA/(2839:2840): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 4 bloques
+[DEBUG] 17:00:20:562 MaRTA/(2839:2841): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 17:00:20:566 MaRTA/(2839:2840): el nodo 196.422.1.1 esta procesando 1 pedidos
+[DEBUG] 17:00:20:569 MaRTA/(2839:2840): el nodo 192.456.3.3 esta procesando 1 pedidos
+[DEBUG] 17:00:20:573 MaRTA/(2839:2840): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 17:00:20:575 MaRTA/(2839:2841): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 17:00:20:606 MaRTA/(2839:2841): el nodo 192.456.8.9 esta procesando 1 pedidos
+[DEBUG] 17:00:20:610 MaRTA/(2839:2840): el nodo 192.153.7.5 esta procesando 1 pedidos
+[DEBUG] 17:00:20:616 MaRTA/(2839:2840): se envia pedido de map, el stream es 196.422.1.1 11 76 /user/juan/datos/temperatura2012.txt/-0 192.456.3.3 62 54 /user/juan/datos/temperatura2012.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2 192.153.7.5 67 82 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 17:00:20:621 MaRTA/(2839:2841): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura1888.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura1888.txt/-1 192.163.2.5 65 85 /user/juan/datos/temperatura1888.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura1888.txt/-3
+
+[DEBUG] 17:00:20:641 MaRTA/(2839:2840): el nodo 196.422.1.1 esta procesando 0 pedidos
+[DEBUG] 17:00:20:652 MaRTA/(2839:2841): el nodo 195.456.2.5 esta procesando 0 pedidos
+[DEBUG] 17:00:20:654 MaRTA/(2839:2841): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 3 bloques
+[DEBUG] 17:00:20:662 MaRTA/(2839:2841): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:00:20:664 MaRTA/(2839:2840): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 3 bloques
+[DEBUG] 17:00:20:668 MaRTA/(2839:2841): el nodo 192.163.2.8 esta procesando 0 pedidos
+[DEBUG] 17:00:20:680 MaRTA/(2839:2840): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 17:00:20:688 MaRTA/(2839:2841): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 2 bloques
+[DEBUG] 17:00:20:694 MaRTA/(2839:2840): el nodo 192.456.3.3 esta procesando 0 pedidos
+[DEBUG] 17:00:20:696 MaRTA/(2839:2841): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:00:20:702 MaRTA/(2839:2840): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:00:20:703 MaRTA/(2839:2840): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 17:00:20:706 MaRTA/(2839:2841): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 17:00:20:717 MaRTA/(2839:2840): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 195.333.2.5 bloque 99 en posicion 2
+[DEBUG] 17:00:20:718 MaRTA/(2839:2841): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 1 bloques
+[DEBUG] 17:00:20:727 MaRTA/(2839:2841): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:00:20:735 MaRTA/(2839:2841): el nodo 192.456.8.9 esta procesando 0 pedidos
+[DEBUG] 17:00:20:744 MaRTA/(2839:2841): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 17:00:20:744 MaRTA/(2839:2840): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 17:00:20:750 MaRTA/(2839:2841): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:00:20:753 MaRTA/(2839:2840): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:00:20:759 MaRTA/(2839:2840): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:00:20:776 MaRTA/(2839:2840): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 17:00:20:782 MaRTA/(2839:2841): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 17:00:20:796 MaRTA/(2839:2840): se envia pedido de map, el stream es 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 17:00:20:800 MaRTA/(2839:2840): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 192.163.2.5 bloque 85 en posicion 2
+[DEBUG] 17:00:20:815 MaRTA/(2839:2840): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 17:00:20:817 MaRTA/(2839:2840): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:00:20:819 MaRTA/(2839:2840): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:00:20:826 MaRTA/(2839:2841): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 17:00:20:856 MaRTA/(2839:2840): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:00:20:862 MaRTA/(2839:2840): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 17:00:20:867 MaRTA/(2839:2841): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 17:00:20:868 MaRTA/(2839:2840): se envia pedido de map, el stream es 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 17:00:20:875 MaRTA/(2839:2840): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 17:00:20:888 MaRTA/(2839:2841): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 17:00:20:892 MaRTA/(2839:2840): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 1 bloques
+[DEBUG] 17:00:20:895 MaRTA/(2839:2840): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 17:00:20:903 MaRTA/(2839:2840): el nodo 192.153.7.5 esta procesando 0 pedidos
+[DEBUG] 17:00:20:904 MaRTA/(2839:2841): el nodo 192.456.8.9 esta procesando 1 pedidos
+[DEBUG] 17:06:31:675 MaRTA/(3200:3201): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 17:06:31:702 MaRTA/(3200:3202): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 17:06:31:739 MaRTA/(3200:3202): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 4 bloques
+[DEBUG] 17:06:31:752 MaRTA/(3200:3202): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 17:06:31:761 MaRTA/(3200:3201): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 4 bloques
+[DEBUG] 17:06:31:767 MaRTA/(3200:3202): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 17:06:31:773 MaRTA/(3200:3201): el nodo 196.422.1.1 esta procesando 1 pedidos
+[DEBUG] 17:06:31:774 MaRTA/(3200:3201): el nodo 192.456.3.3 esta procesando 1 pedidos
+[DEBUG] 17:06:31:777 MaRTA/(3200:3202): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 17:06:31:780 MaRTA/(3200:3202): el nodo 192.456.8.9 esta procesando 1 pedidos
+[DEBUG] 17:06:31:814 MaRTA/(3200:3201): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 17:06:31:827 MaRTA/(3200:3201): el nodo 192.153.7.5 esta procesando 1 pedidos
+[DEBUG] 17:06:31:831 MaRTA/(3200:3202): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura1888.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura1888.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura1888.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura1888.txt/-3
+
+[DEBUG] 17:06:31:834 MaRTA/(3200:3201): se envia pedido de map, el stream es 196.422.1.1 11 76 /user/juan/datos/temperatura2012.txt/-0 192.456.3.3 62 54 /user/juan/datos/temperatura2012.txt/-1 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2 192.153.7.5 67 82 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 17:06:31:859 MaRTA/(3200:3201): el nodo 196.422.1.1 esta procesando 0 pedidos
+[DEBUG] 17:06:31:868 MaRTA/(3200:3202): el nodo 195.456.2.5 esta procesando 0 pedidos
+[DEBUG] 17:06:31:872 MaRTA/(3200:3202): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 3 bloques
+[DEBUG] 17:06:31:874 MaRTA/(3200:3202): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:06:31:876 MaRTA/(3200:3201): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 3 bloques
+[DEBUG] 17:06:31:896 MaRTA/(3200:3202): el nodo 192.163.2.8 esta procesando 0 pedidos
+[DEBUG] 17:06:31:898 MaRTA/(3200:3201): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 17:06:31:902 MaRTA/(3200:3202): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 2 bloques
+[DEBUG] 17:06:31:906 MaRTA/(3200:3201): el nodo 192.456.3.3 esta procesando 0 pedidos
+[DEBUG] 17:06:31:920 MaRTA/(3200:3202): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:06:31:925 MaRTA/(3200:3201): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:06:31:927 MaRTA/(3200:3202): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 17:06:31:931 MaRTA/(3200:3201): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 17:06:31:934 MaRTA/(3200:3201): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 192.163.2.5 bloque 85 en posicion 2
+[DEBUG] 17:06:31:936 MaRTA/(3200:3202): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 1 bloques
+[DEBUG] 17:06:31:951 MaRTA/(3200:3202): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:06:31:957 MaRTA/(3200:3201): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 17:06:31:962 MaRTA/(3200:3201): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:06:31:964 MaRTA/(3200:3202): el nodo 192.456.8.9 esta procesando 0 pedidos
+[DEBUG] 17:06:31:967 MaRTA/(3200:3202): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 17:06:31:980 MaRTA/(3200:3202): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:06:31:983 MaRTA/(3200:3201): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:06:31:991 MaRTA/(3200:3201): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 17:06:31:993 MaRTA/(3200:3202): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 17:06:31:995 MaRTA/(3200:3201): se envia pedido de map, el stream es 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 17:06:32:22 MaRTA/(3200:3201): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 195.333.2.5 bloque 99 en posicion 2
+[DEBUG] 17:06:32:24 MaRTA/(3200:3201): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 17:06:32:25 MaRTA/(3200:3201): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:06:32:28 MaRTA/(3200:3201): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:06:32:43 MaRTA/(3200:3202): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 17:06:32:59 MaRTA/(3200:3201): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:06:32:70 MaRTA/(3200:3202): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 17:09:02:675 MaRTA/(3212:3213): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 17:09:02:699 MaRTA/(3212:3214): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 17:09:02:737 MaRTA/(3212:3214): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 4 bloques
+[DEBUG] 17:09:02:750 MaRTA/(3212:3214): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 17:09:02:750 MaRTA/(3212:3213): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 4 bloques
+[DEBUG] 17:09:02:763 MaRTA/(3212:3213): el nodo 196.422.1.1 esta procesando 1 pedidos
+[DEBUG] 17:09:02:770 MaRTA/(3212:3213): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 17:09:02:771 MaRTA/(3212:3213): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 17:09:02:773 MaRTA/(3212:3213): el nodo 192.456.8.9 esta procesando 1 pedidos
+[DEBUG] 17:09:02:775 MaRTA/(3212:3213): se envia pedido de map, el stream es 196.422.1.1 11 76 /user/juan/datos/temperatura2012.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura2012.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 17:09:02:775 MaRTA/(3212:3214): el nodo 192.456.3.3 esta procesando 1 pedidos
+[DEBUG] 17:09:02:798 MaRTA/(3212:3214): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 17:09:02:803 MaRTA/(3212:3214): el nodo 192.153.7.5 esta procesando 1 pedidos
+[DEBUG] 17:09:02:804 MaRTA/(3212:3214): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura1888.txt/-0 192.456.3.3 62 54 /user/juan/datos/temperatura1888.txt/-1 192.163.2.5 65 85 /user/juan/datos/temperatura1888.txt/-2 192.153.7.5 67 82 /user/juan/datos/temperatura1888.txt/-3
+
+[DEBUG] 17:09:02:808 MaRTA/(3212:3213): el nodo 196.422.1.1 esta procesando 0 pedidos
+[DEBUG] 17:09:02:813 MaRTA/(3212:3213): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 3 bloques
+[DEBUG] 17:09:02:814 MaRTA/(3212:3214): el nodo 195.456.2.5 esta procesando 0 pedidos
+[DEBUG] 17:09:02:822 MaRTA/(3212:3213): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 17:09:02:831 MaRTA/(3212:3214): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 3 bloques
+[DEBUG] 17:09:02:832 MaRTA/(3212:3214): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:09:02:836 MaRTA/(3212:3214): el nodo 192.456.3.3 esta procesando 0 pedidos
+[DEBUG] 17:09:02:842 MaRTA/(3212:3214): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 2 bloques
+[DEBUG] 17:09:02:843 MaRTA/(3212:3213): el nodo 192.163.2.8 esta procesando 0 pedidos
+[DEBUG] 17:09:02:844 MaRTA/(3212:3214): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:09:02:845 MaRTA/(3212:3213): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:09:02:845 MaRTA/(3212:3213): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 17:09:02:851 MaRTA/(3212:3213): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 195.333.2.5 bloque 99 en posicion 2
+[DEBUG] 17:09:02:867 MaRTA/(3212:3214): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 17:09:02:868 MaRTA/(3212:3214): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 1 bloques
+[DEBUG] 17:09:02:870 MaRTA/(3212:3214): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:09:02:871 MaRTA/(3212:3214): el nodo 192.153.7.5 esta procesando 0 pedidos
+[DEBUG] 17:09:02:872 MaRTA/(3212:3214): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 17:09:02:874 MaRTA/(3212:3214): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:09:02:877 MaRTA/(3212:3214): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 17:09:02:896 MaRTA/(3212:3213): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 17:09:02:922 MaRTA/(3212:3213): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:09:02:925 MaRTA/(3212:3213): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:09:02:927 MaRTA/(3212:3213): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 17:09:02:929 MaRTA/(3212:3213): se envia pedido de map, el stream es 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 17:09:02:931 MaRTA/(3212:3213): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 192.163.2.5 bloque 85 en posicion 2
+[DEBUG] 17:09:02:932 MaRTA/(3212:3213): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 17:09:02:933 MaRTA/(3212:3213): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:09:02:935 MaRTA/(3212:3213): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:09:02:963 MaRTA/(3212:3214): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 17:14:32:527 MaRTA/(3293:3294): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 17:14:32:544 MaRTA/(3293:3295): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 17:14:32:576 MaRTA/(3293:3295): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 4 bloques
+[DEBUG] 17:14:32:590 MaRTA/(3293:3295): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 17:14:32:592 MaRTA/(3293:3294): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 4 bloques
+[DEBUG] 17:14:32:597 MaRTA/(3293:3295): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 17:14:32:617 MaRTA/(3293:3294): el nodo 196.422.1.1 esta procesando 1 pedidos
+[DEBUG] 17:14:32:620 MaRTA/(3293:3295): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 17:14:32:623 MaRTA/(3293:3295): el nodo 192.456.8.9 esta procesando 1 pedidos
+[DEBUG] 17:14:32:628 MaRTA/(3293:3294): el nodo 192.456.3.3 esta procesando 1 pedidos
+[DEBUG] 17:14:32:646 MaRTA/(3293:3295): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura1888.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura1888.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura1888.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura1888.txt/-3
+
+[DEBUG] 17:14:32:651 MaRTA/(3293:3294): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 17:14:32:681 MaRTA/(3293:3294): el nodo 192.153.7.5 esta procesando 1 pedidos
+[DEBUG] 17:14:32:688 MaRTA/(3293:3294): se envia pedido de map, el stream es 196.422.1.1 11 76 /user/juan/datos/temperatura2012.txt/-0 192.456.3.3 62 54 /user/juan/datos/temperatura2012.txt/-1 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2 192.153.7.5 67 82 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 17:14:32:704 MaRTA/(3293:3295): el nodo 195.456.2.5 esta procesando 0 pedidos
+[DEBUG] 17:14:32:713 MaRTA/(3293:3295): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 3 bloques
+[DEBUG] 17:14:32:734 MaRTA/(3293:3295): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:14:32:718 MaRTA/(3293:3294): el nodo 196.422.1.1 esta procesando 0 pedidos
+[DEBUG] 17:14:32:746 MaRTA/(3293:3294): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 3 bloques
+[DEBUG] 17:14:32:752 MaRTA/(3293:3295): el nodo 192.163.2.8 esta procesando 0 pedidos
+[DEBUG] 17:14:32:772 MaRTA/(3293:3294): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 17:14:32:783 MaRTA/(3293:3295): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 2 bloques
+[DEBUG] 17:14:32:785 MaRTA/(3293:3294): el nodo 192.456.3.3 esta procesando 0 pedidos
+[DEBUG] 17:14:32:789 MaRTA/(3293:3295): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:14:32:796 MaRTA/(3293:3294): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:14:32:811 MaRTA/(3293:3294): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 17:14:32:815 MaRTA/(3293:3295): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 17:14:32:828 MaRTA/(3293:3294): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 192.163.2.5 bloque 85 en posicion 2
+[DEBUG] 17:14:32:848 MaRTA/(3293:3295): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 1 bloques
+[DEBUG] 17:14:32:853 MaRTA/(3293:3295): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:14:32:856 MaRTA/(3293:3295): el nodo 192.456.8.9 esta procesando 0 pedidos
+[DEBUG] 17:14:32:872 MaRTA/(3293:3295): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 17:14:32:875 MaRTA/(3293:3294): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 17:14:32:890 MaRTA/(3293:3295): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:14:32:896 MaRTA/(3293:3294): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:14:32:905 MaRTA/(3293:3294): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:14:32:912 MaRTA/(3293:3294): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 17:14:32:925 MaRTA/(3293:3295): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 17:14:32:945 MaRTA/(3293:3294): se envia pedido de map, el stream es 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 17:14:32:956 MaRTA/(3293:3294): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 195.333.2.5 bloque 99 en posicion 2
+[DEBUG] 17:14:32:963 MaRTA/(3293:3294): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 17:14:32:970 MaRTA/(3293:3294): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:14:32:972 MaRTA/(3293:3294): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:14:32:976 MaRTA/(3293:3295): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 17:14:33:23 MaRTA/(3293:3294): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:14:33:28 MaRTA/(3293:3295): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 17:15:25:247 MaRTA/(3301:3302): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 17:15:25:267 MaRTA/(3301:3303): PlannerCenter : planificar Job_NewFileToProcess
+[DEBUG] 17:15:25:302 MaRTA/(3301:3303): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 4 bloques
+[DEBUG] 17:15:25:320 MaRTA/(3301:3303): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 17:15:25:329 MaRTA/(3301:3302): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 4 bloques
+[DEBUG] 17:15:25:338 MaRTA/(3301:3303): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 17:15:25:342 MaRTA/(3301:3302): el nodo 196.422.1.1 esta procesando 1 pedidos
+[DEBUG] 17:15:25:345 MaRTA/(3301:3302): el nodo 192.456.3.3 esta procesando 1 pedidos
+[DEBUG] 17:15:25:348 MaRTA/(3301:3302): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 17:15:25:350 MaRTA/(3301:3303): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 17:15:25:366 MaRTA/(3301:3303): el nodo 192.456.8.9 esta procesando 1 pedidos
+[DEBUG] 17:15:25:376 MaRTA/(3301:3302): el nodo 192.153.7.5 esta procesando 1 pedidos
+[DEBUG] 17:15:25:379 MaRTA/(3301:3302): se envia pedido de map, el stream es 196.422.1.1 11 76 /user/juan/datos/temperatura2012.txt/-0 192.456.3.3 62 54 /user/juan/datos/temperatura2012.txt/-1 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2 192.153.7.5 67 82 /user/juan/datos/temperatura2012.txt/-3
+
+[DEBUG] 17:15:25:381 MaRTA/(3301:3303): se envia pedido de map, el stream es 195.456.2.5 55 01 /user/juan/datos/temperatura1888.txt/-0 192.163.2.8 61 20 /user/juan/datos/temperatura1888.txt/-1 192.163.2.5 65 85 /user/juan/datos/temperatura1888.txt/-2 192.456.8.9 66 88 /user/juan/datos/temperatura1888.txt/-3
+
+[DEBUG] 17:15:25:403 MaRTA/(3301:3302): el nodo 196.422.1.1 esta procesando 0 pedidos
+[DEBUG] 17:15:25:408 MaRTA/(3301:3303): el nodo 195.456.2.5 esta procesando 0 pedidos
+[DEBUG] 17:15:25:410 MaRTA/(3301:3303): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 3 bloques
+[DEBUG] 17:15:25:413 MaRTA/(3301:3303): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:15:25:416 MaRTA/(3301:3302): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 3 bloques
+[DEBUG] 17:15:25:448 MaRTA/(3301:3302): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 17:15:25:451 MaRTA/(3301:3303): el nodo 192.163.2.8 esta procesando 0 pedidos
+[DEBUG] 17:15:25:455 MaRTA/(3301:3303): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 2 bloques
+[DEBUG] 17:15:25:456 MaRTA/(3301:3302): el nodo 192.456.3.3 esta procesando 0 pedidos
+[DEBUG] 17:15:25:457 MaRTA/(3301:3303): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:15:25:459 MaRTA/(3301:3302): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:15:25:461 MaRTA/(3301:3302): mapp con exito /user/juan/datos/temperatura2012.txt/ - 5
+[DEBUG] 17:15:25:482 MaRTA/(3301:3303): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 17:15:25:506 MaRTA/(3301:3303): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 1 bloques
+[DEBUG] 17:15:25:498 MaRTA/(3301:3302): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 195.333.2.5 bloque 99 en posicion 2
+[DEBUG] 17:15:25:509 MaRTA/(3301:3303): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:15:25:515 MaRTA/(3301:3302): el nodo 195.333.2.5 esta procesando 0 pedidos
+[DEBUG] 17:15:25:523 MaRTA/(3301:3303): el nodo 192.456.8.9 esta procesando 0 pedidos
+[DEBUG] 17:15:25:535 MaRTA/(3301:3303): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 17:15:25:546 MaRTA/(3301:3302): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:15:25:547 MaRTA/(3301:3303): mapp con exito /user/juan/datos/temperatura1888.txt/ - 5
+[DEBUG] 17:15:25:550 MaRTA/(3301:3302): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:15:25:561 MaRTA/(3301:3302): el nodo 192.163.2.5 esta procesando 1 pedidos
+[DEBUG] 17:15:25:562 MaRTA/(3301:3303): el job 5 para el archivo /user/juan/datos/temperatura1888.txt/ debe mappear 0 bloques
+[DEBUG] 17:15:25:588 MaRTA/(3301:3302): se envia pedido de map, el stream es 192.163.2.5 65 85 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 17:15:25:594 MaRTA/(3301:3302): fallo pedido de map del archivo /user/juan/datos/temperatura2012.txt/ al nodo 192.163.2.5 bloque 85 en posicion 2
+[DEBUG] 17:15:25:605 MaRTA/(3301:3302): el nodo 192.163.2.5 esta procesando 0 pedidos
+[DEBUG] 17:15:25:615 MaRTA/(3301:3302): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:15:25:617 MaRTA/(3301:3303): el nodo 195.456.2.5 esta procesando 1 pedidos
+[DEBUG] 17:15:25:626 MaRTA/(3301:3302): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:15:25:656 MaRTA/(3301:3303): el nodo 192.163.2.8 esta procesando 1 pedidos
+[DEBUG] 17:15:25:658 MaRTA/(3301:3302): el job 5 para el archivo /user/juan/datos/temperatura2012.txt/ debe mappear 2 bloques
+[DEBUG] 17:15:25:664 MaRTA/(3301:3302): el nodo 195.333.2.5 esta procesando 1 pedidos
+[DEBUG] 17:15:25:666 MaRTA/(3301:3302): se envia pedido de map, el stream es 195.333.2.5 64 99 /user/juan/datos/temperatura2012.txt/-2
+
+[DEBUG] 17:15:25:670 MaRTA/(3301:3303): el nodo 192.163.2.5 esta procesando 1 pedidos
