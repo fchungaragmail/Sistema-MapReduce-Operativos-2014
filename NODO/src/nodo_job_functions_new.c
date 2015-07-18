@@ -18,23 +18,21 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 
 
 	int p[2];
-	int ps[2];
 	pipe(p);
-	pipe(ps);
 
 	//para escrbir el bloque en la tuberia
 	if (fork() == 0) {
-		close(p[1]);
 		//cambio la entrada standar por la tuberia
 		close(0);
 		dup(p[0]);
 
 		//cambio la salida standar
-		close(ps[0]);
 		close(1);
-		dup(ps[1]);
+		creat(archivoTemporal1, 0777);
 
-		system(script);
+		close(p[1]);
+
+		execv(script, NULL);
 	} else
 	{
 		close(p[0]);
@@ -43,20 +41,20 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 		write(p[1], bloque, length);
 	}
 
-	wait(0);
+
 	//para aplicar sort
 	if (fork() == 0) {
 		close(0);
-		dup(ps[0]);
-		close(ps[1]);
+		open(archivoTemporal1, O_RDONLY);
 
 		close(1);
 		creat(archivoTemporal2, 0777);
 
-		system("sort");
+		execlp("sort", "sort", NULL);
 	}
 
 	wait(0);
+
 	return 1;//MAPING OK
 
 }

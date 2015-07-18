@@ -315,23 +315,22 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 		result = string_split(buffer_recv->comando, " "); //pos 0 = numBloque  , pos 1 = nombreArchivoTemporal
 
 		char *nombreScript = string_new();
-		string_append_with_format(&nombreScript, "%s%s", DIR_TEMP, result[2]);
+		string_append_with_format(&nombreScript, "%s/%s", DIR_TEMP, result[2]);
 
 		if (access(nombreScript, F_OK) == -1)
 		{
 			FILE* scriptFD = fopen(nombreScript, "w+");
 			fwrite( buffer_recv->data, buffer_recv->dataSize, 1,scriptFD);
 			fclose(scriptFD);
+			char *permisoEjecucionScript = string_new();
+			string_append_with_format(&permisoEjecucionScript, "chmod +x %s", nombreScript);
+			system(permisoEjecucionScript);
 		}
-
-		char *permisoEjecucionScript = string_new();
-		string_append_with_format(&permisoEjecucionScript, "chmod +x %s", nombreScript);
-		system(permisoEjecucionScript);
 
 		numBloque = atoi(result[3]); //paso el string "numBloque" a tipo int , pq mapping recibe int NumBloque
 
 		char *archivoTemporal1 = string_new();
-		string_append_with_format(&archivoTemporal1, "%s%s.txt", DIR_TEMP, temporal_get_string_time());
+		string_append_with_format(&archivoTemporal1, "%s/%s.txt", DIR_TEMP, temporal_get_string_time());
 
 		char *archivoTemporal2 = string_new();
 		string_append_with_format(&archivoTemporal2, "%s%s", DIR_TEMP, result[1]);
