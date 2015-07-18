@@ -346,7 +346,7 @@ int importar(char* argumentos){
 	for (int i=0;i<listaThreads->elements_count;i++)
 	{
 		int ret = 0;
-		pthread_join(*(pthread_t*)(list_get(listaThreads,i)),(void**)&ret);
+		pthread_join((pthread_t*)(list_get(listaThreads,i)),(void**)&ret);
 		sends = sends - 1;
 	}
 
