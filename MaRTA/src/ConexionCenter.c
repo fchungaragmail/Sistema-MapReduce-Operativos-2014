@@ -31,7 +31,7 @@
 #define K_PUERTO_LOCAL 9002
 #define MAX_CONNECTIONS 100
 
-#define K_FS_IP "192.168.1.8"
+#define K_FS_IP "192.168.0.102"
 #define K_FS_PUERTO "3000"
 
 // ESTRUCTURAS

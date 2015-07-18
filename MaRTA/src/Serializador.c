@@ -20,6 +20,7 @@ t_list* deserializarFullDataResponse(Message *recvMessage);
 char *deserializeTempFilePath(Message *recvMessage,TypesMessages type);
 t_list *deserializeFailedReduceResponse(Message *recvMessage);
 int deserializeNumeroDeBloque_PedidoDeCopias(Message *recvMessage);
+bool* deserializeFileSystemResponse(Message *recvMessage);
 
 void addIntToStream(char *stream, int value);
 
@@ -117,6 +118,25 @@ bool* deserializeSoportaCombiner(Message *recvMessage)
 	return soportaCombiner;
 }
 
+bool* deserializeFileSystemResponse(Message *recvMessage)
+{
+	//Segun protocolo recvMessage->mensaje->data sera
+	//*comando: "archivoAProcesar rutaDeArchivo Disponible"
+	//*data: NADA
+	//necesito obtener "soportaCombiner"
+
+	char *comandoStr = recvMessage->mensaje->comando;
+	char **comandoArray = string_split(comandoStr," ");
+	char *soportaCombinerStr = comandoArray[2];
+
+	bool* soportaCombiner = malloc(sizeof(bool));
+	if(strcmp(soportaCombinerStr,"Disponible") == 0){ *soportaCombiner = true; }
+	if(strcmp(soportaCombinerStr,"noDisponible") == 0){ *soportaCombiner = false; }
+
+	free(comandoArray);
+	return soportaCombiner;
+}
+
 bool* deserializeRequestResponse(Message *recvMessage,TypesMessages type)
 {
 		bool* requestResponse;
@@ -136,7 +156,7 @@ bool* deserializeRequestResponse(Message *recvMessage,TypesMessages type)
 			//-Comando: "DataFileResponse rutaDelArchivo Disponible"
 			//-Data: Tabla
 			//debo obtener "Respuesta"
-			requestResponse = deserializeSoportaCombiner(recvMessage);
+			requestResponse = deserializeFileSystemResponse(recvMessage);
 			return requestResponse;
 		}
 }
@@ -169,6 +189,7 @@ int fullData_obtenerCantidadDeBloqes(char **dataArray)
 
 int fullData_obtenerCantidadDeCopias(char **copiasArray)
 {
+	//copiasArray es un 0;Nodo1:IP;3;Nodo8:IP;2;Nodo2:IP;45;
 	int nroDeCopias = 0 ;
 
 	while(1){
@@ -179,7 +200,7 @@ int fullData_obtenerCantidadDeCopias(char **copiasArray)
 			nroDeCopias++;
 	}
 	nroDeCopias = nroDeCopias - 1;
-	nroDeCopias = (nroDeCopias/3);
+	nroDeCopias = (nroDeCopias/2);
 
 	return nroDeCopias;
 }
@@ -203,11 +224,9 @@ t_list *deserializarFullDataResponse(Message *recvMessage)
 	// segun protocolo
 	//-Comando: "DataFileResponse rutaDelArchivo Disponible"
 	//-Data: Tabla
-	/*// Ej: "0;Nodo1;3;Nodo8;2;Nodo2;45;
-		1;Nodo2;1;Nodo1;2;Nodo3;10;"*/
+	/*// Ej: "0;Nodo1:IP;3;Nodo8:IP;2;Nodo2:IP;45;
+		1;Nodo2:IP;1;Nodo1:IP;2;Nodo3:IP;10;"*/
 
-	char *_comando = recvMessage->mensaje->comando;
-	char **comando = string_split(_comando," ");
 	char *data = recvMessage->mensaje->data;
 
 #ifdef K_SIMULACION
@@ -230,16 +249,20 @@ t_list *deserializarFullDataResponse(Message *recvMessage)
 		for(j=0;j<nroDeCopias;j++){
 
 			t_dictionary *dic = dictionary_create();
-			char *ipNodo = copiasArray[k];
-			char *puertoNodo = copiasArray[k+1];
-			char *nroDeBloque = copiasArray[k+2];
+			char *ipPuerto = copiasArray[k];//Nodo1:IP
+
+			char **_ipPuerto = string_split(ipPuerto,":");
+			char *ipNodo = _ipPuerto[0];
+			char *puertoNodo = _ipPuerto[1];
+
+			char *nroDeBloque = copiasArray[k+1];//3
 			bool *estado = malloc(sizeof(bool));
 			*estado = true;
 			dictionary_put(dic,K_Copia_IPNodo,ipNodo);
 			dictionary_put(dic,K_Copia_PuertoNodo,puertoNodo);
 			dictionary_put(dic,K_Copia_NroDeBloque,nroDeBloque);
 			dictionary_put(dic,K_Copia_Estado,estado);
-			k=k+3;
+			k=k+2;
 			list_add(listaHijaDeCopias,dic);
 		}
 		list_add(listaPadreDeBloques,listaHijaDeCopias);

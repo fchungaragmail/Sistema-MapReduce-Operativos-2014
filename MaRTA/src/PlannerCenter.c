@@ -26,7 +26,7 @@ void actualizarPedidoRealizado(char *bloque, char* ipnodo, char* path, char *pat
 Message* obtenerProximoPedido(Message *recvMessage,infoHilo_t *infoThread);
 t_dictionary *obtenerCopiaConMenosCargaParaBloque(Message *recvMessage,char *path,int bloqueNro,infoHilo_t *infoThread);
 char* crearPathTemporal(char *path);
-Message* armarMensajeParaEnvio(Message *recvMessage,char *stream,char *comando);
+Message* armarMensajeParaEnvio(Message *recvMessage,char *stream,char *comando,infoHilo_t *infoThread);
 void actualizarTablas_RtaDeMapExitosa(Message *recvMessage,infoHilo_t *infoThread);
 Message *createFSrequest(Message *msj,int nroDeBloqe);
 bool *obtenerEstadoDeMapping(Message *msj, infoHilo_t *infoThread);
@@ -482,7 +482,7 @@ void planificar(Message *recvMessage,TypesMessages type,infoHilo_t *infoThread)
 				string_append(&data," ");
 		}
 		Message *msj;
-		msj = armarMensajeParaEnvio(msj,data,comando);
+		msj = armarMensajeParaEnvio(msj,data,comando,infoThread);
 		char* log = string_from_format("se envia reduceFinal con data %s",msj->mensaje->data);
 		log_debug(logFile,log); free(log);
 #ifndef K_SIMULACION
@@ -498,8 +498,6 @@ Message* obtenerProximoPedido(Message *recvMessage,infoHilo_t *infoThread)
 	bool *nodosTodosDisp = obtenerEstanTodosDisponibles(recvMessage,infoThread);
 	Message *mensajeAEnviar;
 
-	char *comandoResponse = deserializeComando(recvMessage);
-	bool *_response = deserializeRequestResponse(recvMessage,K_Job_ReduceResponse);
 	if(*todosMappeados && *nodosTodosDisp){
 		mensajeAEnviar = armarPedidoDeReduce(recvMessage,infoThread);
 	}
@@ -592,7 +590,7 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 			char *log = string_from_format("el Pedido1 (%s - %d) de ReduceConCombiner es : %s",infoThread->filePathAProcesar,*(infoThread->jobSocket),stream);
 			log_debug(logFile,log); free(log);
 
-			msjParaEnviar = armarMensajeParaEnvio(recvMessage,stream,command);
+			msjParaEnviar = armarMensajeParaEnvio(recvMessage,stream,command,infoThread);
 			finalStream=stream;
 		}
 
@@ -652,7 +650,7 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 			log_debug(logFile,log); free(log);
 
 			finalStream=stream;
-			msjParaEnviar = armarMensajeParaEnvio(recvMessage,stream,comando);
+			msjParaEnviar = armarMensajeParaEnvio(recvMessage,stream,comando,infoThread);
 
 		}
 		free(comandoResponse);
@@ -738,7 +736,7 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 		infoThread->puertoNodoLocalDePedidoDeReduce = puertoNodoLocal;
 		infoThread->pathNodoLocalDePedidoDeReduce = tempPathFinal;
 
-		msjParaEnviar = armarMensajeParaEnvio(recvMessage,finalStream,comando);
+		msjParaEnviar = armarMensajeParaEnvio(recvMessage,finalStream,comando,infoThread);
 	}
 
 	free(path);
@@ -833,7 +831,7 @@ Message *armarPedidoDeMap(Message *recvMessage,infoHilo_t *infoThread)
 	log_debug(logFile,log); free(log);
 
 	free(path);
-	return armarMensajeParaEnvio(recvMessage,stream,command);
+	return armarMensajeParaEnvio(recvMessage,stream,command,infoThread);
 }
 
 char* crearPathTemporal(char *path){
@@ -1046,12 +1044,13 @@ Message *crearMensajeAJobDeFinalizado(Message *msj,infoHilo_t *infoThread){
 	return fsRequest;
 }
 
-Message* armarMensajeParaEnvio(Message *recvMessage,char *stream,char *comando)
+Message* armarMensajeParaEnvio(Message *recvMessage,char *stream,char *comando,infoHilo_t *infoThread)
 {
 	Message *msjParaEnvio = malloc(sizeof(Message));
 	msjParaEnvio->mensaje = malloc(sizeof(mensaje_t));
 
-	msjParaEnvio->sockfd = recvMessage->sockfd;
+	//msjParaEnvio->sockfd = recvMessage->sockfd;
+	msjParaEnvio->sockfd = *(infoThread->jobSocket);
 	msjParaEnvio->mensaje->comandoSize = (int16_t)(strlen(comando)+1);
 	msjParaEnvio->mensaje->comando = comando;
 	msjParaEnvio->mensaje->dataSize = (int32_t)(strlen(stream)+1);
