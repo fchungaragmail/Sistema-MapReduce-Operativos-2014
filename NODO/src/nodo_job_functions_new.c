@@ -28,6 +28,10 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 	}
 
 	//para aplicar el script
+	char *permisoEjecucionScript = string_new();
+	string_append_with_format(&permisoEjecucionScript, "chmod +x %s", script);
+	system(permisoEjecucionScript);
+
 	if (fork() == 0) {
 		close(p[1]);
 
@@ -47,7 +51,7 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 	//para aplicar sort
 	if (fork() == 0) {
 		close(0);
-		fopen("./temporal.txt", "r");
+		fopen(archivoTemporal1, "r");
 
 		close(1);
 		creat(archivoTemporal2, 0777);
@@ -55,7 +59,7 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 		system("sort");
 	}
 
-	return 0;
+	return 1;//MAPING OK
 
 }
 
@@ -124,7 +128,7 @@ int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal,
 	}
 
 	//int cantidadNodosRemotos = atoi(pedidoReduce[i++]);
-	i++;
+	//i++;
 	//nodos remotos
 	while (pedidoReduce[i] != NULL) {
 
