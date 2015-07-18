@@ -6,6 +6,8 @@
  */
 
 #include "aparearArchivos_new.h"
+#include "nodo_new.h"
+#include <unistd.h>
 
 char* aparearArchivos(char* listaArchivos) {
 
@@ -26,32 +28,64 @@ char* aparearArchivos(char* listaArchivos) {
 															    //modo append (O_APPEND)
 		char** archivo = string_split(listaArchivos, " ");
 
+		/*
 		for (; i < sizeof(archivo); i++) {
 			int archivoFD = open(archivo[i], O_RDONLY);
+
 			while(read(archivoFD, buffer, sizeof(buffer)) != 0) { //leer size del archivo de una usando stat
 				write(apareoArchivo, buffer, sizeof(buffer));
 			}
 			close(archivoFD);
 		}
-		close(apareoArchivo);
+		*/
+		char *streamApareo = string_new();
+		int i = 0;
+		while(archivo[i] != NULL){
+			char *archivoTemporal1 = string_new();
+			string_append_with_format(&archivoTemporal1, "%s%s", DIR_TEMP, archivo[i]);
 
-		write(p[1], path, sizeof(path));
+			struct stat infoArchivo;
+			stat(archivoTemporal1, &infoArchivo);
+			char *contenido = malloc(infoArchivo.st_size);
+
+
+			int fdArchivo = open(archivoTemporal1, O_RDONLY);
+			read(fdArchivo, contenido, infoArchivo.st_size);
+			close(fdArchivo);
+			realloc(contenido, infoArchivo.st_size + 1);
+			contenido[infoArchivo.st_size] = '\0';
+			string_append(&streamApareo, contenido);
+			//write(apareoArchivo, contenido, infoArchivo.st_size);
+
+			i++;
+		}
+
+		//close(apareoArchivo);
+
+		write(p[1], streamApareo, strlen(streamApareo));
 	}
 
-	wait(0); //esperar a que termine el proceso hijo que crea el archivo
+	//wait(0); //esperar a que termine el proceso hijo que crea el archivo
 
 	if(fork() == 0) {
 
 		close(p[1]); //cierro lado escritura del pipe
-		close(0); //cierro entrada estandar, queda libre ese fd y el proximo fd se asociara a la entrada estandar
-		open(path, O_RDONLY); //proximo fd, se asocia a la entrada estandar
 
-		close(1); //cierro salida estandar, el fd queda libre, proximo fd se asociara a stdout
-		open(apareoOrdenado, O_RDWR | O_CREAT); //fd que se asocia a salida standard
-		system("sort"); //se aplica sort a lo que hay en stdin (fd del archivo) y sale por stdout (fd archivo ordenado)
+		close(0); //cierro entrada estandar, queda libre ese fd y el proximo fd se asociara a la entrada estandar
+		dup(p[0]);
+
+		//open(path, O_RDONLY); //proximo fd, se asocia a la entrada estandar
+
+		close(1);
+		creat(apareoOrdenado, 0777);
+
+		//close(1); //cierro salida estandar, el fd queda libre, proximo fd se asociara a stdout
+		//open(apareoOrdenado, O_RDWR | O_CREAT); //fd que se asocia a salida standard
+
+		execlp("sort", "sort", NULL); //se aplica sort a lo que hay en stdin (fd del archivo) y sale por stdout (fd archivo ordenado)
 	}
 
-	wait(0);
+	//wait(0);
 
 	return apareoOrdenado;
 

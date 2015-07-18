@@ -19,8 +19,8 @@
 #include <sys/timeb.h>
 
 #define TAMANIO_BLOQUE 20971520
-#define DIRECTORY_PATH "/tmp"
-#define ARCHIVO_NAME "/apareo"
+#define DIRECTORY_PATH "/tmp/"
+#define ARCHIVO_NAME "apareo"
 
 
 char* setName(char*, char*);

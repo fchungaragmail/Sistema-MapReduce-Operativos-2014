@@ -109,7 +109,7 @@ void* hiloJobHandler(void* arg) {
 	string_append(&bufferData,
 			hiloJobInfo->tipoHilo == TIPO_HILO_MAPPER ?
 					scriptMapperStr : scriptReduceStr);
-	mensajeParaNodo = CreateMensaje(bufferComando, bufferData);
+	mensajeParaNodo = CreateMensajeParaHilo(bufferComando, bufferData);
 
 #ifndef BUILD_CON_MOCK_NODO
 	enviar(hiloJobInfo->socketFd, mensajeParaNodo);

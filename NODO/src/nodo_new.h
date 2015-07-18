@@ -21,11 +21,20 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include "commons/string.h"
+#include "commons/log.h"
 #include <sys/stat.h>
 #include "nodo_fs_functions_new.h"
 #include "nodo_job_functions_new.h"
 #include "sockets_struct_new.h"
 
+//Global Variables
+int PUERTO_FS;
+char* IP_FS;
+char* ARCHIVO_BIN;
+char* DIR_TEMP;
+char* NODO_NUEVO;
+char* IP_NODO;
+int PUERTO_NODO;
 extern char* ARCHIVO_BIN;
 
 

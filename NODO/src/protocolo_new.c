@@ -43,7 +43,7 @@ int recibir(int socket, mensaje_t* mensaje){
 
 
 
-void enviar(int socket, mensaje_t* mensaje)
+int enviar(int socket, mensaje_t* mensaje)
 {
 	send(socket, &(mensaje->comandoSize), sizeof(int16_t), 0);
 	send(socket, mensaje->comando, mensaje->comandoSize, 0);
@@ -51,8 +51,14 @@ void enviar(int socket, mensaje_t* mensaje)
 
 	//send(socket, mensaje->data, mensaje->dataSize, 0);
 	int enviado = 0;
+	int tempEnviado = 0;
 	while(!(enviado == mensaje->dataSize)){
-		enviado += send(socket, mensaje->data + enviado , mensaje->dataSize - enviado, 0 );
+		tempEnviado= send(socket, mensaje->data + enviado , mensaje->dataSize - enviado, 0 );
+		if (tempEnviado == -1) {
+			return -1;
+		}
+		enviado += tempEnviado;
 	}
+	return enviado;
 
 }

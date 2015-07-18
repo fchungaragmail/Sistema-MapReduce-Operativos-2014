@@ -15,22 +15,13 @@
 int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 		char* archivoTemporal2) {
 
+
+
 	int p[2];
 	pipe(p);
 
 	//para escrbir el bloque en la tuberia
 	if (fork() == 0) {
-		close(p[0]);
-		int32_t length;
-		char *bloque = getBloque(numeroBloque, &length);
-		write(p[1], bloque, length);
-		exit(0);
-	}
-
-	//para aplicar el script
-	if (fork() == 0) {
-		close(p[1]);
-
 		//cambio la entrada standar por la tuberia
 		close(0);
 		dup(p[0]);
@@ -39,23 +30,32 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 		close(1);
 		creat(archivoTemporal1, 0777);
 
-		system(script);
+		close(p[1]);
 
+		execv(script, NULL);
+	} else
+	{
+		close(p[0]);
+		int32_t length;
+		char *bloque = getBloque(numeroBloque, &length);
+		write(p[1], bloque, length);
 	}
 
-	wait(0);
+
 	//para aplicar sort
 	if (fork() == 0) {
 		close(0);
-		fopen("./temporal.txt", "r");
+		open(archivoTemporal1, O_RDONLY);
 
 		close(1);
 		creat(archivoTemporal2, 0777);
 
-		system("sort");
+		execlp("sort", "sort", NULL);
 	}
 
-	return 0;
+	wait(0);
+
+	return 1;//MAPING OK
 
 }
 
@@ -124,7 +124,7 @@ int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal,
 	}
 
 	//int cantidadNodosRemotos = atoi(pedidoReduce[i++]);
-	i++;
+	//i++;
 	//nodos remotos
 	while (pedidoReduce[i] != NULL) {
 
