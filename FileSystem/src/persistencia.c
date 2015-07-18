@@ -23,11 +23,12 @@ sem_t sPersistencia;
 
 int persistirEstructuras()
 {
+	char* estructuras = string_new();
 	while(true)
 	{
 		sem_wait(&sPersistencia);
 
-		char* estructuras = string_new();
+		strcpy(estructuras,"");
 
 		//lista de archivos
 		string_append_with_format(&estructuras, "%s\n", SECCION_LISTA_ARCHIVOS);
@@ -96,9 +97,7 @@ int persistirEstructuras()
 		fprintf(persistFile,estructuras);
 		fclose(persistFile);
 		pthread_mutex_unlock(&mPersistFile);
-		free(estructuras);
 	}
-
 	return EXIT_SUCCESS;
 }
 

@@ -34,13 +34,18 @@ int initConexiones()
 	FD_ZERO(&nodos);
 	pthread_mutex_init(&mNodos, NULL);
 	escuchaConexiones = socket(AF_INET, SOCK_STREAM, 0);
-	if (escuchaConexiones == -1){
+	if (escuchaConexiones == -1)
+	{
+		pthread_mutex_lock(&mLogFile);
 		log_error(logFile,"No se pudo crear el socket para escuchar "
 				"nuevas conexiones.");
+		pthread_mutex_unlock(&mLogFile);
 	} else
 	{
+		pthread_mutex_lock(&mLogFile);
 		log_info(logFile, "El socket para escuchar nuevas conexiones se "
 				"creo correctamente.");
+		pthread_mutex_unlock(&mLogFile);
 	}
 
 	pipe2(desbloquearSelect, O_NONBLOCK);
@@ -61,18 +66,24 @@ int initConexiones()
 	memset(&(miDirecc.sin_zero), '\0', 8);
 	if (0 > bind(escuchaConexiones, (Sockaddr_in*) &miDirecc, sizeof(Sockaddr_in)))
 	{
+		pthread_mutex_lock(&mLogFile);
 		log_error(logFile, "No se pudo bindear el socket para escuchar conexiones.");
+		pthread_mutex_unlock(&mLogFile);
 	}
 
 
 	if (listen(escuchaConexiones, NODOS_MAX+1) == -1)
 	{
+		pthread_mutex_lock(&mLogFile);
 		log_error(logFile,"No se pueden escuchar conexiones."
 				"El FileSystem se cerrara");
+		pthread_mutex_unlock(&mLogFile);
 		return(-1);
 	} else
 	{
+		pthread_mutex_lock(&mLogFile);
 		log_info(logFile, "Escuchando conexiones.");
+		pthread_mutex_unlock(&mLogFile);
 	}
 }
 
@@ -109,8 +120,10 @@ void escucharConexiones()
 		pthread_mutex_unlock(&mNodos);
 		sem_post(&sPersistencia);
 
+		pthread_mutex_lock(&mLogFile);
 		log_info(logFile, "Nueva conexion con %s. \n"
 				"Esperando identificacion.", inet_ntoa(their_addr.sin_addr));
+		pthread_mutex_unlock(&mLogFile);
 	}
 }
 
@@ -200,7 +213,9 @@ void cerrarConexion(Conexion_t* conexion)
 		actualizarEstadoArchivos();
 	}
 
+	pthread_mutex_lock(&mLogFile);
 	log_info(logFile, "Desconectado de %s", conexion->nombre);
+	pthread_mutex_unlock(&mLogFile);
 }
 
 
