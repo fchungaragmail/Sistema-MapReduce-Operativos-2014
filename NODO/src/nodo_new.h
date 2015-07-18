@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include "commons/string.h"
+#include "commons/log.h"
 #include <sys/stat.h>
 #include "nodo_fs_functions_new.h"
 #include "nodo_job_functions_new.h"

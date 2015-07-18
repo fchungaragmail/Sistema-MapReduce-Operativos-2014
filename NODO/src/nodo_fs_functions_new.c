@@ -107,7 +107,7 @@ void borrarBloque(int numeroBloque)
 	{
 	    struct stat sb;
 	    stat (ARCHIVO_BIN, & sb);
-	    int32_t tamanio = sb.st_size;
+	    uint32_t tamanio = sb.st_size;
 
 		int archivo = open(ARCHIVO_BIN,O_RDWR);
 		void *bloque= mmap(NULL,  tamanio,  PROT_WRITE, MAP_SHARED,  archivo,  0);

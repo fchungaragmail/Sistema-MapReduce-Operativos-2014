@@ -7,7 +7,7 @@
 
 #include "nodo_new.h"
 
-
+t_log *log_nodo;
 
 //Main Programm
 int main() {
@@ -24,11 +24,11 @@ int main() {
 	pthread_t reduce_handler;
 	mensaje_t* buffer_shakehand = malloc(sizeof(mensaje_t));
 	mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
-
+	log_nodo = log_create("./log_nodo", "NODO", true, LOG_LEVEL_TRACE);
 	getConfig();
 
-	connectToFileSistem(sockFS);
-	pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockFS);
+	//connectToFileSistem(sockFS);
+	//pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockFS);
 	//pthread_join(fs_handler, NULL);
 
 	int value = initServer(&sockFD);
@@ -52,13 +52,13 @@ int main() {
 		}
 
 		recibir(sockAccept, buffer_shakehand); //recibo mensaje shakehand
-		/*
+
 		buffer_send->comandoSize = SHAKEHAND_MESSAGE_LENGTH;
 		buffer_send->comando = "Bienvenido al Nodo";
 		buffer_send->dataSize = 1; //es 1 pq no envio nada y hace un malloc de 1 asi no ocupa memoria
 		buffer_send->data = "\0"; //aca no le envio nada
 		enviar(sockAccept, buffer_send);
-		*/
+
 
 		if (strcmp(buffer_shakehand->comando, "nd") == 0) {
 			int* sockAux = malloc(sizeof(int));
@@ -223,7 +223,7 @@ void *fs_nodo_conection_handler(void* ptr) {
 		result = string_split(buffer_recv->comando, " ");
 
 		if (strcmp(result[0], "getBloque") == 0) {
-
+			log_info(log_nodo,"SOLICITUD GET BLOQUE");
 			char* bloque = malloc(TAMANIO_BLOQUE);
 			int32_t length;
 			bloque = getBloque(atoi(result[1]), &length);  //getBloque bloque
@@ -239,6 +239,7 @@ void *fs_nodo_conection_handler(void* ptr) {
 		}
 
 		if (strcmp(result[0], "setBloque") == 0) {   //setBloque bloque [datos]
+			log_info(log_nodo,"SET GET BLOQUE");
 			int numBLoque = atoi(result[1]);
 			setBloque(numBLoque, buffer_recv->data, buffer_recv->dataSize);
 			free(buffer_send);
@@ -246,10 +247,11 @@ void *fs_nodo_conection_handler(void* ptr) {
 		}
 
 		if (strcmp(result[0], "getFileContent") == 0) { //getFileContent nombre
+			log_info(log_nodo,"SOLICITUD GET FILE CONTENT");
 			t_fileContent* fileContent;
 			fileContent = getFileContent(result[1]);
 			buffer_send->comando = string_new();
-			strcpy(buffer_send->comando,"fileContent");
+			strcpy(buffer_send->comando,"respuesta");
 			buffer_send->comandoSize = strlen(buffer_send->comando) + 1;
 			buffer_send->dataSize = fileContent->size;
 			buffer_send->data = fileContent->contenido;
@@ -259,6 +261,7 @@ void *fs_nodo_conection_handler(void* ptr) {
 		}
 
 		if (strcmp(result[0], "borrarBloque") == 0) {   //setBloque bloque [datos]
+			log_info(log_nodo,"SOLICITUD BORRAR BLOQUE");
 			int numBLoque = atoi(result[1]);
 			borrarBloque(numBLoque);
 			free(buffer_send);
@@ -287,6 +290,7 @@ void *fs_nodo_conection_handler(void* ptr) {
 //	free(result);
 //}
 #include "commons/temporal.h"
+#include "commons/log.h"
 void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 
 	int sockFD = *((int*) ptr);
@@ -299,7 +303,11 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 		int numBloque;
 
 		//recibir peticion de mapping
-		recibir(sockFD, buffer_recv);
+		if(recibir(sockFD, buffer_recv) == DESCONECTADO){
+			log_info(log_nodo,"HILO MP DESCONECTADO");
+			pthread_exit(NULL);
+		}
+		log_info(log_nodo,"RECIBIDA SOLICITUD MAPPING");
 
 		/*****modificar la ruta, no siempre es map.sh, AÑADIR EN EL COMANDO EL NOMBRE DEL SCRIPT***********/
 		FILE* scriptFD = fopen("/tmp/map.sh", "w+");
@@ -308,7 +316,7 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 
 		result = string_split(buffer_recv->comando, " "); //pos 0 = numBloque  , pos 1 = nombreArchivoTemporal
 
-		numBloque = atoi(result[2]); //paso el string "numBloque" a tipo int , pq mapping recibe int NumBloque
+		numBloque = atoi(result[3]); //paso el string "numBloque" a tipo int , pq mapping recibe int NumBloque
 
 		char *archivoTemporal1 = string_new();
 		string_append_with_format(&archivoTemporal1, "%s%s.txt", DIR_TEMP, temporal_get_string_time());
@@ -324,14 +332,20 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 
 		if (mapResult == 1) {
 			buffer_send->comando = strdup("mapFileResponse 1");
+			log_info(log_nodo,"MAPPING REALIZADO EXITOSAMENTE");
 		} else {
 			buffer_send->comando = strdup("mapFileResponse 0");
+			log_info(log_nodo,"MAPPING FALLIDO");
 		}
 
 		buffer_send->comandoSize = strlen("mapFileResponse X") + 1;
 
 		//MUTEX ???
-		enviar(sockFD, buffer_send);
+		if(enviar(sockFD, buffer_send) == DESCONECTADO){
+			log_info(log_nodo,"HILO MP DESCONECTADO");
+			pthread_exit(NULL);
+		}
+		//enviar(sockFD, buffer_send);
 		//MUTEX
 
 
@@ -359,12 +373,15 @@ void *reduce_conection_handler(void* ptr) {
 		mensaje_t* buffer_recv = malloc(sizeof(mensaje_t));
 		mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
 		char** result;
-		char* archivosParaReduce;
+		char** archivosParaReduce;
 		int i = 2;
 
-		recibir(sockFD, buffer_recv);
-
-		//execReduce archiTemp cantArchNodoLocal a1 a2 aN cantNodosRemotos {ipNodoRemoto puertoNodoRemoto cantArchivosNodoRemoto a1 a2 aN}
+		if(recibir(sockFD, buffer_recv) == DESCONECTADO){
+			log_info(log_nodo,"HILO RD DESCONECTADO");
+			pthread_exit(NULL);
+		}
+		log_info(log_nodo,"RECIBIDA SOLICITUD REDUCE");
+		//execReduce archiTemp nombreScript cantArchNodoLocal a1 a2 aN  {ipNodoRemoto puertoNodoRemoto cantArchivosNodoRemoto a1 a2 aN}
 		result = string_split(buffer_recv->comando, " ");
 		/*
 		archivosParaReduce = malloc(sizeof(result));
@@ -374,11 +391,14 @@ void *reduce_conection_handler(void* ptr) {
 		*/
 
 		//reduceFile archivoReducido.txt 1 /tmp/archivoParaReducir.txt
+		/*
 		int espacio = 1;
-		int cantCaracteresDemas = strlen(result[0]) + strlen(result[1]) + espacio * 2;
+		int cantCaracteresDemas = strlen(result[0]) + strlen(result[1]) + strlen(result[1]) + espacio * 2;
 		archivosParaReduce = string_substring_from(buffer_recv->comando, cantCaracteresDemas);
+		*/
+		archivosParaReduce = string_n_split(buffer_recv->comando, 4, " ");
 		char* ipNodoFallido = string_new();
-		int reduceResult = reduce(buffer_recv->data, archivosParaReduce,result[1], ipNodoFallido);
+		int reduceResult = reduce(buffer_recv->data, archivosParaReduce[3],result[1], ipNodoFallido);
 
 
 
@@ -386,16 +406,22 @@ void *reduce_conection_handler(void* ptr) {
 			buffer_send->comando = strdup("reduceFileResponse 1");
 			buffer_send->dataSize = 1;
 			buffer_send->data = "\0";
+			log_info(log_nodo,"REDUCE REALIZADO EXITOSAMENTE");
 		} else {
 			buffer_send->comando = strdup("reduceFileResponse 0");
 			//TODO Obtener IPs de Nodos que fallaron
 			buffer_send->dataSize = strlen(ipNodoFallido) + 1;
 			buffer_send->data = ipNodoFallido;
+			log_info(log_nodo,"REDUCE FALLIDO");
 		}
 
 		buffer_send->comandoSize = strlen("reduceFileResponse X") + 1;
 
-		enviar(sockFD, buffer_send);
+		if(enviar(sockFD, buffer_send) == DESCONECTADO){
+			log_info(log_nodo,"HILO RD DESCONECTADO");
+			pthread_exit(NULL);
+		}
+
 
 		free(ipNodoFallido);
 		free(buffer_send->comando);

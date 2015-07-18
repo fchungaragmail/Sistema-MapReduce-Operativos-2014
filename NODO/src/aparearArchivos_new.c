@@ -47,7 +47,7 @@ char* aparearArchivos(char* listaArchivos) {
 			read(fdArchivo, contenido, infoArchivo.st_size);
 			close(fdArchivo);
 
-			string_append(streamApareo, contenido);
+			string_append(&streamApareo, contenido);
 			//write(apareoArchivo, contenido, infoArchivo.st_size);
 
 			i++;
