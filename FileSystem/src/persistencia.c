@@ -23,11 +23,11 @@ sem_t sPersistencia;
 
 int persistirEstructuras()
 {
-	char* estructuras = string_new();
+
 	while(true)
 	{
 		sem_wait(&sPersistencia);
-
+		char* estructuras = string_new();
 		strcpy(estructuras,"");
 
 		//lista de archivos
@@ -141,6 +141,7 @@ int leerPersistencia()
 
 			strcpy(conexion->nombre, lConexion[0]);
 			conexion->estado = NO_DISPONIBLE;
+			conexion->sockfd = -1;
 			conexion->totalBloques = atoi(lConexion[2]);
 			conexion->estadoBloques = calloc(conexion->totalBloques,1);
 			sem_init(&(conexion->respuestasR),0,1);
