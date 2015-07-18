@@ -333,8 +333,8 @@ int importar(char* argumentos){
 
 				list_add(ubicaciones,ubicacionElegida);
 
-				pthread_t tEnvio;
-				list_add(listaThreads, &(tEnvio));
+				pthread_t* tEnvio = malloc(sizeof(pthread_t));
+				list_add(listaThreads, tEnvio);
 				sends++;
 				pthread_create(&tEnvio, NULL, enviarBloque, envio);
 			}
@@ -346,7 +346,8 @@ int importar(char* argumentos){
 	for (int i=0;i<listaThreads->elements_count;i++)
 	{
 		int ret = 0;
-		pthread_join((pthread_t*)(list_get(listaThreads,i)),(void**)&ret);
+		pthread_t* tEnvio = list_get(listaThreads,i);
+		pthread_join(tEnvio,(void**)&ret);
 		sends = sends - 1;
 	}
 
