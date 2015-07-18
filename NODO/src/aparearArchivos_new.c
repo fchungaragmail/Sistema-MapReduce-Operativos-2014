@@ -63,7 +63,7 @@ char* aparearArchivos(char* listaArchivos) {
 		write(p[1], streamApareo, strlen(streamApareo));
 	}
 
-	wait(0); //esperar a que termine el proceso hijo que crea el archivo
+	//wait(0); //esperar a que termine el proceso hijo que crea el archivo
 
 	if(fork() == 0) {
 
@@ -80,10 +80,10 @@ char* aparearArchivos(char* listaArchivos) {
 		//close(1); //cierro salida estandar, el fd queda libre, proximo fd se asociara a stdout
 		//open(apareoOrdenado, O_RDWR | O_CREAT); //fd que se asocia a salida standard
 
-		system("sort"); //se aplica sort a lo que hay en stdin (fd del archivo) y sale por stdout (fd archivo ordenado)
+		excelp("sort", "sort", NULL); //se aplica sort a lo que hay en stdin (fd del archivo) y sale por stdout (fd archivo ordenado)
 	}
 
-	wait(0);
+	//wait(0);
 
 	return apareoOrdenado;
 
