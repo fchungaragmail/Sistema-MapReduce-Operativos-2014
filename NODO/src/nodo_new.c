@@ -409,7 +409,21 @@ void *reduce_conection_handler(void* ptr) {
 		*/
 		archivosParaReduce = string_n_split(buffer_recv->comando, 4, " ");
 		char* ipNodoFallido = string_new();
-		int reduceResult = reduce(buffer_recv->data, archivosParaReduce[3],result[1], ipNodoFallido);
+
+		char *nombreScript = string_new();
+		string_append_with_format(&nombreScript, "%s/%s", DIR_TEMP, result[2]);
+
+		if (access(nombreScript, F_OK) == -1)
+		{
+			FILE* scriptFD = fopen(nombreScript, "w+");
+			fwrite( buffer_recv->data, buffer_recv->dataSize, 1,scriptFD);
+			fclose(scriptFD);
+			char *permisoEjecucionScript = string_new();
+			string_append_with_format(&permisoEjecucionScript, "chmod +x %s", nombreScript);
+			system(permisoEjecucionScript);
+		}
+
+		int reduceResult = reduce(nombreScript, archivosParaReduce[3],result[1], ipNodoFallido);
 
 
 
