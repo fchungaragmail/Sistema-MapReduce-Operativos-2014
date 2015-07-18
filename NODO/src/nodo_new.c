@@ -7,14 +7,7 @@
 
 #include "nodo_new.h"
 
-//Global Variables
-int PUERTO_FS;
-char* IP_FS;
-char* ARCHIVO_BIN;
-char* DIR_TEMP;
-char* NODO_NUEVO;
-char* IP_NODO;
-int PUERTO_NODO;
+
 
 //Main Programm
 int main() {
@@ -47,6 +40,7 @@ int main() {
 
 	size = sizeof(struct sockaddr_in);
 
+	//comunicacion jobs
 	while (1) {
 		sockAccept = accept(sockFD, (struct sockaddr*) &client_sock, &size);
 		if (sockAccept < 0) {
@@ -58,11 +52,13 @@ int main() {
 		}
 
 		recibir(sockAccept, buffer_shakehand); //recibo mensaje shakehand
+		/*
 		buffer_send->comandoSize = SHAKEHAND_MESSAGE_LENGTH;
 		buffer_send->comando = "Bienvenido al Nodo";
 		buffer_send->dataSize = 1; //es 1 pq no envio nada y hace un malloc de 1 asi no ocupa memoria
 		buffer_send->data = "\0"; //aca no le envio nada
 		enviar(sockAccept, buffer_send);
+		*/
 
 		if (strcmp(buffer_shakehand->comando, "nd") == 0) {
 			int* sockAux = malloc(sizeof(int));
@@ -126,7 +122,11 @@ int initServer(int* sockFD) {
 		printf("Socket creado correctamente...\n");
 		printf("***********************\n");
 	}
-
+	//--Liberar puerto despues de cerrarlo
+			int optval = 1;
+				if (setsockopt(*sockFD, SOL_SOCKET, SO_REUSEADDR, &optval,sizeof optval) == -1){
+					return -1;
+				}
 	if (bind(*sockFD, (struct sockaddr*) &my_sock, sizeof(my_sock)) == -1) {
 		printf("Fallo al hacer el bind\n");
 		//perror("");
@@ -183,8 +183,11 @@ void connectToFileSistem(int* sock) {
 		printf("***********************\n");
 	}
 
+	//leer todo el archivo
+	struct stat infoArchivo;
+	stat(ARCHIVO_BIN, &infoArchivo);
 
-	string_append_with_format(&ipPuertoStr, "nombre %s:%d %d", IP_NODO, PUERTO_NODO, 1000000000);//tamaño espacio datos leer tamaño del datos.bin con stat
+	string_append_with_format(&ipPuertoStr, "nombre %s:%d %ld", IP_NODO, PUERTO_NODO, infoArchivo.st_size);//tamaño espacio datos leer tamaño del datos.bin con stat
 	message->comando = ipPuertoStr;
 	message->comandoSize = strlen(ipPuertoStr) + 1;
 	message->data = NULL;
@@ -245,8 +248,9 @@ void *fs_nodo_conection_handler(void* ptr) {
 		if (strcmp(result[0], "getFileContent") == 0) { //getFileContent nombre
 			t_fileContent* fileContent;
 			fileContent = getFileContent(result[1]);
-			buffer_send->comandoSize = 1;
-			buffer_send->comando = "\0";
+			buffer_send->comando = string_new();
+			strcpy(buffer_send->comando,"fileContent");
+			buffer_send->comandoSize = strlen(buffer_send->comando) + 1;
 			buffer_send->dataSize = fileContent->size;
 			buffer_send->data = fileContent->contenido;
 			enviar(sockFD, buffer_send);
@@ -294,26 +298,34 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 		char** result;
 		int numBloque;
 
+		//recibir peticion de mapping
 		recibir(sockFD, buffer_recv);
 
+		/*****modificar la ruta, no siempre es map.sh, AÑADIR EN EL COMANDO EL NOMBRE DEL SCRIPT***********/
 		FILE* scriptFD = fopen("/tmp/map.sh", "w+");
 		fwrite( buffer_recv->data, buffer_recv->dataSize, 1,scriptFD);
 		fclose(scriptFD);
+
 		result = string_split(buffer_recv->comando, " "); //pos 0 = numBloque  , pos 1 = nombreArchivoTemporal
 
 		numBloque = atoi(result[2]); //paso el string "numBloque" a tipo int , pq mapping recibe int NumBloque
 
-		int mapResult = mapping("./tmp/map.sh", numBloque, 	temporal_get_string_time(), result[1]);
+		char *archivoTemporal1 = string_new();
+		string_append_with_format(&archivoTemporal1, "%s%s.txt", DIR_TEMP, temporal_get_string_time());
 
+		char *archivoTemporal2 = string_new();
+		string_append_with_format(&archivoTemporal2, "%s%s", DIR_TEMP, result[1]);
+
+		int mapResult = mapping("/tmp/map.sh", numBloque, 	archivoTemporal1, archivoTemporal2);
 
 		buffer_send->dataSize = 1;
 		buffer_send->data = "\0";
 
 
-		if (mapResult == 0) {
+		if (mapResult == 1) {
 			buffer_send->comando = strdup("mapFileResponse 1");
 		} else {
-			buffer_send->comando = strdup("mapFileResponse 1");
+			buffer_send->comando = strdup("mapFileResponse 0");
 		}
 
 		buffer_send->comandoSize = strlen("mapFileResponse X") + 1;
@@ -360,11 +372,11 @@ void *reduce_conection_handler(void* ptr) {
 			archivosParaReduce = strcat(archivosParaReduce, result[i]);
 		}
 		*/
+
+		//reduceFile archivoReducido.txt 1 /tmp/archivoParaReducir.txt
 		int espacio = 1;
 		int cantCaracteresDemas = strlen(result[0]) + strlen(result[1]) + espacio * 2;
 		archivosParaReduce = string_substring_from(buffer_recv->comando, cantCaracteresDemas);
-
-
 		char* ipNodoFallido = string_new();
 		int reduceResult = reduce(buffer_recv->data, archivosParaReduce,result[1], ipNodoFallido);
 
