@@ -18,7 +18,6 @@ pthread_t threadPedidosMartaHandler;
 pthread_t threadProcesarHilos;
 t_config* configuracion;
 pthread_mutex_t mMarta;
-pthread_mutex_t mLog;
 t_log* logProcesoJob;
 t_dictionary* diccArchivos = NULL;
 
@@ -31,7 +30,7 @@ void* pedidosMartaHandler(void* arg) {
 
 #ifndef BUILD_CON_MOCK_MARTA
 		mensajeMarta = malloc(sizeof(mensaje_t));
-		recibir(socketMartaFd, mensajeMarta);
+		int resultado = recibir(socketMartaFd, mensajeMarta);
 #else
 		static int alternar = 1;
 		if (alternar == 0) {
@@ -58,11 +57,16 @@ void* pedidosMartaHandler(void* arg) {
 			mensajeMarta = CreateMensaje("FileSuccess todo1.txt", NULL);
 			alternar = 0;
 		}
+		int resultado = CONECTADO;
 #endif
-		pthread_mutex_lock(&mLog);
+		if(resultado == DESCONECTADO){
+			log_error(logProcesoJob,"Se perdió la conexion con MaRTA");
+			Terminar(EXIT_ERROR);
+			break;
+		}
+
 		log_info(logProcesoJob, "Recibido del MaRTA:\nComando: %s\nData: %s\n",
 				mensajeMarta->comando, mensajeMarta->data);
-		pthread_mutex_unlock(&mLog);
 
 		char** comandoStr = string_split(mensajeMarta->comando, " ");
 
@@ -190,7 +194,6 @@ void IniciarConexionMarta() {
 
 	pthread_create(&threadPedidosMartaHandler, NULL, pedidosMartaHandler, NULL);
 	pthread_mutex_init(&mMarta, NULL);
-	pthread_mutex_init(&mLog, NULL);
 
 }
 
