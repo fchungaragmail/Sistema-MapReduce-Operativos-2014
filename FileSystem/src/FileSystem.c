@@ -18,7 +18,7 @@
 void initFileSystem();
 void exitFileSystem();
 FILE* logFile;
-
+pthread_mutex_t mLogFile;
 
 int main(void) {
 	pthread_t tConsola, tEscucharConexiones,
@@ -26,7 +26,6 @@ int main(void) {
 
 	initFileSystem();
 
-	//pthread_create(&tPrueba, NULL, probarConexiones, NULL);
 	pthread_create(&tPersistencia, NULL, persistirEstructuras, NULL);
 
 	pthread_create(&tConsola, NULL, execConsola, NULL);
@@ -41,7 +40,7 @@ int main(void) {
 void initFileSystem()
 {
 	logFile = log_create("./FileSystem.log","FileSystem", true, LOG_LEVEL_TRACE);
-
+	pthread_mutex_init(&mLogFile, NULL);
 
 	t_config* archivoConfig = config_create("./FileSystem.config");
 

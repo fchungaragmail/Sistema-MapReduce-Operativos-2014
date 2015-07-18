@@ -8,7 +8,7 @@
 
 #include "nodo_fs_functions_new.h"
 #include "nodo_new.h"
-
+//#include "commons/string.h"
 
 
 char* getBloque(int numeroBloque, int32_t* length) {
@@ -40,13 +40,15 @@ t_fileContent *getFileContent(char *archivoTemporal) {
 	sprintf(rutaArchivo, "%s%s", directorioTemporal, archivoTemporal);
 	*/
 
+	char *rutaTemporal = string_duplicate(DIR_TEMP);
+	string_append(&rutaTemporal,archivoTemporal);
 	//abrir el archivo
-	int archivo = open(archivoTemporal,O_RDONLY);
-	perror("");
+	int archivo = open(rutaTemporal,O_RDONLY);
+	//perror("");
 
 	//leer todo el archivo
 	struct stat infoArchivo;
-	stat(archivoTemporal, &infoArchivo);
+	stat(rutaTemporal, &infoArchivo);
 	char *contenido = malloc(infoArchivo.st_size);
 	read(archivo, contenido, infoArchivo.st_size);
 
@@ -105,7 +107,7 @@ void borrarBloque(int numeroBloque)
 	{
 	    struct stat sb;
 	    stat (ARCHIVO_BIN, & sb);
-	    int32_t tamanio = sb.st_size;
+	    uint32_t tamanio = sb.st_size;
 
 		int archivo = open(ARCHIVO_BIN,O_RDWR);
 		void *bloque= mmap(NULL,  tamanio,  PROT_WRITE, MAP_SHARED,  archivo,  0);

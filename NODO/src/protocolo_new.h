@@ -43,7 +43,7 @@ typedef struct mensaje
 
 //Es necesario que el malloc para mensaje ya este hecho
 int recibir(int socket, mensaje_t* mensaje);
-void enviar(int socket, mensaje_t* mensaje);
+int enviar(int socket, mensaje_t* mensaje);
 
 
 
