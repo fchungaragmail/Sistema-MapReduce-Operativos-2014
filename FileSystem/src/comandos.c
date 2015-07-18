@@ -58,6 +58,7 @@ void initComandos()
 	dictionary_put(comandosRemotos,"nombre",1);
 	dictionary_put(comandosRemotos,"dataFile",2);
 	dictionary_put(comandosRemotos,"respuesta",3);
+	dictionary_put(comandosRemotos,"archivoResultado",4);
 }
 
 
@@ -109,6 +110,12 @@ void procesarComandoRemoto(argumentos_t* args)
 			free(args->mensaje);
 			sem_post(&(args->conexion->respuestasP));
 			//TODO: Destruir mensaje
+			break;
+		}
+		case 4:
+		{
+			//
+			dataFile(comando[1],args->conexion);
 			break;
 		}
 		default:
@@ -304,6 +311,7 @@ int importar(char* argumentos){
 	t_list* listaBloques = list_create();
 	t_list* listaThreads = list_create();
 	int32_t bytesEnviados = 0;
+	int sends = 0;
 	while (bytesEnviados < tamanio)
 	{
 		for (int j = 0;j<bloques;j++)
@@ -327,6 +335,7 @@ int importar(char* argumentos){
 
 				pthread_t tEnvio;
 				list_add(listaThreads, &(tEnvio));
+				sends++;
 				pthread_create(&tEnvio, NULL, enviarBloque, envio);
 			}
 			list_add_in_index(listaBloques,j,ubicaciones);
@@ -336,8 +345,20 @@ int importar(char* argumentos){
 
 	for (int i=0;i<listaThreads->elements_count;i++)
 	{
-		pthread_join(*(pthread_t*)(list_get(listaThreads,i)),NULL);
+		int ret = 0;
+		pthread_join(*(pthread_t*)(list_get(listaThreads,i)),(void**)&ret);
+		sends = sends - 1;
 	}
+
+	if (sends != 0)
+	{
+		pthread_mutex_lock(&mLogFile);
+		log_info(logFile, "Error al importar el archivo. No se pudo enviar un bloque");
+		pthread_mutex_unlock(&mLogFile);
+		revertirAsignaciones(ubicacionesElegidas);
+		return -1;
+	}
+
 
 	t_reg_archivo* archivo = malloc(sizeof(t_reg_archivo));
 	archivo->dirPadre = indexPadre;
@@ -376,9 +397,9 @@ int exportar(char* argumentos){
 	//tmp[0]: ruta del archivo en MDFS
 	//tmp[1]: ruta del archivo local
 
+	t_reg_archivo* archivo;
 	char nombre[50];
 	int16_t indexPadre;
-	t_reg_archivo* archivo;
 
 	if (getNombreArchivo(tmp[0],nombre,&indexPadre) != EXIT_SUCCESS)
 	{
