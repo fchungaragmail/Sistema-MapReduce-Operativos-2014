@@ -32,6 +32,7 @@ extern char IP_LISTEN[16];
 extern int LISTA_NODOS;
 extern int PUERTO_MARTA;
 extern FILE* logFile;
+extern pthread_mutex_t mLogFile;
 extern t_list* conexiones;
 extern pthread_mutex_t mConexiones;
 extern int nodosOnline;
