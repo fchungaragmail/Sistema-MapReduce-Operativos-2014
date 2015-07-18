@@ -28,8 +28,11 @@
 // CONSTANTES
 
 #define LOCALHOST "127.0.0.1"
-#define K_PUERTO_LOCAL 9001
+#define K_PUERTO_LOCAL 9002
 #define MAX_CONNECTIONS 100
+
+#define K_FS_IP "192.168.0.102"
+#define K_FS_PUERTO "3000"
 
 // ESTRUCTURAS
 
@@ -56,7 +59,6 @@ fd_set read_fds; // conjunto temporal de descriptores de fichero para select()
 struct sockaddr_in remoteaddr; // dirección del cliente
 int fdmax;        // número máximo de descriptores de fichero
 int newfd;        // descriptor de socket de nueva conexión aceptada
-int yes=1;        // para setsockopt() SO_REUSEADDR, más abajo
 int addrlen;
 int conexionesProcesadas;
 
@@ -99,6 +101,8 @@ void prepareConnections()
 
 void createListener()
 {
+	int yes=1;// para setsockopt() SO_REUSEADDR, más abajo
+
 	// obtener socket a la escucha
 	if ((listener = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		perror("socket");

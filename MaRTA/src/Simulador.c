@@ -279,7 +279,7 @@ Message *simulacion_Job_mapResponse_Fallo(int x)
 Message *simulacion_Job_reduceResponse(char *tipo)
 {
 	//-->Job responde a Marta con el resultado de la operacion de reduce
-	//*comando : "mapFileResponse rutaArchivoTemporal Respuesta"
+	//*comando : "reduceFileConCombiner-Pedido2 rutaArchivoTemporal Respuesta"
 	//*data:NADA
 
 	Message *jobMsj = malloc(sizeof(Message));
