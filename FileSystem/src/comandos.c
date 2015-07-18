@@ -56,8 +56,9 @@ void initComandos()
 	pthread_mutex_init(&mNodosOnline, NULL);
 	comandosRemotos = dictionary_create();
 	dictionary_put(comandosRemotos,"nombre",1);
-	dictionary_put(comandosRemotos,"dataFile",2);
+	dictionary_put(comandosRemotos,"DataFile",2);
 	dictionary_put(comandosRemotos,"respuesta",3);
+	dictionary_put(comandosRemotos,"archivoResultado",4);
 }
 
 
@@ -111,6 +112,12 @@ void procesarComandoRemoto(argumentos_t* args)
 			//TODO: Destruir mensaje
 			break;
 		}
+		case 4:
+		{
+			//
+			dataFile(comando[1],args->conexion);
+			break;
+		}
 		default:
 			break;
 		}
@@ -145,15 +152,18 @@ int format(char* argumentos)
 
 void formatNodo(Conexion_t* nodo)
 {
-	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
-	mensaje->comando = string_new();
-	strcpy(mensaje->comando,"borrarBloque -1");
-	mensaje->comandoSize = strlen(mensaje->comando) + 1;
-	mensaje->dataSize = 0;
+	if (nodo->sockfd >= 0)
+	{
+		mensaje_t* mensaje = malloc(sizeof(mensaje_t));
+		mensaje->comando = string_new();
+		strcpy(mensaje->comando,"borrarBloque -1");
+		mensaje->comandoSize = strlen(mensaje->comando) + 1;
+		mensaje->dataSize = 0;
 
-	pthread_mutex_lock(&(nodo->mSocket));
-	enviar(nodo->sockfd,mensaje);
-	pthread_mutex_unlock(&(nodo->mSocket));
+		pthread_mutex_lock(&(nodo->mSocket));
+		enviar(nodo->sockfd,mensaje);
+		pthread_mutex_unlock(&(nodo->mSocket));
+	}
 
 	pthread_mutex_lock(&(nodo->mEstadoBloques));
 	for (int i=0;i<nodo->totalBloques;i++)
@@ -201,11 +211,12 @@ int mover(char* argumentos){
 
 	strcpy(archivo->nombre,nombreDest);
 	archivo->dirPadre = indexPadreDest;
-
+	pthread_mutex_lock(&mLogFile);
 	log_debug(logFile,	"Nombre del archivo: %s\n"
 						"Directorio padre: %d",
 						archivo->nombre,
 						archivo->dirPadre);
+	pthread_mutex_unlock(&mLogFile);
 	return 0;
 }
 
@@ -240,8 +251,10 @@ int crearDir(char* argumentos){
 			strcpy(directorio->directorio, dir);
 			directorio->padre = padre;
 			padre = list_add(listaDirs, directorio);
+			pthread_mutex_lock(&mLogFile);
 			log_debug(logFile, "Directorio agregado: %s "
 					"indice: %d padre: %d", dir, padre,directorio->padre);
+			pthread_mutex_unlock(&mLogFile);
 		}else
 		{
 			padre = index;
@@ -288,14 +301,17 @@ int importar(char* argumentos){
 	t_list* ubicacionesElegidas = list_create();
 	if (elegirNodos(bloques, ubicacionesElegidas) != EXIT_SUCCESS)
 	{
+		pthread_mutex_lock(&mLogFile);
 		log_info(logFile, "El archivo %s no pudo ser importado al MDFS. "
 				"Verifique que haya espacio disponible con el comando space", tmp[0]);
+		pthread_mutex_unlock(&mLogFile);
 		return -1;
 	}
 
 	t_list* listaBloques = list_create();
 	t_list* listaThreads = list_create();
 	int32_t bytesEnviados = 0;
+	int sends = 0;
 	while (bytesEnviados < tamanio)
 	{
 		for (int j = 0;j<bloques;j++)
@@ -319,6 +335,7 @@ int importar(char* argumentos){
 
 				pthread_t tEnvio;
 				list_add(listaThreads, &(tEnvio));
+				sends++;
 				pthread_create(&tEnvio, NULL, enviarBloque, envio);
 			}
 			list_add_in_index(listaBloques,j,ubicaciones);
@@ -328,8 +345,20 @@ int importar(char* argumentos){
 
 	for (int i=0;i<listaThreads->elements_count;i++)
 	{
-		pthread_join(*(pthread_t*)(list_get(listaThreads,i)),NULL);
+		int ret = 0;
+		pthread_join(*(pthread_t*)(list_get(listaThreads,i)),(void**)&ret);
+		sends = sends - 1;
 	}
+
+	if (sends != 0)
+	{
+		pthread_mutex_lock(&mLogFile);
+		log_info(logFile, "Error al importar el archivo. No se pudo enviar un bloque");
+		pthread_mutex_unlock(&mLogFile);
+		revertirAsignaciones(ubicacionesElegidas);
+		return -1;
+	}
+
 
 	t_reg_archivo* archivo = malloc(sizeof(t_reg_archivo));
 	archivo->dirPadre = indexPadre;
@@ -344,12 +373,14 @@ int importar(char* argumentos){
 	pthread_mutex_lock(&mListaArchivos);
 	list_add(listaArchivos,archivo);
 	pthread_mutex_unlock(&mListaArchivos);
+	pthread_mutex_lock(&mLogFile);
 	log_debug(logFile, "Archivo agregado al FS:\n"
 			"Nombre: %s\n"
 			"Tamanio: %"PRId64"\n"
 			"DirPadre: %d\n"
 			"Cantidad de Bloques: %d\n",
 			archivo->nombre,archivo->tamanio,archivo->dirPadre,archivo->bloques->elements_count);
+	pthread_mutex_unlock(&mLogFile);
 	return EXIT_SUCCESS;
 }
 
@@ -366,32 +397,40 @@ int exportar(char* argumentos){
 	//tmp[0]: ruta del archivo en MDFS
 	//tmp[1]: ruta del archivo local
 
+	t_reg_archivo* archivo;
 	char nombre[50];
 	int16_t indexPadre;
-	t_reg_archivo* archivo;
 
 	if (getNombreArchivo(tmp[0],nombre,&indexPadre) != EXIT_SUCCESS)
 	{
+		pthread_mutex_lock(&mLogFile);
 		log_error(logFile,"No se pudo abrir el archivo %s", tmp[0]);
+		pthread_mutex_unlock(&mLogFile);
 		return -1;
 	} else
 	{
 		if (getArchivo(nombre,indexPadre, &archivo) != EXIT_SUCCESS)
 		{
+			pthread_mutex_lock(&mLogFile);
 			log_error(logFile,"No se pudo abrir el archivo %s", tmp[0]);
+			pthread_mutex_unlock(&mLogFile);
 			return -1;
 		}
 	}
 	if (archivo->estado == NO_DISPONIBLE)
 	{
+		pthread_mutex_lock(&mLogFile);
 		log_error(logFile,"El archivo %s no se encientra disponible", tmp[0]);
+		pthread_mutex_unlock(&mLogFile);
 		return -1;
 	}
 
 	FILE* fp = fopen(tmp[1], "ab");
 	if (fp==NULL)
 	{
+		pthread_mutex_lock(&mLogFile);
 		log_error(logFile,"No se pudo abrir el archivo %s", tmp[1]);
+		pthread_mutex_unlock(&mLogFile);
 		return -1;
 	}
 	fclose(fp);
@@ -432,8 +471,9 @@ int exportar(char* argumentos){
 		}
 	}
 
-
+	pthread_mutex_lock(&mLogFile);
 	log_info(logFile,"Archivo exportado con exito");
+	pthread_mutex_unlock(&mLogFile);
 	return 0;
 }
 
@@ -569,7 +609,9 @@ int nomb(char* argumentos, Conexion_t* conexion)
 			free(conexion);
 			pthread_mutex_unlock(&mConexiones);
 
+			pthread_mutex_lock(&mLogFile);
 			log_info(logFile, "Reconectado con el nodo %s", nodo->nombre);
+			pthread_mutex_unlock(&mLogFile);
 
 			actualizarEstadoArchivos();
 			return 0;
@@ -579,7 +621,9 @@ int nomb(char* argumentos, Conexion_t* conexion)
 
 
 	strcpy(conexion->nombre, args[0]);
+	pthread_mutex_lock(&mLogFile);
 	log_info(logFile, "Identificado el nodo %s", conexion->nombre);
+	pthread_mutex_unlock(&mLogFile);
 	if (strcmp(conexion->nombre, "MaRTA") != 0)
 	{
 		conexion->totalBloques = strtoll(args[1], NULL, 10) / TAMANIO_BLOQUE;
@@ -590,7 +634,11 @@ int nomb(char* argumentos, Conexion_t* conexion)
 		nodosOnline++;
 		pthread_mutex_unlock(&mNodosOnline);
 		if (nodosOnline == LISTA_NODOS)
+		{
+			pthread_mutex_lock(&mLogFile);
 			log_info(logFile, "Cantidad minima de nodos (%d) alcanzada.", LISTA_NODOS);
+			pthread_mutex_unlock(&mLogFile);
+		}
 	}
 	return 0;
 }
@@ -625,8 +673,10 @@ int dataFile(char* argumentos, Conexion_t* conexion)
 		enviar(conexion->sockfd,respuesta);
 		pthread_mutex_unlock(&(conexion->mSocket));
 
+		pthread_mutex_lock(&mLogFile);
 		log_info(logFile,"El archivo %s no se encuentra disponible",
 				args[0]);
+		pthread_mutex_unlock(&mLogFile);
 		return -1;
 	}
 
@@ -716,7 +766,9 @@ void actualizarEstadoArchivos()
 
 	if (strcmp("",actualizaciones) != 0)
 	{
+		pthread_mutex_lock(&mLogFile);
 		log_info(logFile, actualizaciones);
+		pthread_mutex_unlock(&mLogFile);
 	}
 }
 
@@ -787,7 +839,9 @@ int getNombreArchivo(char* ruta,char* nombre,int16_t* indexPadre)
 		*indexPadre = getDir(nombrePadre,*indexPadre);
 		if (*indexPadre < 0 )
 		{
+			pthread_mutex_lock(&mLogFile);
 			log_error(logFile, "Directorio no encontrado %s", nombrePadre);
+			pthread_mutex_unlock(&mLogFile);
 			return -1;
 		}
 		strcpy(nombre,directorios[i]);

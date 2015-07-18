@@ -34,7 +34,8 @@ int initConexiones()
 	FD_ZERO(&nodos);
 	pthread_mutex_init(&mNodos, NULL);
 	escuchaConexiones = socket(AF_INET, SOCK_STREAM, 0);
-	if (escuchaConexiones == -1){
+	if (escuchaConexiones == -1)
+	{
 		log_error(logFile,"No se pudo crear el socket para escuchar "
 				"nuevas conexiones.");
 	} else
@@ -109,8 +110,10 @@ void escucharConexiones()
 		pthread_mutex_unlock(&mNodos);
 		sem_post(&sPersistencia);
 
+		pthread_mutex_lock(&mLogFile);
 		log_info(logFile, "Nueva conexion con %s. \n"
 				"Esperando identificacion.", inet_ntoa(their_addr.sin_addr));
+		pthread_mutex_unlock(&mLogFile);
 	}
 }
 
@@ -200,7 +203,9 @@ void cerrarConexion(Conexion_t* conexion)
 		actualizarEstadoArchivos();
 	}
 
+	pthread_mutex_lock(&mLogFile);
 	log_info(logFile, "Desconectado de %s", conexion->nombre);
+	pthread_mutex_unlock(&mLogFile);
 }
 
 
