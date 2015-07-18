@@ -15,43 +15,40 @@
 int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 		char* archivoTemporal2) {
 
+
+
 	int p[2];
+	int ps[2];
 	pipe(p);
+	pipe(ps);
 
 	//para escrbir el bloque en la tuberia
 	if (fork() == 0) {
-		close(p[0]);
-		int32_t length;
-		char *bloque = getBloque(numeroBloque, &length);
-		write(p[1], bloque, length);
-		exit(0);
-	}
-
-	//para aplicar el script
-	char *permisoEjecucionScript = string_new();
-	string_append_with_format(&permisoEjecucionScript, "chmod +x %s", script);
-	system(permisoEjecucionScript);
-
-	if (fork() == 0) {
 		close(p[1]);
-
 		//cambio la entrada standar por la tuberia
 		close(0);
 		dup(p[0]);
 
 		//cambio la salida standar
+		close(ps[0]);
 		close(1);
-		creat(archivoTemporal1, 0777);
+		dup(ps[1]);
 
 		system(script);
-
+	} else
+	{
+		close(p[0]);
+		int32_t length;
+		char *bloque = getBloque(numeroBloque, &length);
+		write(p[1], bloque, length);
 	}
 
 	wait(0);
 	//para aplicar sort
 	if (fork() == 0) {
 		close(0);
-		fopen(archivoTemporal1, "r");
+		dup(ps[0]);
+		close(ps[1]);
 
 		close(1);
 		creat(archivoTemporal2, 0777);
@@ -59,6 +56,7 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 		system("sort");
 	}
 
+	wait(0);
 	return 1;//MAPING OK
 
 }
