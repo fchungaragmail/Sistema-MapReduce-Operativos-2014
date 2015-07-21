@@ -99,8 +99,8 @@ void* hiloJobHandler(void* arg) {
 	char* bufferData = string_new();
 
 	if (hiloJobInfo->tipoHilo == TIPO_HILO_MAPPER) {
-		string_append_with_format(&bufferComando, "mapFile %s %i",
-				hiloJobInfo->nombreArchivo, hiloJobInfo->nroBloque);
+		string_append_with_format(&bufferComando, "mapFile %s %s %i",
+				hiloJobInfo->nombreArchivo, hiloJobInfo->parametros, hiloJobInfo->nroBloque);
 	} else { //TIPO_HILO_REDUCE
 		string_append_with_format(&bufferComando, "reduceFile %s %s",
 				hiloJobInfo->nombreArchivo, hiloJobInfo->parametros);
