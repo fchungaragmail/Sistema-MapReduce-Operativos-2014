@@ -22,7 +22,6 @@
 // FUNCIONES PRIVADAS
 int obtenerIdParaComando(Message *recvMessage);
 void planificar(Message *recvMessage,TypesMessages type,infoHilo_t *infoThread);
-void actualizarPedidoRealizado(char *bloque, char* ipnodo, char* path, char *pathTemporal, StatusBlockState tipo );
 Message* obtenerProximoPedido(Message *recvMessage,infoHilo_t *infoThread);
 t_dictionary *obtenerCopiaConMenosCargaParaBloque(Message *recvMessage,char *path,int bloqueNro,infoHilo_t *infoThread);
 char* crearPathTemporal(char *path);
@@ -166,6 +165,8 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 			if(!(*_response)){
 				//FALLO PEDIDO
 				planificar(recvMessage,K_Job_ReduceResponse,infoThread);
+				liberarMemoria(infoThread);
+				finalizarEjecucion = true;
 			}
 
 			free(path);
@@ -415,9 +416,9 @@ void planificar(Message *recvMessage,TypesMessages type,infoHilo_t *infoThread)
 				char *ipNodo = infoThread->ipNodoLocalDePedidoDeReduce;
 				decrementarOperacionesEnProcesoEnNodo(ipNodo);
 				actualizarTablas_ReduceFallo(path,recvMessage,infoThread);
-				sendMessage = obtenerProximoPedido(recvMessage,infoThread);
+				//sendMessage = obtenerProximoPedido(recvMessage,infoThread);
 #ifndef	K_SIMULACION
-				enviar(sendMessage->sockfd,sendMessage->mensaje);
+				//enviar(sendMessage->sockfd,sendMessage->mensaje);
 #endif K_SIMULACION
 			}
 
@@ -426,10 +427,10 @@ void planificar(Message *recvMessage,TypesMessages type,infoHilo_t *infoThread)
 				log_debug(logFile,"reduce-Pedido1 fallo");
 				decrementarOperacionesEnReduceList(infoThread);
 				actualizarTablas_ReduceFallo(path,recvMessage,infoThread);
-				sendMessage = obtenerProximoPedido(recvMessage,infoThread);
+				//sendMessage = obtenerProximoPedido(recvMessage,infoThread);
 				liberarNodosReduceList_Pedido1(infoThread);
 #ifndef	K_SIMULACION
-				enviar(sendMessage->sockfd,sendMessage->mensaje);
+				//enviar(sendMessage->sockfd,sendMessage->mensaje);
 #endif K_SIMULACION
 
 
@@ -442,12 +443,12 @@ void planificar(Message *recvMessage,TypesMessages type,infoHilo_t *infoThread)
 				decrementarOperacionesEnProcesoEnNodo(ipNodo);
 				actualizarTablas_ReduceFallo(path,recvMessage,infoThread);
 				liberarNodosReduceList_Pedido1(infoThread);
-				sendMessage = obtenerProximoPedido(recvMessage,infoThread);
+				//sendMessage = obtenerProximoPedido(recvMessage,infoThread);
 #ifndef	K_SIMULACION
-				enviar(sendMessage->sockfd,sendMessage->mensaje);
+				//enviar(sendMessage->sockfd,sendMessage->mensaje);
 #endif K_SIMULACION
 			}
-			liberarMensaje(sendMessage);
+			//liberarMensaje(sendMessage);
 		}
 
 		free(requestResponse);
@@ -1101,6 +1102,10 @@ void liberarNodosReduceList_Pedido1(infoHilo_t *infoThread)
 {
 	int i;
 	int size = list_size(infoThread->nodosReduceList_Pedido1);
+
+	if(size <= 0){
+		return;
+	}
 	for(i=0;i<size;i++){
 		t_dictionary *reduceBlock = list_get(infoThread->nodosReduceList_Pedido1,i);
 		char *tempPath = dictionary_get(reduceBlock,"reduceBlock_tempPath");
