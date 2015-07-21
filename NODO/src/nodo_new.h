@@ -37,7 +37,7 @@ char* NODO_NUEVO;
 char* IP_NODO;
 int PUERTO_NODO;
 extern char* ARCHIVO_BIN;
-
+t_log *log_nodo;
 
 void getConfig();
 int initServer(int*);

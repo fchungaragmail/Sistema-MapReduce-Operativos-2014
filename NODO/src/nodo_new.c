@@ -7,7 +7,7 @@
 
 #include "nodo_new.h"
 
-t_log *log_nodo;
+
 
 //Main Programm
 int main() {
@@ -28,8 +28,8 @@ int main() {
 	getConfig();
 	sem_init(&sMaps,0,10);
 
-	connectToFileSistem(sockFS);
-	pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockFS);
+	//connectToFileSistem(sockFS);
+	//pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockFS);
 	//pthread_join(fs_handler, NULL);
 
 	int value = initServer(&sockFD);
@@ -52,6 +52,7 @@ int main() {
 			return -1;
 		}
 
+		/*
 		recibir(sockAccept, buffer_shakehand); //recibo mensaje shakehand
 
 		buffer_send->comandoSize = SHAKEHAND_MESSAGE_LENGTH;
@@ -59,7 +60,6 @@ int main() {
 		buffer_send->dataSize = 1; //es 1 pq no envio nada y hace un malloc de 1 asi no ocupa memoria
 		buffer_send->data = "\0"; //aca no le envio nada
 		enviar(sockAccept, buffer_send);
-
 
 		if (strcmp(buffer_shakehand->comando, "nd") == 0) {
 			int* sockAux = malloc(sizeof(int));
@@ -87,6 +87,20 @@ int main() {
 			pthread_create(&reduce_handler, NULL, reduce_conection_handler,
 					sockAux);
 		}
+		*/
+
+
+
+
+		int* sockAux = malloc(sizeof(int));
+		//sockAux = &sockAccept;
+		*sockAux = sockAccept;
+		printf("Se obtuvo una conexión desde JOB: %s\n",
+				inet_ntoa(client_sock.sin_addr));
+		pthread_create(&map_handler, NULL, map_conection_handler, sockAux);
+
+
+
 
 	} //while
 
@@ -292,6 +306,9 @@ void *fs_nodo_conection_handler(void* ptr) {
 //}
 #include "commons/temporal.h"
 #include "commons/log.h"
+#include <semaphore.h>
+pthread_mutex_t mutexPermisosScript;
+
 void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 
 	int sockFD = *((int*) ptr);
@@ -317,7 +334,7 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 
 		char *nombreScript = string_new();
 		string_append_with_format(&nombreScript, "%s/%s", DIR_TEMP, result[2]);
-
+		pthread_mutex_lock(&mutexPermisosScript);
 		if (access(nombreScript, F_OK) == -1)
 		{
 			FILE* scriptFD = fopen(nombreScript, "w+");
@@ -327,14 +344,14 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 			string_append_with_format(&permisoEjecucionScript, "chmod +x %s", nombreScript);
 			system(permisoEjecucionScript);
 		}
-
+		pthread_mutex_unlock(&mutexPermisosScript);
 		numBloque = atoi(result[3]); //paso el string "numBloque" a tipo int , pq mapping recibe int NumBloque
 
 		char *archivoTemporal1 = string_new();
 		string_append_with_format(&archivoTemporal1, "%s/%s.txt", DIR_TEMP, temporal_get_string_time());
 
 		char *archivoTemporal2 = string_new();
-		string_append_with_format(&archivoTemporal2, "%s%s", DIR_TEMP, result[1]);
+		string_append_with_format(&archivoTemporal2, "%s/%s", DIR_TEMP, result[1]);
 
 		sem_wait(&sMaps);
 		int mapResult = mapping(nombreScript, numBloque, 	archivoTemporal1, archivoTemporal2);
