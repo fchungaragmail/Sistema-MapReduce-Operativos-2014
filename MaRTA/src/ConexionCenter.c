@@ -181,8 +181,11 @@ Message* listenConnections()
 				if(estado == DESCONECTADO){
 					close(i); // bye!
 					FD_CLR(i, &master); // eliminar del conjunto maestro
-					char *log = string_from_format("fallo el recv del proceso con socket %d",i);
-					log_trace(logFile,log); free(log);
+					char *log = string_from_format("fallo conexion del proceso con socket %d, esta caido.",i);
+					pthread_mutex_lock(&mutexLog);
+					log_debug(logFile,log);
+					pthread_mutex_unlock(&mutexLog);
+					free(log);
 					return crearMessageWithCommand("ProcesoCaido",i);
 				}
 
@@ -311,6 +314,8 @@ Message *crearMessageWithCommand(char *command,int socket)
 	newConnection->mensaje->comandoSize=(strlen(command)+1);
 	newConnection->mensaje->comando=malloc(strlen(command)+1);
 	strcpy(newConnection->mensaje->comando,command);
+	newConnection->mensaje->dataSize = 1;
+	newConnection->mensaje->data = strdup("\0");
 	int _s = socket;
 	newConnection->sockfd= _s;
 

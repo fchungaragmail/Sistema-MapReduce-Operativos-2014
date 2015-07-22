@@ -165,8 +165,6 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 			if(!(*_response)){
 				//FALLO PEDIDO
 				planificar(recvMessage,K_Job_ReduceResponse,infoThread);
-				liberarMemoria(infoThread);
-				finalizarEjecucion = true;
 			}
 
 			free(path);
@@ -179,7 +177,6 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 
 			list_clean(infoThread->listaDeNodos_EnCasoDeFalloDeJob);
 			bool *mresponse = deserializeRequestResponse(recvMessage,K_Job_ReduceFinal);
-			char *mPath = deserializeFilePath(recvMessage,K_Job_ReduceFinal);
 			if(*mresponse == true){
 				finalizarEjecucion = true;
 				Message *jobMsj = crearMensajeAJobDeFinalizado(recvMessage,infoThread);
@@ -202,7 +199,10 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 			break;
 		case K_ProcesoCaido:;
 			char *log = string_from_format("jobCaido: socket %d - No se puede seguir procesando archivo",*(infoThread->jobSocket));
-			log_trace(logFile,log); free(log);
+			pthread_mutex_lock(&mutexLog);
+			log_debug(logFile,log);
+			pthread_mutex_unlock(&mutexLog);
+			free(log);
 
 			sacarCargasDeNodos_FalloDeJob(infoThread);
 			liberarMemoria(infoThread);
@@ -718,11 +718,6 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 		}
 		char *path = deserializeFilePath(recvMessage,K_Job_MapResponse);
 
-		char *log = string_from_format("el archivo %s - sckt %d no soporta Combiner",path,*(infoThread->jobSocket));
-		char *log2 = string_from_format("el pedido de reduce (arch %s - sckt %d)es : %s",infoThread->filePathAProcesar,*(infoThread->jobSocket),stream);
-		log_trace(logFile,log);log_trace(logFile,log2);
-		free(log);free(log2);
-
 		//actualizar Tablas !!
 		incrementarOperacionesEnProcesoEnNodo(IPnroNodoLocal);
 		//setBlockStatesListInReducingState(path);
@@ -730,12 +725,22 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 
 		char *comando = string_new();
 		char *tempPathFinal = crearPathTemporal(path);
-		string_append(&comando,"reduceFile ");
+		string_append(&comando,"reduceFileSinCombiner ");
 		string_append(&comando,tempPathFinal);
 
 		infoThread->ipNodoLocalDePedidoDeReduce = IPnroNodoLocal;
 		infoThread->puertoNodoLocalDePedidoDeReduce = puertoNodoLocal;
 		infoThread->pathNodoLocalDePedidoDeReduce = tempPathFinal;
+
+		char *log = string_from_format("el archivo %s - sckt %d no soporta Combiner",path,*(infoThread->jobSocket));
+		char *log2 = string_from_format("el pedido de reduce (arch %s - sckt %d) es data: %s",infoThread->filePathAProcesar,*(infoThread->jobSocket),stream);
+		char *log3 = string_from_format("comando: %s",comando);
+		pthread_mutex_lock(&mutexLog);
+		log_debug(logFile,log);
+		log_debug(logFile,log2);
+		log_debug(logFile,log3);
+		pthread_mutex_unlock(&mutexLog);
+		free(log);free(log2);free(log3);
 
 		msjParaEnviar = armarMensajeParaEnvio(recvMessage,finalStream,comando,infoThread);
 	}
