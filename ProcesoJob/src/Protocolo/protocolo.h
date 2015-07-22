@@ -27,15 +27,12 @@
 #include <netinet/in.h>
 #include <stdlib.h>
 
-
-typedef struct mensaje
-{
+typedef struct mensaje {
 	int16_t comandoSize;
 	char* comando;
-	int32_t dataSize; 	//Pongo int32_t asi entra el valor correspondiente a 20mb
+	int32_t dataSize; //Pongo int32_t asi entra el valor correspondiente a 20mb
 	char* data;
 } mensaje_t;
-
 
 #define CONECTADO 0
 #define DESCONECTADO -1
