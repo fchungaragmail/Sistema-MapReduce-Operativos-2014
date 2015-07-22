@@ -80,7 +80,9 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 
 		case K_FS_FileFullData:
 
-			log_trace(logFile,"PlannerCenter : planificar FS_FileFullData");
+			pthread_mutex_lock(&mutexLog);
+			log_debug(logFile,"PlannerCenter : planificar FS_FileFullData");
+			pthread_mutex_unlock(&mutexLog);
 			//FS me responde con el pedido de datos que le hice.
 			bool *response = deserializeRequestResponse(recvMessage,K_FS_FileFullData);
 
@@ -102,19 +104,24 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 				planificar(recvMessage,K_FS_FileFullData,infoThread);
 			}
 			free(response);
-			log_trace(logFile,"***************");
+			pthread_mutex_lock(&mutexLog);
+			log_debug(logFile,"***************");
+			pthread_mutex_unlock(&mutexLog);
 			break;
 
 		case K_Job_MapResponse:
 
 			log_trace(logFile,"PlannerCenter : planificar Job_MapResponse");
 			planificar(recvMessage,K_Job_MapResponse,infoThread);
-			log_trace(logFile,"***************");
+			pthread_mutex_lock(&mutexLog);
+			log_debug(logFile,"***************");
+			pthread_mutex_unlock(&mutexLog);
 			break;
 
 		case K_Job_ReduceResponse:
-
-			log_trace(logFile,"PlannerCenter : planificar Job_ReduceResponse\n");
+			pthread_mutex_lock(&mutexLog);
+			log_debug(logFile,"PlannerCenter : planificar Job_ReduceResponse\n");
+			pthread_mutex_lock(&mutexLog);
 			//tipos de rtas
 			//**************
 			//*comando: "reduceFileConCombiner-Pedido1 pathArchivo Respuesta"
@@ -126,7 +133,7 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 			char *reduceType = deserializeComando(recvMessage);
 			Message *jobMsj;
 
-			if((*_response)&&((strcmp(reduceType,"reduceFileConCombiner-Pedido2")==0)||(strcmp(reduceType,"reduceFileSinCombiner")==0))){
+			if((*_response)&&((strcmp(reduceType,"reduceFileConCombiner-Pedido2")==0)||(strcmp(reduceType,"reduceFileSinCombiner")==0)||(strcmp(reduceType,"reduceFileResponse")==0))){
 
 				char *ip = infoThread->ipNodoLocalDePedidoDeReduce;
 				char *puerto = infoThread->puertoNodoLocalDePedidoDeReduce;
@@ -170,10 +177,15 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 			free(path);
 			free(reduceType);
 			free(_response);
-			log_trace(logFile,"***************");
+			pthread_mutex_lock(&mutexLog);
+			log_debug(logFile,"***************");
+			pthread_mutex_lock(&mutexLog);
 			break;
 
 		case K_Job_ReduceFinal:;
+			pthread_mutex_lock(&mutexLog);
+			log_debug(logFile,"PlannerCenter : planificar Job_ReduceFinal\n");
+			pthread_mutex_lock(&mutexLog);
 
 			list_clean(infoThread->listaDeNodos_EnCasoDeFalloDeJob);
 			bool *mresponse = deserializeRequestResponse(recvMessage,K_Job_ReduceFinal);
@@ -194,11 +206,13 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 			liberarMemoria(infoThread);
 			finalizarEjecucion = true;
 			//TODO destruir fileToProcess --> ver si puede tener 2 cantidades de archs distintos a procesar
-
-
+			pthread_mutex_lock(&mutexLog);
+			log_debug(logFile,"***************");
+			pthread_mutex_lock(&mutexLog);
 			break;
+
 		case K_ProcesoCaido:;
-			char *log = string_from_format("jobCaido: socket %d - No se puede seguir procesando archivo",*(infoThread->jobSocket));
+			char *log = string_from_format("JobCaido: socket %d - No se puede seguir procesando archivo",*(infoThread->jobSocket));
 			pthread_mutex_lock(&mutexLog);
 			log_debug(logFile,log);
 			pthread_mutex_unlock(&mutexLog);
@@ -230,7 +244,7 @@ int obtenerIdParaComando(Message *recvMessage)
 	if(strcmp(comando,"mapFileResponse")==0){type = K_Job_MapResponse;}
 	if(strcmp(comando,"DataFileResponse")==0){type = K_FS_FileFullData;}
 
-	if(strcmp(comando,"reduceFileConCombiner-Pedido1")==0){type = K_Job_ReduceResponse;}
+	if(strcmp(comando,"reduceFileResponse")==0){type = K_Job_ReduceResponse;}//reduceFileConCombiner-Pedido1
 	if(strcmp(comando,"reduceFileConCombiner-Pedido2")==0){type = K_Job_ReduceResponse;}
 	if(strcmp(comando,"reduceFileSinCombiner")==0){type = K_Job_ReduceResponse;}
 	if(strcmp(comando,"ProcesoCaido")==0){type = K_ProcesoCaido;}
@@ -410,7 +424,7 @@ void planificar(Message *recvMessage,TypesMessages type,infoHilo_t *infoThread)
 			t_list *reduceResponse = deserializeFailedReduceResponse(recvMessage);
 			Message* sendMessage;
 
-			if(strcmp(reduceType,"reduceFileSinCombiner")==0){
+			if(strcmp(reduceType,"reduceFileSinCombiner")==0||(strcmp(reduceType,"reduceFileResponse")==0)){
 
 				log_trace(logFile,"reduceSinCombiner fallo");
 				char *ipNodo = infoThread->ipNodoLocalDePedidoDeReduce;

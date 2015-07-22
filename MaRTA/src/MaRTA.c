@@ -221,6 +221,7 @@ void administrarHilos(){
 				sem_post(semHilo);
 			}
 		}
+		return;
 	}
 
 	//TODO FS - Implementar bien esto, para iguales archivos con distinto job falla
