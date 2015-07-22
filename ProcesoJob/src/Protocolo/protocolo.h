@@ -25,22 +25,20 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <stdlib.h>
 
-
-typedef struct mensaje
-{
+typedef struct mensaje {
 	int16_t comandoSize;
 	char* comando;
-	int32_t dataSize; 	//Pongo int32_t asi entra el valor correspondiente a 20mb
+	int32_t dataSize; //Pongo int32_t asi entra el valor correspondiente a 20mb
 	char* data;
 } mensaje_t;
-
 
 #define CONECTADO 0
 #define DESCONECTADO -1
 
 //Es necesario que el malloc para mensaje ya este hecho
 int recibir(int socket, mensaje_t* mensaje);
-void enviar(int socket, mensaje_t* mensaje);
+int enviar(int socket, mensaje_t* mensaje);
 
 #endif /* COMPARTIDOS_PROTOCOLO_H_ */

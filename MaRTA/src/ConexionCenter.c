@@ -20,6 +20,7 @@
 #include <commons/txt.h>
 #include <commons/error.h>
 #include <commons/collections/list.h>
+#include <commons/config.h>
 #include "ConexionCenter.h"
 #include "VariablesGlobales.h"
 #include "FilesStatusCenter.h"
@@ -28,11 +29,7 @@
 // CONSTANTES
 
 #define LOCALHOST "127.0.0.1"
-#define K_PUERTO_LOCAL 9002
 #define MAX_CONNECTIONS 100
-
-#define K_FS_IP "192.168.0.102"
-#define K_FS_PUERTO "3000"
 
 // ESTRUCTURAS
 
@@ -62,6 +59,10 @@ int newfd;        // descriptor de socket de nueva conexión aceptada
 int addrlen;
 int conexionesProcesadas;
 
+int K_PUERTO_LOCAL;
+char *K_FS_IP;
+char *K_FS_PUERTO;
+
 // FUNCIONES PUBLICAS
 void initConexiones();
 void closeServidores();
@@ -74,10 +75,19 @@ void createListener();
 void prepareConnections();
 void setnonblocking();
 Message *crearMessageWithCommand(char *command,int socket);
+void initConfiguracion();
 
+void initConfiguracion()
+{
+	t_config *configuracion = config_create("configuracionMaRTA.config");
+	K_FS_PUERTO = config_get_string_value(configuracion,"K_FS_PUERTO");
+	K_FS_IP = config_get_string_value(configuracion,"K_FS_IP");
+	K_PUERTO_LOCAL = config_get_int_value(configuracion,"PUERTO_LOCAL");
 
+}
 void initConexiones()
 {
+	initConfiguracion();
 	createListener();
 	prepareConnections();
 	conexionesProcesadas=-1;

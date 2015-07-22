@@ -5,7 +5,9 @@
 extern char* scriptMapperStr;
 extern char* scriptReduceStr;
 extern t_log* logProcesoJob;
-
+#ifdef FALLO_EN_NODO_JOB_MUERTO
+extern int cantidadDeHilosActivos;
+#endif
 pthread_t* CrearHiloJob(HiloJobInfo* hiloJobInfo, TipoHilo tipoHilo) {
 
 	pthread_t* hiloJob;
@@ -13,6 +15,10 @@ pthread_t* CrearHiloJob(HiloJobInfo* hiloJobInfo, TipoHilo tipoHilo) {
 	hiloJobInfo->tipoHilo = tipoHilo;
 	pthread_create(&hiloJob, NULL, hiloJobHandler, (void*) hiloJobInfo);
 	hiloJobInfo->threadhilo = hiloJob;
+
+#ifdef FALLO_EN_NODO_JOB_MUERTO
+	cantidadDeHilosActivos++;
+#endif //FALLO_EN_NODO_JOB_MUERTO
 
 	return hiloJob;
 }
@@ -24,15 +30,22 @@ void* hiloJobHandler(void* arg) {
 
 #ifndef BUILD_CON_MOCK_NODO
 	if ((hiloJobInfo->socketFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) { //<--- CREO QUE SI OCURRE ESTO, FALLO JOB Y DEBE ABORTAR
-		log_error(logProcesoJob,"Error al crear socket para nodo %s\n",inet_ntoa(hiloJobInfo->direccionNodo.sin_addr));
-		ReportarResultadoHilo(hiloJobInfo,ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION);
+		log_error(logProcesoJob, "Error al crear socket para nodo %s\n",
+				inet_ntoa(hiloJobInfo->direccionNodo.sin_addr));
+		ReportarResultadoHilo(hiloJobInfo,
+				ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION);
 		return NULL;
 	}
 
-	if (connect(hiloJobInfo->socketFd, (Sockaddr_in*) &hiloJobInfo->direccionNodo, sizeof(Sockaddr_in))
+	if (connect(hiloJobInfo->socketFd,
+			(Sockaddr_in*) &hiloJobInfo->direccionNodo, sizeof(Sockaddr_in))
 			== -1) {
-		log_error(logProcesoJob,"Intento de conexion fallida con nodo IP:%s PUERTO:%d\n", inet_ntoa(hiloJobInfo->direccionNodo.sin_addr), ntohs(hiloJobInfo->direccionNodo.sin_port));
-		ReportarResultadoHilo(hiloJobInfo,ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION);
+		log_error(logProcesoJob,
+				"Intento de conexion fallida con nodo IP:%s PUERTO:%d\n",
+				inet_ntoa(hiloJobInfo->direccionNodo.sin_addr),
+				ntohs(hiloJobInfo->direccionNodo.sin_port));
+		ReportarResultadoHilo(hiloJobInfo,
+				ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION);
 		return NULL;
 	}
 #else
@@ -67,7 +80,7 @@ void* hiloJobHandler(void* arg) {
 
 #ifndef BUILD_CON_MOCK_NODO
 	mensajeDeNodo = malloc(sizeof(mensaje_t));
-	estadoConexion = recibir(hiloJobInfo->socketFd,mensajeDeNodo);
+	estadoConexion = recibir(hiloJobInfo->socketFd, mensajeDeNodo);
 #else
 	estadoConexion = CONECTADO;
 	mensajeDeNodo = CreateMensaje("bienvenido", NULL);
@@ -100,7 +113,8 @@ void* hiloJobHandler(void* arg) {
 
 	if (hiloJobInfo->tipoHilo == TIPO_HILO_MAPPER) {
 		string_append_with_format(&bufferComando, "mapFile %s %s %i",
-				hiloJobInfo->nombreArchivo, hiloJobInfo->parametros, hiloJobInfo->nroBloque);
+				hiloJobInfo->nombreArchivo, hiloJobInfo->parametros,
+				hiloJobInfo->nroBloque);
 	} else { //TIPO_HILO_REDUCE
 		string_append_with_format(&bufferComando, "reduceFile %s %s",
 				hiloJobInfo->nombreArchivo, hiloJobInfo->parametros);
@@ -109,11 +123,13 @@ void* hiloJobHandler(void* arg) {
 	string_append(&bufferData,
 			hiloJobInfo->tipoHilo == TIPO_HILO_MAPPER ?
 					scriptMapperStr : scriptReduceStr);
+
 	mensajeParaNodo = CreateMensajeParaHilo(bufferComando, bufferData);
 
 #ifndef BUILD_CON_MOCK_NODO
 	enviar(hiloJobInfo->socketFd, mensajeParaNodo);
 #endif
+
 	log_info(logProcesoJob,
 			"Enviado al nodo IP:%s PUERTO:%d\nComando: %s\nData: %s\n",
 			inet_ntoa(hiloJobInfo->direccionNodo.sin_addr),
@@ -130,7 +146,7 @@ void* hiloJobHandler(void* arg) {
 
 #ifndef BUILD_CON_MOCK_NODO
 	mensajeDeNodo = malloc(sizeof(mensaje_t));
-	estadoConexion = recibir(hiloJobInfo->socketFd,mensajeDeNodo);
+	estadoConexion = recibir(hiloJobInfo->socketFd, mensajeDeNodo);
 #else
 	estadoConexion = CONECTADO;
 	mensajeDeNodo = NULL;
