@@ -37,7 +37,6 @@ mensaje_t* CreateMensaje(char* comandoStr, char* dataStr) {
 
 mensaje_t* CreateMensajeParaHilo(char* comandoStr, char* dataStr) {
 
-	printf(dataStr);
 
 	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
 
