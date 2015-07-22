@@ -15,10 +15,11 @@
 #define FALLO_MAPPING 0
 #define OK_MAPPING 1
 #include <errno.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 		char* archivoTemporal2) {
 
-int cantHijos = 0;
 
 	int p[2];
 	if (pipe(p) < 0){
@@ -34,8 +35,7 @@ int cantHijos = 0;
 		return FALLO_MAPPING;
 
 	}else if(resultFork == 0) {
-		//cambio la entrada standar por la tuberia
-		cantHijos++;
+		//Se ejecuta el hijo
 		if(close(0) < 0){
 			log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
 			return FALLO_MAPPING;
@@ -67,9 +67,11 @@ int cantHijos = 0;
 			log_info(log_nodo, "Fallo syscall EXEXV() en mapping()");
 			return FALLO_MAPPING;
 		}
+		exit(EXIT_SUCCESS);
 
 	}
 
+	//continua el padre
 	if(close(p[0]) < 0){
 		log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
 		return FALLO_MAPPING;
@@ -88,13 +90,20 @@ int cantHijos = 0;
 		return FALLO_MAPPING;
 	}
 
+
+
+	if(waitpid(resultFork, NULL, WNOHANG) < 0){
+		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
+		return FALLO_MAPPING;
+	}
+
+
 	//para aplicar sort
 	if ((resultFork = fork()) < 0) {
 		log_info(log_nodo, "Fallo syscall FORK() en mapping()");
 		return FALLO_MAPPING;
 
 	}else if(resultFork == 0) {
-		cantHijos++;
 		if(close(0) < 0){
 			log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
 			return FALLO_MAPPING;
@@ -121,16 +130,11 @@ int cantHijos = 0;
 		}
 	}
 
-	int j;
-	for (j = 0; j < cantHijos; ++j) {
-		#include <sys/types.h>
-		#include <sys/wait.h>
-		if(wait(0) < 0){
-			log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
-			return FALLO_MAPPING;
-		}
 
-}
+	if(waitpid(resultFork, NULL, 0) < 0){
+		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
+		return FALLO_MAPPING;
+	}
 
 	return OK_MAPPING;//MAPING OK
 

@@ -348,7 +348,7 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 		numBloque = atoi(result[3]); //paso el string "numBloque" a tipo int , pq mapping recibe int NumBloque
 
 		char *archivoTemporal1 = string_new();
-		string_append_with_format(&archivoTemporal1, "%s/%s.txt", DIR_TEMP, temporal_get_string_time());
+		string_append_with_format(&archivoTemporal1, "%s/%s.map", DIR_TEMP, temporal_get_string_time());
 
 		char *archivoTemporal2 = string_new();
 		string_append_with_format(&archivoTemporal2, "%s/%s", DIR_TEMP, result[1]);
