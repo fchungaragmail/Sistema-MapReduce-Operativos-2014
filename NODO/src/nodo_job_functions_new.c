@@ -124,10 +124,11 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 			return FALLO_MAPPING;
 		}
 
-		if(execlp("sort", "sort", NULL) < 0){
+		if(system("sort") < 0){
 			log_info(log_nodo, "Fallo syscall EXEXLP() en mapping()");
 			return FALLO_MAPPING;
 		}
+		exit(EXIT_SUCCESS);
 	}
 /*
 	if(waitpid(resultFork, NULL, WNOHANG) < 0){

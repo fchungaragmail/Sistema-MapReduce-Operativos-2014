@@ -26,7 +26,7 @@ int main() {
 	mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
 	log_nodo = log_create("./log_nodo", "NODO", true, LOG_LEVEL_TRACE);
 	getConfig();
-	sem_init(&sMaps,0,10);
+	sem_init(&sMaps,0,40);
 
 	//connectToFileSistem(sockFS);
 	//pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockFS);
@@ -152,7 +152,7 @@ int initServer(int* sockFD) {
 		printf("***********************\n");
 	}
 
-	if (listen(*sockFD, 5) == -1) {
+	if (listen(*sockFD, 100) == -1) {
 		printf("Fallo en listen\n");
 		printf("***********************\n");
 		return -1;
