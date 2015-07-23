@@ -347,8 +347,9 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 		pthread_mutex_unlock(&mutexPermisosScript);
 		numBloque = atoi(result[3]); //paso el string "numBloque" a tipo int , pq mapping recibe int NumBloque
 
+		int static inc = 0;
 		char *archivoTemporal1 = string_new();
-		string_append_with_format(&archivoTemporal1, "%s/%s.map", DIR_TEMP, temporal_get_string_time());
+		string_append_with_format(&archivoTemporal1, "%s/%s%d.map", DIR_TEMP, temporal_get_string_time(), inc++);
 
 		char *archivoTemporal2 = string_new();
 		string_append_with_format(&archivoTemporal2, "%s/%s", DIR_TEMP, result[1]);

@@ -129,8 +129,12 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 			return FALLO_MAPPING;
 		}
 	}
-
-
+/*
+	if(waitpid(resultFork, NULL, WNOHANG) < 0){
+		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
+		return FALLO_MAPPING;
+	}
+*/
 	if(waitpid(resultFork, NULL, 0) < 0){
 		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
 		return FALLO_MAPPING;
