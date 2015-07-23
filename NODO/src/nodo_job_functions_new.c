@@ -175,16 +175,18 @@ void aplicarScriptReduce(char *script, char *archivoTemporal1,
 
 	int p[2];
 	pipe(p);
+	pid_t childPid;
 
 	//para escrbir el bloque en la tuberia
 	if (fork() == 0) {
+		childPid = getPid();
 		close(p[0]);
 		t_fileContent *archivoTemporal = getFileContent(archivoTemporal1);
 		write(p[1], archivoTemporal->contenido, archivoTemporal->size);
 		exit(EXIT_SUCCESS);
 	}
 
-	wait(0);
+	waitpid(childPid, 0, NULL);
 	//para aplicar el script
 	if (fork() == 0) {
 		close(p[1]);
