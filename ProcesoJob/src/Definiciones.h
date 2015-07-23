@@ -20,7 +20,6 @@
 //FLAG PARA BUILDEAR PARA TESTS, CON MENSAJES DE JOB Y NODO Y SLEEPS PARA SIMULACION
 //#define BUILD_CON_MOCK_NODO
 //#define BUILD_CON_MOCK_MARTA
-#define FALLO_EN_NODO_JOB_MUERTO
 
 #define MENSAJE_COMANDO 0
 #define MENSAJE_COMANDO_NOMBREARCHIVO 1
@@ -35,6 +34,11 @@ typedef enum {
 typedef enum {
 	TIPO_HILO_MAPPER, TIPO_HILO_REDUCE
 } TipoHilo;
+
+typedef enum {
+	SUBTIPO_MAPPER, SUBTIPO_REDUCE_SIN_COMBINER, SUBTIPO_REDUCE_CON_COMBINER_1, SUBTIPO_REDUCE_CON_COMBINER_2, SUBTIPO_REDUCE_CON_COMBINER_FINAL
+} SubTipoHilo;
+
 
 typedef struct {
 	short int sin_family;
@@ -52,6 +56,7 @@ typedef struct {
 	char* parametrosError;
 	int nroBloque;
 	TipoHilo tipoHilo;
+	SubTipoHilo subTipoHilo;
 } HiloJobInfo;
 
 #endif /* SRC_DEFINICIONES_H_ */

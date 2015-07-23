@@ -6205,3 +6205,3264 @@ Data: 129.3.6.9 112.3.4.5
 Comando: reduceFileResponse archTempCC3 0
 Data: 129.3.6.9 112.3.4.5
 
+[INFO] 21:22:41:479 ProcesoJob/(3161:3161): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:22:41:484 ProcesoJob/(3161:3162): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:22:41:484 ProcesoJob/(3161:3162): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:22:41:484 ProcesoJob/(3161:3162): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:22:41:484 ProcesoJob/(3161:3162): Recibido del MaRTA:
+Comando: reduceFileSinCombiner prueba-final.txt
+Data: 192.168.0.103 6000 1 prueba.txt
+
+[INFO] 21:22:41:487 ProcesoJob/(3161:3162): Se creó un Hilo Reduce sin combiner con los siguientes parametros
+Nombre del Archivo temporal: prueba-final.txt
+Parametros: reduce.pl 1 prueba.txt
+
+[INFO] 21:22:41:491 ProcesoJob/(3161:3163): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:22:41:491 ProcesoJob/(3161:3163): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: rd
+Data: 
+
+[INFO] 21:22:41:491 ProcesoJob/(3161:3163): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:22:41:492 ProcesoJob/(3161:3163): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFile prueba-final.txt reduce.pl 1 prueba.txt
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 21:22:45:493 ProcesoJob/(3161:3163): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFileResponse 1
+Data: 
+
+[INFO] 21:22:45:493 ProcesoJob/(3161:3163): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileResponse prueba-final.txt 1
+Data: 
+
+[INFO] 21:25:55:194 ProcesoJob/(3215:3215): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:25:55:217 ProcesoJob/(3215:3218): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:25:55:217 ProcesoJob/(3215:3218): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:25:55:217 ProcesoJob/(3215:3218): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:25:55:217 ProcesoJob/(3215:3218): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:25:55:217 ProcesoJob/(3215:3218): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:25:55:223 ProcesoJob/(3215:3220): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:25:55:223 ProcesoJob/(3215:3220): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:25:55:223 ProcesoJob/(3215:3220): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:25:55:224 ProcesoJob/(3215:3220): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+Y
+
+[INFO] 21:25:55:224 ProcesoJob/(3215:3220): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 21:25:55:224 ProcesoJob/(3215:3220): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 21:26:10:219 ProcesoJob/(3215:3218): Recibido del MaRTA:
+Comando: reduceFileSinCombiner prueba-final.txt
+Data: 192.168.0.103 6000 1 prueba.txt
+
+[INFO] 21:26:10:220 ProcesoJob/(3215:3218): Se creó un Hilo Reduce sin combiner con los siguientes parametros
+Nombre del Archivo temporal: prueba-final.txt
+Parametros: reduce.pl 1 prueba.txt
+
+[INFO] 21:26:10:220 ProcesoJob/(3215:3225): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:26:10:220 ProcesoJob/(3215:3225): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: rd
+Data: 
+
+[INFO] 21:26:10:220 ProcesoJob/(3215:3225): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:26:10:220 ProcesoJob/(3215:3225): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFile prueba-final.txt reduce.pl 1 prueba.txt
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 21:26:14:220 ProcesoJob/(3215:3225): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFileResponse 1
+Data: 
+
+[INFO] 21:26:14:221 ProcesoJob/(3215:3225): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileResponse prueba-final.txt 1
+Data: 
+
+[INFO] 21:30:51:572 ProcesoJob/(3479:3479): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:30:51:600 ProcesoJob/(3479:3491): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:30:51:600 ProcesoJob/(3479:3491): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:30:51:600 ProcesoJob/(3479:3491): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:30:51:600 ProcesoJob/(3479:3491): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:30:51:606 ProcesoJob/(3479:3491): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:30:51:606 ProcesoJob/(3479:3492): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:30:51:606 ProcesoJob/(3479:3492): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:30:51:606 ProcesoJob/(3479:3492): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:31:52:553 ProcesoJob/(3550:3550): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:31:52:564 ProcesoJob/(3550:3551): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:31:52:564 ProcesoJob/(3550:3551): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:31:52:564 ProcesoJob/(3550:3551): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:31:52:565 ProcesoJob/(3550:3551): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:31:52:565 ProcesoJob/(3550:3551): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:31:52:568 ProcesoJob/(3550:3552): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:31:52:568 ProcesoJob/(3550:3552): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:31:52:569 ProcesoJob/(3550:3552): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:31:52:569 ProcesoJob/(3550:3552): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+Y
+
+[INFO] 21:31:54:569 ProcesoJob/(3550:3552): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 21:31:54:572 ProcesoJob/(3550:3552): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 21:32:07:566 ProcesoJob/(3550:3551): Recibido del MaRTA:
+Comando: reduceFileSinCombiner prueba-final.txt
+Data: 192.168.0.103 6000 1 prueba.txt
+
+[INFO] 21:32:07:567 ProcesoJob/(3550:3551): Se creó un Hilo Reduce sin combiner con los siguientes parametros
+Nombre del Archivo temporal: prueba-final.txt
+Parametros: reduce.pl 1 prueba.txt
+
+[INFO] 21:32:07:567 ProcesoJob/(3550:3563): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:32:07:567 ProcesoJob/(3550:3563): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: rd
+Data: 
+
+[INFO] 21:32:07:567 ProcesoJob/(3550:3563): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:32:07:568 ProcesoJob/(3550:3563): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFile prueba-final.txt reduce.pl 1 prueba.txt
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 21:32:09:573 ProcesoJob/(3550:3563): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFileResponse 1
+Data: 
+
+[INFO] 21:32:09:574 ProcesoJob/(3550:3563): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileResponse prueba-final.txt 1
+Data: 
+
+[INFO] 21:34:31:188 ProcesoJob/(3714:3714): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:34:31:201 ProcesoJob/(3714:3715): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:34:31:201 ProcesoJob/(3714:3715): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:34:31:201 ProcesoJob/(3714:3715): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:34:31:201 ProcesoJob/(3714:3715): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:34:31:202 ProcesoJob/(3714:3715): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:34:31:203 ProcesoJob/(3714:3718): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:34:31:204 ProcesoJob/(3714:3718): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:34:31:204 ProcesoJob/(3714:3718): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:34:31:204 ProcesoJob/(3714:3718): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+Y
+
+[INFO] 21:34:34:205 ProcesoJob/(3714:3718): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 21:34:34:208 ProcesoJob/(3714:3718): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 21:34:47:101 ProcesoJob/(3757:3757): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:34:47:105 ProcesoJob/(3757:3761): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:34:47:109 ProcesoJob/(3757:3761): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:34:47:109 ProcesoJob/(3757:3761): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:34:47:109 ProcesoJob/(3757:3761): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:34:47:110 ProcesoJob/(3757:3761): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:34:47:114 ProcesoJob/(3757:3763): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:34:47:114 ProcesoJob/(3757:3763): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:34:47:114 ProcesoJob/(3757:3763): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:34:47:114 ProcesoJob/(3757:3763): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+Y
+
+[INFO] 21:34:50:115 ProcesoJob/(3757:3763): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 21:34:50:116 ProcesoJob/(3757:3763): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 21:35:17:514 ProcesoJob/(3802:3802): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:35:17:525 ProcesoJob/(3802:3805): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:35:17:527 ProcesoJob/(3802:3805): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:35:17:527 ProcesoJob/(3802:3805): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:35:17:528 ProcesoJob/(3802:3805): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:35:17:528 ProcesoJob/(3802:3805): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:35:17:534 ProcesoJob/(3802:3808): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:35:17:535 ProcesoJob/(3802:3808): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:35:17:535 ProcesoJob/(3802:3808): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:35:17:535 ProcesoJob/(3802:3808): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+Y
+
+[INFO] 21:35:20:535 ProcesoJob/(3802:3808): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 21:35:20:537 ProcesoJob/(3802:3808): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 21:35:57:475 ProcesoJob/(3843:3843): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:35:57:502 ProcesoJob/(3843:3853): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:35:57:502 ProcesoJob/(3843:3853): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:35:57:502 ProcesoJob/(3843:3853): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:35:57:502 ProcesoJob/(3843:3853): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:35:57:503 ProcesoJob/(3843:3853): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:35:57:503 ProcesoJob/(3843:3854): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:35:57:503 ProcesoJob/(3843:3854): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:35:57:503 ProcesoJob/(3843:3854): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:36:14:19 ProcesoJob/(3843:3853): Recibido del MaRTA:
+Comando: reduceFileSinCombiner prueba-final.txt
+Data: 192.168.0.103 6000 1 prueba.txt
+
+[INFO] 21:36:16:62 ProcesoJob/(3843:3853): Se creó un Hilo Reduce sin combiner con los siguientes parametros
+Nombre del Archivo temporal: prueba-final.txt
+Parametros: reduce.pl 1 prueba.txt
+
+[INFO] 21:36:16:62 ProcesoJob/(3843:3867): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:36:16:62 ProcesoJob/(3843:3867): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: rd
+Data: 
+
+[INFO] 21:36:16:62 ProcesoJob/(3843:3867): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:36:20:315 ProcesoJob/(3843:3854): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+Y
+
+[INFO] 21:36:24:35 ProcesoJob/(3843:3854): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 21:36:24:35 ProcesoJob/(3843:3854): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 21:36:24:57 ProcesoJob/(3843:3867): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFile prueba-final.txt reduce.pl 1 prueba.txt
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 21:36:31:63 ProcesoJob/(3843:3853): Recibido del MaRTA:
+Comando: reduceFileConCombiner-Pedido1 todoCC1.txt
+Data: 227.4.6.1 999 archTempCC1 2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 archTempCC2 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 archTempCC3 1 ruta_temp5
+
+[INFO] 21:36:31:68 ProcesoJob/(3843:3853): Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros
+Nombre del Archivo temporal: archTempCC1
+Parametros: reduce.pl 2 /ruta_temp1 /ruta_temp2
+
+[INFO] 21:36:31:68 ProcesoJob/(3843:3887): Conexion exitosa con nodo IP:227.4.6.1 PUERTO:999
+
+[INFO] 21:36:31:68 ProcesoJob/(3843:3887): Enviado al nodo IP:227.4.6.1 PUERTO:999
+Comando: rd
+Data: 
+
+[INFO] 21:36:31:68 ProcesoJob/(3843:3887): Recibido del nodo IP:227.4.6.1 PUERTO:999
+Comando: bienvenido
+Data: 
+
+[INFO] 21:36:31:246 ProcesoJob/(3843:3853): Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros
+Nombre del Archivo temporal: archTempCC2
+Parametros: reduce.pl 2 /ruta_temp3 /ruta_temp4
+
+[INFO] 21:36:31:246 ProcesoJob/(3843:3888): Conexion exitosa con nodo IP:117.4.5.1 PUERTO:259
+
+[INFO] 21:36:31:246 ProcesoJob/(3843:3888): Enviado al nodo IP:117.4.5.1 PUERTO:259
+Comando: rd
+Data: 
+
+[INFO] 21:36:31:246 ProcesoJob/(3843:3888): Recibido del nodo IP:117.4.5.1 PUERTO:259
+Comando: bienvenido
+Data: 
+
+[INFO] 21:36:32:925 ProcesoJob/(3843:3887): Enviado al nodo IP:227.4.6.1 PUERTO:999
+Comando: reduceFile archTempCC1 reduce.pl 2 /ruta_temp1 /ruta_temp2
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 21:37:05:699 ProcesoJob/(3948:3948): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:37:05:723 ProcesoJob/(3948:3958): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:37:05:723 ProcesoJob/(3948:3958): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:37:05:724 ProcesoJob/(3948:3958): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:37:05:724 ProcesoJob/(3948:3958): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:37:05:726 ProcesoJob/(3948:3958): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:37:05:726 ProcesoJob/(3948:3959): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:37:05:726 ProcesoJob/(3948:3959): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:37:05:726 ProcesoJob/(3948:3959): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:38:56:957 ProcesoJob/(4027:4027): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:38:56:962 ProcesoJob/(4027:4030): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:38:56:962 ProcesoJob/(4027:4030): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:38:56:962 ProcesoJob/(4027:4030): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:38:56:962 ProcesoJob/(4027:4030): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:38:56:963 ProcesoJob/(4027:4030): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:38:56:969 ProcesoJob/(4027:4033): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:38:56:969 ProcesoJob/(4027:4033): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:38:56:969 ProcesoJob/(4027:4033): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:39:17:840 ProcesoJob/(4068:4068): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:39:17:842 ProcesoJob/(4068:4071): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:39:17:842 ProcesoJob/(4068:4071): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:39:17:843 ProcesoJob/(4068:4071): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:39:17:843 ProcesoJob/(4068:4071): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:39:17:843 ProcesoJob/(4068:4071): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:39:17:843 ProcesoJob/(4068:4073): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:39:17:843 ProcesoJob/(4068:4073): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:39:17:843 ProcesoJob/(4068:4073): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:40:21:374 ProcesoJob/(4104:4104): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:40:21:379 ProcesoJob/(4104:4107): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:40:21:379 ProcesoJob/(4104:4107): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:40:21:379 ProcesoJob/(4104:4107): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:40:21:379 ProcesoJob/(4104:4107): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:40:21:379 ProcesoJob/(4104:4107): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:40:21:382 ProcesoJob/(4104:4110): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:40:21:382 ProcesoJob/(4104:4110): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:40:21:383 ProcesoJob/(4104:4110): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:42:41:619 ProcesoJob/(4143:4143): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:42:41:627 ProcesoJob/(4143:4148): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:42:41:628 ProcesoJob/(4143:4148): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:42:41:628 ProcesoJob/(4143:4148): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:42:41:628 ProcesoJob/(4143:4148): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:42:41:628 ProcesoJob/(4143:4148): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:42:41:630 ProcesoJob/(4143:4149): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:42:41:631 ProcesoJob/(4143:4149): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:42:41:631 ProcesoJob/(4143:4149): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:42:41:631 ProcesoJob/(4143:4149): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+Y
+
+[INFO] 21:42:45:632 ProcesoJob/(4143:4149): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 21:42:45:633 ProcesoJob/(4143:4149): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 21:43:01:555 ProcesoJob/(4189:4189): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:43:01:583 ProcesoJob/(4189:4201): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:43:01:583 ProcesoJob/(4189:4201): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:43:01:583 ProcesoJob/(4189:4201): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:43:01:583 ProcesoJob/(4189:4201): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:43:01:590 ProcesoJob/(4189:4201): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:43:01:590 ProcesoJob/(4189:4202): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:43:01:590 ProcesoJob/(4189:4202): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:43:01:590 ProcesoJob/(4189:4202): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:43:45:450 ProcesoJob/(4266:4266): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:43:45:456 ProcesoJob/(4266:4271): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:43:45:457 ProcesoJob/(4266:4271): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:43:45:457 ProcesoJob/(4266:4271): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:43:45:457 ProcesoJob/(4266:4271): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:43:45:457 ProcesoJob/(4266:4271): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:43:45:462 ProcesoJob/(4266:4272): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:43:45:462 ProcesoJob/(4266:4272): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:43:45:463 ProcesoJob/(4266:4272): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:43:45:464 ProcesoJob/(4266:4272): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+Y
+
+[INFO] 21:43:48:464 ProcesoJob/(4266:4272): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 21:43:48:465 ProcesoJob/(4266:4272): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 21:44:02:867 ProcesoJob/(4305:4305): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:44:02:894 ProcesoJob/(4305:4315): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:44:02:894 ProcesoJob/(4305:4315): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:44:02:894 ProcesoJob/(4305:4315): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:44:02:894 ProcesoJob/(4305:4315): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:44:02:901 ProcesoJob/(4305:4315): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:44:02:901 ProcesoJob/(4305:4316): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:44:02:902 ProcesoJob/(4305:4316): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:44:02:902 ProcesoJob/(4305:4316): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:44:29:910 ProcesoJob/(4305:4316): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+Y
+
+[INFO] 21:45:08:657 ProcesoJob/(4386:4386): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:45:08:678 ProcesoJob/(4386:4395): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:45:08:678 ProcesoJob/(4386:4395): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:45:08:678 ProcesoJob/(4386:4395): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:45:08:678 ProcesoJob/(4386:4395): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:45:08:682 ProcesoJob/(4386:4395): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:45:08:682 ProcesoJob/(4386:4396): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:45:08:682 ProcesoJob/(4386:4396): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:45:08:682 ProcesoJob/(4386:4396): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:45:39:350 ProcesoJob/(4460:4460): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:45:39:353 ProcesoJob/(4460:4467): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:45:39:353 ProcesoJob/(4460:4467): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:45:39:353 ProcesoJob/(4460:4467): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:45:39:353 ProcesoJob/(4460:4467): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:45:39:357 ProcesoJob/(4460:4467): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:45:39:357 ProcesoJob/(4460:4468): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:45:39:357 ProcesoJob/(4460:4468): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:45:39:357 ProcesoJob/(4460:4468): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:45:50:21 ProcesoJob/(4460:4468): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+Y
+
+[INFO] 21:47:00:984 ProcesoJob/(4548:4548): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:47:00:991 ProcesoJob/(4548:4549): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:47:00:991 ProcesoJob/(4548:4549): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:47:00:991 ProcesoJob/(4548:4549): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:47:00:991 ProcesoJob/(4548:4549): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:47:00:992 ProcesoJob/(4548:4549): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:47:00:996 ProcesoJob/(4548:4551): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:47:00:996 ProcesoJob/(4548:4551): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:47:00:996 ProcesoJob/(4548:4551): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:47:00:996 ProcesoJob/(4548:4551): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+Y
+[INFO] 21:47:00:997 ProcesoJob/(4548:4551): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 21:47:00:997 ProcesoJob/(4548:4551): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 21:56:12:644 ProcesoJob/(4611:4611): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:56:12:653 ProcesoJob/(4611:4612): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:56:12:655 ProcesoJob/(4611:4612): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:56:12:655 ProcesoJob/(4611:4612): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:56:12:655 ProcesoJob/(4611:4612): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:56:12:655 ProcesoJob/(4611:4612): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:56:12:658 ProcesoJob/(4611:4614): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:56:12:658 ProcesoJob/(4611:4614): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:56:12:658 ProcesoJob/(4611:4614): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:56:12:659 ProcesoJob/(4611:4614): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+Y
+
+[INFO] 21:56:15:659 ProcesoJob/(4611:4614): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 21:56:15:661 ProcesoJob/(4611:4614): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 21:56:35:459 ProcesoJob/(4651:4651): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 21:56:35:462 ProcesoJob/(4651:4656): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 21:56:35:462 ProcesoJob/(4651:4656): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 21:56:35:462 ProcesoJob/(4651:4656): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 21:56:35:462 ProcesoJob/(4651:4656): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:56:35:463 ProcesoJob/(4651:4656): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:56:35:466 ProcesoJob/(4651:4657): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:56:35:466 ProcesoJob/(4651:4657): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:56:35:466 ProcesoJob/(4651:4657): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:56:35:466 ProcesoJob/(4651:4657): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+Y
+
+[INFO] 21:56:39:466 ProcesoJob/(4651:4657): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 21:56:39:467 ProcesoJob/(4651:4657): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 22:14:56:282 ProcesoJob/(4933:4933): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 22:14:56:296 ProcesoJob/(4933:4935): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 22:14:56:296 ProcesoJob/(4933:4935): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 22:14:56:296 ProcesoJob/(4933:4935): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 22:14:56:296 ProcesoJob/(4933:4935): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 22:14:56:297 ProcesoJob/(4933:4935): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 22:14:56:300 ProcesoJob/(4933:4937): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 22:14:56:301 ProcesoJob/(4933:4937): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 22:14:56:301 ProcesoJob/(4933:4937): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 22:14:56:303 ProcesoJob/(4933:4937): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+Y
+
+[INFO] 22:14:56:303 ProcesoJob/(4933:4937): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 22:14:56:303 ProcesoJob/(4933:4937): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 22:15:36:192 ProcesoJob/(4991:4991): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9015
+
+[INFO] 22:15:36:201 ProcesoJob/(4991:4996): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo1.txt 0
+Data: 
+
+[INFO] 22:15:36:203 ProcesoJob/(4991:4996): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo2.txt 0
+Data: 
+
+[INFO] 22:15:36:203 ProcesoJob/(4991:4996): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar todo3.txt 0
+Data: 
+
+[INFO] 22:15:36:203 ProcesoJob/(4991:4996): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 22:15:36:204 ProcesoJob/(4991:4996): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 22:15:36:209 ProcesoJob/(4991:4997): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 22:15:36:209 ProcesoJob/(4991:4997): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 22:15:36:209 ProcesoJob/(4991:4997): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 22:15:36:209 ProcesoJob/(4991:4997): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+Y
+
+[INFO] 22:15:37:210 ProcesoJob/(4991:4997): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 22:15:37:214 ProcesoJob/(4991:4997): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 22:17:21:205 ProcesoJob/(4991:4996): Recibido del MaRTA:
+Comando: reduceFileSinCombiner prueba-final.txt
+Data: 192.168.0.103 6000 1 prueba.txt
+
+[INFO] 22:17:21:206 ProcesoJob/(4991:4996): Se creó un Hilo Reduce sin combiner con los siguientes parametros
+Nombre del Archivo temporal: prueba-final.txt
+Parametros: reduce.pl 1 prueba.txt
+
+[INFO] 22:17:21:206 ProcesoJob/(4991:5025): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 22:17:21:206 ProcesoJob/(4991:5025): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: rd
+Data: 
+
+[INFO] 22:17:21:206 ProcesoJob/(4991:5025): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 22:17:21:207 ProcesoJob/(4991:5025): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFile prueba-final.txt reduce.pl 1 prueba.txt
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 22:17:23:211 ProcesoJob/(4991:5025): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFileResponse 1
+Data: 
+
+[INFO] 22:17:23:212 ProcesoJob/(4991:5025): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileResponse prueba-final.txt 1
+Data: 
+
+[ERROR] 22:17:31:23 ProcesoJob/(5074:5074): Error al conectarse con MARTA, con IP: 127.0.0.1 PUERTO: 9015
+
+[INFO] 22:17:31:23 ProcesoJob/(5074:5074): Finalizacion del ProcesoJob con exit_status = -1
+
+[INFO] 22:19:06:206 ProcesoJob/(4991:4996): Recibido del MaRTA:
+Comando: reduceFileConCombiner-Pedido1 todoCC1.txt
+Data: 227.4.6.1 999 archTempCC1 2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 archTempCC2 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 archTempCC3 1 ruta_temp5
+
+[INFO] 22:19:06:207 ProcesoJob/(4991:4996): Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros
+Nombre del Archivo temporal: archTempCC1
+Parametros: reduce.pl 2 /ruta_temp1 /ruta_temp2
+
+[INFO] 22:19:06:207 ProcesoJob/(4991:4996): Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros
+Nombre del Archivo temporal: archTempCC2
+Parametros: reduce.pl 2 /ruta_temp3 /ruta_temp4
+
+[INFO] 22:19:06:208 ProcesoJob/(4991:4996): Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros
+Nombre del Archivo temporal: archTempCC3
+Parametros: reduce.pl 1 ruta_temp5
+
+[INFO] 22:19:06:208 ProcesoJob/(4991:5121): Conexion exitosa con nodo IP:167.5.4.1 PUERTO:250
+
+[INFO] 22:19:06:208 ProcesoJob/(4991:5121): Enviado al nodo IP:167.5.4.1 PUERTO:250
+Comando: rd
+Data: 
+
+[INFO] 22:19:06:208 ProcesoJob/(4991:5121): Recibido del nodo IP:167.5.4.1 PUERTO:250
+Comando: bienvenido
+Data: 
+
+[INFO] 22:19:06:208 ProcesoJob/(4991:5121): Enviado al nodo IP:167.5.4.1 PUERTO:250
+Comando: reduceFile archTempCC3 reduce.pl 1 ruta_temp5
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 22:19:06:213 ProcesoJob/(4991:5120): Conexion exitosa con nodo IP:117.4.5.1 PUERTO:259
+
+[INFO] 22:19:06:213 ProcesoJob/(4991:5121): Recibido del nodo IP:167.5.4.1 PUERTO:250
+Comando: reduceFileResponse 0
+Data: 129.3.6.9 112.3.4.5
+
+[INFO] 22:19:06:213 ProcesoJob/(4991:5119): Conexion exitosa con nodo IP:227.4.6.1 PUERTO:999
+
+[INFO] 22:19:06:214 ProcesoJob/(4991:5120): Enviado al nodo IP:117.4.5.1 PUERTO:259
+Comando: rd
+Data: 
+
+[INFO] 22:19:06:214 ProcesoJob/(4991:5120): Recibido del nodo IP:117.4.5.1 PUERTO:259
+Comando: bienvenido
+Data: 
+
+[INFO] 22:19:06:214 ProcesoJob/(4991:5120): Enviado al nodo IP:117.4.5.1 PUERTO:259
+Comando: reduceFile archTempCC2 reduce.pl 2 /ruta_temp3 /ruta_temp4
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 22:19:06:216 ProcesoJob/(4991:5120): Recibido del nodo IP:117.4.5.1 PUERTO:259
+Comando: reduceFileResponse 1
+Data: 
+
+[INFO] 22:19:06:216 ProcesoJob/(4991:5121): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileResponse archTempCC3 0
+Data: 129.3.6.9 112.3.4.5
+
+[INFO] 22:19:06:218 ProcesoJob/(4991:5119): Enviado al nodo IP:227.4.6.1 PUERTO:999
+Comando: rd
+Data: 
+
+[INFO] 22:19:06:218 ProcesoJob/(4991:5119): Recibido del nodo IP:227.4.6.1 PUERTO:999
+Comando: bienvenido
+Data: 
+
+[INFO] 22:19:06:218 ProcesoJob/(4991:5119): Enviado al nodo IP:227.4.6.1 PUERTO:999
+Comando: reduceFile archTempCC1 reduce.pl 2 /ruta_temp1 /ruta_temp2
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 22:19:06:219 ProcesoJob/(4991:5120): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileResponse archTempCC2 1
+Data: 
+
+[INFO] 22:19:07:219 ProcesoJob/(4991:5119): Recibido del nodo IP:227.4.6.1 PUERTO:999
+Comando: reduceFileResponse 0
+Data: 129.3.6.9 112.3.4.5
+
+[INFO] 22:19:07:219 ProcesoJob/(4991:5119): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileResponse archTempCC1 0
+Data: 129.3.6.9 112.3.4.5
+
+[INFO] 22:20:51:208 ProcesoJob/(4991:4996): Recibido del MaRTA:
+Comando: reduceFileConCombiner-Pedido2 todoCC2.txt
+Data: 227.4.6.1 999 1 /ruta_temp1 117.4.5.1 259 1 /ruta_temp3 167.5.4.1 250 1 ruta_temp5
+
+[INFO] 22:20:51:209 ProcesoJob/(4991:4996): Se creó un Hilo Reduce sin combiner con los siguientes parametros
+Nombre del Archivo temporal: todoCC2.txt
+Parametros: reduce.pl 1 /ruta_temp1 117.4.5.1 259 1 /ruta_temp3 167.5.4.1 250 1 ruta_temp5
+
+[INFO] 22:20:51:209 ProcesoJob/(4991:5126): Conexion exitosa con nodo IP:227.4.6.1 PUERTO:999
+
+[INFO] 22:20:51:209 ProcesoJob/(4991:5126): Enviado al nodo IP:227.4.6.1 PUERTO:999
+Comando: rd
+Data: 
+
+[INFO] 22:20:51:209 ProcesoJob/(4991:5126): Recibido del nodo IP:227.4.6.1 PUERTO:999
+Comando: bienvenido
+Data: 
+
+[INFO] 22:20:51:209 ProcesoJob/(4991:5126): Enviado al nodo IP:227.4.6.1 PUERTO:999
+Comando: reduceFile todoCC2.txt reduce.pl 1 /ruta_temp1 117.4.5.1 259 1 /ruta_temp3 167.5.4.1 250 1 ruta_temp5
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 22:20:51:211 ProcesoJob/(4991:5126): Recibido del nodo IP:227.4.6.1 PUERTO:999
+Comando: reduceFileResponse 1
+Data: 
+
+[INFO] 22:20:51:211 ProcesoJob/(4991:5126): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileResponse todoCC2.txt 1
+Data: 
+
+[ERROR] 22:22:36:643 ProcesoJob/(5217:5217): Error al conectarse con MARTA, con IP: 127.0.0.1 PUERTO: 9015
+
+[INFO] 22:22:36:646 ProcesoJob/(5217:5217): Finalizacion del ProcesoJob con exit_status = -1
+
+[ERROR] 21:50:35:680 ProcesoJob/(2980:2980): Error al conectarse con MARTA, con IP: 127.0.0.1 PUERTO: 9002
+
+[INFO] 21:50:35:701 ProcesoJob/(2980:2980): Finalizacion del ProcesoJob con exit_status = -1
+
+[INFO] 21:50:53:185 ProcesoJob/(3029:3029): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 21:50:53:192 ProcesoJob/(3029:3030): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 21:50:53:192 ProcesoJob/(3029:3030): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:50:53:192 ProcesoJob/(3029:3030): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:50:53:193 ProcesoJob/(3029:3031): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:50:53:193 ProcesoJob/(3029:3031): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:50:53:193 ProcesoJob/(3029:3031): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:50:53:193 ProcesoJob/(3029:3031): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+
+
+[INFO] 21:50:56:193 ProcesoJob/(3029:3031): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 21:51:09:561 ProcesoJob/(3065:3065): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 21:51:09:626 ProcesoJob/(3065:3070): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 21:51:09:626 ProcesoJob/(3065:3070): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:51:09:632 ProcesoJob/(3065:3070): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:51:09:632 ProcesoJob/(3065:3071): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:51:09:632 ProcesoJob/(3065:3071): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:51:09:632 ProcesoJob/(3065:3071): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:51:11:816 ProcesoJob/(3065:3071): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+
+
+[INFO] 21:51:11:816 ProcesoJob/(3065:3071): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 21:51:56:713 ProcesoJob/(3103:3103): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 21:51:56:720 ProcesoJob/(3103:3106): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 21:51:56:723 ProcesoJob/(3103:3106): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:51:56:724 ProcesoJob/(3103:3106): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:51:56:727 ProcesoJob/(3103:3108): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:51:56:727 ProcesoJob/(3103:3108): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:51:56:727 ProcesoJob/(3103:3108): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:51:56:727 ProcesoJob/(3103:3108): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+
+
+[INFO] 21:51:58:728 ProcesoJob/(3103:3108): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 21:51:58:728 ProcesoJob/(3103:3108): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 21:53:41:724 ProcesoJob/(3103:3106): Recibido del MaRTA:
+Comando: reduceFileSinCombiner prueba-final.txt
+Data: 192.168.0.103 6000 1 prueba.txt
+
+[INFO] 21:53:41:725 ProcesoJob/(3103:3106): Se creó un Hilo Reduce sin combiner con los siguientes parametros
+Nombre del Archivo temporal: prueba-final.txt
+Parametros: reduce.pl 1 prueba.txt
+
+[INFO] 21:53:41:725 ProcesoJob/(3103:3112): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:53:41:725 ProcesoJob/(3103:3112): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: rd
+Data: 
+
+[INFO] 21:53:41:726 ProcesoJob/(3103:3112): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:53:41:726 ProcesoJob/(3103:3112): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFile prueba-final.txt reduce.pl 1 prueba.txt
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 21:53:45:731 ProcesoJob/(3103:3112): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFileResponse 1
+Data: 
+
+[INFO] 21:53:45:731 ProcesoJob/(3103:3112): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileConCombiner-Pedido2 prueba-final.txt 1
+Data: 
+
+[INFO] 21:55:51:55 ProcesoJob/(3155:3155): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 21:55:51:61 ProcesoJob/(3155:3156): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 21:55:51:61 ProcesoJob/(3155:3156): Recibido del MaRTA:
+Comando: FileSuccess todo1.txt
+Data: 
+
+[WARNING] 21:55:51:61 ProcesoJob/(3155:3156): Nombre de archivo: todo1.txt incorrecto o ya fue completado con anterioridad!
+
+[INFO] 21:57:20:386 ProcesoJob/(3190:3190): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 21:57:20:395 ProcesoJob/(3190:3193): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 21:57:20:396 ProcesoJob/(3190:3193): Recibido del MaRTA:
+Comando: reduceFileConCombiner-Pedido2 todoCC2.txt
+Data: 227.4.6.1 999 1 /ruta_temp1 117.4.5.1 259 1 /ruta_temp3 167.5.4.1 250 1 ruta_temp5
+
+[INFO] 21:57:20:396 ProcesoJob/(3190:3193): Se creó un Hilo Reduce sin combiner con los siguientes parametros
+Nombre del Archivo temporal: todoCC2.txt
+Parametros: reduce.pl 1 /ruta_temp1 117.4.5.1 259 1 /ruta_temp3 167.5.4.1 250 1 ruta_temp5
+
+[INFO] 21:57:20:402 ProcesoJob/(3190:3195): Conexion exitosa con nodo IP:227.4.6.1 PUERTO:999
+
+[INFO] 21:57:20:402 ProcesoJob/(3190:3195): Enviado al nodo IP:227.4.6.1 PUERTO:999
+Comando: rd
+Data: 
+
+[INFO] 21:57:20:402 ProcesoJob/(3190:3195): Recibido del nodo IP:227.4.6.1 PUERTO:999
+Comando: bienvenido
+Data: 
+
+[INFO] 21:57:20:402 ProcesoJob/(3190:3195): Enviado al nodo IP:227.4.6.1 PUERTO:999
+Comando: reduceFile todoCC2.txt reduce.pl 1 /ruta_temp1 117.4.5.1 259 1 /ruta_temp3 167.5.4.1 250 1 ruta_temp5
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 21:57:23:403 ProcesoJob/(3190:3195): Recibido del nodo IP:227.4.6.1 PUERTO:999
+Comando: reduceFileResponse 1
+Data: 
+
+[INFO] 21:57:23:406 ProcesoJob/(3190:3195): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileConCombiner-Pedido2 todoCC2.txt 1
+Data: 
+
+[INFO] 21:57:48:271 ProcesoJob/(3228:3228): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 21:57:48:275 ProcesoJob/(3228:3229): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 21:57:48:276 ProcesoJob/(3228:3229): Recibido del MaRTA:
+Comando: reduceFileConCombiner-Pedido1 todoCC1.txt
+Data: 227.4.6.1 999 archTempCC1 2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 archTempCC2 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 archTempCC3 1 ruta_temp5
+
+[INFO] 21:57:48:276 ProcesoJob/(3228:3229): Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros
+Nombre del Archivo temporal: archTempCC1
+Parametros: reduce.pl 2 /ruta_temp1 /ruta_temp2
+
+[INFO] 21:57:48:276 ProcesoJob/(3228:3229): Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros
+Nombre del Archivo temporal: archTempCC2
+Parametros: reduce.pl 2 /ruta_temp3 /ruta_temp4
+
+[INFO] 21:57:48:276 ProcesoJob/(3228:3229): Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros
+Nombre del Archivo temporal: archTempCC3
+Parametros: reduce.pl 1 ruta_temp5
+
+[INFO] 21:57:48:277 ProcesoJob/(3228:3233): Conexion exitosa con nodo IP:167.5.4.1 PUERTO:250
+
+[INFO] 21:57:48:277 ProcesoJob/(3228:3233): Enviado al nodo IP:167.5.4.1 PUERTO:250
+Comando: rd
+Data: 
+
+[INFO] 21:57:48:278 ProcesoJob/(3228:3233): Recibido del nodo IP:167.5.4.1 PUERTO:250
+Comando: bienvenido
+Data: 
+
+[INFO] 21:57:48:278 ProcesoJob/(3228:3233): Enviado al nodo IP:167.5.4.1 PUERTO:250
+Comando: reduceFile archTempCC3 reduce.pl 1 ruta_temp5
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 21:57:48:278 ProcesoJob/(3228:3232): Conexion exitosa con nodo IP:117.4.5.1 PUERTO:259
+
+[INFO] 21:57:48:279 ProcesoJob/(3228:3232): Enviado al nodo IP:117.4.5.1 PUERTO:259
+Comando: rd
+Data: 
+
+[INFO] 21:57:48:279 ProcesoJob/(3228:3232): Recibido del nodo IP:117.4.5.1 PUERTO:259
+Comando: bienvenido
+Data: 
+
+[INFO] 21:57:48:280 ProcesoJob/(3228:3232): Enviado al nodo IP:117.4.5.1 PUERTO:259
+Comando: reduceFile archTempCC2 reduce.pl 2 /ruta_temp3 /ruta_temp4
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 21:57:48:282 ProcesoJob/(3228:3231): Conexion exitosa con nodo IP:227.4.6.1 PUERTO:999
+
+[INFO] 21:57:48:282 ProcesoJob/(3228:3232): Recibido del nodo IP:117.4.5.1 PUERTO:259
+Comando: reduceFileResponse 1
+Data: 
+
+[INFO] 21:57:48:282 ProcesoJob/(3228:3232): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileConCombiner-Pedido1 archTempCC2 1
+Data: 
+
+[INFO] 21:57:48:282 ProcesoJob/(3228:3231): Enviado al nodo IP:227.4.6.1 PUERTO:999
+Comando: rd
+Data: 
+
+[INFO] 21:57:48:282 ProcesoJob/(3228:3231): Recibido del nodo IP:227.4.6.1 PUERTO:999
+Comando: bienvenido
+Data: 
+
+[INFO] 21:57:48:283 ProcesoJob/(3228:3231): Enviado al nodo IP:227.4.6.1 PUERTO:999
+Comando: reduceFile archTempCC1 reduce.pl 2 /ruta_temp1 /ruta_temp2
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 21:57:52:279 ProcesoJob/(3228:3233): Recibido del nodo IP:167.5.4.1 PUERTO:250
+Comando: reduceFileResponse 0
+Data: 129.3.6.9 112.3.4.5
+
+[INFO] 21:57:52:282 ProcesoJob/(3228:3233): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileConCombiner-Pedido1 archTempCC3 0
+Data: 129.3.6.9 112.3.4.5
+
+[ERROR] 21:57:52:282 ProcesoJob/(3228:3233): Al menos un nodo falló, cerrando Job...
+
+[INFO] 21:57:52:282 ProcesoJob/(3228:3233): Finalizacion del ProcesoJob con exit_status = 1
+
+[INFO] 21:57:58:943 ProcesoJob/(3245:3245): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 21:57:58:948 ProcesoJob/(3245:3246): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 21:57:58:948 ProcesoJob/(3245:3246): Recibido del MaRTA:
+Comando: reduceFileConCombiner-Pedido1 todoCC1.txt
+Data: 227.4.6.1 999 archTempCC1 2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 archTempCC2 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 archTempCC3 1 ruta_temp5
+
+[INFO] 21:57:58:948 ProcesoJob/(3245:3246): Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros
+Nombre del Archivo temporal: archTempCC1
+Parametros: reduce.pl 2 /ruta_temp1 /ruta_temp2
+
+[INFO] 21:57:58:949 ProcesoJob/(3245:3246): Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros
+Nombre del Archivo temporal: archTempCC2
+Parametros: reduce.pl 2 /ruta_temp3 /ruta_temp4
+
+[INFO] 21:57:58:949 ProcesoJob/(3245:3246): Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros
+Nombre del Archivo temporal: archTempCC3
+Parametros: reduce.pl 1 ruta_temp5
+
+[INFO] 21:57:58:949 ProcesoJob/(3245:3250): Conexion exitosa con nodo IP:167.5.4.1 PUERTO:250
+
+[INFO] 21:57:58:949 ProcesoJob/(3245:3250): Enviado al nodo IP:167.5.4.1 PUERTO:250
+Comando: rd
+Data: 
+
+[INFO] 21:57:58:949 ProcesoJob/(3245:3250): Recibido del nodo IP:167.5.4.1 PUERTO:250
+Comando: bienvenido
+Data: 
+
+[INFO] 21:57:58:949 ProcesoJob/(3245:3250): Enviado al nodo IP:167.5.4.1 PUERTO:250
+Comando: reduceFile archTempCC3 reduce.pl 1 ruta_temp5
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 21:57:58:949 ProcesoJob/(3245:3247): Conexion exitosa con nodo IP:227.4.6.1 PUERTO:999
+
+[INFO] 21:57:58:949 ProcesoJob/(3245:3247): Enviado al nodo IP:227.4.6.1 PUERTO:999
+Comando: rd
+Data: 
+
+[INFO] 21:57:58:949 ProcesoJob/(3245:3247): Recibido del nodo IP:227.4.6.1 PUERTO:999
+Comando: bienvenido
+Data: 
+
+[INFO] 21:57:58:949 ProcesoJob/(3245:3249): Conexion exitosa con nodo IP:117.4.5.1 PUERTO:259
+
+[INFO] 21:57:58:949 ProcesoJob/(3245:3247): Enviado al nodo IP:227.4.6.1 PUERTO:999
+Comando: reduceFile archTempCC1 reduce.pl 2 /ruta_temp1 /ruta_temp2
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 21:57:58:949 ProcesoJob/(3245:3249): Enviado al nodo IP:117.4.5.1 PUERTO:259
+Comando: rd
+Data: 
+
+[INFO] 21:57:58:949 ProcesoJob/(3245:3249): Recibido del nodo IP:117.4.5.1 PUERTO:259
+Comando: bienvenido
+Data: 
+
+[INFO] 21:57:58:949 ProcesoJob/(3245:3249): Enviado al nodo IP:117.4.5.1 PUERTO:259
+Comando: reduceFile archTempCC2 reduce.pl 2 /ruta_temp3 /ruta_temp4
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 21:57:58:950 ProcesoJob/(3245:3249): Recibido del nodo IP:117.4.5.1 PUERTO:259
+Comando: reduceFileResponse 1
+Data: 
+
+[INFO] 21:57:58:950 ProcesoJob/(3245:3249): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileConCombiner-Pedido1 archTempCC2 1
+Data: 
+
+[INFO] 21:57:59:949 ProcesoJob/(3245:3250): Recibido del nodo IP:167.5.4.1 PUERTO:250
+Comando: reduceFileResponse 0
+Data: 129.3.6.9 112.3.4.5
+
+[INFO] 21:57:59:950 ProcesoJob/(3245:3250): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileConCombiner-Pedido1 archTempCC3 0
+Data: 129.3.6.9 112.3.4.5
+
+[INFO] 21:57:59:950 ProcesoJob/(3245:3247): Recibido del nodo IP:227.4.6.1 PUERTO:999
+Comando: reduceFileResponse 1
+Data: 
+
+[ERROR] 21:57:59:950 ProcesoJob/(3245:3250): Al menos un nodo falló, cerrando Job...
+
+[INFO] 21:57:59:951 ProcesoJob/(3245:3247): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileConCombiner-Pedido1 archTempCC1 1
+Data: 
+
+[INFO] 21:57:59:955 ProcesoJob/(3245:3250): Finalizacion del ProcesoJob con exit_status = 1
+
+[INFO] 21:58:43:369 ProcesoJob/(3282:3282): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 21:58:43:375 ProcesoJob/(3282:3283): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 21:58:43:375 ProcesoJob/(3282:3283): Recibido del MaRTA:
+Comando: reduceFileSinCombiner prueba-final.txt
+Data: 192.168.0.103 6000 1 prueba.txt
+
+[INFO] 21:58:43:375 ProcesoJob/(3282:3283): Se creó un Hilo Reduce sin combiner con los siguientes parametros
+Nombre del Archivo temporal: prueba-final.txt
+Parametros: reduce.pl 1 prueba.txt
+
+[INFO] 21:58:43:379 ProcesoJob/(3282:3284): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:58:43:379 ProcesoJob/(3282:3284): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: rd
+Data: 
+
+[INFO] 21:58:43:379 ProcesoJob/(3282:3284): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:58:43:379 ProcesoJob/(3282:3284): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFile prueba-final.txt reduce.pl 1 prueba.txt
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 21:58:44:380 ProcesoJob/(3282:3284): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFileResponse 1
+Data: 
+
+[INFO] 21:58:44:381 ProcesoJob/(3282:3284): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileConCombiner-Pedido2 prueba-final.txt 1
+Data: 
+
+[INFO] 21:59:16:877 ProcesoJob/(3321:3321): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 21:59:16:885 ProcesoJob/(3321:3325): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 21:59:16:886 ProcesoJob/(3321:3325): Recibido del MaRTA:
+Comando: reduceFileSinCombiner prueba-final.txt
+Data: 192.168.0.103 6000 1 prueba.txt
+
+[INFO] 21:59:16:886 ProcesoJob/(3321:3325): Se creó un Hilo Reduce sin combiner con los siguientes parametros
+Nombre del Archivo temporal: prueba-final.txt
+Parametros: reduce.pl 1 prueba.txt
+
+[INFO] 21:59:16:892 ProcesoJob/(3321:3327): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:59:16:893 ProcesoJob/(3321:3327): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: rd
+Data: 
+
+[INFO] 21:59:16:893 ProcesoJob/(3321:3327): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:59:16:893 ProcesoJob/(3321:3327): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFile prueba-final.txt reduce.pl 1 prueba.txt
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 21:59:19:894 ProcesoJob/(3321:3327): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFileResponse 1
+Data: 
+
+[INFO] 21:59:19:894 ProcesoJob/(3321:3327): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileSinCombiner prueba-final.txt 1
+Data: 
+
+[INFO] 21:59:36:235 ProcesoJob/(3361:3361): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 21:59:36:238 ProcesoJob/(3361:3365): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 21:59:36:239 ProcesoJob/(3361:3365): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 21:59:36:239 ProcesoJob/(3361:3365): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 21:59:36:246 ProcesoJob/(3361:3367): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 21:59:36:246 ProcesoJob/(3361:3367): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 21:59:36:246 ProcesoJob/(3361:3367): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 21:59:36:246 ProcesoJob/(3361:3367): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+
+
+[INFO] 21:59:37:247 ProcesoJob/(3361:3367): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 21:59:37:248 ProcesoJob/(3361:3367): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 22:04:09:534 ProcesoJob/(3474:3474): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 22:04:09:541 ProcesoJob/(3474:3477): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 22:04:09:542 ProcesoJob/(3474:3477): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 22:04:09:542 ProcesoJob/(3474:3477): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 22:04:09:548 ProcesoJob/(3474:3479): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 22:04:09:550 ProcesoJob/(3474:3479): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 22:04:09:550 ProcesoJob/(3474:3479): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 22:04:09:550 ProcesoJob/(3474:3479): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+
+
+[INFO] 22:04:12:551 ProcesoJob/(3474:3479): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 22:04:12:552 ProcesoJob/(3474:3479): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 22:05:01:361 ProcesoJob/(3528:3528): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 22:05:01:365 ProcesoJob/(3528:3531): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 22:05:01:366 ProcesoJob/(3528:3531): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 22:05:01:366 ProcesoJob/(3528:3531): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 22:05:01:371 ProcesoJob/(3528:3534): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 22:05:01:372 ProcesoJob/(3528:3534): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 22:05:01:372 ProcesoJob/(3528:3534): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 22:05:01:372 ProcesoJob/(3528:3534): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+
+
+[INFO] 22:05:05:375 ProcesoJob/(3528:3534): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 22:05:05:376 ProcesoJob/(3528:3534): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 22:06:49:425 ProcesoJob/(3565:3565): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 22:06:49:429 ProcesoJob/(3565:3568): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 22:06:49:430 ProcesoJob/(3565:3568): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 22:06:49:430 ProcesoJob/(3565:3568): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 22:06:49:438 ProcesoJob/(3565:3570): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 22:06:49:438 ProcesoJob/(3565:3570): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 22:06:49:439 ProcesoJob/(3565:3570): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 22:06:49:439 ProcesoJob/(3565:3570): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+
+
+[INFO] 22:06:52:440 ProcesoJob/(3565:3570): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 22:06:52:440 ProcesoJob/(3565:3570): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 22:07:04:432 ProcesoJob/(3565:3568): Recibido del MaRTA:
+Comando: reduceFileSinCombiner prueba-final.txt
+Data: 192.168.0.103 6000 1 prueba.txt
+
+[INFO] 22:07:04:433 ProcesoJob/(3565:3568): Se creó un Hilo Reduce sin combiner con los siguientes parametros
+Nombre del Archivo temporal: prueba-final.txt
+Parametros: reduce.pl 1 prueba.txt
+
+[INFO] 22:07:04:433 ProcesoJob/(3565:3574): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 22:07:04:433 ProcesoJob/(3565:3574): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: rd
+Data: 
+
+[INFO] 22:07:04:433 ProcesoJob/(3565:3574): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 22:07:04:433 ProcesoJob/(3565:3574): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFile prueba-final.txt reduce.pl 1 prueba.txt
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 22:07:08:437 ProcesoJob/(3565:3574): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFileResponse 1
+Data: 
+
+[INFO] 22:07:08:437 ProcesoJob/(3565:3574): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileSinCombiner prueba-final.txt 1
+Data: 
+
+[INFO] 22:07:19:433 ProcesoJob/(3565:3568): Recibido del MaRTA:
+Comando: reduceFileConCombiner-Pedido1 todoCC1.txt
+Data: 227.4.6.1 999 archTempCC1 2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 archTempCC2 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 archTempCC3 1 ruta_temp5
+
+[INFO] 22:07:19:434 ProcesoJob/(3565:3568): Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros
+Nombre del Archivo temporal: archTempCC1
+Parametros: reduce.pl 2 /ruta_temp1 /ruta_temp2
+
+[INFO] 22:07:19:434 ProcesoJob/(3565:3568): Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros
+Nombre del Archivo temporal: archTempCC2
+Parametros: reduce.pl 2 /ruta_temp3 /ruta_temp4
+
+[INFO] 22:07:19:434 ProcesoJob/(3565:3568): Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros
+Nombre del Archivo temporal: archTempCC3
+Parametros: reduce.pl 1 ruta_temp5
+
+[INFO] 22:07:19:434 ProcesoJob/(3565:3577): Conexion exitosa con nodo IP:167.5.4.1 PUERTO:250
+
+[INFO] 22:07:19:434 ProcesoJob/(3565:3577): Enviado al nodo IP:167.5.4.1 PUERTO:250
+Comando: rd
+Data: 
+
+[INFO] 22:07:19:435 ProcesoJob/(3565:3577): Recibido del nodo IP:167.5.4.1 PUERTO:250
+Comando: bienvenido
+Data: 
+
+[INFO] 22:07:19:435 ProcesoJob/(3565:3577): Enviado al nodo IP:167.5.4.1 PUERTO:250
+Comando: reduceFile archTempCC3 reduce.pl 1 ruta_temp5
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 22:07:19:436 ProcesoJob/(3565:3576): Conexion exitosa con nodo IP:117.4.5.1 PUERTO:259
+
+[INFO] 22:07:19:437 ProcesoJob/(3565:3576): Enviado al nodo IP:117.4.5.1 PUERTO:259
+Comando: rd
+Data: 
+
+[INFO] 22:07:19:438 ProcesoJob/(3565:3576): Recibido del nodo IP:117.4.5.1 PUERTO:259
+Comando: bienvenido
+Data: 
+
+[INFO] 22:07:19:438 ProcesoJob/(3565:3576): Enviado al nodo IP:117.4.5.1 PUERTO:259
+Comando: reduceFile archTempCC2 reduce.pl 2 /ruta_temp3 /ruta_temp4
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 22:07:19:441 ProcesoJob/(3565:3575): Conexion exitosa con nodo IP:227.4.6.1 PUERTO:999
+
+[INFO] 22:07:19:441 ProcesoJob/(3565:3575): Enviado al nodo IP:227.4.6.1 PUERTO:999
+Comando: rd
+Data: 
+
+[INFO] 22:07:19:442 ProcesoJob/(3565:3575): Recibido del nodo IP:227.4.6.1 PUERTO:999
+Comando: bienvenido
+Data: 
+
+[INFO] 22:07:19:442 ProcesoJob/(3565:3575): Enviado al nodo IP:227.4.6.1 PUERTO:999
+Comando: reduceFile archTempCC1 reduce.pl 2 /ruta_temp1 /ruta_temp2
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 22:07:20:437 ProcesoJob/(3565:3577): Recibido del nodo IP:167.5.4.1 PUERTO:250
+Comando: reduceFileResponse 0
+Data: 129.3.6.9 112.3.4.5
+
+[ERROR] 22:07:20:438 ProcesoJob/(3565:3577): Al menos un nodo falló, cerrando Job...
+
+[INFO] 22:07:20:438 ProcesoJob/(3565:3577): Finalizacion del ProcesoJob con exit_status = 1
+
+[INFO] 22:08:16:887 ProcesoJob/(3610:3610): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 22:08:16:892 ProcesoJob/(3610:3612): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 22:08:16:892 ProcesoJob/(3610:3612): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 22:08:16:892 ProcesoJob/(3610:3612): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 22:08:16:895 ProcesoJob/(3610:3614): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 22:08:16:895 ProcesoJob/(3610:3614): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 22:08:16:895 ProcesoJob/(3610:3614): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 22:08:16:895 ProcesoJob/(3610:3614): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+
+
+[INFO] 22:08:20:897 ProcesoJob/(3610:3614): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 0
+Data: 
+
+[INFO] 22:08:20:899 ProcesoJob/(3610:3614): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt
+Data: 
+
+[INFO] 22:08:31:894 ProcesoJob/(3610:3612): Recibido del MaRTA:
+Comando: reduceFileSinCombiner prueba-final.txt
+Data: 192.168.0.103 6000 1 prueba.txt
+
+[INFO] 22:08:31:895 ProcesoJob/(3610:3612): Se creó un Hilo Reduce sin combiner con los siguientes parametros
+Nombre del Archivo temporal: prueba-final.txt
+Parametros: reduce.pl 1 prueba.txt
+
+[INFO] 22:08:31:896 ProcesoJob/(3610:3619): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 22:08:31:896 ProcesoJob/(3610:3619): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: rd
+Data: 
+
+[INFO] 22:08:31:896 ProcesoJob/(3610:3619): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 22:08:31:896 ProcesoJob/(3610:3619): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFile prueba-final.txt reduce.pl 1 prueba.txt
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 22:08:32:897 ProcesoJob/(3610:3619): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFileResponse 0
+Data: 129.3.6.9 112.3.4.5
+
+[ERROR] 22:08:32:897 ProcesoJob/(3610:3619): Al menos un nodo falló, cerrando Job...
+
+[INFO] 22:08:32:897 ProcesoJob/(3610:3619): Finalizacion del ProcesoJob con exit_status = 1
+
+[INFO] 22:11:32:402 ProcesoJob/(3728:3728): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 22:11:32:406 ProcesoJob/(3728:3732): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 22:11:32:406 ProcesoJob/(3728:3732): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 22:11:32:406 ProcesoJob/(3728:3732): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 22:11:32:413 ProcesoJob/(3728:3734): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 22:11:32:413 ProcesoJob/(3728:3734): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 22:11:32:413 ProcesoJob/(3728:3734): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 22:11:32:413 ProcesoJob/(3728:3734): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+
+
+[INFO] 22:11:33:414 ProcesoJob/(3728:3734): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 1
+Data: 
+
+[INFO] 22:11:33:414 ProcesoJob/(3728:3734): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 1
+Data: 
+
+[INFO] 22:11:47:407 ProcesoJob/(3728:3732): Recibido del MaRTA:
+Comando: reduceFileSinCombiner prueba-final.txt
+Data: 192.168.0.103 6000 1 prueba.txt
+
+[INFO] 22:11:47:408 ProcesoJob/(3728:3732): Se creó un Hilo Reduce sin combiner con los siguientes parametros
+Nombre del Archivo temporal: prueba-final.txt
+Parametros: reduce.pl 1 prueba.txt
+
+[INFO] 22:11:47:410 ProcesoJob/(3728:3739): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 22:11:47:410 ProcesoJob/(3728:3739): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: rd
+Data: 
+
+[INFO] 22:11:47:411 ProcesoJob/(3728:3739): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 22:11:47:412 ProcesoJob/(3728:3739): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFile prueba-final.txt reduce.pl 1 prueba.txt
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 22:11:48:418 ProcesoJob/(3728:3739): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFileResponse 1
+Data: 
+
+[INFO] 22:11:48:418 ProcesoJob/(3728:3739): Se envió a MaRTA el siguiente mensaje
+Comando: reduceFileSinCombiner prueba-final.txt 1
+Data: 
+
+[INFO] 22:12:06:510 ProcesoJob/(3767:3767): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 22:12:06:520 ProcesoJob/(3767:3768): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 22:12:06:520 ProcesoJob/(3767:3768): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 22:12:06:521 ProcesoJob/(3767:3768): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 22:12:06:524 ProcesoJob/(3767:3770): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 22:12:06:524 ProcesoJob/(3767:3770): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 22:12:06:526 ProcesoJob/(3767:3770): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 22:12:06:526 ProcesoJob/(3767:3770): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+
+
+[INFO] 22:12:06:526 ProcesoJob/(3767:3770): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFileResponse 0
+Data: 
+
+[INFO] 22:12:06:526 ProcesoJob/(3767:3770): Se envió a MaRTA el siguiente mensaje
+Comando: mapFileResponse prueba.txt 0
+Data: 192.168.0.103
+
+[INFO] 22:12:21:522 ProcesoJob/(3767:3768): Recibido del MaRTA:
+Comando: reduceFileSinCombiner prueba-final.txt
+Data: 192.168.0.103 6000 1 prueba.txt
+
+[INFO] 22:12:21:524 ProcesoJob/(3767:3768): Se creó un Hilo Reduce sin combiner con los siguientes parametros
+Nombre del Archivo temporal: prueba-final.txt
+Parametros: reduce.pl 1 prueba.txt
+
+[INFO] 22:12:21:524 ProcesoJob/(3767:3782): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 22:12:21:524 ProcesoJob/(3767:3782): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: rd
+Data: 
+
+[INFO] 22:12:21:524 ProcesoJob/(3767:3782): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 22:12:21:525 ProcesoJob/(3767:3782): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFile prueba-final.txt reduce.pl 1 prueba.txt
+Data: #!/usr/bin/perl
+# This script takes data with the folowing format ordered by DATE;WBAN and returns the day, the WBAN, the greater temperature and what time that measure was sampled
+# Input (ordered!) DATE;WBAN;TEMP;TIME
+# Output: DATE;WBAN;MAX_DAILY_TEMP_IN_WBAN;TIME_OF_MEASUREMENT
+
+$old_key = '';
+$wban_max = '';
+$key_max = '';
+$max_hour = '';
+while(<stdin>) {
+
+	@chunks = split(';', $_);
+	
+
+	if (($old_key eq $chunks[0]) && ($wban_max eq $chunks[1])){
+		if($chunks[2] > $key_max) {
+			$key_max = $chunks[2];
+			$max_hour = $chunks[3];
+		}
+	} else {
+		if ($old_key ne '') {
+			print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+		}
+		$old_key = $chunks[0];
+		$wban_max = $chunks[1];
+		$key_max = $chunks[2];		
+		$max_hour = $chunks[3];
+	}
+}
+
+if ($old_key ne "Date") {
+	print $old_key . ";" . $wban_max . ";" . $key_max . ";" . $max_hour;
+}
+
+
+
+[INFO] 22:12:23:530 ProcesoJob/(3767:3782): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: reduceFileResponse 0
+Data: 129.3.6.9 112.3.4.5
+
+[ERROR] 22:12:23:531 ProcesoJob/(3767:3782): Al menos un nodo falló, cerrando Job...
+
+[INFO] 22:12:23:531 ProcesoJob/(3767:3782): Finalizacion del ProcesoJob con exit_status = 1
+
+[INFO] 22:12:46:402 ProcesoJob/(3810:3810): Conexion exitosa con Marta, IP: 127.0.0.1, PUERTO: 9002
+
+[INFO] 22:12:46:407 ProcesoJob/(3810:3812): Se envió a MaRTA el siguiente mensaje
+Comando: archivoAProcesar 201301hourly.txt 0
+Data: 
+
+[INFO] 22:12:46:407 ProcesoJob/(3810:3812): Recibido del MaRTA:
+Comando: mapFile todo1.txt
+Data: 192.168.0.103 6000 0 prueba.txt
+
+[INFO] 22:12:46:407 ProcesoJob/(3810:3812): Se creó un Hilo Mapper con los siguientes parametros
+Nombre del Archivo temporal: prueba.txt
+Numero de bloque :0
+
+[INFO] 22:12:46:409 ProcesoJob/(3810:3814): Conexion exitosa con nodo IP:192.168.0.103 PUERTO:6000
+
+[INFO] 22:12:46:409 ProcesoJob/(3810:3814): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mp
+Data: 
+
+[INFO] 22:12:46:409 ProcesoJob/(3810:3814): Recibido del nodo IP:192.168.0.103 PUERTO:6000
+Comando: bienvenido
+Data: 
+
+[INFO] 22:12:46:409 ProcesoJob/(3810:3814): Enviado al nodo IP:192.168.0.103 PUERTO:6000
+Comando: mapFile prueba.txt mapper.sh 0
+Data: #!/bin/bash
+# Uses awk to parse comma-separated-value and keeps Date;WBAN;DryBulbCelsius;Time
+# All the fields in the file header
+# $1 - WBAN
+# $2 - DATE
+# $3 - Time
+# $13 - DryBulbCelsius - https://en.wikipedia.org/wiki/Dry-bulb_temperature
+
+cat - | awk -F ',' '{print $2 ";" $1  ";" $13 ";" $3}'
+	
+
+
+[ERROR] 22:13:04:210 ProcesoJob/(3862:3862): Error al conectarse con MARTA, con IP: 127.0.0.1 PUERTO: 9002
+
+[INFO] 22:13:04:210 ProcesoJob/(3862:3862): Finalizacion del ProcesoJob con exit_status = -1
+
+[ERROR] 22:13:58:943 ProcesoJob/(3914:3914): Error al conectarse con MARTA, con IP: 127.0.0.1 PUERTO: 9002
+
+[INFO] 22:13:58:943 ProcesoJob/(3914:3914): Finalizacion del ProcesoJob con exit_status = -1
+
