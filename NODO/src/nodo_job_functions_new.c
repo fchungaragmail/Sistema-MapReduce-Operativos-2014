@@ -6,7 +6,7 @@
  */
 
 #include "nodo_job_functions_new.h"
-#include "nodo_new.h"
+
 
 /*Ejecuta el script sobre el contenido del numeroBloque del espacioDatos, el resultado se
  * almacena en archivoTemporal1
@@ -14,9 +14,6 @@
  * */
 #define FALLO_MAPPING 0
 #define OK_MAPPING 1
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 		char* archivoTemporal2) {
 
@@ -264,7 +261,7 @@ void aplicarScriptReduce(char *script, char *archivoTemporal1,
 
 	//para escrbir el bloque en la tuberia
 	if (fork() == 0) {
-		childPid = getPid();
+		childPid = getpid();
 		close(p[0]);
 		t_fileContent *archivoTemporal = getFileContent(archivoTemporal1);
 		write(p[1], archivoTemporal->contenido, archivoTemporal->size);
