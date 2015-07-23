@@ -35,6 +35,11 @@ typedef enum {
 	TIPO_HILO_MAPPER, TIPO_HILO_REDUCE
 } TipoHilo;
 
+typedef enum {
+	SUBTIPO_MAPPER, SUBTIPO_REDUCE_SIN_COMBINER, SUBTIPO_REDUCE_CON_COMBINER_1, SUBTIPO_REDUCE_CON_COMBINER_2, SUBTIPO_REDUCE_CON_COMBINER_FINAL
+} SubTipoHilo;
+
+
 typedef struct {
 	short int sin_family;
 	unsigned short int sin_port;
@@ -51,6 +56,7 @@ typedef struct {
 	char* parametrosError;
 	int nroBloque;
 	TipoHilo tipoHilo;
+	SubTipoHilo subTipoHilo;
 } HiloJobInfo;
 
 #endif /* SRC_DEFINICIONES_H_ */

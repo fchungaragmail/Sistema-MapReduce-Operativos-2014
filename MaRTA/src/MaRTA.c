@@ -133,7 +133,7 @@ void planificarHilo(void* args){
 	free(log);
 	//free(path); --> "administrarHilos" mira los paths
 	sem_destroy(semHilo);
-	list_destroy(colaDePedidos);
+	list_clean(colaDePedidos);//si hago list_destroy william me manda
 	//dictionary_destroy(hiloDic); --> "administrarHilos" mira el path q esta en eeste dic
 
 	pthread_exit(0);
@@ -181,6 +181,10 @@ void administrarHilos(){
 
 		return;
 	}
+	if(command == K_Job_ReduceResponse){
+
+			printf("reduceResponse lalala");
+		}
 	char *path = deserializeFilePath(recvMessage,command);
 	int size = list_size(hilosData);
 	int i;
@@ -217,6 +221,7 @@ void administrarHilos(){
 				sem_post(semHilo);
 			}
 		}
+		return;
 	}
 
 	//TODO FS - Implementar bien esto, para iguales archivos con distinto job falla

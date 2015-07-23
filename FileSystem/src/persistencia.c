@@ -199,7 +199,7 @@ int leerPersistencia()
 
 					if ((lUbicaciones[2] != NULL) && (strcmp(lUbicaciones[2],"\n") != 0))
 					{
-						lUbicaciones = string_n_split(lUbicaciones[3],3,";");
+						lUbicaciones = string_n_split(lUbicaciones[2],3,";");
 					}else
 					{
 						lUbicaciones[0] = NULL;

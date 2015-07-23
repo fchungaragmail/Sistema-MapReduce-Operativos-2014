@@ -20,6 +20,7 @@
 #include <commons/txt.h>
 #include <commons/error.h>
 #include <commons/collections/list.h>
+#include <commons/config.h>
 #include "ConexionCenter.h"
 #include "VariablesGlobales.h"
 #include "FilesStatusCenter.h"
@@ -28,11 +29,7 @@
 // CONSTANTES
 
 #define LOCALHOST "127.0.0.1"
-#define K_PUERTO_LOCAL 9002
 #define MAX_CONNECTIONS 100
-
-#define K_FS_IP "192.168.0.102"
-#define K_FS_PUERTO "3000"
 
 // ESTRUCTURAS
 
@@ -62,6 +59,10 @@ int newfd;        // descriptor de socket de nueva conexión aceptada
 int addrlen;
 int conexionesProcesadas;
 
+int K_PUERTO_LOCAL;
+char *K_FS_IP;
+char *K_FS_PUERTO;
+
 // FUNCIONES PUBLICAS
 void initConexiones();
 void closeServidores();
@@ -74,10 +75,19 @@ void createListener();
 void prepareConnections();
 void setnonblocking();
 Message *crearMessageWithCommand(char *command,int socket);
+void initConfiguracion();
 
+void initConfiguracion()
+{
+	t_config *configuracion = config_create("configuracionMaRTA.config");
+	K_FS_PUERTO = config_get_string_value(configuracion,"K_FS_PUERTO");
+	K_FS_IP = config_get_string_value(configuracion,"K_FS_IP");
+	K_PUERTO_LOCAL = config_get_int_value(configuracion,"PUERTO_LOCAL");
 
+}
 void initConexiones()
 {
+	initConfiguracion();
 	createListener();
 	prepareConnections();
 	conexionesProcesadas=-1;
@@ -171,8 +181,11 @@ Message* listenConnections()
 				if(estado == DESCONECTADO){
 					close(i); // bye!
 					FD_CLR(i, &master); // eliminar del conjunto maestro
-					char *log = string_from_format("fallo el recv del proceso con socket %d",i);
-					log_trace(logFile,log); free(log);
+					char *log = string_from_format("fallo conexion del proceso con socket %d, esta caido.",i);
+					pthread_mutex_lock(&mutexLog);
+					log_debug(logFile,log);
+					pthread_mutex_unlock(&mutexLog);
+					free(log);
 					return crearMessageWithCommand("ProcesoCaido",i);
 				}
 
@@ -301,6 +314,8 @@ Message *crearMessageWithCommand(char *command,int socket)
 	newConnection->mensaje->comandoSize=(strlen(command)+1);
 	newConnection->mensaje->comando=malloc(strlen(command)+1);
 	strcpy(newConnection->mensaje->comando,command);
+	newConnection->mensaje->dataSize = 1;
+	newConnection->mensaje->data = strdup("\0");
 	int _s = socket;
 	newConnection->sockfd= _s;
 

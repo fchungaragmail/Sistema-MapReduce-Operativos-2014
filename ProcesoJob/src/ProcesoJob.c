@@ -32,16 +32,15 @@ void* pedidosMartaHandler(void* arg) {
 		mensajeMarta = malloc(sizeof(mensaje_t));
 		int resultado = recibir(socketMartaFd, mensajeMarta);
 #else
-		static int alternar = 1;
+		static int alternar = 0;
 		if (alternar == 0) {
-			mensajeMarta =
-					CreateMensaje("mapFile todo1.txt",
-							"192.168.0.103 6000 0 prueba.txt");
+			mensajeMarta = CreateMensaje("mapFile todo1.txt",
+					"192.168.0.103 6000 0 prueba.txt");
 			alternar = 1;
 		} else if (alternar == 1) {
-			mensajeMarta =
-					CreateMensaje("reduceFileSinCombiner prueba-final.txt",
-							"192.168.0.103 6000 1 prueba.txt");
+			mensajeMarta = CreateMensaje(
+					"reduceFileSinCombiner prueba-final.txt",
+					"192.168.0.103 6000 1 prueba.txt");
 			alternar = 2;
 		} else if (alternar == 2) {
 			mensajeMarta =
@@ -59,8 +58,8 @@ void* pedidosMartaHandler(void* arg) {
 		}
 		int resultado = CONECTADO;
 #endif
-		if(resultado == DESCONECTADO){
-			log_error(logProcesoJob,"Se perdió la conexion con MaRTA");
+		if (resultado == DESCONECTADO) {
+			log_error(logProcesoJob, "Se perdió la conexion con MaRTA");
 			Terminar(EXIT_ERROR);
 			break;
 		}
@@ -76,13 +75,17 @@ void* pedidosMartaHandler(void* arg) {
 				== 0
 				|| strcmp(comandoStr[MENSAJE_COMANDO],
 						"reduceFileConCombiner-Pedido2") == 0) {
-			PlanificarHilosReduce(mensajeMarta, FALSE, NULL);
+			PlanificarHilosReduce(mensajeMarta, FALSE, NULL,
+					SUBTIPO_REDUCE_SIN_COMBINER);
 		} else if (strcmp(comandoStr[MENSAJE_COMANDO],
 				"reduceFileConCombiner-Pedido1") == 0) {
-			PlanificarHilosReduce(mensajeMarta, TRUE, NULL);
+			PlanificarHilosReduce(mensajeMarta, TRUE, NULL,
+					SUBTIPO_REDUCE_CON_COMBINER_1);
 		} else if (strcmp(comandoStr[MENSAJE_COMANDO],
 				"reduceFinal") == 0) {
-			PlanificarHilosReduce(mensajeMarta, TRUE, config_get_string_value(configuracion, "RESULTADO"));
+			PlanificarHilosReduce(mensajeMarta, TRUE,
+					config_get_string_value(configuracion, "RESULTADO"),
+					SUBTIPO_REDUCE_CON_COMBINER_FINAL);
 		} else if (strcmp(comandoStr[MENSAJE_COMANDO], "FileSuccess") == 0) {
 			char* dataDiccionario = dictionary_remove(diccArchivos,
 					comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO]);
@@ -107,7 +110,7 @@ void* pedidosMartaHandler(void* arg) {
 		FreeMensaje(mensajeMarta);
 
 #ifdef BUILD_CON_MOCK_MARTA
-		sleep(500);
+		sleep(15);
 #endif
 
 	}
@@ -135,8 +138,8 @@ void IniciarConfiguracion() {
 
 char* LeerArchivo(char* nombreArchivo) {
 
-	int archivo = open(nombreArchivo,O_RDONLY);
-	if (archivo == -1 ) {
+	int archivo = open(nombreArchivo, O_RDONLY);
+	if (archivo == -1) {
 		log_error(logProcesoJob, "Error leyendo archivo %s!\n", nombreArchivo);
 		Terminar(EXIT_ERROR);
 	}
@@ -172,7 +175,7 @@ void IniciarConexionMarta() {
 	struct sockaddr_in their_addr;
 
 	if ((socketMartaFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-		log_error(logProcesoJob,"Error al crear socket para MARTA\n");
+		log_error(logProcesoJob, "Error al crear socket para MARTA\n");
 		Terminar(EXIT_ERROR);
 	}
 
@@ -183,7 +186,9 @@ void IniciarConexionMarta() {
 
 	if (connect(socketMartaFd, (Sockaddr_in*) &their_addr, sizeof(Sockaddr_in))
 			== -1) {
-		log_error(logProcesoJob,"Error al conectarse con MARTA, con IP: %s PUERTO: %s\n", ipMarta, puertoMarta);
+		log_error(logProcesoJob,
+				"Error al conectarse con MARTA, con IP: %s PUERTO: %s\n",
+				ipMarta, puertoMarta);
 		Terminar(EXIT_ERROR);
 	}
 #else
@@ -234,20 +239,49 @@ void ReportarResultadoHilo(HiloJobInfo* hiloJobInfo, EstadoHilo estado) {
 	char* bufferComandoStr = string_new();
 	char* bufferDataStr = string_new();
 
-	string_append_with_format(&bufferComandoStr,
-			hiloJobInfo->tipoHilo == TIPO_HILO_MAPPER ?
-					"mapFileResponse %s" : "reduceFileResponse %s",
-			hiloJobInfo->nombreArchivo);
+	if (hiloJobInfo->tipoHilo == TIPO_HILO_MAPPER) {
+		string_append_with_format(&bufferComandoStr, "mapFileResponse %s",
+				hiloJobInfo->nombreArchivo);
+	} else {
+		switch (hiloJobInfo->subTipoHilo) {
+		case SUBTIPO_REDUCE_CON_COMBINER_1:
+			string_append_with_format(&bufferComandoStr,
+					"reduceFileConCombiner-Pedido1 %s",
+					hiloJobInfo->nombreArchivo);
+			break;
+		case SUBTIPO_REDUCE_CON_COMBINER_2:
+			string_append_with_format(&bufferComandoStr,
+					"reduceFileConCombiner-Pedido2 %s",
+					hiloJobInfo->nombreArchivo);
+			break;
+		case SUBTIPO_REDUCE_CON_COMBINER_FINAL:
+			string_append_with_format(&bufferComandoStr,
+					"reduceFinalResponse %s", hiloJobInfo->nombreArchivo);
+			break;
+		case SUBTIPO_REDUCE_SIN_COMBINER:
+			string_append_with_format(&bufferComandoStr,
+					"reduceFileSinCombiner %s", hiloJobInfo->nombreArchivo);
+			break;
+
+		}
+	}
 
 	switch (estado) {
 
 	case ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION:
-	case ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO:
-		string_append(&bufferComandoStr, " 0");
-		string_append_with_format(&bufferDataStr, "%s",
-				hiloJobInfo->parametrosError != NULL ?
-						hiloJobInfo->parametrosError :
-						inet_ntoa(hiloJobInfo->direccionNodo.sin_addr));
+	case ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO: {
+		if (hiloJobInfo->tipoHilo == TIPO_HILO_REDUCE) {
+			log_error(logProcesoJob,
+					"Al menos un nodo falló, cerrando Job...\n");
+			Terminar(EXIT_FAILURE);
+		} else {
+			string_append(&bufferComandoStr, " 0");
+			string_append_with_format(&bufferDataStr, "%s",
+					hiloJobInfo->parametrosError != NULL ?
+							hiloJobInfo->parametrosError :
+							inet_ntoa(hiloJobInfo->direccionNodo.sin_addr));
+		}
+	}
 		break;
 	case ESTADO_HILO_FINALIZO_OK:
 		string_append(&bufferComandoStr, " 1");
@@ -260,12 +294,13 @@ void ReportarResultadoHilo(HiloJobInfo* hiloJobInfo, EstadoHilo estado) {
 	/*
 	 * varios hilos pueden estar reportando a marta
 	 */
+
 #ifndef BUILD_CON_MOCK_MARTA
 	pthread_mutex_lock(&mMarta);
 	enviar(socketMartaFd, mensajeParaMarta);
 	pthread_mutex_unlock(&mMarta);
 
-	if(hiloJobInfo->socketFd != -1) {
+	if (hiloJobInfo->socketFd != -1) {
 		close(hiloJobInfo->socketFd);
 	}
 #endif
@@ -303,9 +338,11 @@ void PlanificarHilosMapper(mensaje_t* mensaje) {
 		hiloJobInfo->parametrosError = NULL;
 		hiloJobInfo->nroBloque = atoi(dataStr[i++]);
 		hiloJobInfo->nombreArchivo = string_duplicate(dataStr[i++]);
+		hiloJobInfo->subTipoHilo = SUBTIPO_MAPPER;
 
 		char* parametrosBuffer = string_new();
-		string_append_with_format(&parametrosBuffer, "%s", config_get_string_value(configuracion, "MAPPER"));
+		string_append_with_format(&parametrosBuffer, "%s",
+				config_get_string_value(configuracion, "MAPPER"));
 
 		hiloJobInfo->parametros = strdup(parametrosBuffer);
 
@@ -320,7 +357,8 @@ void PlanificarHilosMapper(mensaje_t* mensaje) {
 	FreeStringArray(&dataStr);
 }
 
-void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner, char* nombreArchivo) {
+void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner,
+		char* nombreArchivo, SubTipoHilo subTipoHilo) {
 
 	char** comandoStr = string_split(mensaje->comando, " ");
 	char** dataStr = string_split(mensaje->data, " ");
@@ -348,11 +386,12 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner, char* nombreArch
 			hiloJobInfo->socketFd = -1;
 			hiloJobInfo->parametros = NULL;
 			hiloJobInfo->parametrosError = NULL;
+			hiloJobInfo->subTipoHilo = subTipoHilo;
 
-			if(nombreArchivo){
+			if (nombreArchivo) {
 				hiloJobInfo->nombreArchivo = string_duplicate(nombreArchivo);
 				i++;
-			} else{
+			} else {
 				hiloJobInfo->nombreArchivo = string_duplicate(dataStr[i++]);
 			}
 
@@ -361,7 +400,8 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner, char* nombreArch
 
 			char* parametrosBuffer = string_new();
 
-			string_append_with_format(&parametrosBuffer, "%s %d %s", config_get_string_value(configuracion, "REDUCE"),
+			string_append_with_format(&parametrosBuffer, "%s %d %s",
+					config_get_string_value(configuracion, "REDUCE"),
 					archivosTotalesAProcesar, dataStr[i++]);
 
 			while (i < leerHasta) {
@@ -399,18 +439,21 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner, char* nombreArch
 		hiloJobInfo->socketFd = -1;
 		hiloJobInfo->parametros = NULL;
 		hiloJobInfo->parametrosError = NULL;
+		hiloJobInfo->subTipoHilo = subTipoHilo;
 		hiloJobInfo->nombreArchivo = string_duplicate(
 				comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO]);
 
-		if(nombreArchivo){
+		if (nombreArchivo) {
 			hiloJobInfo->nombreArchivo = string_duplicate(nombreArchivo);
-		} else{
-			hiloJobInfo->nombreArchivo = string_duplicate(comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO]);
+		} else {
+			hiloJobInfo->nombreArchivo = string_duplicate(
+					comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO]);
 		}
 
 		char* parametrosBuffer = string_new();
 
-		string_append_with_format(&parametrosBuffer, "%s %s",config_get_string_value(configuracion, "REDUCE"), dataStr[i++]);
+		string_append_with_format(&parametrosBuffer, "%s %s",
+				config_get_string_value(configuracion, "REDUCE"), dataStr[i++]);
 		while (dataStr[i] != NULL) {
 			string_append_with_format(&parametrosBuffer, " %s", dataStr[i++]);
 		}
