@@ -15,16 +15,36 @@ char* getBloque(int numeroBloque, int32_t* length) {
 
 	//abro el espacio de datos para lectura
 	int archivo = open(ARCHIVO_BIN,O_RDONLY);
+	if(archivo < 0){
+		log_info(log_nodo, "Fallo syscall OPEN() en getBloque()");
+		return NULL;
+	}
 
 	//calculo offset
 	long int offset = numeroBloque * TAMANIO_BLOQUE;
 
-	//leo el contenido del bloque
-	lseek(archivo, offset, SEEK_SET);
+	if(	lseek(archivo, offset, SEEK_SET) < 0){
+		log_info(log_nodo, "Fallo syscall OPEN() en getBloque()");
+		return NULL;
+	}
+
 	char *contenido = malloc(TAMANIO_BLOQUE);
 
-	read(archivo, contenido, TAMANIO_BLOQUE);
-	close(archivo);
+	if(	contenido == NULL){
+		log_info(log_nodo, "Fallo syscall OPEN() en getBloque()");
+		return NULL;
+	}
+
+	if(	read(archivo, contenido, TAMANIO_BLOQUE) < 0){
+		log_info(log_nodo, "Fallo syscall READ() en getBloque()");
+		return NULL;
+	}
+
+	if(close(archivo) < 0){
+		log_info(log_nodo, "Fallo syscall CLOSE() en getBloque()");
+		return NULL;
+	}
+
 
 	*length = strnlen(contenido, TAMANIO_BLOQUE);
 

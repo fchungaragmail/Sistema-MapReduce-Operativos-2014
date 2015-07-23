@@ -2,6 +2,10 @@
 
 void FreeMensaje(mensaje_t* mensaje) {
 
+	if(mensaje == NULL){
+		return;
+	}
+
 	if (mensaje->comando != NULL) {
 		free(mensaje->comando);
 	}
@@ -36,7 +40,6 @@ mensaje_t* CreateMensaje(char* comandoStr, char* dataStr) {
 }
 
 mensaje_t* CreateMensajeParaHilo(char* comandoStr, char* dataStr) {
-
 
 	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
 

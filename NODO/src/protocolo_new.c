@@ -27,12 +27,14 @@ int recibir(int socket, mensaje_t* mensaje){
 		recv(socket, mensaje->data, mensaje->dataSize,0);
 	*/
 	int recibido = 0;
+	int tempRecibido = 0;
 	if (mensaje->dataSize != 0){
 		while(!(recibido == mensaje->dataSize)){
-		   recibido += recv(socket, mensaje->data + recibido, mensaje->dataSize - recibido, 0);
-		   if ( recibido == -1){
+		   tempRecibido = recv(socket, mensaje->data + recibido, mensaje->dataSize - recibido, 0);
+		   if ( tempRecibido <= 0){
 			   return DESCONECTADO;
 		   }
+		   recibido +=tempRecibido;
 		}
 		//printf("data recibido %d\n", recibido);
 		//printf("datos: %s\n", mensaje->data);
@@ -54,11 +56,11 @@ int enviar(int socket, mensaje_t* mensaje)
 	int tempEnviado = 0;
 	while(!(enviado == mensaje->dataSize)){
 		tempEnviado= send(socket, mensaje->data + enviado , mensaje->dataSize - enviado, 0 );
-		if (tempEnviado == -1) {
-			return -1;
+		if (tempEnviado <= 0) {
+			return DESCONECTADO;
 		}
 		enviado += tempEnviado;
 	}
-	return enviado;
+	return CONECTADO;
 
 }

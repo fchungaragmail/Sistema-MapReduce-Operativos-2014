@@ -12,50 +12,135 @@
  * almacena en archivoTemporal1
  * Luego ejecuta sort sobre archivoTemporal1 y lo almacenta en archivoTemporal2
  * */
+#define FALLO_MAPPING 0
+#define OK_MAPPING 1
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 		char* archivoTemporal2) {
 
 
-
 	int p[2];
-	pipe(p);
+	if (pipe(p) < 0){
+		log_info(log_nodo, "Fallo syscall PIPE() en mapping()");
+		return FALLO_MAPPING;
+	}
 
 	//para escrbir el bloque en la tuberia
-	if (fork() == 0) {
-		//cambio la entrada standar por la tuberia
-		close(0);
-		dup(p[0]);
+
+	int resultFork;
+	if ((resultFork = fork()) < 0) {
+		log_info(log_nodo, "Fallo syscall FORK() en mapping()");
+		return FALLO_MAPPING;
+
+	}else if(resultFork == 0) {
+		//Se ejecuta el hijo
+		if(close(0) < 0){
+			log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
+			return FALLO_MAPPING;
+		}
+
+		if(dup(p[0]) < 0){
+			log_info(log_nodo, "Fallo syscall DUP() en mapping()");
+			return FALLO_MAPPING;
+		}
+
 
 		//cambio la salida standar
-		close(1);
-		creat(archivoTemporal1, 0777);
+		if(close(1) < 0){
+			log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
+			return FALLO_MAPPING;
+		}
 
-		close(p[1]);
+		if(creat(archivoTemporal1, 0777) < 0){
+			log_info(log_nodo, "Fallo syscall CREAT() en mapping()");
+			return FALLO_MAPPING;
+		}
 
-		execv(script, NULL);
-	} else
-	{
-		close(p[0]);
-		int32_t length;
-		char *bloque = getBloque(numeroBloque, &length);
-		write(p[1], bloque, length);
+		if(close(p[1]) < 0){
+			log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
+			return FALLO_MAPPING;
+		}
+
+		if(execv(script, NULL) < 0){
+			log_info(log_nodo, "Fallo syscall EXEXV() en mapping()");
+			return FALLO_MAPPING;
+		}
+		exit(EXIT_SUCCESS);
+
+	}
+
+	//continua el padre
+	if(close(p[0]) < 0){
+		log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
+		return FALLO_MAPPING;
+	}
+
+	int32_t length;
+
+	char *bloque = getBloque(numeroBloque, &length);
+	if(bloque == NULL){
+		log_info(log_nodo, "Fallo getBloque() en mapping()");
+		return FALLO_MAPPING;
+	}
+	if(write(p[1], bloque, length) < 0){
+		perror("");
+		log_info(log_nodo, "Fallo syscall WRITE() en mapping()");
+		return FALLO_MAPPING;
+	}
+
+
+
+	if(waitpid(resultFork, NULL, WNOHANG) < 0){
+		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
+		return FALLO_MAPPING;
 	}
 
 
 	//para aplicar sort
-	if (fork() == 0) {
-		close(0);
-		open(archivoTemporal1, O_RDONLY);
+	if ((resultFork = fork()) < 0) {
+		log_info(log_nodo, "Fallo syscall FORK() en mapping()");
+		return FALLO_MAPPING;
 
-		close(1);
-		creat(archivoTemporal2, 0777);
+	}else if(resultFork == 0) {
+		if(close(0) < 0){
+			log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
+			return FALLO_MAPPING;
+		}
 
-		execlp("sort", "sort", NULL);
+		if(open(archivoTemporal1, O_RDONLY) < 0){
+			log_info(log_nodo, "Fallo syscall OPEN() en mapping()");
+			return FALLO_MAPPING;
+		}
+
+		if(close(1) < 0){
+			log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
+			return FALLO_MAPPING;
+		}
+
+		if(creat(archivoTemporal2, 0777) < 0){
+			log_info(log_nodo, "Fallo syscall CREAT() en mapping()");
+			return FALLO_MAPPING;
+		}
+
+		if(execlp("sort", "sort", NULL) < 0){
+			log_info(log_nodo, "Fallo syscall EXEXLP() en mapping()");
+			return FALLO_MAPPING;
+		}
+	}
+/*
+	if(waitpid(resultFork, NULL, WNOHANG) < 0){
+		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
+		return FALLO_MAPPING;
+	}
+*/
+	if(waitpid(resultFork, NULL, 0) < 0){
+		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
+		return FALLO_MAPPING;
 	}
 
-	wait(0);
-
-	return 1;//MAPING OK
+	return OK_MAPPING;//MAPING OK
 
 }
 
