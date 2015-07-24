@@ -142,6 +142,7 @@ int format(char* argumentos)
 	for(int i=0;i<listaArchivos->elements_count;i++)
 	{
 		t_reg_archivo* archivo = list_get(listaArchivos,i);
+		list_destroy_and_destroy_elements(archivo->bloques,list_destroy);
 		free(archivo);
 	}
 	list_clean(listaArchivos);
@@ -155,7 +156,8 @@ void formatNodo(Conexion_t* nodo)
 	if (nodo->sockfd >= 0)
 	{
 		mensaje_t* mensaje = malloc(sizeof(mensaje_t));
-		mensaje->comando = string_new();
+		mensaje->comando = malloc(sizeof(char*));
+		strcpy(mensaje->comando,"");
 		strcpy(mensaje->comando,"borrarBloque -1");
 		mensaje->comandoSize = strlen(mensaje->comando) + 1;
 		mensaje->dataSize = 0;
@@ -628,7 +630,7 @@ int nomb(char* argumentos, Conexion_t* conexion)
 	if (strcmp(conexion->nombre, "MaRTA") != 0)
 	{
 		conexion->totalBloques = strtoll(args[1], NULL, 10) / TAMANIO_BLOQUE;
-		conexion->estadoBloques = calloc(conexion->totalBloques, 1);
+		conexion->estadoBloques = calloc(conexion->totalBloques, sizeof(bool));
 
 
 		pthread_mutex_lock(&mNodosOnline);
