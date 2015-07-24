@@ -26,10 +26,10 @@ int main() {
 	mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
 	log_nodo = log_create("./log_nodo", "NODO", true, LOG_LEVEL_TRACE);
 	getConfig();
-	sem_init(&sMaps,0,40);
+	sem_init(&sMaps,0,10);
 
-	//connectToFileSistem(sockFS);
-	//pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockFS);
+	connectToFileSistem(sockFS);
+	pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockFS);
 	//pthread_join(fs_handler, NULL);
 
 	int value = initServer(&sockFD);
@@ -52,7 +52,7 @@ int main() {
 			return -1;
 		}
 
-		/*
+
 		recibir(sockAccept, buffer_shakehand); //recibo mensaje shakehand
 
 		buffer_send->comandoSize = SHAKEHAND_MESSAGE_LENGTH;
@@ -87,17 +87,17 @@ int main() {
 			pthread_create(&reduce_handler, NULL, reduce_conection_handler,
 					sockAux);
 		}
-		*/
 
 
 
-
+		/*
 		int* sockAux = malloc(sizeof(int));
 		//sockAux = &sockAccept;
 		*sockAux = sockAccept;
 		printf("Se obtuvo una conexión desde JOB: %s\n",
 				inet_ntoa(client_sock.sin_addr));
 		pthread_create(&map_handler, NULL, map_conection_handler, sockAux);
+		*/
 
 
 
