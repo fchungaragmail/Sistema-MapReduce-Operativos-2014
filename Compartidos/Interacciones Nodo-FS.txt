@@ -26,3 +26,10 @@ Luego el nodo queda a la espera de cualquiera de los sigtes msjs del filesystem 
 	//Formatear el espacio de datos
 	Comando: borrarBloque -1
 	Data: vacio
+	
+	
+El FS debe contener los resultados finales de los reduce.
+Por esto, los nodos deben enviarle estos archivos para que el FS los importe
+Comando para pasar un archivo de reduce final:
+-Comando: "reduceFinal RutaDelArchivoEnFS"
+-Data: ContenidoDelArchivo

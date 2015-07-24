@@ -14,7 +14,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <commons/collections/list.h>
-#include "nodo_fs_functions_new.h"
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include "nodo_new.h"
 
 typedef struct {
 	int nodo;
