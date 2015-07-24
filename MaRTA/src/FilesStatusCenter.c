@@ -378,8 +378,8 @@ void decrementarOperacionesEnProcesoEnNodo(char *IPnroNodo)
 		t_dictionary *nodoState = getNodoState(IPnroNodo);
 		int *operacionesEnProceso = getNodoState_OperacionesEnProceso(nodoState);
 
-		//*operacionesEnProceso = *operacionesEnProceso - 1;
-		*operacionesEnProceso = 0;
+		*operacionesEnProceso = *operacionesEnProceso - 1;
+		//*operacionesEnProceso = 0;
 
 		char *log = string_from_format("el nodo %s esta procesando %d pedidos",IPnroNodo,*operacionesEnProceso);
 		log_debug(logFile,log);free(log);

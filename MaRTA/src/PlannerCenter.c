@@ -244,11 +244,11 @@ int obtenerIdParaComando(Message *recvMessage)
 	if(strcmp(comando,"mapFileResponse")==0){type = K_Job_MapResponse;}
 	if(strcmp(comando,"DataFileResponse")==0){type = K_FS_FileFullData;}
 
-	if(strcmp(comando,"reduceFileResponse")==0){type = K_Job_ReduceResponse;}//reduceFileConCombiner-Pedido1
+	if(strcmp(comando,"reduceFileConCombiner-Pedido1")==0){type = K_Job_ReduceResponse;}
 	if(strcmp(comando,"reduceFileConCombiner-Pedido2")==0){type = K_Job_ReduceResponse;}
 	if(strcmp(comando,"reduceFileSinCombiner")==0){type = K_Job_ReduceResponse;}
 	if(strcmp(comando,"ProcesoCaido")==0){type = K_ProcesoCaido;}
-	if(strcmp(comando,"ReduceFinal")==0){type = K_Job_ReduceFinal;}
+	if((strcmp(comando,"reduceFinalResponse")==0)||(strcmp(comando,"ReduceFinalResponse")==0)){type = K_Job_ReduceFinal;}
 
 	free(comando);
 	return type;
@@ -769,9 +769,7 @@ Message *armarPedidoDeMap(Message *recvMessage,infoHilo_t *infoThread)
 	char *path = deserializeFilePath(recvMessage,tipoComando);
 	t_list *blockStateArray = dictionary_get(infoThread->fileState,K_FileState_arrayOfBlocksStates);
 	int size_fileState= list_size(blockStateArray);
-	printf("ssssss");
 	informarTareasPendientesDeMapping(path,*(infoThread->jobSocket),infoThread->fileState);
-	printf("ssssss");
 	char *stream = string_new();
 	int i;
 	bool firstTime = true;
@@ -1170,9 +1168,7 @@ void sacarCargasDeNodos_FalloDeJob(infoHilo_t *infoThread){
 	for(i=0;i<size;i++){
 		char *ip = list_get(infoThread->listaDeNodos_EnCasoDeFalloDeJob,i);
 		decrementarOperacionesEnProcesoEnNodo(ip);
-		printf("3333");
 		informarTareasPendientesDeMapping(infoThread->filePathAProcesar,*(infoThread->jobSocket),infoThread->fileState);
-		printf("333");
 	}
 	list_destroy(infoThread->listaDeNodos_EnCasoDeFalloDeJob);
 }
