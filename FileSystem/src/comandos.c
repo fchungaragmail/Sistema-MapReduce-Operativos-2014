@@ -25,6 +25,7 @@ int quitarNodo(char* argumentos);
 int espacioTotal();
 int nomb(char* argumentos, Conexion_t* conexion);
 int dataFile(char* argumentos, Conexion_t* conexion);
+int reduceFinal(mensaje_t* mensaje);
 
 int enviarBloque(enviarBloque_t* envio);
 
@@ -59,6 +60,7 @@ void initComandos()
 	dictionary_put(comandosRemotos,"DataFile",2);
 	dictionary_put(comandosRemotos,"respuesta",3);
 	dictionary_put(comandosRemotos,"archivoResultado",4);
+	dictionary_put(comandosRemotos,"reduceFinal",5);
 }
 
 
@@ -116,6 +118,12 @@ void procesarComandoRemoto(argumentos_t* args)
 		{
 			//
 			dataFile(comando[1],args->conexion);
+			break;
+		}
+		case 5:
+		{
+			//Archivo de reduce final
+			reduceFinal(args->mensaje);
 			break;
 		}
 		default:
@@ -727,6 +735,31 @@ int dataFile(char* argumentos, Conexion_t* conexion)
 	log_info(logFile,"Enviada la tabla de bloques a MaRTA del archivo: %s",
 			archivo->nombre);
 	pthread_mutex_unlock(&mLogFile);
+
+	return EXIT_SUCCESS;
+}
+
+int reduceFinal(mensaje_t* mensaje)
+{
+	char** comando = string_n_split(mensaje->comando,2," ");
+	srand(time(NULL));
+	int r = rand();
+
+	char* tempFileName = string_new();
+	string_append_with_format(&tempFileName,"/tmp/%d", r);
+
+	FILE* tempFile = fopen(tempFileName, "w+");
+	fwrite(mensaje->data, 1, mensaje->dataSize, tempFile);
+	fclose(tempFile);
+
+	char* args = string_new();
+	string_append_with_format(&args,"%s %s", tempFileName, comando[1]);
+
+	importar(args);
+
+	unlink(tempFileName);
+	free(tempFileName);
+	free(args);
 
 	return EXIT_SUCCESS;
 }
