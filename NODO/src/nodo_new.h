@@ -37,6 +37,7 @@ char* NODO_NUEVO;
 char* IP_NODO;
 int PUERTO_NODO;
 extern char* ARCHIVO_BIN;
+extern pthread_mutex_t getBloqueMutex;
 t_log *log_nodo;
 
 void getConfig();

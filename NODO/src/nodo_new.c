@@ -7,7 +7,7 @@
 
 #include "nodo_new.h"
 
-
+pthread_mutex_t getBloqueMutex;
 
 //Main Programm
 int main() {
