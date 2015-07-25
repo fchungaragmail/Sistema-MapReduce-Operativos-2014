@@ -28,7 +28,7 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 
 	int resultFork;
 	if ((resultFork = fork()) < 0) {
-		log_info(log_nodo, "Fallo syscall FORK() en mapping()");
+		log_info(log_nodo, "Fallo syscall FORK() 1 en mapping()");
 		return FALLO_MAPPING;
 
 	}else if(resultFork == 0) {
@@ -88,8 +88,17 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 	}
 
 
+	if( close(p[1])< 0){
+//		perror("");
+		log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
+//		return FALLO_MAPPING;
+	} else{
+		log_info(log_nodo, "Se realizo bien el syscall CLOSE() en mapping()");
+	}
 
-	if(waitpid(resultFork, NULL, WNOHANG) < 0){
+
+
+	if(waitpid(resultFork, NULL, 0) < 0){
 		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
 		return FALLO_MAPPING;
 	}
@@ -97,7 +106,7 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 
 	//para aplicar sort
 	if ((resultFork = fork()) < 0) {
-		log_info(log_nodo, "Fallo syscall FORK() en mapping()");
+		log_info(log_nodo, "Fallo syscall FORK() 2  en mapping()");
 		return FALLO_MAPPING;
 
 	}else if(resultFork == 0) {

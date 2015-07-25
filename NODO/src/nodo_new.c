@@ -26,7 +26,7 @@ int main() {
 	mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
 	log_nodo = log_create("./log_nodo", "NODO", true, LOG_LEVEL_TRACE);
 	getConfig();
-	sem_init(&sMaps,0,10);
+	sem_init(&sMaps,0,5);
 
 	connectToFileSistem(sockFS);
 	pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockFS);
