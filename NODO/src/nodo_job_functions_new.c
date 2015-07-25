@@ -291,7 +291,20 @@ void aplicarScriptReduce(char *script, char *archivoTemporal1, char* archivoTemp
 
 #include "socketsFunciones/sockets.h"
 int32_t conectarseANodoRemoto(char *ip, int puerto) {
-	return new_connection(ip, puerto);
+	int32_t socket = new_connection(ip, puerto);
+
+	mensaje_t* shakeHand = malloc(sizeof(mensaje_t));
+	shakeHand->comando = string_new();
+	strcpy(shakeHand->comando, "nd");
+	shakeHand->comandoSize = strlen(shakeHand->comando) + 1;
+	shakeHand->dataSize = 0;
+
+	enviar(socket, shakeHand);
+
+	free(shakeHand->comando);
+	free(shakeHand);
+
+	return socket;
 }
 
 #include "protocolo_new.h"
