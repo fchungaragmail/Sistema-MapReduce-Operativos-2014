@@ -27,6 +27,7 @@ int main() {
 	log_nodo = log_create("./log_nodo", "NODO", true, LOG_LEVEL_TRACE);
 	getConfig();
 	sem_init(&sMaps,0,5);
+	pthread_mutex_init(&getBloqueMutex, NULL);
 
 	connectToFileSistem(sockFS);
 	pthread_create(&fs_handler, NULL, fs_nodo_conection_handler, sockFS);
