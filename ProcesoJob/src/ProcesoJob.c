@@ -312,8 +312,8 @@ void ReportarResultadoHilo(HiloJobInfo* hiloJobInfo, EstadoHilo estado) {
 
 	pthread_mutex_lock(&mHilos);
 	cantidadDeHilosActivos--;
-	log_info(logProcesoJob,
-			"Se envió un mensaje a Marta, quedan %d hilos activos\n",
+	log_debug(logProcesoJob,
+			"Quedan %d hilos activos!!\n",
 			cantidadDeHilosActivos);
 	pthread_mutex_unlock(&mHilos);
 
