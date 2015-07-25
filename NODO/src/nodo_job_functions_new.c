@@ -28,7 +28,7 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 
 	int resultFork;
 	if ((resultFork = fork()) < 0) {
-		log_info(log_nodo, "Fallo syscall FORK() en mapping()");
+		log_info(log_nodo, "Fallo syscall FORK() 1 en mapping()");
 		return FALLO_MAPPING;
 
 	}else if(resultFork == 0) {
@@ -81,15 +81,28 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 		log_info(log_nodo, "Fallo getBloque() en mapping()");
 		return FALLO_MAPPING;
 	}
-	if(write(p[1], bloque, length) < 0){
+	sleep(1);
+	int retWrite = write(p[1], bloque, length);
+	if( retWrite  < 0){
 		perror("");
 		log_info(log_nodo, "Fallo syscall WRITE() en mapping()");
 		return FALLO_MAPPING;
 	}
 
+	log_info(log_nodo, "Write escribio %d", retWrite);
 
 
-	if(waitpid(resultFork, NULL, WNOHANG) < 0){
+	if(close(p[1])< 0){
+		perror("");
+		log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
+		return FALLO_MAPPING;
+	} else{
+		log_info(log_nodo, "Se realizo bien el syscall CLOSE() en mapping()");
+	}
+
+
+
+	if(waitpid(resultFork, NULL, 0) < 0){
 		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
 		return FALLO_MAPPING;
 	}
@@ -97,7 +110,7 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 
 	//para aplicar sort
 	if ((resultFork = fork()) < 0) {
-		log_info(log_nodo, "Fallo syscall FORK() en mapping()");
+		log_info(log_nodo, "Fallo syscall FORK() 2  en mapping()");
 		return FALLO_MAPPING;
 
 	}else if(resultFork == 0) {
@@ -125,18 +138,18 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 			log_info(log_nodo, "Fallo syscall EXEXLP() en mapping()");
 			return FALLO_MAPPING;
 		}
+
 		exit(EXIT_SUCCESS);
 	}
-/*
-	if(waitpid(resultFork, NULL, WNOHANG) < 0){
-		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
-		return FALLO_MAPPING;
-	}
-*/
+
+	free(bloque);
+
 	if(waitpid(resultFork, NULL, 0) < 0){
 		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
 		return FALLO_MAPPING;
 	}
+
+	unlink(archivoTemporal1);
 
 	return OK_MAPPING;//MAPING OK
 

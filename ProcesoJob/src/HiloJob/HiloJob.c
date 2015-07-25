@@ -3,11 +3,13 @@
 #include <commons/log.h>
 
 extern char* scriptMapperStr;
+extern int scriptMapperSize;
 extern char* scriptReduceStr;
+extern int scriptReduceSize;
 extern t_log* logProcesoJob;
-#ifdef FALLO_EN_NODO_JOB_MUERTO
+
 extern int cantidadDeHilosActivos;
-#endif
+extern pthread_mutex_t mHilos;
 pthread_t* CrearHiloJob(HiloJobInfo* hiloJobInfo, TipoHilo tipoHilo) {
 
 	pthread_t* hiloJob;
@@ -15,11 +17,9 @@ pthread_t* CrearHiloJob(HiloJobInfo* hiloJobInfo, TipoHilo tipoHilo) {
 	hiloJobInfo->tipoHilo = tipoHilo;
 	pthread_create(&hiloJob, NULL, hiloJobHandler, (void*) hiloJobInfo);
 	hiloJobInfo->threadhilo = hiloJob;
-
-#ifdef FALLO_EN_NODO_JOB_MUERTO
+	pthread_mutex_lock(&mHilos);
 	cantidadDeHilosActivos++;
-#endif //FALLO_EN_NODO_JOB_MUERTO
-
+	pthread_mutex_unlock(&mHilos);
 	return hiloJob;
 }
 
@@ -109,7 +109,6 @@ void* hiloJobHandler(void* arg) {
 	 */
 
 	char* bufferComando = string_new();
-	char* bufferData = string_new();
 
 	if (hiloJobInfo->tipoHilo == TIPO_HILO_MAPPER) {
 		string_append_with_format(&bufferComando, "mapFile %s %s %i",
@@ -120,23 +119,22 @@ void* hiloJobHandler(void* arg) {
 				hiloJobInfo->nombreArchivo, hiloJobInfo->parametros);
 	}
 
-	string_append(&bufferData,
+	mensajeParaNodo = CreateMensajeParaHilo(bufferComando,
 			hiloJobInfo->tipoHilo == TIPO_HILO_MAPPER ?
-					scriptMapperStr : scriptReduceStr);
-
-	mensajeParaNodo = CreateMensajeParaHilo(bufferComando, bufferData);
+					scriptMapperStr : scriptReduceStr,
+			hiloJobInfo->tipoHilo == TIPO_HILO_MAPPER ?
+					scriptMapperSize : scriptReduceSize);
 
 #ifndef BUILD_CON_MOCK_NODO
 	enviar(hiloJobInfo->socketFd, mensajeParaNodo);
 #endif
 
 	log_info(logProcesoJob,
-			"Enviado al nodo IP:%s PUERTO:%d\nComando: %s\nData: %s\n",
+			"Enviado al nodo IP:%s PUERTO:%d\nComando: %s\n",
 			inet_ntoa(hiloJobInfo->direccionNodo.sin_addr),
 			ntohs(hiloJobInfo->direccionNodo.sin_port),
-			mensajeParaNodo->comando, mensajeParaNodo->data);
+			mensajeParaNodo->comando);
 	free(bufferComando);
-	free(bufferData);
 	FreeMensaje(mensajeParaNodo);
 
 #ifdef BUILD_CON_MOCK_NODO

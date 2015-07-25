@@ -13,13 +13,17 @@
 
 int socketMartaFd = -1;
 char* scriptMapperStr = NULL;
+int scriptMapperSize = 0;
 char* scriptReduceStr = NULL;
+int scriptReduceSize = 0;
 pthread_t threadPedidosMartaHandler;
 pthread_t threadProcesarHilos;
 t_config* configuracion;
 pthread_mutex_t mMarta;
 t_log* logProcesoJob;
 t_dictionary* diccArchivos = NULL;
+int cantidadDeHilosActivos = 0;
+pthread_mutex_t mHilos;
 
 void* pedidosMartaHandler(void* arg) {
 
@@ -35,22 +39,22 @@ void* pedidosMartaHandler(void* arg) {
 		static int alternar = 0;
 		if (alternar == 0) {
 			mensajeMarta = CreateMensaje("mapFile todo1.txt",
-					"192.168.0.103 6000 0 prueba.txt");
+					"127.0.0.1 6000 0 prueba.txt");
 			alternar = 1;
 		} else if (alternar == 1) {
 			mensajeMarta = CreateMensaje(
 					"reduceFileSinCombiner prueba-final.txt",
-					"192.168.0.103 6000 1 prueba.txt");
+					"127.0.0.1 6000 1 prueba.txt");
 			alternar = 2;
 		} else if (alternar == 2) {
 			mensajeMarta =
-					CreateMensaje("reduceFileConCombiner-Pedido1 todoCC1.txt",
-							"227.4.6.1 999 archTempCC1 2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 archTempCC2 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 archTempCC3 1 ruta_temp5");
+			CreateMensaje("reduceFileConCombiner-Pedido1 todoCC1.txt",
+					"227.4.6.1 999 archTempCC1 2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 archTempCC2 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 archTempCC3 1 ruta_temp5");
 			alternar = 3;
 		} else if (alternar == 3) {
 			mensajeMarta =
-					CreateMensaje("reduceFileConCombiner-Pedido2 todoCC2.txt",
-							"227.4.6.1 999 1 /ruta_temp1 117.4.5.1 259 1 /ruta_temp3 167.5.4.1 250 1 ruta_temp5");
+			CreateMensaje("reduceFileConCombiner-Pedido2 todoCC2.txt",
+					"227.4.6.1 999 1 /ruta_temp1 117.4.5.1 259 1 /ruta_temp3 167.5.4.1 250 1 ruta_temp5");
 			alternar = 4;
 		} else {
 			mensajeMarta = CreateMensaje("FileSuccess todo1.txt", NULL);
@@ -81,8 +85,7 @@ void* pedidosMartaHandler(void* arg) {
 				"reduceFileConCombiner-Pedido1") == 0) {
 			PlanificarHilosReduce(mensajeMarta, TRUE, NULL,
 					SUBTIPO_REDUCE_CON_COMBINER_1);
-		} else if (strcmp(comandoStr[MENSAJE_COMANDO],
-				"reduceFinal") == 0) {
+		} else if (strcmp(comandoStr[MENSAJE_COMANDO], "reduceFinal") == 0) {
 			PlanificarHilosReduce(mensajeMarta, TRUE,
 					config_get_string_value(configuracion, "RESULTADO"),
 					SUBTIPO_REDUCE_CON_COMBINER_FINAL);
@@ -124,10 +127,10 @@ void IniciarConfiguracion() {
 		Terminar(EXIT_ERROR);
 	}
 
-	scriptMapperStr = LeerArchivo(
-			config_get_string_value(configuracion, "MAPPER"));
-	scriptReduceStr = LeerArchivo(
-			config_get_string_value(configuracion, "REDUCE"));
+	LeerArchivo(config_get_string_value(configuracion, "MAPPER"),
+			&scriptMapperStr, &scriptMapperSize);
+	LeerArchivo(config_get_string_value(configuracion, "REDUCE"),
+			&scriptReduceStr, &scriptReduceSize);
 
 	logProcesoJob = log_create("./ProcesoJob.log", "ProcesoJob", TRUE,
 			LOG_LEVEL_TRACE);
@@ -136,7 +139,7 @@ void IniciarConfiguracion() {
 
 }
 
-char* LeerArchivo(char* nombreArchivo) {
+void LeerArchivo(char* nombreArchivo, char** contenido, int* size) {
 
 	int archivo = open(nombreArchivo, O_RDONLY);
 	if (archivo == -1) {
@@ -147,10 +150,10 @@ char* LeerArchivo(char* nombreArchivo) {
 	//leer todo el archivo
 	struct stat infoArchivo;
 	stat(nombreArchivo, &infoArchivo);
-	char *contenido = malloc(infoArchivo.st_size);
-	read(archivo, contenido, infoArchivo.st_size);
+	*contenido = malloc(infoArchivo.st_size);
+	read(archivo, *contenido, infoArchivo.st_size);
 
-	return contenido;
+	*size = infoArchivo.st_size;
 }
 
 void Terminar(int exitStatus) {
@@ -199,7 +202,7 @@ void IniciarConexionMarta() {
 
 	pthread_create(&threadPedidosMartaHandler, NULL, pedidosMartaHandler, NULL);
 	pthread_mutex_init(&mMarta, NULL);
-
+	pthread_mutex_init(&mHilos, NULL);
 }
 
 void HacerPedidoMarta() {
@@ -308,6 +311,13 @@ void ReportarResultadoHilo(HiloJobInfo* hiloJobInfo, EstadoHilo estado) {
 	log_info(logProcesoJob,
 			"Se envió a MaRTA el siguiente mensaje\nComando: %s\nData: %s\n",
 			mensajeParaMarta->comando, mensajeParaMarta->data);
+
+	pthread_mutex_lock(&mHilos);
+	cantidadDeHilosActivos--;
+	log_debug(logProcesoJob, "Quedan %d hilos activos!!\n",
+			cantidadDeHilosActivos);
+	pthread_mutex_unlock(&mHilos);
+
 	free(bufferComandoStr);
 	FreeMensaje(mensajeParaMarta);
 	FreeHiloJobInfo(hiloJobInfo);
