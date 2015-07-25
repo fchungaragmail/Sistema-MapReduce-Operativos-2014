@@ -185,13 +185,12 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 #include "commons/string.h"
 #include <string.h>
 #include "aparearArchivos_new.h"
-void aplicarScriptReduce(char *script, char *archivoTemporal1,
-		char* archivoTemporal2);
+
+void aplicarScriptReduce(char *script, char *archivoTemporal1,char* archivoTemporal2);
 int procesarArchivoRemoto(int conexionNodoRemoto, char* nombreArchivoRemoto);
 int32_t conectarseANodoRemoto(char *ip, int puerto);
 
-int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal,
-		char* ipNodoFallido) {
+int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal, char* ipNodoFallido) {
 
 	char *archivosParaApareo = string_new();
 	char **pedidoReduce = string_split(archivosParaReduce, " ");
@@ -230,6 +229,7 @@ int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal,
 
 			if( resultadoProcesamiento == -1){
 				string_append(&ipNodoFallido, ip);
+				return -1;
 			}
 			string_append(&archivosParaApareo, " ");
 			string_append(&archivosParaApareo,
@@ -238,7 +238,12 @@ int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal,
 	}
 
 	//apareo
-	char *archivoApareado = aparearArchivos(archivosParaApareo);
+	char *archivoApareado = aparearArchivos2(archivosParaApareo);
+	if (archivoApareado == NULL) {
+		log_info(log_nodo, "FALLO EL APAREO DE ARCHIVOS");
+		return -1;
+	}
+
 	//char *archivoApareado = "/home/daniel/workspaceC/reduccion/tmp/temporalApareado.txt";
 	aplicarScriptReduce(script, archivoApareado, archivoTemporalFinal);
 
@@ -253,9 +258,8 @@ int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal,
 #include <sys/wait.h>
 #include "nodo_fs_functions_new.h"
 //aplica el script sobre archivoTemporal1 y lo guarda en archivoTemporal2
-void aplicarScriptReduce(char *script, char *archivoTemporal1,
-		char* archivoTemporal2) {
-
+void aplicarScriptReduce(char *script, char *archivoTemporal1, char* archivoTemporal2) {
+	//FALTA AGREGAR VALIDACIONES Y TESTEAR
 	int p[2];
 	pipe(p);
 	pid_t childPid;
@@ -283,7 +287,7 @@ void aplicarScriptReduce(char *script, char *archivoTemporal1,
 		creat(archivoTemporal2, 0777);
 
 		system(script);
-
+		//exit(EXIT_SUCCESS);
 	}
 }
 
@@ -299,28 +303,50 @@ int32_t conectarseANodoRemoto(char *ip, int puerto) {
  * */
 int procesarArchivoRemoto(int conexionNodoRemoto, char* nombreArchivoRemoto) {
 	//GET FILECONTENT
+	//puts("enviando comando getFileContent");
+	//char *comando = malloc(50);
+	//sprintf(comando, "%s %s", "getFileContent", nombreArchivoRemoto);
+
 	mensaje_t *msj = malloc(sizeof(mensaje_t));
-	puts("enviando comando getFileContent");
-	char *comando = malloc(50);
-	sprintf(comando, "%s %s", "getFileContent", nombreArchivoRemoto);
+	char *comando = string_new();
+
+	string_append_with_format(&comando,"%s %s", "getFileContent", nombreArchivoRemoto);
+
 	msj->comandoSize = strlen(comando);
 	msj->comando = comando;
 	msj->dataSize = 0;
 	msj->data = NULL;
-	enviar(conexionNodoRemoto, msj);
 
-	puts("recibiendo archivo temporal");
-	int resultado = recibir(conexionNodoRemoto, msj);
-	printf("tamaño %d\n", msj->dataSize);
+	int resultado;
+
+	resultado = enviar(conexionNodoRemoto, msj);
+	if (resultado == DESCONECTADO) {
+		log_info(log_nodo, "NODO DESCONECTADO");
+		return -1;
+	}
+
+	resultado = recibir(conexionNodoRemoto, msj);
 
 	if( resultado == DESCONECTADO){
+		log_info(log_nodo, "NODO DESCONECTADO");
 		return -1;
 	}
 
 	//SE GUARDA EL ARCHIVO EN EL ESPACIO TEMPORAL
-	char *pathArchivoTemporal = malloc(50);
-	sprintf(pathArchivoTemporal, "%s%s", DIR_TEMP, nombreArchivoRemoto);
+	char *pathArchivoTemporal = string_new();
+	string_append_with_format(&pathArchivoTemporal,"%s%s", DIR_TEMP, nombreArchivoRemoto);
+	//sprintf(pathArchivoTemporal, "%s%s", DIR_TEMP, nombreArchivoRemoto);
 	int archivoTemporal = creat(pathArchivoTemporal, 0777);
-	write(archivoTemporal, msj->data, msj->dataSize);
+	if (archivoTemporal < 0) {
+		log_info(log_nodo, "FALLO SYSCALL CREAT() EN PROCESAR_ARCHIVO_REMOTO()");
+		return -1;
+	}
+
+	if(write(archivoTemporal, msj->data, msj->dataSize) < 0){
+		log_info(log_nodo, "FALLO SYSCALL WRITE() EN PROCESAR_ARCHIVO_REMOTO()");
+		return -1;
+	}
+
 	free(msj->data);
+	return 0;
 }
