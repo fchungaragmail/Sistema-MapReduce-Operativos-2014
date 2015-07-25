@@ -130,8 +130,12 @@ void planificarHilo(void* args){
 	log_debug(logFile,log);
 	pthread_mutex_unlock(&mutexLog);
 
-	free(log);
 	//free(path); --> "administrarHilos" mira los paths
+	pthread_mutex_lock(mutex);
+	strcpy(path,"-1");//rompo el path asi no lo reconoce mas desde el hilo principal
+	pthread_mutex_unlock(mutex);
+
+	free(log);
 	sem_destroy(semHilo);
 	list_clean(colaDePedidos);//si hago list_destroy william me manda
 	//dictionary_destroy(hiloDic); --> "administrarHilos" mira el path q esta en eeste dic
@@ -184,7 +188,7 @@ void administrarHilos(){
 	if(command == K_Job_ReduceResponse){
 
 			printf("reduceResponse lalala");
-		}
+	}
 	char *path = deserializeFilePath(recvMessage,command);
 	int size = list_size(hilosData);
 	int i;
@@ -231,13 +235,16 @@ void administrarHilos(){
 		for(i=0;i<size;i++){
 			t_dictionary *hiloDic = list_get(hilosData,i);
 			int hiloJobSocket = dictionary_get(hiloDic,K_HiloDic_JobSocket);
+			pthread_mutex_t *mutex = dictionary_get(hiloDic,K_HiloDic_Mutex);
+
+			pthread_mutex_lock(mutex);
 			char *hiloPath = dictionary_get(hiloDic,K_HiloDic_Path);
+			pthread_mutex_unlock(mutex);
 
 			if(strcmp(hiloPath,path)==0){
 				hiloYaExiste = true;
 				t_list *colaDePedidos = dictionary_get(hiloDic,K_HiloDic_PedidosQueue);
 				sem_t *semHilo = dictionary_get(hiloDic,K_HiloDic_Sem);
-				pthread_mutex_t *mutex = dictionary_get(hiloDic,K_HiloDic_Mutex);
 
 				pthread_mutex_lock(mutex);
 				list_add(colaDePedidos,recvMessage);
@@ -255,7 +262,10 @@ void administrarHilos(){
 
 		t_dictionary *hiloDic = list_get(hilosData,i);
 		int hiloJobSocket = dictionary_get(hiloDic,K_HiloDic_JobSocket);
+		pthread_mutex_t *mutex = dictionary_get(hiloDic,K_HiloDic_Mutex);
+		pthread_mutex_lock(mutex);
 		char *hiloPath = dictionary_get(hiloDic,K_HiloDic_Path);
+		pthread_mutex_unlock(mutex);
 
 		if((strcmp(hiloPath,path)==0)&&(hiloJobSocket==recvMessage->sockfd)){
 
