@@ -13,9 +13,7 @@
 
 char* aparearArchivos(char* listaArchivos) {
 
-	int p[2];
 	int apareoArchivo;
-	char* buffer = malloc(sizeof(int));
 	char* path = setName(DIRECTORY_PATH, ARCHIVO_NAME);
 	char* apareoOrdenado = setName(DIRECTORY_PATH, "apareo_ordenado");
 
