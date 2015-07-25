@@ -15,7 +15,7 @@
 #include <commons/collections/list.h>
 #include <commons/config.h>
 #include <commons/log.h>
-#include <protocolo.h>
+#include "Compartidos/protocolo.h"
 #include "estructuras.h"
 
 #define TAMANIO_BLOQUE 20971520
