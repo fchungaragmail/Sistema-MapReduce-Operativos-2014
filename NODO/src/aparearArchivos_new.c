@@ -15,38 +15,36 @@ char* aparearArchivos(char* listaArchivos) {
 
 	int p[2];
 	int apareoArchivo;
-	int i = 0;
 	char* buffer = malloc(sizeof(int));
 	char* path = setName(DIRECTORY_PATH, ARCHIVO_NAME);
 	char* apareoOrdenado = setName(DIRECTORY_PATH, "apareo_ordenado");
 
-	pipe(p);
 
-	if(fork() == 0) {
+	apareoArchivo = creat(path, 0777); //si no existe lo crea (O_CREATE) y lo hace en
+	//modo append (O_APPEND)
+	char** archivo = string_split(listaArchivos, " ");
 
-		close(p[0]);
+	int i = 0;
+	while(archivo[i] != NULL)
+	{
+		char* tempFile = string_new();
+		string_append_with_format(&tempFile, "/tmp%s", archivo[i]);
+		int archivoFD = open(tempFile, O_RDONLY);
+		struct stat infoArchivo;
+		stat(tempFile, &infoArchivo);
+		char *contenido = malloc(infoArchivo.st_size);
 
-		apareoArchivo = open(path, O_APPEND | O_CREAT | O_RDWR); //si no existe lo crea (O_CREATE) y lo hace en
-															    //modo append (O_APPEND)
-		char** archivo = string_split(listaArchivos, " ");
+		read(archivoFD, contenido, infoArchivo.st_size);
+		write(apareoArchivo, contenido, infoArchivo.st_size);
+		free(contenido);
+		free(tempFile);
+		close(archivoFD);
 
-		for (; i < sizeof(archivo); i++) {
-			int archivoFD = open(archivo[i], O_RDONLY);
-			struct stat infoArchivo;
-			stat(archivo[i], &infoArchivo);
-			char *contenido = malloc(infoArchivo.st_size);
-
-			while(read(archivoFD, contenido, sizeof(infoArchivo.st_size)) != 0) { //leer size del archivo de una usando stat
-				write(apareoArchivo, contenido, sizeof(infoArchivo.st_size));
-			}
-			close(archivoFD);
-			free(contenido);
-		}
-
-		close(apareoArchivo);
+		i++;
 	}
 
-	wait(0); //esperar a que termine el proceso hijo que crea el archivo
+	close(apareoArchivo);
+
 
 	if(fork() == 0) {
 
@@ -56,10 +54,13 @@ char* aparearArchivos(char* listaArchivos) {
 		close(1); //cierro salida estandar, el fd queda libre, proximo fd se asociara a stdout
 		creat(apareoOrdenado, 0777); //fd que se asocia a salida standard
 
-		system("sort"); //se aplica sort a lo que hay en stdin (fd del archivo) y sale por stdout (fd archivo ordenado)
+		system("sort");
+		exit(EXIT_SUCCESS);//se aplica sort a lo que hay en stdin (fd del archivo) y sale por stdout (fd archivo ordenado)
 	}
 
 	wait(0);
+
+	unlink(path);
 
 	return apareoOrdenado;
 
@@ -69,18 +70,13 @@ char* aparearArchivos(char* listaArchivos) {
 char* setName(char* directory, char* name) {
 
 	struct timeb time;
-	char* finalName = malloc(140);
-	char* miliseconds = malloc(sizeof(int));
+	char* finalName = string_new();
+	char* miliseconds = string_new();
 
 	ftime(&time);
+	string_append_with_format(&miliseconds, "%hu", time.millitm);
 
-	sprintf(miliseconds, "%d", time.millitm);
-
-	finalName = strcat(finalName, directory);
-	finalName = strcat(finalName, name);
-	finalName = strcat(finalName, "_");
-	finalName = strcat(finalName, miliseconds);
-
+	string_append_with_format(&finalName,"%s%s_%s" ,directory, name,miliseconds);
 
 	return finalName;
 
