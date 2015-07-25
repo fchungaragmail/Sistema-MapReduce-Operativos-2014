@@ -13,6 +13,8 @@
 
 char* getBloque(int numeroBloque, int32_t* length) {
 
+	pthread_mutex_lock(&getBloqueMutex);
+
 	//abro el espacio de datos para lectura
 	int archivo = open(ARCHIVO_BIN,O_RDONLY);
 	if(archivo < 0){
@@ -47,6 +49,8 @@ char* getBloque(int numeroBloque, int32_t* length) {
 
 
 	*length = strnlen(contenido, TAMANIO_BLOQUE);
+
+	pthread_mutex_unlock(&getBloqueMutex);
 
 	return contenido;
 }
