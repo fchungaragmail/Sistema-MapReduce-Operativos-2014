@@ -22,7 +22,7 @@
 #define DIRECTORY_PATH "/tmp/"
 #define ARCHIVO_NAME "apareo"
 
-
+char* aparearArchivos2(char* listaArchivos);
 char* setName(char*, char*);
 
 
