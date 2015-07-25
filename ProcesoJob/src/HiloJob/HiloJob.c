@@ -5,9 +5,9 @@
 extern char* scriptMapperStr;
 extern char* scriptReduceStr;
 extern t_log* logProcesoJob;
-#ifdef FALLO_EN_NODO_JOB_MUERTO
+
 extern int cantidadDeHilosActivos;
-#endif
+extern pthread_mutex_t mHilos;
 pthread_t* CrearHiloJob(HiloJobInfo* hiloJobInfo, TipoHilo tipoHilo) {
 
 	pthread_t* hiloJob;
@@ -15,11 +15,9 @@ pthread_t* CrearHiloJob(HiloJobInfo* hiloJobInfo, TipoHilo tipoHilo) {
 	hiloJobInfo->tipoHilo = tipoHilo;
 	pthread_create(&hiloJob, NULL, hiloJobHandler, (void*) hiloJobInfo);
 	hiloJobInfo->threadhilo = hiloJob;
-
-#ifdef FALLO_EN_NODO_JOB_MUERTO
+	pthread_mutex_lock(&mHilos);
 	cantidadDeHilosActivos++;
-#endif //FALLO_EN_NODO_JOB_MUERTO
-
+	pthread_mutex_unlock(&mHilos);
 	return hiloJob;
 }
 
