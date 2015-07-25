@@ -28,7 +28,7 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 
 	int resultFork;
 	if ((resultFork = fork()) < 0) {
-		log_info(log_nodo, "Fallo syscall FORK() en mapping()");
+		log_info(log_nodo, "Fallo syscall FORK() 1 en mapping()");
 		return FALLO_MAPPING;
 
 	}else if(resultFork == 0) {
@@ -81,15 +81,28 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 		log_info(log_nodo, "Fallo getBloque() en mapping()");
 		return FALLO_MAPPING;
 	}
-	if(write(p[1], bloque, length) < 0){
+	sleep(1);
+	int retWrite = write(p[1], bloque, length);
+	if( retWrite  < 0){
 		perror("");
 		log_info(log_nodo, "Fallo syscall WRITE() en mapping()");
 		return FALLO_MAPPING;
 	}
 
+	log_info(log_nodo, "Write escribio %d", retWrite);
 
 
-	if(waitpid(resultFork, NULL, WNOHANG) < 0){
+	if(close(p[1])< 0){
+		perror("");
+		log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
+		return FALLO_MAPPING;
+	} else{
+		log_info(log_nodo, "Se realizo bien el syscall CLOSE() en mapping()");
+	}
+
+
+
+	if(waitpid(resultFork, NULL, 0) < 0){
 		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
 		return FALLO_MAPPING;
 	}
@@ -97,7 +110,7 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 
 	//para aplicar sort
 	if ((resultFork = fork()) < 0) {
-		log_info(log_nodo, "Fallo syscall FORK() en mapping()");
+		log_info(log_nodo, "Fallo syscall FORK() 2  en mapping()");
 		return FALLO_MAPPING;
 
 	}else if(resultFork == 0) {
@@ -125,18 +138,18 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 			log_info(log_nodo, "Fallo syscall EXEXLP() en mapping()");
 			return FALLO_MAPPING;
 		}
+
 		exit(EXIT_SUCCESS);
 	}
-/*
-	if(waitpid(resultFork, NULL, WNOHANG) < 0){
-		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
-		return FALLO_MAPPING;
-	}
-*/
+
+	free(bloque);
+
 	if(waitpid(resultFork, NULL, 0) < 0){
 		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
 		return FALLO_MAPPING;
 	}
+
+	unlink(archivoTemporal1);
 
 	return OK_MAPPING;//MAPING OK
 
@@ -185,13 +198,12 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 #include "commons/string.h"
 #include <string.h>
 #include "aparearArchivos_new.h"
-void aplicarScriptReduce(char *script, char *archivoTemporal1,
-		char* archivoTemporal2);
+
+void aplicarScriptReduce(char *script, char *archivoTemporal1,char* archivoTemporal2);
 int procesarArchivoRemoto(int conexionNodoRemoto, char* nombreArchivoRemoto);
 int32_t conectarseANodoRemoto(char *ip, int puerto);
 
-int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal,
-		char* ipNodoFallido) {
+int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal, char* ipNodoFallido) {
 
 	char *archivosParaApareo = string_new();
 	char **pedidoReduce = string_split(archivosParaReduce, " ");
@@ -230,6 +242,7 @@ int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal,
 
 			if( resultadoProcesamiento == -1){
 				string_append(&ipNodoFallido, ip);
+				return -1;
 			}
 			string_append(&archivosParaApareo, " ");
 			string_append(&archivosParaApareo,
@@ -239,7 +252,11 @@ int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal,
 
 	//apareo
 	char *archivoApareado = aparearArchivos(archivosParaApareo);
-	//char *archivoApareado = "/home/daniel/workspaceC/reduccion/tmp/temporalApareado.txt";
+	if (archivoApareado == NULL) {
+		log_info(log_nodo, "FALLO EL APAREO DE ARCHIVOS");
+		return -1;
+	}
+
 	aplicarScriptReduce(script, archivoApareado, archivoTemporalFinal);
 
 	free(archivosParaApareo);
@@ -253,43 +270,41 @@ int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal,
 #include <sys/wait.h>
 #include "nodo_fs_functions_new.h"
 //aplica el script sobre archivoTemporal1 y lo guarda en archivoTemporal2
-void aplicarScriptReduce(char *script, char *archivoTemporal1,
-		char* archivoTemporal2) {
+void aplicarScriptReduce(char *script, char *archivoTemporal1, char* archivoTemporal2) {
 
-	int p[2];
-	pipe(p);
-	pid_t childPid;
+	char* archivoFinal = string_new();
+	string_append_with_format(&archivoFinal, "/tmp%s", archivoTemporal2);
 
-	//para escrbir el bloque en la tuberia
-	if (fork() == 0) {
-		childPid = getpid();
-		close(p[0]);
-		t_fileContent *archivoTemporal = getFileContent(archivoTemporal1);
-		write(p[1], archivoTemporal->contenido, archivoTemporal->size);
+	int childPid = fork();
+	if (childPid == 0) {
+		close(0);
+		open(archivoTemporal1, O_RDONLY);
+
+		close(1);
+		creat(archivoFinal, 0777);
+		system(script);
 		exit(EXIT_SUCCESS);
 	}
 
 	waitpid(childPid, 0, 0);
-	//para aplicar el script
-	if (fork() == 0) {
-		close(p[1]);
-
-		//cambio la entrada standar por la tuberia
-		close(0);
-		dup(p[0]);
-
-		//cambio la salida standar
-		close(1);
-		creat(archivoTemporal2, 0777);
-
-		system(script);
-
-	}
 }
 
 #include "socketsFunciones/sockets.h"
 int32_t conectarseANodoRemoto(char *ip, int puerto) {
-	return new_connection(ip, puerto);
+	int32_t socket = new_connection(ip, puerto);
+
+	mensaje_t* shakeHand = malloc(sizeof(mensaje_t));
+	shakeHand->comando = string_new();
+	strcpy(shakeHand->comando, "nd");
+	shakeHand->comandoSize = strlen(shakeHand->comando) + 1;
+	shakeHand->dataSize = 0;
+
+	enviar(socket, shakeHand);
+
+	free(shakeHand->comando);
+	free(shakeHand);
+
+	return socket;
 }
 
 #include "protocolo_new.h"
@@ -299,28 +314,50 @@ int32_t conectarseANodoRemoto(char *ip, int puerto) {
  * */
 int procesarArchivoRemoto(int conexionNodoRemoto, char* nombreArchivoRemoto) {
 	//GET FILECONTENT
+	//puts("enviando comando getFileContent");
+	//char *comando = malloc(50);
+	//sprintf(comando, "%s %s", "getFileContent", nombreArchivoRemoto);
+
 	mensaje_t *msj = malloc(sizeof(mensaje_t));
-	puts("enviando comando getFileContent");
-	char *comando = malloc(50);
-	sprintf(comando, "%s %s", "getFileContent", nombreArchivoRemoto);
-	msj->comandoSize = strlen(comando);
-	msj->comando = comando;
+	msj->comando = string_new();
+
+	string_append_with_format(&(msj->comando),"%s %s", "getFileContent", nombreArchivoRemoto);
+
+	msj->comandoSize = strlen(msj->comando) + 1;
 	msj->dataSize = 0;
 	msj->data = NULL;
-	enviar(conexionNodoRemoto, msj);
 
-	puts("recibiendo archivo temporal");
-	int resultado = recibir(conexionNodoRemoto, msj);
-	printf("tamaño %d\n", msj->dataSize);
+	int resultado;
+
+	resultado = enviar(conexionNodoRemoto, msj);
+	if (resultado == DESCONECTADO) {
+		log_info(log_nodo, "NODO DESCONECTADO");
+		return -1;
+	}
+
+	resultado = recibir(conexionNodoRemoto, msj);
 
 	if( resultado == DESCONECTADO){
+		log_info(log_nodo, "NODO DESCONECTADO");
 		return -1;
 	}
 
 	//SE GUARDA EL ARCHIVO EN EL ESPACIO TEMPORAL
-	char *pathArchivoTemporal = malloc(50);
-	sprintf(pathArchivoTemporal, "%s%s", DIR_TEMP, nombreArchivoRemoto);
+	char *pathArchivoTemporal = string_new();
+	string_append_with_format(&pathArchivoTemporal,"%s%s", "/tmp", nombreArchivoRemoto);
 	int archivoTemporal = creat(pathArchivoTemporal, 0777);
-	write(archivoTemporal, msj->data, msj->dataSize);
+	if (archivoTemporal < 0) {
+		log_info(log_nodo, "FALLO SYSCALL CREAT() EN PROCESAR_ARCHIVO_REMOTO()");
+		return -1;
+	}
+
+	if(write(archivoTemporal, msj->data, msj->dataSize) < 0){
+		log_info(log_nodo, "FALLO SYSCALL WRITE() EN PROCESAR_ARCHIVO_REMOTO()");
+		return -1;
+	}
+
 	free(msj->data);
+	free(msj->comando);
+	free(msj);
+	return 0;
 }

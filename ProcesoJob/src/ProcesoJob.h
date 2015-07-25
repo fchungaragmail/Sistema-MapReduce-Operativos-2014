@@ -14,7 +14,7 @@ void IniciarConexionMarta();
 void HacerPedidoMarta();
 void IniciarConfiguracion();
 void Terminar(int);
-char* LeerArchivo(char*);
+void LeerArchivo(char*, char**, int*);
 void ReportarResultadoHilo(HiloJobInfo*, EstadoHilo);
 
 /*

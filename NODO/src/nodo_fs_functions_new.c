@@ -13,6 +13,8 @@
 
 char* getBloque(int numeroBloque, int32_t* length) {
 
+	pthread_mutex_lock(&getBloqueMutex);
+
 	//abro el espacio de datos para lectura
 	int archivo = open(ARCHIVO_BIN,O_RDONLY);
 	if(archivo < 0){
@@ -48,6 +50,8 @@ char* getBloque(int numeroBloque, int32_t* length) {
 
 	*length = strnlen(contenido, TAMANIO_BLOQUE);
 
+	pthread_mutex_unlock(&getBloqueMutex);
+
 	return contenido;
 }
 
@@ -60,7 +64,7 @@ t_fileContent *getFileContent(char *archivoTemporal) {
 	sprintf(rutaArchivo, "%s%s", directorioTemporal, archivoTemporal);
 	*/
 
-	char *rutaTemporal = string_duplicate(DIR_TEMP);
+	char *rutaTemporal = string_duplicate("/tmp");
 	string_append(&rutaTemporal,archivoTemporal);
 	//abrir el archivo
 	int archivo = open(rutaTemporal,O_RDONLY);
@@ -71,6 +75,7 @@ t_fileContent *getFileContent(char *archivoTemporal) {
 	stat(rutaTemporal, &infoArchivo);
 	char *contenido = malloc(infoArchivo.st_size);
 	read(archivo, contenido, infoArchivo.st_size);
+	close(archivo);
 
 	t_fileContent *fileContent = malloc(sizeof(t_fileContent));
 	fileContent->contenido = contenido;

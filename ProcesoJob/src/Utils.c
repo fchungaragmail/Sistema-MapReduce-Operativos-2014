@@ -2,7 +2,7 @@
 
 void FreeMensaje(mensaje_t* mensaje) {
 
-	if(mensaje == NULL){
+	if (mensaje == NULL) {
 		return;
 	}
 
@@ -39,7 +39,7 @@ mensaje_t* CreateMensaje(char* comandoStr, char* dataStr) {
 	return mensaje;
 }
 
-mensaje_t* CreateMensajeParaHilo(char* comandoStr, char* dataStr) {
+mensaje_t* CreateMensajeParaHilo(char* comandoStr, char* dataStr, int sizeData) {
 
 	mensaje_t* mensaje = malloc(sizeof(mensaje_t));
 
@@ -52,8 +52,9 @@ mensaje_t* CreateMensajeParaHilo(char* comandoStr, char* dataStr) {
 	}
 
 	if (dataStr != NULL) {
-		mensaje->data = strdup(dataStr);
-		mensaje->dataSize = strlen(dataStr);
+		mensaje->data = malloc(sizeData);
+		memcpy(mensaje->data, dataStr, sizeData);
+		mensaje->dataSize = sizeData;
 	} else {
 		mensaje->data = strdup("\0");
 		mensaje->dataSize = 1;

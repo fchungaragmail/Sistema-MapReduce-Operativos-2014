@@ -13,7 +13,9 @@
 
 int socketMartaFd = -1;
 char* scriptMapperStr = NULL;
+int scriptMapperSize = 0;
 char* scriptReduceStr = NULL;
+int scriptReduceSize = 0;
 pthread_t threadPedidosMartaHandler;
 pthread_t threadProcesarHilos;
 t_config* configuracion;
@@ -34,7 +36,7 @@ void* pedidosMartaHandler(void* arg) {
 		mensajeMarta = malloc(sizeof(mensaje_t));
 		int resultado = recibir(socketMartaFd, mensajeMarta);
 #else
-		static int alternar = 1;
+		static int alternar = 0;
 		if (alternar == 0) {
 			mensajeMarta = CreateMensaje("mapFile todo1.txt",
 					"127.0.0.1 6000 0 prueba.txt");
@@ -125,10 +127,10 @@ void IniciarConfiguracion() {
 		Terminar(EXIT_ERROR);
 	}
 
-	scriptMapperStr = LeerArchivo(
-			config_get_string_value(configuracion, "MAPPER"));
-	scriptReduceStr = LeerArchivo(
-			config_get_string_value(configuracion, "REDUCE"));
+	LeerArchivo(config_get_string_value(configuracion, "MAPPER"),
+			&scriptMapperStr, &scriptMapperSize);
+	LeerArchivo(config_get_string_value(configuracion, "REDUCE"),
+			&scriptReduceStr, &scriptReduceSize);
 
 	logProcesoJob = log_create("./ProcesoJob.log", "ProcesoJob", TRUE,
 			LOG_LEVEL_TRACE);
@@ -137,7 +139,7 @@ void IniciarConfiguracion() {
 
 }
 
-char* LeerArchivo(char* nombreArchivo) {
+void LeerArchivo(char* nombreArchivo, char** contenido, int* size) {
 
 	int archivo = open(nombreArchivo, O_RDONLY);
 	if (archivo == -1) {
@@ -148,10 +150,10 @@ char* LeerArchivo(char* nombreArchivo) {
 	//leer todo el archivo
 	struct stat infoArchivo;
 	stat(nombreArchivo, &infoArchivo);
-	char *contenido = malloc(infoArchivo.st_size);
-	read(archivo, contenido, infoArchivo.st_size);
+	*contenido = malloc(infoArchivo.st_size);
+	read(archivo, *contenido, infoArchivo.st_size);
 
-	return contenido;
+	*size = infoArchivo.st_size;
 }
 
 void Terminar(int exitStatus) {
@@ -312,8 +314,7 @@ void ReportarResultadoHilo(HiloJobInfo* hiloJobInfo, EstadoHilo estado) {
 
 	pthread_mutex_lock(&mHilos);
 	cantidadDeHilosActivos--;
-	log_debug(logProcesoJob,
-			"Quedan %d hilos activos!!\n",
+	log_debug(logProcesoJob, "Quedan %d hilos activos!!\n",
 			cantidadDeHilosActivos);
 	pthread_mutex_unlock(&mHilos);
 

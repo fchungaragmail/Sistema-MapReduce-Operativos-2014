@@ -13,7 +13,7 @@
 void FreeStringArray(char***);
 void FreeMensaje(mensaje_t*);
 mensaje_t* CreateMensaje(char*, char*);
-mensaje_t* CreateMensajeParaHilo(char*, char*);
+mensaje_t* CreateMensajeParaHilo(char*, char*, int);
 void FreeHiloJobInfo(HiloJobInfo*);
 
 #endif /* SRC_UTILS_H_ */
