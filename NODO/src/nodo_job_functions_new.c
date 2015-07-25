@@ -149,6 +149,8 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 		return FALLO_MAPPING;
 	}
 
+	unlink(archivoTemporal1);
+
 	return OK_MAPPING;//MAPING OK
 
 }
