@@ -64,7 +64,7 @@ t_fileContent *getFileContent(char *archivoTemporal) {
 	sprintf(rutaArchivo, "%s%s", directorioTemporal, archivoTemporal);
 	*/
 
-	char *rutaTemporal = string_duplicate(DIR_TEMP);
+	char *rutaTemporal = string_duplicate("/tmp");
 	string_append(&rutaTemporal,archivoTemporal);
 	//abrir el archivo
 	int archivo = open(rutaTemporal,O_RDONLY);
@@ -75,6 +75,7 @@ t_fileContent *getFileContent(char *archivoTemporal) {
 	stat(rutaTemporal, &infoArchivo);
 	char *contenido = malloc(infoArchivo.st_size);
 	read(archivo, contenido, infoArchivo.st_size);
+	close(archivo);
 
 	t_fileContent *fileContent = malloc(sizeof(t_fileContent));
 	fileContent->contenido = contenido;

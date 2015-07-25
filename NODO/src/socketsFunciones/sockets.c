@@ -120,5 +120,17 @@ int32_t new_connection(char *ip, int  puerto){
 		return -1;
 	}
 
+	mensaje_t* shakeHand = malloc(sizeof(mensaje_t));
+	shakeHand->comando = string_new();
+	strcpy(shakeHand->comando, "nd");
+	shakeHand->comandoSize = strlen(shakeHand->comando) + 1;
+	shakeHand->dataSize = 0;
+
+	enviar(new_connect_descr, shakeHand);
+
+	free(shakeHand->comando);
+	free(shakeHand);
+
+
 	return new_connect_descr;
 }

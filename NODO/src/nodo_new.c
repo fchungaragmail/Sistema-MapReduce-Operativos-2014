@@ -272,6 +272,8 @@ void *fs_nodo_conection_handler(void* ptr) {
 			buffer_send->dataSize = fileContent->size;
 			buffer_send->data = fileContent->contenido;
 			enviar(sockFD, buffer_send);
+			free(buffer_send->data);
+			free(buffer_send->comando);
 			free(buffer_send);
 			free(buffer_recv);
 		}
