@@ -294,12 +294,20 @@ int32_t conectarseANodoRemoto(char *ip, int puerto) {
 	int32_t socket = new_connection(ip, puerto);
 
 	mensaje_t* shakeHand = malloc(sizeof(mensaje_t));
+	mensaje_t* msj_recv = malloc(sizeof(mensaje_t));
+	int resultado;
 	shakeHand->comando = string_new();
 	strcpy(shakeHand->comando, "nd");
 	shakeHand->comandoSize = strlen(shakeHand->comando) + 1;
 	shakeHand->dataSize = 0;
 
 	enviar(socket, shakeHand);
+	resultado = recibir(socket, msj_recv);
+
+		if( resultado == DESCONECTADO){
+			log_info(log_nodo, "NODO DESCONECTADO");
+			return -1;
+		}
 
 	free(shakeHand->comando);
 	free(shakeHand);
@@ -336,12 +344,6 @@ int procesarArchivoRemoto(int conexionNodoRemoto, char* nombreArchivoRemoto) {
 		return -1;
 	}
 
-	resultado = recibir(conexionNodoRemoto, msj_recv);
-
-	if( resultado == DESCONECTADO){
-		log_info(log_nodo, "NODO DESCONECTADO");
-		return -1;
-	}
 
 	resultado = recibir(conexionNodoRemoto, msj_recv);
 
