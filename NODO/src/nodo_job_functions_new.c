@@ -319,7 +319,7 @@ int procesarArchivoRemoto(int conexionNodoRemoto, char* nombreArchivoRemoto) {
 	//sprintf(comando, "%s %s", "getFileContent", nombreArchivoRemoto);
 
 	mensaje_t *msj = malloc(sizeof(mensaje_t));
-	msj->comando = string_new();
+	mensaje_t *msj_recv = malloc(sizeof(mensaje_t));
 
 	string_append_with_format(&(msj->comando),"%s %s", "getFileContent", nombreArchivoRemoto);
 
@@ -335,7 +335,7 @@ int procesarArchivoRemoto(int conexionNodoRemoto, char* nombreArchivoRemoto) {
 		return -1;
 	}
 
-	resultado = recibir(conexionNodoRemoto, msj);
+	resultado = recibir(conexionNodoRemoto, msj_recv);
 
 	if( resultado == DESCONECTADO){
 		log_info(log_nodo, "NODO DESCONECTADO");
@@ -351,7 +351,7 @@ int procesarArchivoRemoto(int conexionNodoRemoto, char* nombreArchivoRemoto) {
 		return -1;
 	}
 
-	if(write(archivoTemporal, msj->data, msj->dataSize) < 0){
+	if(write(archivoTemporal, msj_recv->data, msj_recv->dataSize) < 0){
 		log_info(log_nodo, "FALLO SYSCALL WRITE() EN PROCESAR_ARCHIVO_REMOTO()");
 		return -1;
 	}
@@ -359,5 +359,6 @@ int procesarArchivoRemoto(int conexionNodoRemoto, char* nombreArchivoRemoto) {
 	free(msj->data);
 	free(msj->comando);
 	free(msj);
+	free(msj_recv);
 	return 0;
 }
