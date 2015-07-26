@@ -542,7 +542,6 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 	bool *tieneCombinerMode = soportaCombiner(infoThread->file_StatusData);
 	int cantidadDeNodos = obtenerCantidadDeNodosDiferentesEnBlockState(infoThread->fileState);
 	t_list *nodosEnBlockState = obtenerNodosEnBlockStateArray(infoThread->fileState);
-	char *finalStream;
 
 
 	if(*tieneCombinerMode){
@@ -606,7 +605,6 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 			log_debug(logFile,log); free(log);
 
 			msjParaEnviar = armarMensajeParaEnvio(recvMessage,stream,command,infoThread);
-			finalStream=stream;
 		}
 
 		//**************************************************************
@@ -664,7 +662,6 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 			char *log = string_from_format("el Pedido2 (%s - %d) de ReduceConCombiner es : %s",infoThread->filePathAProcesar,*(infoThread->jobSocket),stream);
 			log_debug(logFile,log); free(log);
 
-			finalStream=stream;
 			msjParaEnviar = armarMensajeParaEnvio(recvMessage,stream,comando,infoThread);
 
 		}
@@ -690,16 +687,15 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 		list_add(infoThread->listaDeNodos_EnCasoDeFalloDeJob,IPnroNodoLocal);
 
 		char *stream = string_new();
-		string_append(&stream,IPnroNodoLocal);string_append(&stream," ");
-		string_append(&stream,puertoNodoLocal);
-		addIntToStream(stream,cantidadDePathsTempEnNodoLocal);
+		string_append_with_format(&stream, "%s %s %d", IPnroNodoLocal,
+				puertoNodoLocal, cantidadDePathsTempEnNodoLocal);
 
 		int k;
 		for(k=0;k<cantidadDePathsTempEnNodoLocal;k++){
 
 			char *tempPath = list_get(pathsTemporalesParaNodoLocal,k);
 			//agregar a el serializado "tempPath"
-			string_append(&stream," "); string_append(&stream,tempPath);
+			string_append_with_format(&stream," %s",tempPath);
 		}
 		list_destroy(pathsTemporalesParaNodoLocal);
 		//*****************************************************
@@ -716,16 +712,17 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 				list_add(infoThread->listaDeNodos_EnCasoDeFalloDeJob,IPnodoEnBlockState);
 
 				//agregar a el serializado --> "cantidadDePathsTempEnNodo"
-				string_append(&stream," "); string_append(&stream,IPnodoEnBlockState);
-				string_append(&stream," "); string_append(&stream,puertonodoEnBlockState);
-				addIntToStream(stream,cantidadDePathsTempEnNodo);
+
+				string_append_with_format(&stream, " %s %s %d", IPnodoEnBlockState,
+						puertonodoEnBlockState, cantidadDePathsTempEnNodo);
+
 
 				int j;
 				for(j=0;j<cantidadDePathsTempEnNodo;j++){
 
 					char *tempPath = list_get(pathsTemporalesParaNodo,j);
 					//agregar a el serializado "tempPath"
-					string_append(&stream," "); string_append(&stream,tempPath);
+					string_append_with_format(&stream, " %s", tempPath);
 				}
 				list_destroy(pathsTemporalesParaNodo);
 			}
@@ -735,7 +732,6 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 		//actualizar Tablas !!
 		incrementarOperacionesEnProcesoEnNodo(IPnroNodoLocal);
 		//setBlockStatesListInReducingState(path);
-		finalStream=stream;
 
 		char *comando = string_new();
 		char *tempPathFinal = crearPathTemporal(path);
@@ -756,7 +752,7 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 		pthread_mutex_unlock(&mutexLog);
 		free(log);free(log2);free(log3);
 
-		msjParaEnviar = armarMensajeParaEnvio(recvMessage,finalStream,comando,infoThread);
+		msjParaEnviar = armarMensajeParaEnvio(recvMessage, stream,comando,infoThread);
 	}
 
 	free(path);
