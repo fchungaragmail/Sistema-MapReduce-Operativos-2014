@@ -76,11 +76,13 @@ void* pedidosMartaHandler(void* arg) {
 		if (strcmp(comandoStr[MENSAJE_COMANDO], "mapFile") == 0) {
 			PlanificarHilosMapper(mensajeMarta);
 		} else if (strcmp(comandoStr[MENSAJE_COMANDO], "reduceFileSinCombiner")
-				== 0
-				|| strcmp(comandoStr[MENSAJE_COMANDO],
-						"reduceFileConCombiner-Pedido2") == 0) {
+				== 0) {
 			PlanificarHilosReduce(mensajeMarta, FALSE, NULL,
 					SUBTIPO_REDUCE_SIN_COMBINER);
+		} else if (strcmp(comandoStr[MENSAJE_COMANDO],
+				"reduceFileConCombiner-Pedido2") == 0) {
+			PlanificarHilosReduce(mensajeMarta, FALSE, NULL,
+					SUBTIPO_REDUCE_CON_COMBINER_2);
 		} else if (strcmp(comandoStr[MENSAJE_COMANDO],
 				"reduceFileConCombiner-Pedido1") == 0) {
 			PlanificarHilosReduce(mensajeMarta, TRUE, NULL,
@@ -298,25 +300,31 @@ void ReportarResultadoHilo(HiloJobInfo* hiloJobInfo, EstadoHilo estado) {
 	 * varios hilos pueden estar reportando a marta
 	 */
 
+	pthread_mutex_lock(&mHilos);
+	cantidadDeHilosActivos--;
+	log_debug(logProcesoJob, "Quedan %d hilos activos!!\n",
+			cantidadDeHilosActivos);
+	pthread_mutex_unlock(&mHilos);
+
 #ifndef BUILD_CON_MOCK_MARTA
 	pthread_mutex_lock(&mMarta);
-	enviar(socketMartaFd, mensajeParaMarta);
+
+	if (hiloJobInfo->subTipoHilo == SUBTIPO_REDUCE_CON_COMBINER_1
+			&& cantidadDeHilosActivos > 0) {
+		log_debug(logProcesoJob, " Esperando a todos los reduce locales");
+	} else {
+		enviar(socketMartaFd, mensajeParaMarta);
+		log_info(logProcesoJob,
+				"Se envió a MaRTA el siguiente mensaje\nComando: %s\nData: %s\n",
+				mensajeParaMarta->comando, mensajeParaMarta->data);
+	}
+
 	pthread_mutex_unlock(&mMarta);
 
 	if (hiloJobInfo->socketFd != -1) {
 		close(hiloJobInfo->socketFd);
 	}
 #endif
-
-	log_info(logProcesoJob,
-			"Se envió a MaRTA el siguiente mensaje\nComando: %s\nData: %s\n",
-			mensajeParaMarta->comando, mensajeParaMarta->data);
-
-	pthread_mutex_lock(&mHilos);
-	cantidadDeHilosActivos--;
-	log_debug(logProcesoJob, "Quedan %d hilos activos!!\n",
-			cantidadDeHilosActivos);
-	pthread_mutex_unlock(&mHilos);
 
 	free(bufferComandoStr);
 	FreeMensaje(mensajeParaMarta);
