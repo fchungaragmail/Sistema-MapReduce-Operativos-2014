@@ -25,7 +25,7 @@
 
 typedef struct{
 	char* contenido;
-	long int size;
+	int32_t size;
 }t_fileContent;
 
 
