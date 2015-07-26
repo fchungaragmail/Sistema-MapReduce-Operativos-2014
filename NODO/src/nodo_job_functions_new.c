@@ -320,6 +320,7 @@ int procesarArchivoRemoto(int conexionNodoRemoto, char* nombreArchivoRemoto) {
 
 	mensaje_t *msj = malloc(sizeof(mensaje_t));
 	mensaje_t *msj_recv = malloc(sizeof(mensaje_t));
+	msj->comando = string_new();
 
 	string_append_with_format(&(msj->comando),"%s %s", "getFileContent", nombreArchivoRemoto);
 
@@ -335,7 +336,13 @@ int procesarArchivoRemoto(int conexionNodoRemoto, char* nombreArchivoRemoto) {
 		return -1;
 	}
 
-	recibir(conexionNodoRemoto, msj_recv);
+	resultado = recibir(conexionNodoRemoto, msj_recv);
+
+	if( resultado == DESCONECTADO){
+		log_info(log_nodo, "NODO DESCONECTADO");
+		return -1;
+	}
+
 	resultado = recibir(conexionNodoRemoto, msj_recv);
 
 	if( resultado == DESCONECTADO){
