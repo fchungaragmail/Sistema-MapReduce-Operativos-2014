@@ -300,7 +300,6 @@ void addIntToStream(char *stream, int value)
 {
 	//char *intValue = intToCharPtr(value);
 	char *intValue  = string_from_format("%d",value);
-	string_append(&stream," ");
-	string_append(&stream,intValue);
+	string_append_with_format(&stream," %s",intValue);
 	free(intValue);
 }

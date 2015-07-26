@@ -788,11 +788,9 @@ Message *armarPedidoDeMap(Message *recvMessage,infoHilo_t *infoThread)
 			if((*_disponible) == false){//checkeo q haya copias disponibles
 
 				//NO HAY COPIAS DISPONIBLES !!!!!
-				pthread_mutex_lock(&mutexLog);
-				log_debug(logFile,"no hay mas copias disponibles!!!");
+				log_trace(logFile,"no hay mas copias disponibles!!!");
 				char *log = string_from_format("averiguo si FileSystem tiene nuevos nodos !, (%d - %s) pedido de bloqe %d",*(infoThread->jobSocket),infoThread->filePathAProcesar,i);
-				log_debug(logFile,log);free(log);
-				pthread_mutex_unlock(&mutexLog);
+				log_trace(logFile,log);free(log);
 
 				Message *fsRequest = createFSrequest(recvMessage,i);
 				*(infoThread->yaPediFullDataTable) = true;
