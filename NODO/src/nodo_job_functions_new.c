@@ -335,6 +335,7 @@ int procesarArchivoRemoto(int conexionNodoRemoto, char* nombreArchivoRemoto) {
 		return -1;
 	}
 
+	recibir(conexionNodoRemoto, msj_recv);
 	resultado = recibir(conexionNodoRemoto, msj_recv);
 
 	if( resultado == DESCONECTADO){
