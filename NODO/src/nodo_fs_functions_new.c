@@ -68,6 +68,9 @@ t_fileContent *getFileContent(char *archivoTemporal) {
 	string_append(&rutaTemporal,archivoTemporal);
 	//abrir el archivo
 	int archivo = open(rutaTemporal,O_RDONLY);
+	if (archivo == -1) {
+		log_info(log_nodo, "FALLO AL ABRIR ARCHIVO EN GETFILECONTENT");
+	}
 	//perror("");
 
 	//leer todo el archivo
