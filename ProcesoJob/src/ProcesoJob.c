@@ -91,24 +91,6 @@ void* pedidosMartaHandler(void* arg) {
 			PlanificarHilosReduce(mensajeMarta, FALSE,
 					config_get_string_value(configuracion, "RESULTADO"),
 					SUBTIPO_REDUCE_CON_COMBINER_FINAL);
-		} else if (strcmp(comandoStr[MENSAJE_COMANDO], "FileSuccess") == 0) {
-			char* dataDiccionario = dictionary_remove(diccArchivos,
-					comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO]);
-			if (dataDiccionario) {
-				free(dataDiccionario);
-				log_debug(logProcesoJob,
-						"Se completo %s, quedan %d archivos.\n",
-						comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO],
-						dictionary_size(diccArchivos));
-				if (dictionary_is_empty(diccArchivos)) {
-					break;
-				}
-			} else {
-				log_warning(logProcesoJob,
-						"Nombre de archivo: %s incorrecto o ya fue completado con anterioridad!\n",
-						comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO]);
-			}
-
 		}
 
 		FreeStringArray(&comandoStr);
@@ -277,7 +259,7 @@ void ReportarResultadoHilo(HiloJobInfo* hiloJobInfo, EstadoHilo estado) {
 	case ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO: {
 		if (hiloJobInfo->tipoHilo == TIPO_HILO_REDUCE) {
 			log_error(logProcesoJob,
-					"Al menos un nodo falló, cerrando Job...\n");
+					"Al menos un nodo falló en reduce, cerrando Job...\n");
 			Terminar(EXIT_FAILURE);
 		} else {
 			string_append(&bufferComandoStr, " 0");
@@ -308,6 +290,17 @@ void ReportarResultadoHilo(HiloJobInfo* hiloJobInfo, EstadoHilo estado) {
 
 #ifndef BUILD_CON_MOCK_MARTA
 	pthread_mutex_lock(&mMarta);
+
+
+	int* dataDiccionario = dictionary_get(diccArchivos,hiloJobInfo->nombreArchivo ); //TODO cual nombre de archivo identifica MaRTA para reduce?
+	if (dataDiccionario) {
+		*dataDiccionario = *dataDiccionario - 1;
+		if (*dataDiccionario == 0) {
+			int* dataAEliminar = dictionary_remove(diccArchivos,hiloJobInfo->nombreArchivo);
+			free(dataAEliminar);
+			//enviar
+		}
+	}
 
 	if (hiloJobInfo->subTipoHilo == SUBTIPO_REDUCE_CON_COMBINER_1
 			&& cantidadDeHilosActivos > 0) {
