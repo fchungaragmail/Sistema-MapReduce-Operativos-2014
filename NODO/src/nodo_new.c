@@ -97,10 +97,10 @@ int main() {
 		if(strcmp(buffer_shakehand->comando, "rdf") == 0) {
 			int* sockAux = malloc(sizeof(int));
 			*sockAux = sockAccept;
-			reduceArguments_t reduceArguments = malloc(sizeof(reduceArguments_t));
-			reduceArguments.isFinalReduce = true;
-			reduceArguments.sockFS = sockFS;
-			reduceArguments.sockJob = sockAux;
+			reduceArguments_t* reduceArguments = malloc(sizeof(reduceArguments_t));
+			reduceArguments->isFinalReduce = true;
+			reduceArguments->sockFS = sockFS;
+			reduceArguments->sockJob = sockAux;
 			pthread_create(&reduce_handler, NULL, reduce_conection_handler, reduceArguments);
 		}
 
