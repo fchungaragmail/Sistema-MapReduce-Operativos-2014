@@ -121,7 +121,7 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 		case K_Job_ReduceResponse:
 			pthread_mutex_lock(&mutexLog);
 			log_debug(logFile,"PlannerCenter : planificar Job_ReduceResponse\n");
-			pthread_mutex_lock(&mutexLog);
+			pthread_mutex_unlock(&mutexLog);
 			//tipos de rtas
 			//**************
 			//*comando: "reduceFileConCombiner-Pedido1 pathArchivo Respuesta"
@@ -153,7 +153,9 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 					liberarMemoria(infoThread);
 
 					char *tlog = string_from_format("archivo %s reducido con exito !",path);
+					pthread_mutex_lock(&mutexLog);
 					log_debug(logFile,tlog);
+					pthread_mutex_unlock(&mutexLog);
 					free(tlog);
 
 					jobMsj = crearMensajeAJobDeFinalizado(recvMessage,infoThread);
@@ -179,13 +181,13 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 			free(_response);
 			pthread_mutex_lock(&mutexLog);
 			log_debug(logFile,"***************");
-			pthread_mutex_lock(&mutexLog);
+			pthread_mutex_unlock(&mutexLog);
 			break;
 
 		case K_Job_ReduceFinal:;
 			pthread_mutex_lock(&mutexLog);
 			log_debug(logFile,"PlannerCenter : planificar Job_ReduceFinal\n");
-			pthread_mutex_lock(&mutexLog);
+			pthread_mutex_unlock(&mutexLog);
 
 			list_clean(infoThread->listaDeNodos_EnCasoDeFalloDeJob);
 			bool *mresponse = deserializeRequestResponse(recvMessage,K_Job_ReduceFinal);
@@ -208,7 +210,7 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 			//TODO destruir fileToProcess --> ver si puede tener 2 cantidades de archs distintos a procesar
 			pthread_mutex_lock(&mutexLog);
 			log_debug(logFile,"***************");
-			pthread_mutex_lock(&mutexLog);
+			pthread_mutex_unlock(&mutexLog);
 			break;
 
 		case K_ProcesoCaido:;
@@ -496,10 +498,13 @@ void planificar(Message *recvMessage,TypesMessages type,infoHilo_t *infoThread)
 			if(i != (size-1))
 				string_append(&data," ");
 		}
-		Message *msj;
-		msj = armarMensajeParaEnvio(msj,data,comando,infoThread);
+		Message *msj = armarMensajeParaEnvio(msj,data,comando,infoThread);
 		char* log = string_from_format("se envia reduceFinal con data %s",msj->mensaje->data);
-		log_debug(logFile,log); free(log);
+		char* log2 = string_from_format("se envia reduceFinal con comando %s",msj->mensaje->comando);
+		log_debug(logFile,log);
+		log_debug(logFile,log2);
+		free(log2);
+		free(log);
 #ifndef K_SIMULACION
 		enviar(msj->sockfd,msj->mensaje);
 #endif
@@ -643,7 +648,7 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 
 			infoThread->ipNodoLocalDePedidoDeReduce = ip;
 			infoThread->puertoNodoLocalDePedidoDeReduce = puerto;
-			infoThread->pathNodoLocalDePedidoDeReduce = tempPath;
+			infoThread->pathNodoLocalDePedidoDeReduce = pathTempo;
 
 			//******************************************
 			int size = list_size(infoThread->nodosReduceList_Pedido1);
