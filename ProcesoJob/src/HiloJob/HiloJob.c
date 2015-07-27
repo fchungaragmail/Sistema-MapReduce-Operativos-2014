@@ -65,7 +65,11 @@ void* hiloJobHandler(void* arg) {
 	if (hiloJobInfo->tipoHilo == TIPO_HILO_MAPPER) {
 		mensajeParaNodo = CreateMensaje("mp", NULL);
 	} else { //TIPO_HILO_REDUCE
-		mensajeParaNodo = CreateMensaje("rd", NULL);
+		if (hiloJobInfo->subTipoHilo == SUBTIPO_REDUCE_CON_COMBINER_FINAL) {
+			mensajeParaNodo = CreateMensaje("rdf", NULL);
+		} else {
+			mensajeParaNodo = CreateMensaje("rd", NULL);
+		}
 	}
 
 #ifndef BUILD_CON_MOCK_NODO
@@ -129,8 +133,7 @@ void* hiloJobHandler(void* arg) {
 	enviar(hiloJobInfo->socketFd, mensajeParaNodo);
 #endif
 
-	log_info(logProcesoJob,
-			"Enviado al nodo IP:%s PUERTO:%d\nComando: %s\n",
+	log_info(logProcesoJob, "Enviado al nodo IP:%s PUERTO:%d\nComando: %s\n",
 			inet_ntoa(hiloJobInfo->direccionNodo.sin_addr),
 			ntohs(hiloJobInfo->direccionNodo.sin_port),
 			mensajeParaNodo->comando);
