@@ -88,7 +88,7 @@ void* pedidosMartaHandler(void* arg) {
 			PlanificarHilosReduce(mensajeMarta, TRUE, NULL,
 					SUBTIPO_REDUCE_CON_COMBINER_1);
 		} else if (strcmp(comandoStr[MENSAJE_COMANDO], "reduceFinal") == 0) {
-			PlanificarHilosReduce(mensajeMarta, TRUE,
+			PlanificarHilosReduce(mensajeMarta, FALSE,
 					config_get_string_value(configuracion, "RESULTADO"),
 					SUBTIPO_REDUCE_CON_COMBINER_FINAL);
 		} else if (strcmp(comandoStr[MENSAJE_COMANDO], "FileSuccess") == 0) {
