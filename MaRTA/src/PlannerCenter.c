@@ -628,10 +628,9 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 			char *pathTempo = crearPathTemporal(_path);
 			char *comando = string_new();
 			char *stream = string_new();
-			string_append(&comando,"reduceFileConCombiner-Pedido2");string_append(&comando," ");
+			string_append(&comando,"reduceFileConCombiner-Pedido2 ");
 			string_append(&comando,pathTempo);
 			free(_path);
-			free(pathTempo);
 
 			//******************************************
 			//1ero NodoLocal --> tomo el 1ero porque si
@@ -665,7 +664,10 @@ Message *armarPedidoDeReduce(Message *recvMessage, infoHilo_t *infoThread){
 				list_add(infoThread->listaDeNodos_EnCasoDeFalloDeJob,ip);
 			}
 			char *log = string_from_format("el Pedido2 (%s - %d) de ReduceConCombiner es : %s",infoThread->filePathAProcesar,*(infoThread->jobSocket),stream);
-			log_debug(logFile,log); free(log);
+			pthread_mutex_lock(&mutexLog);
+			log_debug(logFile,log);
+			pthread_mutex_unlock(&mutexLog);
+			free(log);
 
 			msjParaEnviar = armarMensajeParaEnvio(recvMessage,stream,comando,infoThread);
 
@@ -965,9 +967,7 @@ void actualizarTablas_RtaDeMapExitosa(Message *recvMessage,infoHilo_t *infoThrea
 	*status = K_MAPPED;
 	//Actualizo nodoState
 	decrementarOperacionesEnProcesoEnNodo(IPnroNodo);
-	printf("1111");
 	informarTareasPendientesDeMapping(path,*(infoThread->jobSocket),infoThread->fileState);
-	printf("1111");
 	free(path);
 	free(temporaryPath);
 }
