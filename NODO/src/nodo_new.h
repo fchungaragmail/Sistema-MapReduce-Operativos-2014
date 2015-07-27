@@ -40,6 +40,12 @@ extern char* ARCHIVO_BIN;
 extern pthread_mutex_t getBloqueMutex;
 t_log *log_nodo;
 
+typedef struct  {
+	int* sockJob;
+	int* sockFS;
+	bool isFinalReduce;
+} reduceArguments_t;
+
 void getConfig();
 int initServer(int*);
 void connectToFileSistem(int*);

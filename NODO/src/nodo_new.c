@@ -16,6 +16,7 @@ int main() {
 	int sockAccept; //socket nodo servidor acepta conexiones
 	int* sockFS = malloc(sizeof(int)); //socket nodo cliente para conectarse con FS
 	int* sockForThread = malloc(sizeof(int)); //sockFS que paso por parametro al thread que queda hablando con FS
+	bool isFinalReduce;
 	socklen_t size;
 	Sockaddr_in client_sock; //sockaddr que se usa en accept de nodo servidor
 	pthread_t nodo_handler;
@@ -85,8 +86,19 @@ int main() {
 			int* sockAux = malloc(sizeof(int));
 			//sockAux = &sockAccept;
 			*sockAux = sockAccept;
+			reduceArguments_t* reduceArguments = malloc(sizeof(reduceArguments_t));
+			reduceArguments->isFinalReduce = false;
+			reduceArguments->sockFS = sockFS;
+			reduceArguments->sockJob = sockAux;
 			pthread_create(&reduce_handler, NULL, reduce_conection_handler,
-					sockAux);
+					reduceArguments);
+		}
+
+		if(strcmp(buffer_shakehand->comando, "rdf") == 0) {
+			int* sockAux = malloc(sizeof(int));
+			*sockAux = sockAccept;
+			isFinalReduce = true;
+			pthread_create(&reduce_handler, NULL, reduce_conection_handler, sockAux);
 		}
 
 
@@ -401,7 +413,7 @@ void *map_conection_handler(void* ptr) {  //int bloque  char* nombreArchTemp
 
 void *reduce_conection_handler(void* ptr) {
 
-	int sockFD = *((int*) ptr);
+	reduceArguments_t reduceArguments = *((reduceArguments_t*) ptr);
 
 	while (1) {
 
@@ -409,9 +421,9 @@ void *reduce_conection_handler(void* ptr) {
 		mensaje_t* buffer_send = malloc(sizeof(mensaje_t));
 		char** result;
 		char** archivosParaReduce;
-		int i = 2;
+//		int i = 2;
 
-		if(recibir(sockFD, buffer_recv) == DESCONECTADO){
+		if(recibir(*reduceArguments.sockJob, buffer_recv) == DESCONECTADO){
 			log_info(log_nodo,"HILO RD DESCONECTADO");
 			pthread_exit(NULL);
 		}
@@ -447,9 +459,14 @@ void *reduce_conection_handler(void* ptr) {
 			system(permisoEjecucionScript);
 		}
 
-		int reduceResult = reduce(nombreScript, archivosParaReduce[3],result[1], ipNodoFallido);
 
+		char** filePath = string_split(result[1], "/");
+		int j = 0;
+		while(filePath[j+1] != NULL) {
+			j++;
+		};
 
+		int reduceResult = reduce(nombreScript, archivosParaReduce[3],filePath[j], ipNodoFallido);
 
 		if (reduceResult == 0) {
 			buffer_send->comando = strdup("reduceFileResponse 1");
@@ -466,10 +483,11 @@ void *reduce_conection_handler(void* ptr) {
 
 		buffer_send->comandoSize = strlen("reduceFileResponse X") + 1;
 
-		if(enviar(sockFD, buffer_send) == DESCONECTADO){
+		if(enviar(*reduceArguments.sockJob, buffer_send) == DESCONECTADO){
 			log_info(log_nodo,"HILO RD DESCONECTADO");
 			pthread_exit(NULL);
 		}
+
 
 
 		free(ipNodoFallido);
@@ -481,8 +499,19 @@ void *reduce_conection_handler(void* ptr) {
 			free(buffer_recv->data);
 		}
 
+		if(reduceArguments.isFinalReduce) {
+			filePath[j] = string_from_format("/%s", filePath[j]);
+			t_fileContent* reduceFinal = getFileContent(filePath[j]);
+			buffer_send->comando = string_from_format("reduceFinal %s", filePath[j]);
+			buffer_send->comandoSize = strlen(buffer_send->comando) + 1;
+			buffer_send->data = reduceFinal->contenido;
+			buffer_send->dataSize = reduceFinal->size;
+			enviar(*reduceArguments.sockFS, buffer_send);
+		}
+
 		free(buffer_recv);
 		free(buffer_send);
+
 	}
 
 }

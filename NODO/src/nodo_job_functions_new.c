@@ -273,7 +273,7 @@ int reduce(char *script, char *archivosParaReduce, char *archivoTemporalFinal, c
 void aplicarScriptReduce(char *script, char *archivoTemporal1, char* archivoTemporal2) {
 
 	char* archivoFinal = string_new();
-	string_append_with_format(&archivoFinal, "/tmp%s", archivoTemporal2);
+	string_append_with_format(&archivoFinal, "/tmp/%s", archivoTemporal2);
 
 	int childPid = fork();
 	if (childPid == 0) {
