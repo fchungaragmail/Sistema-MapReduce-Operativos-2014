@@ -8,7 +8,7 @@
 #ifndef NODO_NEW_H_
 #define NODO_NEW_H_
 
-
+#define _FILE_OFFSET_BITS 64
 #define MESSAGE_LENGTH 256
 #define SHAKEHAND_MESSAGE_LENGTH 50
 #define COMANDO_LENGTH 50
