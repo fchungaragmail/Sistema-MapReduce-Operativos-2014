@@ -6,6 +6,8 @@
  */
 #include "sockets.h"
 #include <stdint.h>
+#include <stdio.h>
+#include <errno.h>
 
 /* Funciones Servidor */
 /*
@@ -29,7 +31,7 @@ int32_t aceptar_cliente (int descriptor){
 
 
 	if (hijo == SOCKET_ERROR){
-		perror("");
+
 		return SOCKET_ERROR;
 	}
 
