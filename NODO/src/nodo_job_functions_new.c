@@ -33,16 +33,11 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 
 	}else if(resultFork == 0) {
 		//Se ejecuta el hijo
-		if(close(0) < 0){
-			log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
+
+		if(dup2(p[0],0) < 0){
+			log_info(log_nodo, "Fallo syscall DUP2() en mapping()");
 			return FALLO_MAPPING;
 		}
-
-		if(dup(p[0]) < 0){
-			log_info(log_nodo, "Fallo syscall DUP() en mapping()");
-			return FALLO_MAPPING;
-		}
-
 
 		//cambio la salida standar
 		if(close(1) < 0){
@@ -81,7 +76,7 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 		log_info(log_nodo, "Fallo getBloque() en mapping()");
 		return FALLO_MAPPING;
 	}
-	sleep(1);
+	//sleep(1);
 	int retWrite = write(p[1], bloque, length);
 	if( retWrite  < 0){
 		perror("");
