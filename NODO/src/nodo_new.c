@@ -218,7 +218,7 @@ void connectToFileSistem(int* sock) {
 	struct stat infoArchivo;
 	stat(ARCHIVO_BIN, &infoArchivo);
 
-	string_append_with_format(&ipPuertoStr, "nombre %s:%d %ld", IP_NODO, PUERTO_NODO, infoArchivo.st_size);//tamaño espacio datos leer tamaño del datos.bin con stat
+	string_append_with_format(&ipPuertoStr, "nombre %s:%d %lu", IP_NODO, PUERTO_NODO, infoArchivo.st_size);//tamaño espacio datos leer tamaño del datos.bin con stat
 	message->comando = ipPuertoStr;
 	message->comandoSize = strlen(ipPuertoStr) + 1;
 	message->data = NULL;

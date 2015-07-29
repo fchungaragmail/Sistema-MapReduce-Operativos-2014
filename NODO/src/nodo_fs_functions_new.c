@@ -4,7 +4,7 @@
  *  Created on: 11/6/2015
  *      Author: utnso
  */
-
+#define _FILE_OFFSET_BITS 64
 
 #include "nodo_fs_functions_new.h"
 #include "nodo_new.h"
