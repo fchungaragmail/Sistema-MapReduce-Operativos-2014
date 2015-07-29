@@ -160,10 +160,11 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 
 					jobMsj = crearMensajeAJobDeFinalizado(recvMessage,infoThread);
 					finalizarEjecucion = true;
-				}
 #ifndef K_SIMULACION
 				enviar(jobMsj->sockfd,jobMsj->mensaje);
 #endif
+				}
+
 			}
 
 			if((*_response)&&(strcmp(reduceType,"reduceFileConCombiner-Pedido1")==0)){
