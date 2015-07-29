@@ -190,7 +190,6 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 			log_debug(logFile,"PlannerCenter : planificar Job_ReduceFinal\n");
 			pthread_mutex_unlock(&mutexLog);
 
-			list_clean(infoThread->listaDeNodos_EnCasoDeFalloDeJob);
 			bool *mresponse = deserializeRequestResponse(recvMessage,K_Job_ReduceFinal);
 			if(*mresponse == true){
 				finalizarEjecucion = true;
@@ -198,13 +197,15 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 #ifndef K_SIMULACION
 				enviar(jobMsj->sockfd,jobMsj->mensaje);
 #endif
+			}else{
+				char *mlog = string_from_format("fallo reduceFinal de %s, doy por finalizado intenteo de Reduce",infoThread->filePathAProcesar);
+				pthread_mutex_lock(&mutexLog);
+				log_trace(logFile,mlog);
+				pthread_mutex_unlock(&mutexLog);
+				free(mlog);
 			}
 
-			//Si falla reduceFinal doy por finalizado intento de reduce
-			char *ipNodo = infoThread->ipNodoLocalDePedidoDeReduce;
-			decrementarOperacionesEnProcesoEnNodo(ipNodo);
-			char *mlog = string_from_format("fallo reduceFinal de %s, doy por finalizado intenteo de Reduce",infoThread->filePathAProcesar);
-			log_trace(logFile,mlog); free(mlog);;
+			//De cualquier modo, Si falla o no ,doy por finalizado el intento de reduce
 			decrementarOperacionesEnProcesoEnNodo(infoThread->ipNodoLocalDePedidoDeReduce);
 			liberarMemoria(infoThread);
 			finalizarEjecucion = true;
