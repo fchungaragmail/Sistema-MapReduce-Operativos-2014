@@ -96,6 +96,13 @@ char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 		return filePath;
 	}
 
+	if(type == K_Job_ReduceFinal){
+		//reduceFinalResponse archivo 1
+		char *comandoStr = recvMessage->mensaje->comando;
+		char **comandoArray = string_split(comandoStr," ");
+		filePath = comandoArray[1];
+		return filePath;
+	}
 	return filePath;
 }
 
@@ -157,6 +164,12 @@ bool* deserializeRequestResponse(Message *recvMessage,TypesMessages type)
 			//-Data: Tabla
 			//debo obtener "Respuesta"
 			requestResponse = deserializeFileSystemResponse(recvMessage);
+			return requestResponse;
+		}
+
+		if(type == K_Job_ReduceFinal){
+			//reduceFinalResponse archivo 1
+			requestResponse = deserializeSoportaCombiner(recvMessage);
 			return requestResponse;
 		}
 }

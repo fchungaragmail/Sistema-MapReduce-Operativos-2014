@@ -186,10 +186,11 @@ void administrarHilos(){
 
 		return;
 	}
-	if(command == K_Job_ReduceResponse){
+	if(command == K_Job_ReduceFinal){
 
-			printf("reduceResponse lalala");
-		}
+			printf("K_Job_ReduceFinal lalala");
+			//reduceFinalResponse /resultado-final2.txt 1
+	}
 	char *path = deserializeFilePath(recvMessage,command);
 	int size = list_size(hilosData);
 	int i;
@@ -268,7 +269,7 @@ void administrarHilos(){
 		char *hiloPath = dictionary_get(hiloDic,K_HiloDic_Path);
 		pthread_mutex_unlock(mutex);
 
-		if((strcmp(hiloPath,path)==0)&&(hiloJobSocket==recvMessage->sockfd)){
+		if(((strcmp(hiloPath,path)==0)||(strcmp("/resultado-final2.txt",path)==0))&&(hiloJobSocket==recvMessage->sockfd)){
 
 			//EL HILO YA EXISTE
 			hiloYaExiste = true;
