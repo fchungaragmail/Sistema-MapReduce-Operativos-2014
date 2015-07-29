@@ -85,6 +85,9 @@ void FreeHiloJobInfo(HiloJobInfo* hiloJobInfo) {
 	if (hiloJobInfo->parametrosError != NULL) {
 		free(hiloJobInfo->parametrosError);
 	}
+	if (hiloJobInfo->archivoOriginal != NULL) {
+		free(hiloJobInfo->archivoOriginal);
+	}
 	free(hiloJobInfo);
 	hiloJobInfo = NULL;
 }

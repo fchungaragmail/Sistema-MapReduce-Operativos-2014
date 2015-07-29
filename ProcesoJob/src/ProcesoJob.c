@@ -36,7 +36,7 @@ void* pedidosMartaHandler(void* arg) {
 		mensajeMarta = malloc(sizeof(mensaje_t));
 		int resultado = recibir(socketMartaFd, mensajeMarta);
 #else
-		static int alternar = 0;
+		static int alternar = 2;
 		if (alternar == 0) {
 			mensajeMarta = CreateMensaje("mapFile todo1.txt",
 					"127.0.0.1 6000 0 prueba.txt");
@@ -48,16 +48,17 @@ void* pedidosMartaHandler(void* arg) {
 			alternar = 2;
 		} else if (alternar == 2) {
 			mensajeMarta =
-			CreateMensaje("reduceFileConCombiner-Pedido1 todoCC1.txt",
-					"227.4.6.1 999 archTempCC1 2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 archTempCC2 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 archTempCC3 1 ruta_temp5");
+					CreateMensaje("reduceFileConCombiner-Pedido1 todoCC1.txt",
+							"227.4.6.1 999 archTempCC1 2 /ruta_temp1 /ruta_temp2 117.4.5.1 259 archTempCC2 2 /ruta_temp3 /ruta_temp4 167.5.4.1 250 archTempCC3 1 ruta_temp5");
 			alternar = 3;
 		} else if (alternar == 3) {
 			mensajeMarta =
-			CreateMensaje("reduceFileConCombiner-Pedido2 todoCC2.txt",
-					"227.4.6.1 999 1 /ruta_temp1 117.4.5.1 259 1 /ruta_temp3 167.5.4.1 250 1 ruta_temp5");
+					CreateMensaje("reduceFileConCombiner-Pedido2 todoCC2.txt",
+							"227.4.6.1 999 1 /ruta_temp1 117.4.5.1 259 1 /ruta_temp3 167.5.4.1 250 1 ruta_temp5");
 			alternar = 4;
 		} else {
-			mensajeMarta = CreateMensaje("FileSuccess todo1.txt", NULL);
+			mensajeMarta = CreateMensaje("reduceFinal resultado.txt",
+					"227.4.6.1 999 1 todoCC2.txt");
 			alternar = 0;
 		}
 		int resultado = CONECTADO;
@@ -211,8 +212,6 @@ void HacerPedidoMarta() {
 				"Se envió a MaRTA el siguiente mensaje\nComando: %s\nData: %s\n",
 				mensaje->comando, mensaje->data);
 
-		dictionary_put(diccArchivos, archivos[i], string_duplicate("")); //Por ahora no hay info inportante por cada archivo
-
 		free(buffer);
 		FreeMensaje(mensaje);
 
@@ -290,26 +289,35 @@ void ReportarResultadoHilo(HiloJobInfo* hiloJobInfo, EstadoHilo estado) {
 
 #ifndef BUILD_CON_MOCK_MARTA
 	pthread_mutex_lock(&mMarta);
-
-
-	int* dataDiccionario = dictionary_get(diccArchivos,hiloJobInfo->nombreArchivo ); //TODO cual nombre de archivo identifica MaRTA para reduce?
-	if (dataDiccionario) {
-		*dataDiccionario = *dataDiccionario - 1;
-		if (*dataDiccionario == 0) {
-			int* dataAEliminar = dictionary_remove(diccArchivos,hiloJobInfo->nombreArchivo);
-			free(dataAEliminar);
-			//enviar
-		}
-	}
-
-	if (hiloJobInfo->subTipoHilo == SUBTIPO_REDUCE_CON_COMBINER_1
-			&& cantidadDeHilosActivos > 0) {
-		log_debug(logProcesoJob, " Esperando a todos los reduce locales");
-	} else {
+	if (hiloJobInfo->subTipoHilo != SUBTIPO_REDUCE_CON_COMBINER_1) {
 		enviar(socketMartaFd, mensajeParaMarta);
 		log_info(logProcesoJob,
 				"Se envió a MaRTA el siguiente mensaje\nComando: %s\nData: %s\n",
 				mensajeParaMarta->comando, mensajeParaMarta->data);
+	} else { // Si es un pedido Reduce con combiner 1
+
+		int* dataDiccionario = dictionary_get(diccArchivos,
+				hiloJobInfo->archivoOriginal); //TODO cual nombre de archivo identifica MaRTA para reduce?
+		if (dataDiccionario) {
+			*dataDiccionario = *dataDiccionario - 1;
+			if (*dataDiccionario == 0) {
+				int* dataAEliminar = dictionary_remove(diccArchivos,
+						hiloJobInfo->nombreArchivo);
+				free(dataAEliminar);
+				enviar(socketMartaFd, mensajeParaMarta);
+				log_info(logProcesoJob,
+						"Se envió a MaRTA el siguiente mensaje\nComando: %s\nData: %s\n",
+						mensajeParaMarta->comando, mensajeParaMarta->data);
+			} else {
+				log_debug(logProcesoJob,
+						" Esperando a todos los reduce locales\n");
+			}
+		} else {
+			log_warning(logProcesoJob,
+					"Pedido de Reduce con Combiner 1 con un nombre de archivo original incorrecto!\n");
+
+		}
+
 	}
 
 	pthread_mutex_unlock(&mMarta);
@@ -317,6 +325,37 @@ void ReportarResultadoHilo(HiloJobInfo* hiloJobInfo, EstadoHilo estado) {
 	if (hiloJobInfo->socketFd != -1) {
 		close(hiloJobInfo->socketFd);
 	}
+#else
+	pthread_mutex_lock(&mMarta);
+	if (hiloJobInfo->subTipoHilo != SUBTIPO_REDUCE_CON_COMBINER_1) {
+		log_info(logProcesoJob,
+				"Se envió a MaRTA el siguiente mensaje\nComando: %s\nData: %s\n",
+				mensajeParaMarta->comando, mensajeParaMarta->data);
+	} else { // Si es un pedido Reduce con combiner 1
+
+		int* dataDiccionario = dictionary_get(diccArchivos,
+				hiloJobInfo->archivoOriginal); //TODO cual nombre de archivo identifica MaRTA para reduce?
+		if (dataDiccionario) {
+			*dataDiccionario = *dataDiccionario - 1;
+			if (*dataDiccionario == 0) {
+				int* dataAEliminar = dictionary_remove(diccArchivos,
+						hiloJobInfo->nombreArchivo);
+				free(dataAEliminar);
+				log_info(logProcesoJob,
+						"Se envió a MaRTA el siguiente mensaje\nComando: %s\nData: %s\n",
+						mensajeParaMarta->comando, mensajeParaMarta->data);
+			} else {
+				log_debug(logProcesoJob,
+						" Esperando a todos los reduce locales\n");
+			}
+		} else {
+			log_warning(logProcesoJob,
+					"Pedido de Reduce con Combiner 1 con un nombre de archivo original incorrecto!\n");
+
+		}
+
+	}
+	pthread_mutex_unlock(&mMarta);
 #endif
 
 	free(bufferComandoStr);
@@ -349,6 +388,8 @@ void PlanificarHilosMapper(mensaje_t* mensaje) {
 		hiloJobInfo->parametrosError = NULL;
 		hiloJobInfo->nroBloque = atoi(dataStr[i++]);
 		hiloJobInfo->nombreArchivo = string_duplicate(dataStr[i++]);
+		hiloJobInfo->archivoOriginal = string_duplicate(
+				hiloJobInfo->nombreArchivo);
 		hiloJobInfo->subTipoHilo = SUBTIPO_MAPPER;
 
 		char* parametrosBuffer = string_new();
@@ -382,6 +423,7 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner,
 		//		...Nodo3 ....
 
 		int i = 0;
+		int cantidadDePedidos = 0;
 		while (dataStr[i] != NULL) {
 
 			Sockaddr_in their_addr;
@@ -398,6 +440,8 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner,
 			hiloJobInfo->parametros = NULL;
 			hiloJobInfo->parametrosError = NULL;
 			hiloJobInfo->subTipoHilo = subTipoHilo;
+			hiloJobInfo->archivoOriginal = strdup(
+					comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO]);
 
 			if (nombreArchivo) {
 				hiloJobInfo->nombreArchivo = string_duplicate(nombreArchivo);
@@ -428,7 +472,14 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner,
 					"Se creó un Hilo Reduce desde un pedido de Marta con combiner con los siguientes parametros\nNombre del Archivo temporal: %s\nParametros: %s\n",
 					hiloJobInfo->nombreArchivo, hiloJobInfo->parametros);
 
+			cantidadDePedidos++;
 		}
+
+		int* cantidadDePedidosData = malloc(sizeof(int));
+		*cantidadDePedidosData = cantidadDePedidos;
+		dictionary_put(diccArchivos, comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO],
+				cantidadDePedidosData);
+
 	} else {
 
 		//*comando: "reduceFileSinCombiner NombreArchTempFinal "
@@ -452,6 +503,8 @@ void PlanificarHilosReduce(mensaje_t* mensaje, int conCombiner,
 		hiloJobInfo->parametrosError = NULL;
 		hiloJobInfo->subTipoHilo = subTipoHilo;
 		hiloJobInfo->nombreArchivo = string_duplicate(
+				comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO]);
+		hiloJobInfo->archivoOriginal = string_duplicate(
 				comandoStr[MENSAJE_COMANDO_NOMBREARCHIVO]);
 
 		if (nombreArchivo) {
