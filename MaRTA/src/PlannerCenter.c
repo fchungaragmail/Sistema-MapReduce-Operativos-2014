@@ -158,10 +158,10 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 					pthread_mutex_unlock(&mutexLog);
 					free(tlog);
 
-					jobMsj = crearMensajeAJobDeFinalizado(recvMessage,infoThread);
+					//jobMsj = crearMensajeAJobDeFinalizado(recvMessage,infoThread);
 					finalizarEjecucion = true;
 #ifndef K_SIMULACION
-				enviar(jobMsj->sockfd,jobMsj->mensaje);
+				//enviar(jobMsj->sockfd,jobMsj->mensaje);
 #endif
 				}
 
@@ -228,12 +228,12 @@ bool processMessage(Message *recvMessage,infoHilo_t *infoThread)
 			break;
 		default:
 
-			log_trace(logFile,"PlannerCenter: ERROR !! Comando no identificado !!");
+			log_debug(logFile,"PlannerCenter: ERROR !! Comando no identificado !!");
 			finalizarEjecucion = true;
 			break;
 	}
 
-	liberarMensaje(recvMessage);
+	//liberarMensaje(recvMessage);
 	return finalizarEjecucion;
 }
 
