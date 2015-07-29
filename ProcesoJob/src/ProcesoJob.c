@@ -242,7 +242,7 @@ void ReportarResultadoHilo(HiloJobInfo* hiloJobInfo, EstadoHilo estado) {
 			break;
 		case SUBTIPO_REDUCE_CON_COMBINER_FINAL:
 			string_append_with_format(&bufferComandoStr,
-					"reduceFinalResponse %s", hiloJobInfo->nombreArchivo);
+					"reduceFinalResponse %s", hiloJobInfo->archivoOriginal);
 			break;
 		case SUBTIPO_REDUCE_SIN_COMBINER:
 			string_append_with_format(&bufferComandoStr,
