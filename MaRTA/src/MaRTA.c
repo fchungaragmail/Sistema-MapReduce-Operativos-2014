@@ -186,11 +186,7 @@ void administrarHilos(){
 
 		return;
 	}
-	if(command == K_Job_ReduceFinal){
 
-			printf("K_Job_ReduceFinal lalala");
-			//reduceFinalResponse /resultado-final2.txt 1
-	}
 	char *path = deserializeFilePath(recvMessage,command);
 	int size = list_size(hilosData);
 	int i;

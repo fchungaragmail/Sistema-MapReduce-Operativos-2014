@@ -21,6 +21,7 @@ char *deserializeTempFilePath(Message *recvMessage,TypesMessages type);
 t_list *deserializeFailedReduceResponse(Message *recvMessage);
 int deserializeNumeroDeBloque_PedidoDeCopias(Message *recvMessage);
 bool* deserializeFileSystemResponse(Message *recvMessage);
+int deserializeTipoDeRespuestaMapFallida(Message *recvMessage);
 
 void addIntToStream(char *stream, int value);
 
@@ -106,6 +107,20 @@ char *deserializeFilePath(Message *recvMessage,TypesMessages type)
 	return filePath;
 }
 
+int deserializeTipoDeRespuestaMapFallida(Message *recvMessage)
+{
+	char *comandoStr = recvMessage->mensaje->comando;
+	char **comandoArray = string_split(comandoStr," ");
+	char *soportaCombinerStr = comandoArray[2];
+
+	if((strcmp(soportaCombinerStr,"0") == 0)){
+		free(comandoArray);
+		return 0;
+	}
+	free(comandoArray);
+	return -1;
+
+}
 bool* deserializeSoportaCombiner(Message *recvMessage)
 {
 	//Segun protocolo recvMessage->mensaje->data sera
@@ -119,7 +134,7 @@ bool* deserializeSoportaCombiner(Message *recvMessage)
 
 	bool* soportaCombiner = malloc(sizeof(bool));
 	if(strcmp(soportaCombinerStr,"1") == 0){ *soportaCombiner = true; }
-	if(strcmp(soportaCombinerStr,"0") == 0){ *soportaCombiner = false; }
+	if((strcmp(soportaCombinerStr,"0") == 0)||(strcmp(soportaCombinerStr,"-1") == 0)){ *soportaCombiner = false; }
 
 	free(comandoArray);
 	return soportaCombiner;

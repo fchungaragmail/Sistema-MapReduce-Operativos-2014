@@ -29,7 +29,7 @@ Message* armarMensajeParaEnvio(Message *recvMessage,char *stream,char *comando,i
 void actualizarTablas_RtaDeMapExitosa(Message *recvMessage,infoHilo_t *infoThread);
 Message *createFSrequest(Message *msj,int nroDeBloqe);
 bool *obtenerEstadoDeMapping(Message *msj, infoHilo_t *infoThread);
-void actualizarTablas_RtaDeMapFallo(Message *recvMessage,infoHilo_t *infoThread);
+void actualizarTablas_RtaDeMapFallo(Message *recvMessage,infoHilo_t *infoThread, int tipoDeFallo);
 void decrementarOperacionesEnReduceList(infoHilo_t *infoThread);
 void resetBlockStateConNodo(char *path,char *ipNodoCaido,infoHilo_t *infoThread);
 void actualizarTablas_ReduceFallo(char *path,Message *recvMessage,infoHilo_t *infoThread);
@@ -383,7 +383,18 @@ void planificar(Message *recvMessage,TypesMessages type,infoHilo_t *infoThread)
 			free(log);
 			free(log2);
 
-			actualizarTablas_RtaDeMapFallo(recvMessage,infoThread);
+
+			int tipoDeFallo = deserializeTipoDeRespuestaMapFallida(recvMessage);
+
+			if(tipoDeFallo == 0){
+				//fallo porque se desconecto
+				log_debug(logFile,"fallo porque se desconecto");
+				actualizarTablas_RtaDeMapFallo(recvMessage,infoThread,tipoDeFallo);
+			}
+			if(tipoDeFallo == -1){
+				//fallo internamente el NODO
+				log_debug(logFile,"fallo internamente el NODO");
+			}
 
 			//OBTENER PROXIMO PEDIDO (se va a enviar devuelta el mismo, siempre y cuando haya copias disponibles)
 			Message* sendMessage = obtenerProximoPedido(recvMessage,infoThread);
@@ -793,9 +804,9 @@ Message *armarPedidoDeMap(Message *recvMessage,infoHilo_t *infoThread)
 			if((*_disponible) == false){//checkeo q haya copias disponibles
 
 				//NO HAY COPIAS DISPONIBLES !!!!!
-				log_trace(logFile,"no hay mas copias disponibles!!!");
+				log_debug(logFile,"no hay mas copias disponibles!!!");
 				char *log = string_from_format("averiguo si FileSystem tiene nuevos nodos !, (%d - %s) pedido de bloqe %d",*(infoThread->jobSocket),infoThread->filePathAProcesar,i);
-				log_trace(logFile,log);free(log);
+				log_debug(logFile,log);free(log);
 
 				Message *fsRequest = createFSrequest(recvMessage,i);
 				*(infoThread->yaPediFullDataTable) = true;
@@ -974,7 +985,7 @@ void actualizarTablas_RtaDeMapExitosa(Message *recvMessage,infoHilo_t *infoThrea
 	free(temporaryPath);
 }
 
-void actualizarTablas_RtaDeMapFallo(Message *recvMessage,infoHilo_t *infoThread){
+void actualizarTablas_RtaDeMapFallo(Message *recvMessage,infoHilo_t *infoThread, int tipoDeFallo ){
 
 	//actualizar tablas y reenviar si existen copias
 	char *path = deserializeFilePath(recvMessage,K_Job_MapResponse);
@@ -985,13 +996,17 @@ void actualizarTablas_RtaDeMapFallo(Message *recvMessage,infoHilo_t *infoThread)
 	StatusBlockState *status = dictionary_get(blockState,K_BlockState_state);
 
 	//actualizo nodoState y file_StatusData
-	darDeBajaCopiaEnBloqueYNodo(ipNodo,infoThread->file_StatusData);
+	if(tipoDeFallo==0){
+		//se perdio la conexion con nodo
+		darDeBajaCopiaEnBloqueYNodo(ipNodo,infoThread->file_StatusData);
+	}
+	if(tipoDeFallo==-1){
+		//fallo internamente el nodo
+	}
 	decrementarOperacionesEnProcesoEnNodo(ipNodo);
 	//actualizo blockState
 	*status = K_UNINITIALIZED;
-	printf("2222");
 	informarTareasPendientesDeMapping(path,*(infoThread->jobSocket),infoThread->fileState);
-	printf("222");
 	free(path);
 	free(tempPath);
 }

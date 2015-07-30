@@ -138,14 +138,11 @@ void createListener()
 
 Message* listenConnections()
 {
-	printf(" SELECT en espera !!!\n");
-	printf("*******************\n");
 	read_fds = master; // cópialo
 	if (select(FD_SETSIZE, &read_fds, NULL, NULL, NULL) == -1) {
 		perror("select");
 		exit(1);
 	}
-	printf("SELECT recibio algo !!!\n");
 	int i, j;
 	// explorar conexiones existentes en busca de datos que leer
 	for(i = 0; i <= fdmax; i++) {
@@ -190,9 +187,7 @@ Message* listenConnections()
 				}
 
 				if(estado == CONECTADO){
-					printf("se recibio dataSize %d \n",_recvMesage->mensaje->dataSize);
 					printf("se recibio la data %s \n",_recvMesage->mensaje->data);
-					printf("se recibio comandoSize %d \n",_recvMesage->mensaje->comandoSize);
 					printf("se recibio el comando %s \n",_recvMesage->mensaje->comando);
 					int _s = i;
 					_recvMesage->sockfd = _s;

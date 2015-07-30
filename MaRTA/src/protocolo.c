@@ -46,6 +46,9 @@ int enviar(int socket, mensaje_t* mensaje)
 	if (sendall(socket, mensaje->data, mensaje->dataSize) < 0)
 		return -1;
 
+	printf("se envio la data %s \n",mensaje->data);
+	printf("se envio el comando %s \n",mensaje->comando);
+
 	sem_post(&semEnviar);
 
 	return EXIT_SUCCESS;
