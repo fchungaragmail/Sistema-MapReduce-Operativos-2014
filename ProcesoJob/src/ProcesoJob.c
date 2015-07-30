@@ -276,7 +276,7 @@ void ReportarResultadoHilo(HiloJobInfo* hiloJobInfo, EstadoHilo estado) {
 					"Al menos un nodo falló en reduce, cerrando Job...\n");
 			Terminar(EXIT_FAILURE);
 		} else {
-			string_append(&bufferComandoStr, " 0");
+			string_append(&bufferComandoStr, " -1");
 			string_append_with_format(&bufferDataStr, "%s",
 					hiloJobInfo->parametrosError != NULL ?
 							hiloJobInfo->parametrosError :
