@@ -31,12 +31,14 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 	resultFork = fork();
 
 	if(resultFork == 0) {
-		close(p[1]);
 
 		dup2(p[0],0);
 
 		close(1);
 		creat(archivoTemporal1, 0777);
+
+		close(p[1]);
+		close(p[0]);
 
 		int execResult = execv(script, NULL);
 		if(execResult == -1) {
