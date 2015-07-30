@@ -108,9 +108,11 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 
 	free(bloque);
 
-	if(waitpid(resultFork, 0, 0) < 0){
-		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
-		return FALLO_MAPPING;
+	waitpid(resultFork, &status, 0);
+	if(WIFEXITED(status)) {
+		log_info(log_nodo, "Child sort termino bien");
+	} else {
+		log_info(log_nodo, "Child sort termino MAL");
 	}
 
 	unlink(archivoTemporal1);
