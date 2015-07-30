@@ -1000,7 +1000,8 @@ int getCantidadBloquesDisponibles(Conexion_t* conexion)
 
 bool tieneMasEspacio(Conexion_t* nodo1,Conexion_t* nodo2)
 {
-	if (getCantidadBloquesDisponibles(nodo1) >= getCantidadBloquesDisponibles(nodo2))
+	if ((getCantidadBloquesDisponibles(nodo1)/nodo1->totalBloques) >=
+		(getCantidadBloquesDisponibles(nodo2)/nodo2->totalBloques))
 		return true;
 	return false;
 }
