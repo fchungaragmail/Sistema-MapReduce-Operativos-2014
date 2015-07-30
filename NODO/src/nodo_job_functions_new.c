@@ -76,7 +76,7 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 		log_info(log_nodo, "Fallo getBloque() en mapping()");
 		return FALLO_MAPPING;
 	}
-	//sleep(1);
+	sleep(1);
 	int retWrite = write(p[1], bloque, length);
 	if( retWrite  < 0){
 		perror("");
