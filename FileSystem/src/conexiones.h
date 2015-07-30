@@ -39,8 +39,8 @@ typedef struct _sockaddr_in Sockaddr_in;
 typedef struct {
 	Conexion_t* conexion;
 	void* archivoMap;
-	int32_t archivoSize;
-	int32_t offset;
+	int32_t byteDesde;
+	int32_t byteHasta;
 	int16_t bloque;
 } enviarBloque_t;
 

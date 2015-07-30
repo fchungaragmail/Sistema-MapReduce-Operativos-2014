@@ -304,10 +304,33 @@ int importar(char* argumentos){
 		return -1;
 
 	int archivoDisk = open(tmp[0],O_RDONLY);
-	void* archivoMap = mmap(NULL, tamanio, PROT_READ, MAP_SHARED, archivoDisk, 0);
+	char* archivoMap = mmap(NULL, tamanio, PROT_READ, MAP_SHARED, archivoDisk, 0);
 	close(archivoDisk);
 
-	int bloques = (tamanio / TAMANIO_BLOQUE) + 1;
+	int bloques = 1;
+	int32_t recorrido = 0;
+	if (tamanio>TAMANIO_BLOQUE)
+	{
+		recorrido = 0;
+	}else
+	{
+		recorrido = tamanio;
+	}
+	while (recorrido<tamanio)
+	{
+		recorrido += TAMANIO_BLOQUE;
+		while((archivoMap[recorrido]) != '\n')
+		{
+			recorrido--;
+			if (recorrido > (tamanio-TAMANIO_BLOQUE))
+				{
+					recorrido = tamanio;
+					break;
+				}
+		}
+		bloques++;
+	}
+
 	t_list* ubicacionesElegidas = list_create();
 	if (elegirNodos(bloques, ubicacionesElegidas) != EXIT_SUCCESS)
 	{
@@ -320,36 +343,58 @@ int importar(char* argumentos){
 
 	t_list* listaBloques = list_create();
 	t_list* listaThreads = list_create();
-	int32_t bytesEnviados = 0;
 	int sends = 0;
-	while (bytesEnviados < tamanio)
+	int32_t BeginOfBlock = 0;
+	int32_t EndOfBlock = 0;
+	if (tamanio>TAMANIO_BLOQUE)
 	{
-		for (int j = 0;j<bloques;j++)
+		EndOfBlock = TAMANIO_BLOQUE;
+	}else
+	{
+		EndOfBlock = tamanio;
+	}
+
+	for (int j = 0;j<bloques;j++)
+	{
+		t_list* ubicaciones = list_create();
+		t_list* bloque = list_get(ubicacionesElegidas,j);
+
+		if (EndOfBlock != tamanio)
 		{
-			t_list* ubicaciones = list_create();
-			t_list* bloque = list_get(ubicacionesElegidas,j);
-			//Asi lo copia en todos lados -> Diseniar un selector de nodo
-			for (int i=0;i<bloque->elements_count;i++)
+			while((archivoMap[EndOfBlock]) != '\n')
 			{
-				t_ubicacion_bloque* ubicacionElegida = list_get(bloque,i);
-				Conexion_t* nodo = ubicacionElegida->nodo;
-
-				enviarBloque_t* envio = malloc(sizeof(enviarBloque_t));
-				envio->bloque = ubicacionElegida->bloque;
-				envio->conexion = nodo;
-				envio->archivoMap = archivoMap;
-				envio->offset = bytesEnviados;
-				envio->archivoSize = tamanio;
-
-				list_add(ubicaciones,ubicacionElegida);
-
-				pthread_t* tEnvio = malloc(sizeof(pthread_t));
-				list_add(listaThreads, tEnvio);
-				sends++;
-				pthread_create(tEnvio, NULL, enviarBloque, envio);
+				EndOfBlock--;
+				if (EndOfBlock < 0) break;
 			}
-			list_add_in_index(listaBloques,j,ubicaciones);
-			bytesEnviados += TAMANIO_BLOQUE;
+		}
+
+		for (int i=0;i<bloque->elements_count;i++)
+		{
+			t_ubicacion_bloque* ubicacionElegida = list_get(bloque,i);
+			Conexion_t* nodo = ubicacionElegida->nodo;
+
+			enviarBloque_t* envio = malloc(sizeof(enviarBloque_t));
+			envio->bloque = ubicacionElegida->bloque;
+			envio->conexion = nodo;
+			envio->archivoMap = archivoMap;
+			envio->byteDesde = BeginOfBlock;
+			envio->byteHasta = EndOfBlock;
+
+			list_add(ubicaciones,ubicacionElegida);
+
+			pthread_t* tEnvio = malloc(sizeof(pthread_t));
+			list_add(listaThreads, tEnvio);
+			sends++;
+			pthread_create(tEnvio, NULL, enviarBloque, envio);
+		}
+		list_add_in_index(listaBloques,j,ubicaciones);
+		BeginOfBlock = EndOfBlock;
+		if (EndOfBlock > (tamanio-TAMANIO_BLOQUE))
+		{
+			EndOfBlock = tamanio;
+		}else
+		{
+			EndOfBlock += TAMANIO_BLOQUE;
 		}
 	}
 
@@ -842,17 +887,8 @@ int enviarBloque(enviarBloque_t* envio)
 	string_append(&(mensaje->comando), "setBloque ");
 	string_append(&(mensaje->comando), string_itoa(envio->bloque));
 	mensaje->comandoSize = strlen(mensaje->comando) + 1;
-	mensaje->data = envio->archivoMap + envio->offset;//Desde donde se envia
-
-	//Calculo hasta donde tengo que enviar
-	div_t result = div(envio->archivoSize-envio->offset,TAMANIO_BLOQUE);
-	if ((result.quot == 0) && (result.rem < TAMANIO_BLOQUE))
-	{
-		mensaje->dataSize = result.rem;
-	}else
-	{
-		mensaje->dataSize = TAMANIO_BLOQUE;
-	}
+	mensaje->data = envio->archivoMap + envio->byteDesde;//Desde donde se envia
+	mensaje->dataSize = envio->byteHasta - envio->byteDesde;
 
 	pthread_mutex_lock(&(envio->conexion->mSocket));
 	enviar(envio->conexion->sockfd,mensaje);
