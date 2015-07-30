@@ -24,50 +24,32 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 		return FALLO_MAPPING;
 	}
 
+
 	//para escrbir el bloque en la tuberia
 
 	int resultFork;
-	if ((resultFork = fork()) < 0) {
-		log_info(log_nodo, "Fallo syscall FORK() 1 en mapping()");
-		return FALLO_MAPPING;
+	resultFork = fork();
 
-	}else if(resultFork == 0) {
-		//Se ejecuta el hijo
+	if(resultFork == 0) {
+		close(p[1]);
 
-		if(dup2(p[0],0) < 0){
-			log_info(log_nodo, "Fallo syscall DUP2() en mapping()");
-			return FALLO_MAPPING;
-		}
+		dup2(p[0],0);
 
-		//cambio la salida standar
-		if(close(1) < 0){
-			log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
-			return FALLO_MAPPING;
-		}
+		close(1);
+		creat(archivoTemporal1, 0777);
 
-		if(creat(archivoTemporal1, 0777) < 0){
-			log_info(log_nodo, "Fallo syscall CREAT() en mapping()");
-			return FALLO_MAPPING;
-		}
-
-		if(close(p[1]) < 0){
-			log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
-			return FALLO_MAPPING;
-		}
-
-		if(execv(script, NULL) < 0){
-			log_info(log_nodo, "Fallo syscall EXEXV() en mapping()");
-			return FALLO_MAPPING;
+		int execResult = execv(script, NULL);
+		if(execResult == -1) {
+			log_info(log_nodo, "Fallo en ejecucion script MAPPER");
+			exit(EXIT_FAILURE);
 		}
 		exit(EXIT_SUCCESS);
 
 	}
+	close(p[0]);
 
 	//continua el padre
-	if(close(p[0]) < 0){
-		log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
-		return FALLO_MAPPING;
-	}
+
 
 	int32_t length;
 
@@ -76,30 +58,18 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 		log_info(log_nodo, "Fallo getBloque() en mapping()");
 		return FALLO_MAPPING;
 	}
-	//sleep(1);
+
+	sleep(1);
 	int retWrite = write(p[1], bloque, length);
-	if( retWrite  < 0){
-		perror("");
-		log_info(log_nodo, "Fallo syscall WRITE() en mapping()");
-		return FALLO_MAPPING;
-	}
+	log_info(log_nodo, "Se escribio %d en FD %d", retWrite, p[1]);
+	close(p[1]);
 
-	log_info(log_nodo, "Write escribio %d", retWrite);
-
-
-	if(close(p[1])< 0){
-		perror("");
-		log_info(log_nodo, "Fallo syscall CLOSE() en mapping()");
-		return FALLO_MAPPING;
-	} else{
-		log_info(log_nodo, "Se realizo bien el syscall CLOSE() en mapping()");
-	}
-
-
-
-	if(waitpid(resultFork, NULL, 0) < 0){
-		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
-		return FALLO_MAPPING;
+	int status;
+	waitpid(resultFork, &status, 0);
+	if(WIFEXITED(status)) {
+		log_info(log_nodo, "Child termino bien");
+	} else {
+		log_info(log_nodo, "Child termino MAL");
 	}
 
 
@@ -139,7 +109,7 @@ int mapping(char *script, int numeroBloque, char *archivoTemporal1,
 
 	free(bloque);
 
-	if(waitpid(resultFork, NULL, 0) < 0){
+	if(waitpid(resultFork, 0, 0) < 0){
 		log_info(log_nodo, "Fallo syscall WAIT() en mapping()");
 		return FALLO_MAPPING;
 	}

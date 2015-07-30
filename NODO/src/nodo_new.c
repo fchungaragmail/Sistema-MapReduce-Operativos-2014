@@ -270,7 +270,7 @@ void *fs_nodo_conection_handler(void* ptr) {
 		}
 
 		if (strcmp(result[0], "setBloque") == 0) {   //setBloque bloque [datos]
-			log_info(log_nodo,"SET GET BLOQUE");
+			log_info(log_nodo,"SET BLOQUE");
 			int numBLoque = atoi(result[1]);
 			setBloque(numBLoque, buffer_recv->data, buffer_recv->dataSize);
 			free(buffer_send);
@@ -305,23 +305,6 @@ void *fs_nodo_conection_handler(void* ptr) {
 
 } //cierra thread
 
-//char** generate_fields(int size) {
-//		char** result = malloc(size*sizeof(char*));
-//		int i = 0;
-//		for(i ; i < size; i++) {
-//			result[i] = malloc(COMANDO_LENGTH);
-//		}
-//
-//		return result;
-//}
-//
-//void freeMemory(char** result) {
-//	int i = 0;
-//	for (i ; i < 2; i++) {
-//		free(result[i]);
-//	}
-//	free(result);
-//}
 #include "commons/temporal.h"
 #include "commons/log.h"
 #include <semaphore.h>
