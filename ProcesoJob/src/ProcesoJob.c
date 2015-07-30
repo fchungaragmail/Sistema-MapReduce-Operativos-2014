@@ -259,6 +259,17 @@ void ReportarResultadoHilo(HiloJobInfo* hiloJobInfo, EstadoHilo estado) {
 	switch (estado) {
 
 	case ESTADO_HILO_FINALIZO_CON_ERROR_DE_CONEXION:
+		if (hiloJobInfo->tipoHilo == TIPO_HILO_REDUCE) {
+			log_error(logProcesoJob,
+					"Al menos un nodo falló en reduce, cerrando Job...\n");
+			Terminar(EXIT_FAILURE);
+		} else {
+			string_append(&bufferComandoStr, " -1");
+			string_append_with_format(&bufferDataStr, "%s",
+					hiloJobInfo->parametrosError != NULL ?
+							hiloJobInfo->parametrosError :
+							inet_ntoa(hiloJobInfo->direccionNodo.sin_addr));
+		}
 	case ESTADO_HILO_FINALIZO_CON_ERROR_EN_NODO: {
 		if (hiloJobInfo->tipoHilo == TIPO_HILO_REDUCE) {
 			log_error(logProcesoJob,
