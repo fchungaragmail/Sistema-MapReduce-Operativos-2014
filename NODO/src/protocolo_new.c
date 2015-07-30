@@ -13,14 +13,14 @@ int recibir(int socket, mensaje_t* mensaje){
 
 	int primerRecv = 0;
 
-	primerRecv = recv(socket, &(mensaje->comandoSize), sizeof(int16_t),0);
+	primerRecv = recv(socket, &(mensaje->comandoSize), sizeof(int16_t),MSG_WAITALL);
 	if (primerRecv == 0) return DESCONECTADO;
 
 	mensaje->comando = malloc(mensaje->comandoSize);
 	if (mensaje->comandoSize != 0)
-		recv(socket, mensaje->comando, mensaje->comandoSize,0);
+		recv(socket, mensaje->comando, mensaje->comandoSize,MSG_WAITALL);
 
-	recv(socket, &(mensaje->dataSize), sizeof(int32_t),0);
+	recv(socket, &(mensaje->dataSize), sizeof(int32_t),MSG_WAITALL);
 	mensaje->data = malloc(mensaje->dataSize);
 	/*
 	if (mensaje->dataSize != 0)
@@ -30,7 +30,7 @@ int recibir(int socket, mensaje_t* mensaje){
 	int tempRecibido = 0;
 	if (mensaje->dataSize != 0){
 		while(!(recibido == mensaje->dataSize)){
-		   tempRecibido = recv(socket, mensaje->data + recibido, mensaje->dataSize - recibido, 0);
+		   tempRecibido = recv(socket, mensaje->data + recibido, mensaje->dataSize - recibido, MSG_WAITALL);
 		   if ( tempRecibido <= 0){
 			   return DESCONECTADO;
 		   }
