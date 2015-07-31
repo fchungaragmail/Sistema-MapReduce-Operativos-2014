@@ -1,0 +1,9 @@
+El script instala las commons libries y compila los proyectos del tp
+
+Deberia contener
+	so-commons-library
+	tp-2015-1c-the-byteless (cada projecto debe contener la carpeta Debug generada por eclipse)
+	script_make.sh
+
+Para ejecutarlo, dar permisos al script
+	chmod +x script_make.sh
