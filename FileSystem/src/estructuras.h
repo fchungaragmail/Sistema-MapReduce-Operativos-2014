@@ -8,7 +8,7 @@
 #ifndef ESTRUCTURAS_H_
 #define ESTRUCTURAS_H_
 
-typedef enum {DISPONIBLE, NO_DISPONIBLE} t_estado;
+typedef enum {DISPONIBLE, NO_DISPONIBLE, AGREGADO} t_estado;
 
 
 typedef struct {

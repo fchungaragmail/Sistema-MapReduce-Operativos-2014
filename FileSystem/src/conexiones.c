@@ -94,7 +94,7 @@ void escucharConexiones()
 		sem_init(&(conexionNueva->respuestasP),0,0);
 		strcpy(conexionNueva->nombre, "NombreGenerico");
 		conexionNueva->sockfd = nuevoSocketfd;
-		conexionNueva->estado = CONECTADO;
+		conexionNueva->estado = DISPONIBLE;
 		pthread_mutex_init(&(conexionNueva->mSocket), NULL);
 		pthread_mutex_init(&(conexionNueva->mEstadoBloques), NULL);
 		conexionNueva->totalBloques = 0;
@@ -196,7 +196,7 @@ void cerrarConexion(Conexion_t* conexion)
 	FD_CLR(conexion->sockfd, &nodos);
 	pthread_mutex_unlock(&mNodos);
 	close(conexion->sockfd);
-	conexion->estado = DESCONECTADO;
+	conexion->estado = NO_DISPONIBLE;
 
 	if (strcmp(conexion->nombre,MARTA) != 0)
 	{

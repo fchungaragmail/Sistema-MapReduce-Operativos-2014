@@ -39,7 +39,7 @@ int getCantidadBloquesDisponibles(Conexion_t* conexion);
 int elegirNodos(int bloques, t_list* ubicaciones);
 bool tieneMasEspacio(Conexion_t* nodo1,Conexion_t* nodo2);
 bool esNodo(Conexion_t* conexion);
-bool estaDisponible(Conexion_t* conexion);
+bool estaAgregado(Conexion_t* conexion);
 void formatNodo(Conexion_t* nodo);
 pthread_mutex_t mListaArchivos;
 pthread_mutex_t mListaDirs;
@@ -497,7 +497,7 @@ int exportar(char* argumentos){
 		for (int j=0;j<bloque->elements_count;j++)
 		{
 			t_ubicacion_bloque* ubicacion = list_get(bloque,j);
-			if (ubicacion->nodo->estado == DISPONIBLE)
+			if (ubicacion->nodo->estado == AGREGADO)
 			{
 				mensaje_t* mensaje = malloc(sizeof(mensaje_t));
 				mensaje->comando = string_new();
@@ -608,8 +608,11 @@ int bloques(char* argumentos){
 		for (int j=0;j<bloque->elements_count;j++)
 		{
 			t_ubicacion_bloque* ubicacion = list_get(bloque,j);
+			if (ubicacion->nodo->estado == AGREGADO)
+			{
 			string_append_with_format(&bloques,"| Nodo: %s - Bloque: %d ",ubicacion->nodo->nombre,
 					ubicacion->bloque);
+			}
 		}
 		string_append(&bloques,"\n");
 		printf(bloques);
@@ -632,7 +635,43 @@ int copiarBloque(char* argumentos){
 
 
 int agregarNodo(char* argumentos){
-	printf("Agregar nodo\n");
+	if (strcmp(argumentos,"/?") == 0 )
+	{
+		printf("addn IP:PUERTO\n");
+		return 0;
+	}
+
+	pthread_mutex_lock(&mConexiones);
+	for(int i=0;i<conexiones->elements_count;i++)
+	{
+		Conexion_t* conexion = list_get(conexiones,i);
+		if (strcmp(conexion->nombre,argumentos) == 0)
+		{
+			if (conexion->sockfd < 0)
+			{
+				pthread_mutex_lock(&mLogFile);
+				log_info(logFile, "El nodo no esta en linea");
+				pthread_mutex_unlock(&mLogFile);
+				return -1;
+			}
+
+			conexion->estado = AGREGADO;
+			pthread_mutex_lock(&mNodosOnline);
+			nodosOnline++;
+			pthread_mutex_unlock(&mNodosOnline);
+			break;
+		}
+	}
+	pthread_mutex_unlock(&mConexiones);
+	if (nodosOnline == LISTA_NODOS)
+	{
+		pthread_mutex_lock(&mLogFile);
+		log_info(logFile, "Cantidad minima de nodos (%d) alcanzada.", LISTA_NODOS);
+		pthread_mutex_unlock(&mLogFile);
+	}
+
+	espacioTotal();
+
 	return 0;
 }
 
@@ -654,7 +693,12 @@ int nomb(char* argumentos, Conexion_t* conexion)
 		if (strcmp(args[0], nodo->nombre) == 0)
 		{
 			nodo->sockfd = conexion->sockfd;
-			nodo->estado = DISPONIBLE;
+			if (nodo->estadoBloques[0] != false)
+			{
+				nodo->estado = AGREGADO;
+			} else
+				nodo->estado = DISPONIBLE;
+
 
 			for (int k=0;k<conexiones->elements_count;k++)
 			{
@@ -684,17 +728,6 @@ int nomb(char* argumentos, Conexion_t* conexion)
 	{
 		conexion->totalBloques = strtoll(args[1], NULL, 10) / TAMANIO_BLOQUE;
 		conexion->estadoBloques = calloc(conexion->totalBloques, sizeof(bool));
-
-
-		pthread_mutex_lock(&mNodosOnline);
-		nodosOnline++;
-		pthread_mutex_unlock(&mNodosOnline);
-		if (nodosOnline == LISTA_NODOS)
-		{
-			pthread_mutex_lock(&mLogFile);
-			log_info(logFile, "Cantidad minima de nodos (%d) alcanzada.", LISTA_NODOS);
-			pthread_mutex_unlock(&mLogFile);
-		}
 	}
 	return 0;
 }
@@ -824,7 +857,7 @@ void actualizarEstadoArchivos()
 			for (int k=0;k<bloque->elements_count;k++)
 			{
 				t_ubicacion_bloque* ubicacion = list_get(bloque,k);
-				if (ubicacion->nodo->estado == DISPONIBLE)
+				if (ubicacion->nodo->estado == AGREGADO)
 				{
 					bloquesDisponibles++;
 					break;
@@ -983,7 +1016,7 @@ int elegirNodos(int bloques, t_list* ubicaciones)
 	{
 		pthread_mutex_lock(&mConexiones);
 		t_list* nodos = list_filter(conexiones, esNodo);
-		nodos = list_filter(nodos, estaDisponible);
+		nodos = list_filter(nodos, estaAgregado);
 		pthread_mutex_unlock(&mConexiones);
 		if (nodos->elements_count < LISTA_NODOS)
 		{
@@ -1049,9 +1082,9 @@ bool esNodo(Conexion_t* conexion)
 	return true;
 }
 
-bool estaDisponible(Conexion_t* conexion)
+bool estaAgregado(Conexion_t* conexion)
 {
-	if (conexion->estado == DISPONIBLE)
+	if (conexion->estado == AGREGADO)
 	{
 		return true;
 	}
@@ -1070,7 +1103,7 @@ int espacioTotal()
 	for (int i=0;i<nodos->elements_count;i++)
 	{
 		Conexion_t* nodo = list_get(nodos,i);
-		if (nodo->estado == NO_DISPONIBLE) continue;
+		if (nodo->estado != AGREGADO) continue;
 
 		espacioTotal += nodo->totalBloques * TAMANIO_BLOQUE/1024/1024;
 		pthread_mutex_lock(&(nodo->mEstadoBloques));
