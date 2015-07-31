@@ -143,7 +143,7 @@ int leerPersistencia()
 			conexion->estado = NO_DISPONIBLE;
 			conexion->sockfd = -1;
 			conexion->totalBloques = atoi(lConexion[2]);
-			conexion->estadoBloques = calloc(conexion->totalBloques,1);
+			conexion->estadoBloques = calloc(conexion->totalBloques,sizeof(bool));
 			sem_init(&(conexion->respuestasR),0,1);
 			sem_init(&(conexion->respuestasP),0,0);
 			pthread_mutex_init(&(conexion->mSocket), NULL);

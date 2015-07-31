@@ -164,9 +164,7 @@ void formatNodo(Conexion_t* nodo)
 	if (nodo->sockfd >= 0)
 	{
 		mensaje_t* mensaje = malloc(sizeof(mensaje_t));
-		mensaje->comando = malloc(sizeof(char*));
-		strcpy(mensaje->comando,"");
-		strcpy(mensaje->comando,"borrarBloque -1");
+		mensaje->comando = string_from_format("borrarBloque -1");
 		mensaje->comandoSize = strlen(mensaje->comando) + 1;
 		mensaje->dataSize = 0;
 
